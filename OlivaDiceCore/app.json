@@ -1,0 +1,14 @@
+{
+    "name" : "OlivaDice核心模块",
+    "author" : "lunzhiPenxil",
+    "namespace" : "OlivaDiceCore",
+    "message_mode" : "old_string",
+    "priority" : 30000,
+    "support" : [
+        {
+            "sdk" : "all",
+            "platform" : "all",
+            "model" : "all"
+        }
+    ]
+}
