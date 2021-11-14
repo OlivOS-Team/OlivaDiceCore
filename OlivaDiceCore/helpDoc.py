@@ -117,27 +117,27 @@ def getRecommendRank(word1_in, word2_in):
     find_flag = 1
     word1 = word1_in
     word2 = word2_in
+    if len(word1) > len(word2):
+        [word1, word2] = [word2, word1]
     word1_len = len(word1)
     word2_len = len(word2)
 
     if word2.find(word1) != -1:
-        find_flag = 0
-    if word1.find(word2) != -1:
         find_flag = 0
 
     #LCS
     dp1 = []
     dp1_first = [0]
     for word1_this in word1:
-        dp1_first.append(ord(word1_this))
+        dp1_first.append(0)
     dp1.append(dp1_first)
     for word2_this in word2:
-        dp1.append([ord(word2_this)] + [0] * word1_len)
+        dp1.append([0] + [0] * word1_len)
     tmp_i_list = range(1, word1_len + 1)
     tmp_j_list = range(1, word2_len + 1)
     for i in tmp_i_list:
         for j in tmp_j_list:
-            if dp1[0][i] == dp1[j][0]:
+            if word1[i - 1] == word2[j - 1]:
                 dp1[j][i] = dp1[j - 1][i - 1] + 1
             else:
                 dp1[j][i] = max(dp1[j - 1][i], dp1[j][i - 1])
@@ -146,23 +146,30 @@ def getRecommendRank(word1_in, word2_in):
     #minDistance
     dp2 = []
     dp2_first = [0]
+    tmp_counter = 1
     for word1_this in word1:
-        dp2_first.append(ord(word1_this))
+        dp2_first.append(tmp_counter)
+        tmp_counter += 1
     dp2.append(dp2_first)
+    tmp_counter = 1
     for word2_this in word2:
-        dp2.append([ord(word2_this)] + [0] * word1_len)
+        dp2.append([tmp_counter] + [0] * word1_len)
+        tmp_counter += 1
     tmp_i_list = range(1, word1_len + 1)
     tmp_j_list = range(1, word2_len + 1)
     for i in tmp_i_list:
         for j in tmp_j_list:
-            if dp2[0][i] == dp2[j][0]:
+            if word1[i - 1] == word2[j - 1]:
                 dp2[j][i] = dp2[j - 1][i - 1]
             else:
-                dp2[j][i] = min(dp2[j - 1][i - 1], min(dp2[j - 1][i], dp2[j][i - 1]))
+                dp2[j][i] = min(dp2[j - 1][i - 1], min(dp2[j - 1][i], dp2[j][i - 1])) + 1
     iRank_2 = dp2[word2_len][word1_len]
 
-    iRank = (find_flag) * (word1_len * (word2_len - iRank_1)) + iRank_2
-    iRank = iRank * int(iRank / (word1_len * word2_len))
+    iRank = (find_flag) * (word2_len * (word1_len - iRank_1) + iRank_2 + 1);
+    iRank = int(int((iRank * iRank) / word1_len) / word2_len)
+
+    if iRank >= word1_len * word2_len:
+        iRank += 1000
 
     return iRank
 
