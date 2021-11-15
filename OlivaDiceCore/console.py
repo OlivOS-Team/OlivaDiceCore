@@ -23,7 +23,11 @@ import os
 dictConsoleSwitchTemplate = {
     'default' : {
         'globalEnable' : 1,
-        'userConfigCount' : 100
+        'userConfigCount' : 100,
+        'autoAcceptGroupAdd' : 1,
+        'autoAcceptFriendAdd' : 1,
+        'masterList' : [],
+        'noticeGroupList' : []
     }
 }
 
@@ -81,8 +85,11 @@ def readConsoleSwitch():
         consoleSwitchDir = OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/console'
         consoleSwitchFile = 'switch.json'
         consoleSwitchPath = consoleSwitchDir + '/' + consoleSwitchFile
-        with open(consoleSwitchPath, 'r', encoding = 'utf-8') as consoleSwitchPath_f:
-            dictConsoleSwitch[botHash] = json.loads(consoleSwitchPath_f.read())
+        try:
+            with open(consoleSwitchPath, 'r', encoding = 'utf-8') as consoleSwitchPath_f:
+                dictConsoleSwitch[botHash].update(json.loads(consoleSwitchPath_f.read()))
+        except:
+            pass
     
 def releaseDir(dir_path):
     if not os.path.exists(dir_path):

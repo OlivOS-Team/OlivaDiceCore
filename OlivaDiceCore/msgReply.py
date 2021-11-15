@@ -32,8 +32,8 @@ def unity_init(plugin_event, Proc):
     dictGValue = OlivaDiceCore.msgCustom.dictGValue
     dictTValue.update(dictGValue)
     #init start
-    OlivaDiceCore.console.readConsoleSwitch()
     OlivaDiceCore.console.initConsoleSwitchByBotDict(Proc.Proc_data['bot_info_dict'])
+    OlivaDiceCore.console.readConsoleSwitch()
     OlivaDiceCore.console.saveConsoleSwitch()
     OlivaDiceCore.msgCustomManager.initMsgCustom(Proc.Proc_data['bot_info_dict'])
     OlivaDiceCore.helpDoc.initHelpDoc(Proc.Proc_data['bot_info_dict'])
@@ -171,6 +171,17 @@ def unity_reply(plugin_event, Proc):
                         replyMsg(plugin_event, tmp_reply_str)
                         time.sleep(1)
                         plugin_event.set_group_leave(tmp_group_id)
+                elif isMatchWordStart(tmp_reast_str, 'accept'):
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'accept')
+                    tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                    tmp_reast_str = tmp_reast_str.rstrip(' ')
+                    if len(tmp_reast_str) > 0:
+                        tmp_flag = tmp_reast_str
+                        dictTValue['tInvateFlag'] = str(tmp_flag)
+                        tmp_reply_str = dictStrCustom['strBotAddGroupRemoteAcceptShow'].format(**dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
+                        time.sleep(1)
+                        plugin_event.set_group_add_request(tmp_flag, 'invite', True, '')
                 return
         if isMatchWordStart(tmp_reast_str, 'bot'):
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'bot')
@@ -815,12 +826,17 @@ def unity_reply(plugin_event, Proc):
                         else:
                             tmp_reply_str = dictStrCustom['strSanCheck'].format(**dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
-        elif isMatchWordStart(tmp_reast_str, 'ra'):
+        elif isMatchWordStart(tmp_reast_str, 'ra') or isMatchWordStart(tmp_reast_str, 'rc'):
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
             tmp_reply_str_show = ''
-            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'ra')
+            if isMatchWordStart(tmp_reast_str, 'ra'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'ra')
+            elif isMatchWordStart(tmp_reast_str, 'rc'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rc')
+            else:
+                return
             tmp_skill_name = None
             tmp_skill_value = None
             flag_hide_roll = False

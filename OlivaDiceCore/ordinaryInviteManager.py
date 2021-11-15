@@ -18,7 +18,15 @@ import OlivOS
 import OlivaDiceCore
 
 def unity_group_invite_request(plugin_event, Proc):
-    tmp_data = plugin_event.set_group_add_request(plugin_event.data.flag, 'invite', True, '')
+    flag_enable_default = 1
+    flag_enable = 1
+    flag_enable = OlivaDiceCore.console.getConsoleSwitchByHash('autoAcceptGroupAdd', 'unity')
+    flag_enable = OlivaDiceCore.console.getConsoleSwitchByHash('autoAcceptGroupAdd', plugin_event.bot_info.hash)
+    if flag_enable == None:
+        flag_enable = flag_enable_default
+
+    if flag_enable == 1:
+        tmp_data = plugin_event.set_group_add_request(plugin_event.data.flag, 'invite', True, '')
 
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
     dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]
@@ -33,12 +41,24 @@ def unity_group_invite_request(plugin_event, Proc):
                             dictTValue['tGroupId'] = str(plugin_event.data.group_id)
                             dictTValue['tInvaterId'] = str(plugin_event.data.user_id)
                             dictTValue['tComment'] = plugin_event.data.comment
-                            dictTValue['tResult'] = dictStrCustom['strAccept'].format(**dictTValue)
+                            if flag_enable == 0:
+                                dictTValue['tAcceptCommand'] = '.master accept %s' % (str(plugin_event.data.flag),)
+                                dictTValue['tResult'] = dictStrCustom['strBotAddGroupNoticeIgnoreResult'].format(**dictTValue)
+                            elif flag_enable == 1:
+                                dictTValue['tResult'] = dictStrCustom['strAccept'].format(**dictTValue)
                             tmp_reply_str = dictStrCustom['strBotAddGroupNotice'].format(**dictTValue)
                             OlivaDiceCore.msgReply.sendMsgByEvent(plugin_event, tmp_reply_str, noticeGroupList_this[0], 'group')
 
 def unity_friend_add_request(plugin_event, Proc):
-    tmp_data = plugin_event.set_friend_add_request(plugin_event.data.flag, True, '')
+    flag_enable_default = 1
+    flag_enable = 1
+    flag_enable = OlivaDiceCore.console.getConsoleSwitchByHash('autoAcceptFriendAdd', 'unity')
+    flag_enable = OlivaDiceCore.console.getConsoleSwitchByHash('autoAcceptFriendAdd', plugin_event.bot_info.hash)
+    if flag_enable == None:
+        flag_enable = flag_enable_default
+
+    if flag_enable == 1:
+        tmp_data = plugin_event.set_friend_add_request(plugin_event.data.flag, True, '')
 
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
     dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]
@@ -52,7 +72,10 @@ def unity_friend_add_request(plugin_event, Proc):
                         if type(noticeGroupList_this) == list and len(noticeGroupList_this) == 2:
                             dictTValue['tUserId'] = str(plugin_event.data.user_id)
                             dictTValue['tComment'] = plugin_event.data.comment
-                            dictTValue['tResult'] = dictStrCustom['strAccept'].format(**dictTValue)
+                            if flag_enable == 0:
+                                dictTValue['tResult'] = dictStrCustom['strIgnore'].format(**dictTValue)
+                            elif flag_enable == 1:
+                                dictTValue['tResult'] = dictStrCustom['strAccept'].format(**dictTValue)
                             tmp_reply_str = dictStrCustom['strBotAddFriendNotice'].format(**dictTValue)
                             OlivaDiceCore.msgReply.sendMsgByEvent(plugin_event, tmp_reply_str, noticeGroupList_this[0], 'group')
 
