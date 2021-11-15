@@ -167,7 +167,7 @@ def readUserConfig():
             if userHash not in dictUserConfigData:
                 dictUserConfigData[userHash] = {}
             with open(userConfigDataPath, 'r', encoding = 'utf-8') as userConfigDataPath_f:
-                dictUserConfigData[userHash][botHash] = json.loads(userConfigDataPath_f.read())
+                dictUserConfigData[userHash] = json.loads(userConfigDataPath_f.read())
 
 def dataUserConfigLoadAll():
     global gMsgCount
