@@ -246,7 +246,8 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str += OlivaDiceCore.data.bot_summary
                 replyMsg(plugin_event, tmp_reply_str)
             else:
-                replyMsg(plugin_event, OlivaDiceCore.data.bot_info)
+                tmp_reply_str = OlivaDiceCore.data.bot_info + '\n' + dictStrCustom['strBot'].format(**dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
             return
         #此群关闭时中断处理
         if not flag_groupEnable and not flag_force_reply:
@@ -264,19 +265,33 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = OlivaDiceCore.helpDoc.getHelp('default', plugin_event.bot_info.hash)
             if tmp_reply_str != None:
                 replyMsg(plugin_event, tmp_reply_str)
+            return
         elif isMatchWordStart(tmp_reast_str, 'draw'):
+            flag_hide = False
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'draw')
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            if isMatchWordStart(tmp_reast_str, 'h'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'h')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                flag_hide = True
             tmp_reast_str = tmp_reast_str.rstrip(' ')
+            tmp_reast_str = tmp_reast_str.lstrip('_')
+            tmp_reast_str = skipSpaceStart(tmp_reast_str)
             tmp_reply_str = None
             if tmp_reast_str == '':
                 tmp_reast_str = None
             if tmp_reast_str != None:
                 tmp_reply_str = OlivaDiceCore.drawCard.getDrawDeck(tmp_reast_str, plugin_event.bot_info.hash)
+                if flag_hide:
+                    replyMsgPrivateByEvent(plugin_event, tmp_reply_str)
+                    tmp_reply_str = dictStrCustom['strDrawDeckHideShow'].format(**dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
             else:
                 tmp_reply_str = OlivaDiceCore.helpDoc.getHelp('draw', plugin_event.bot_info.hash)
             if tmp_reply_str != None:
                 replyMsg(plugin_event, tmp_reply_str)
+            return
         elif isMatchWordStart(tmp_reast_str, 'nn'):
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'nn')
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -308,6 +323,8 @@ def unity_reply(plugin_event, Proc):
                         dictTValue['tPcSelection'] = dictTValue['tName']
                     tmp_reply_str = dictStrCustom['strPcRename'].format(**dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
+            else:
+                replyMsgLazyHelpByEvent(plugin_event, 'nn')
             return
         elif isMatchWordStart(tmp_reast_str, 'st'):
             tmp_pc_name = None
@@ -573,6 +590,8 @@ def unity_reply(plugin_event, Proc):
                 if tmp_skill_value != None:
                     tmp_skill_value = int(tmp_skill_value)
                 if tmp_skill_name != None:
+                    if tmp_skill_name[-1] in ['=', ':']:
+                        tmp_skill_name = tmp_skill_name[:-1]
                     tmp_skill_name = tmp_skill_name.upper()
                     if len(tmp_skill_pair_list) == 0:
                         if tmp_skill_value != None:
@@ -1114,6 +1133,10 @@ def sendMsgByEvent(plugin_event, message, target_id, target_type):
 
 def replyMsgPrivateByEvent(plugin_event, message):
     return plugin_event.send('private', plugin_event.data.user_id, message)
+
+def replyMsgLazyHelpByEvent(plugin_event, help_key):
+    tmp_reply_str = OlivaDiceCore.helpDoc.getHelp(str(help_key), plugin_event.bot_info.hash)
+    return plugin_event.reply(str(tmp_reply_str))
 
 def skipSpaceStart(data):
     tmp_output_str = ''

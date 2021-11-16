@@ -18,7 +18,7 @@ import sys
 import platform
 import os
 
-OlivaDiceCore_ver = '3.0.0'
+OlivaDiceCore_ver = '3.0.1'
 
 exce_path = os.getcwd()
 

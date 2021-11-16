@@ -20,6 +20,8 @@ import OlivaDiceCore
 dictStrCustomDict = {}
 
 dictStrCustom = {
+    'strHello': '欢迎使用本机器人! 请使用[.help]查看帮助',
+    'strBot': '欢迎使用本机器人! 请使用[.help]查看帮助',
     'strBotExit': '即将退出本群',
     'strBotExitRemote': '收到远程控制, 即将退出本群',
     'strBotExitRemoteShow' : '即将远程退出群[{tGroupId}]',
@@ -38,6 +40,7 @@ dictStrCustom = {
     'strHelpDocRecommend' : '已为你找到以下以下相似条目:\n{tHelpDocResult}',
     'strHelpDocNotFound' : '未找到匹配条目',
     'strDrawDeck' : '你抽到了:\n{tDrawDeckResult}',
+    'strDrawDeckHideShow' : '[{tName}]进行了暗抽牌',
     'strDrawDeckNotFound' : '牌堆未找到',
     'strRoll' : '[{tName}]掷骰: {tRollResult}',
     'strRollWithReason' : '[{tName}]由于[{tRollReason}]掷骰: {tRollResult}',

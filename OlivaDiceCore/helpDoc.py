@@ -68,6 +68,11 @@ def getHelp(key_str, bot_hash):
         dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[bot_hash]
     if bot_hash in OlivaDiceCore.helpDocData.dictHelpDoc:
         if key_str in OlivaDiceCore.helpDocData.dictHelpDoc[bot_hash]:
+            tmp_tHelpDocResult = OlivaDiceCore.helpDocData.dictHelpDoc[bot_hash][key_str]
+            if len(tmp_tHelpDocResult) > 1:
+                if tmp_tHelpDocResult[0] == '&' and tmp_tHelpDocResult[1:] != key_str:
+                    tmp_reply_str = getHelp(tmp_tHelpDocResult[1:], bot_hash)
+                    return tmp_reply_str
             dictTValue['tHelpDocResult'] = OlivaDiceCore.helpDocData.dictHelpDoc[bot_hash][key_str]
             if key_str == 'default':
                 tmp_reply_str = '%s\n%s' % (OlivaDiceCore.data.bot_info, dictTValue['tHelpDocResult'])
