@@ -20,6 +20,7 @@ import OlivaDiceCore
 dictStrCustomDict = {}
 
 dictStrCustom = {
+    'strNeedMaster': '需要Master权限',
     'strHello': '欢迎使用本机器人! 请使用[.help]查看帮助',
     'strBot': '欢迎使用本机器人! 请使用[.help]查看帮助',
     'strBotExit': '即将退出本群',
@@ -36,9 +37,17 @@ dictStrCustom = {
     'strBotAlreadyOn' : '已经处于开启状态',
     'strBotOff' : '关闭成功',
     'strBotAlreadyOff' : '已经处于关闭状态',
+    'strBotNotUnderHost' : '无所属主频道',
+    'strBotHostOn' : '本主频道进入默认开启模式',
+    'strBotAlreadyHostOn' : '本主频道已经处于默认开启模式',
+    'strBotHostOff' : '本主频道进入默认关闭模式',
+    'strBotAlreadyHostOff' : '本主频道已经处于默认关闭模式',
     'strHelpDoc' : '已为你找到以下以下条目:\n{tHelpDocResult}',
     'strHelpDocRecommend' : '已为你找到以下以下相似条目:\n{tHelpDocResult}',
     'strHelpDocNotFound' : '未找到匹配条目',
+    'strDrawTi' : '[{tName}]疯狂发作-临时症状:\n{tResult}',
+    'strDrawLi' : '[{tName}]疯狂发作-总结症状:\n{tResult}',
+    'strDrawName' : '[{tName}]的随机名称:\n{tResult}',
     'strDrawDeck' : '你抽到了:\n{tDrawDeckResult}',
     'strDrawDeckHideShow' : '[{tName}]进行了暗抽牌',
     'strDrawDeckNotFound' : '牌堆未找到',

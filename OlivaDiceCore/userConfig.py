@@ -32,7 +32,9 @@ gMsgCountLock = threading.Lock()
 gUserConfigLock = threading.Lock()
 
 dictUserConfigNoteDefault = {
-    'groupEnable' : True
+    'groupEnable' : True,
+    'hostEnable' : True,
+    'groupWithHostEnable' : False
 }
 
 def setUserConfigByKey(userId, userType, platform, userConfigKey, userConfigValue, botHash):
@@ -148,7 +150,7 @@ def writeUserConfigByUserHash(userHash):
             releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/user')
             userConfigDataPath = OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/user/' + userHash
             with open(userConfigDataPath, 'w', encoding = 'utf-8') as userConfigDataPath_f:
-                userConfigDataPath_f.write(json.dumps(tmp_dictUserConfigData_this[botHash], ensure_ascii = False, indent = 4))
+                userConfigDataPath_f.write(json.dumps(tmp_dictUserConfigData_this, ensure_ascii = False, indent = 4))
 
 def readUserConfig():
     global dictUserConfigData
@@ -180,11 +182,13 @@ def dataUserConfigTotalCount():
         total_count += 1
     return total_count
 
-def getUserHash(userId, userType, platform):
+def getUserHash(userId, userType, platform, subId = None):
     hash_tmp = hashlib.new('md5')
     hash_tmp.update(str(userId).encode(encoding='UTF-8'))
     hash_tmp.update(str(userType).encode(encoding='UTF-8'))
     hash_tmp.update(str(platform).encode(encoding='UTF-8'))
+    if subId != None:
+        hash_tmp.update(str(subId).encode(encoding='UTF-8'))
     return hash_tmp.hexdigest()
 
 def releaseDir(dir_path):

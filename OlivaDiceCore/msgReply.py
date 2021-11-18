@@ -88,12 +88,17 @@ def unity_reply(plugin_event, Proc):
     dictTValue.update(dictGValue)
 
     tmp_at_str = OlivOS.messageAPI.PARA.at(plugin_event.base_info['self_id']).CQ()
+    tmp_at_str_sub = None
+    if 'sub_self_id' in plugin_event.data.extend:
+        if plugin_event.data.extend['sub_self_id'] != None:
+            tmp_at_str_sub = OlivOS.messageAPI.PARA.at(plugin_event.data.extend['sub_self_id']).CQ()
     tmp_command_str_1 = '.'
     tmp_command_str_2 = '。'
     tmp_command_str_3 = '/'
     tmp_reast_str = plugin_event.data.message
     flag_force_reply = False
     flag_is_command = False
+    flag_is_from_host = False
     flag_is_from_group = False
     flag_is_from_group_admin = False
     flag_is_from_group_have_admin = False
@@ -109,6 +114,11 @@ def unity_reply(plugin_event, Proc):
         tmp_reast_str = getMatchWordStartRight(tmp_reast_str, tmp_at_str)
         tmp_reast_str = skipSpaceStart(tmp_reast_str)
         flag_force_reply = True
+    if tmp_at_str_sub != None:
+        if isMatchWordStart(tmp_reast_str, tmp_at_str_sub):
+            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, tmp_at_str_sub)
+            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            flag_force_reply = True
     if isMatchWordStart(tmp_reast_str, tmp_command_str_1):
         tmp_reast_str = getMatchWordStartRight(tmp_reast_str, tmp_command_str_1)
         flag_is_command = True
@@ -129,10 +139,18 @@ def unity_reply(plugin_event, Proc):
             )
         )
         if plugin_event.plugin_info['func_type'] == 'group_message':
-            tmp_list_hit = [
-                [plugin_event.data.group_id, 'group', plugin_event.platform['platform']],
-                [plugin_event.data.user_id,  'user',  plugin_event.platform['platform']]
-            ]
+            if plugin_event.data.host_id != None:
+                tmp_list_hit = [
+                    [plugin_event.data.host_id, 'host', plugin_event.platform['platform']],
+                    [plugin_event.data.group_id, 'group', plugin_event.platform['platform']],
+                    [plugin_event.data.user_id,  'user',  plugin_event.platform['platform']]
+                ]
+                flag_is_from_host = True
+            else:
+                tmp_list_hit = [
+                    [plugin_event.data.group_id, 'group', plugin_event.platform['platform']],
+                    [plugin_event.data.user_id,  'user',  plugin_event.platform['platform']]
+                ]
             flag_is_from_group = True
         elif plugin_event.plugin_info['func_type'] == 'private_message':
             tmp_list_hit = [
@@ -145,15 +163,42 @@ def unity_reply(plugin_event, Proc):
                 if plugin_event.data.sender['role'] in ['owner', 'admin']:
                     flag_is_from_group_admin = True
         OlivaDiceCore.userConfig.releaseUnityMsgCount(tmp_list_hit, plugin_event.bot_info.hash)
-        flag_groupEnable = True
-        if flag_is_from_group:
-            flag_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKey(
-                userId = plugin_event.data.group_id,
-                userType = 'group',
+        flag_hostEnable = True
+        if flag_is_from_host:
+            flag_hostEnable = OlivaDiceCore.userConfig.getUserConfigByKey(
+                userId = plugin_event.data.host_id,
+                userType = 'host',
                 platform = plugin_event.platform['platform'],
-                userConfigKey = 'groupEnable',
+                userConfigKey = 'hostEnable',
                 botHash = plugin_event.bot_info.hash
             )
+        flag_groupEnable = True
+        if flag_is_from_group:
+            if flag_is_from_host:
+                if flag_hostEnable:
+                    flag_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKey(
+                        userId = plugin_event.data.group_id,
+                        userType = 'group',
+                        platform = plugin_event.platform['platform'],
+                        userConfigKey = 'groupEnable',
+                        botHash = plugin_event.bot_info.hash
+                    )
+                else:
+                    flag_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKey(
+                        userId = plugin_event.data.group_id,
+                        userType = 'group',
+                        platform = plugin_event.platform['platform'],
+                        userConfigKey = 'groupWithHostEnable',
+                        botHash = plugin_event.bot_info.hash
+                    )
+            else:
+                flag_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = plugin_event.data.group_id,
+                    userType = 'group',
+                    platform = plugin_event.platform['platform'],
+                    userConfigKey = 'groupEnable',
+                    botHash = plugin_event.bot_info.hash
+                )
         if flag_is_from_master:
             if isMatchWordStart(tmp_reast_str, 'master'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'master')
@@ -182,6 +227,65 @@ def unity_reply(plugin_event, Proc):
                         replyMsg(plugin_event, tmp_reply_str)
                         time.sleep(1)
                         plugin_event.set_group_add_request(tmp_flag, 'invite', True, '')
+                elif isMatchWordStart(tmp_reast_str, 'host'):
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'host')
+                    tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                    if isMatchWordStart(tmp_reast_str, 'on'):
+                        tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'on')
+                        tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                        if flag_is_from_host:
+                            if flag_hostEnable != True:
+                                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                                        userConfigKey = 'hostEnable',
+                                        userConfigValue = True,
+                                        botHash = plugin_event.bot_info.hash,
+                                        userId = plugin_event.data.host_id,
+                                        userType = 'host',
+                                        platform = plugin_event.platform['platform']
+                                    )
+                                    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                                        userHash = OlivaDiceCore.userConfig.getUserHash(
+                                            userId = plugin_event.data.group_id,
+                                            userType = 'group',
+                                            platform = plugin_event.platform['platform']
+                                        )
+                                    )
+                                    tmp_reply_str = dictStrCustom['strBotHostOn'].format(**dictTValue)
+                            else:
+                                tmp_reply_str = dictStrCustom['strBotAlreadyHostOn'].format(**dictTValue)
+                            replyMsg(plugin_event, tmp_reply_str)
+                        else:
+                            tmp_reply_str = dictStrCustom['strBotNotUnderHost'].format(**dictTValue)
+                            replyMsg(plugin_event, tmp_reply_str)
+                            return
+                    elif isMatchWordStart(tmp_reast_str, 'off'):
+                        tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'off')
+                        tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                        if flag_is_from_host:
+                            if flag_hostEnable != False:
+                                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                                        userConfigKey = 'hostEnable',
+                                        userConfigValue = False,
+                                        botHash = plugin_event.bot_info.hash,
+                                        userId = plugin_event.data.host_id,
+                                        userType = 'host',
+                                        platform = plugin_event.platform['platform']
+                                    )
+                                    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                                        userHash = OlivaDiceCore.userConfig.getUserHash(
+                                            userId = plugin_event.data.group_id,
+                                            userType = 'group',
+                                            platform = plugin_event.platform['platform']
+                                        )
+                                    )
+                                    tmp_reply_str = dictStrCustom['strBotHostOff'].format(**dictTValue)
+                            else:
+                                tmp_reply_str = dictStrCustom['strBotAlreadyHostOff'].format(**dictTValue)
+                            replyMsg(plugin_event, tmp_reply_str)
+                        else:
+                            tmp_reply_str = dictStrCustom['strBotNotUnderHost'].format(**dictTValue)
+                            replyMsg(plugin_event, tmp_reply_str)
+                            return
                 return
         if isMatchWordStart(tmp_reast_str, 'bot'):
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'bot')
@@ -190,14 +294,39 @@ def unity_reply(plugin_event, Proc):
                 if flag_is_from_group:
                     if flag_is_from_group_have_admin and flag_is_from_group_admin or not flag_is_from_group_have_admin:
                         if flag_groupEnable != True:
-                            OlivaDiceCore.userConfig.setUserConfigByKey(
-                                userConfigKey = 'groupEnable',
-                                userConfigValue = True,
-                                botHash = plugin_event.bot_info.hash,
-                                userId = plugin_event.data.group_id,
-                                userType = 'group',
-                                platform = plugin_event.platform['platform']
-                            )
+                            if flag_is_from_host:
+                                if flag_hostEnable:
+                                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                                        userConfigKey = 'groupEnable',
+                                        userConfigValue = True,
+                                        botHash = plugin_event.bot_info.hash,
+                                        userId = plugin_event.data.group_id,
+                                        userType = 'group',
+                                        platform = plugin_event.platform['platform']
+                                    )
+                                else:
+                                    if flag_is_from_master:
+                                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                                            userConfigKey = 'groupWithHostEnable',
+                                            userConfigValue = True,
+                                            botHash = plugin_event.bot_info.hash,
+                                            userId = plugin_event.data.group_id,
+                                            userType = 'group',
+                                            platform = plugin_event.platform['platform']
+                                        )
+                                    else:
+                                        tmp_reply_str = dictStrCustom['strNeedMaster'].format(**dictTValue)
+                                        replyMsg(plugin_event, tmp_reply_str)
+                                        return
+                            else:
+                                OlivaDiceCore.userConfig.setUserConfigByKey(
+                                    userConfigKey = 'groupEnable',
+                                    userConfigValue = True,
+                                    botHash = plugin_event.bot_info.hash,
+                                    userId = plugin_event.data.group_id,
+                                    userType = 'group',
+                                    platform = plugin_event.platform['platform']
+                                )
                             OlivaDiceCore.userConfig.writeUserConfigByUserHash(
                                 userHash = OlivaDiceCore.userConfig.getUserHash(
                                     userId = plugin_event.data.group_id,
@@ -214,14 +343,39 @@ def unity_reply(plugin_event, Proc):
                 if flag_is_from_group:
                     if flag_is_from_group_have_admin and flag_is_from_group_admin or not flag_is_from_group_have_admin:
                         if flag_groupEnable != False:
-                            OlivaDiceCore.userConfig.setUserConfigByKey(
-                                userConfigKey = 'groupEnable',
-                                userConfigValue = False,
-                                botHash = plugin_event.bot_info.hash,
-                                userId = plugin_event.data.group_id,
-                                userType = 'group',
-                                platform = plugin_event.platform['platform']
-                            )
+                            if flag_is_from_host:
+                                if flag_hostEnable:
+                                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                                        userConfigKey = 'groupEnable',
+                                        userConfigValue = False,
+                                        botHash = plugin_event.bot_info.hash,
+                                        userId = plugin_event.data.group_id,
+                                        userType = 'group',
+                                        platform = plugin_event.platform['platform']
+                                    )
+                                else:
+                                    if flag_is_from_master:
+                                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                                            userConfigKey = 'groupWithHostEnable',
+                                            userConfigValue = False,
+                                            botHash = plugin_event.bot_info.hash,
+                                            userId = plugin_event.data.group_id,
+                                            userType = 'group',
+                                            platform = plugin_event.platform['platform']
+                                        )
+                                    else:
+                                        tmp_reply_str = dictStrCustom['strNeedMaster'].format(**dictTValue)
+                                        replyMsg(plugin_event, tmp_reply_str)
+                                        return
+                            else:
+                                OlivaDiceCore.userConfig.setUserConfigByKey(
+                                    userConfigKey = 'groupEnable',
+                                    userConfigValue = False,
+                                    botHash = plugin_event.bot_info.hash,
+                                    userId = plugin_event.data.group_id,
+                                    userType = 'group',
+                                    platform = plugin_event.platform['platform']
+                                )
                             OlivaDiceCore.userConfig.writeUserConfigByUserHash(
                                 userHash = OlivaDiceCore.userConfig.getUserHash(
                                     userId = plugin_event.data.group_id,
@@ -291,6 +445,27 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = OlivaDiceCore.helpDoc.getHelp('draw', plugin_event.bot_info.hash)
             if tmp_reply_str != None:
                 replyMsg(plugin_event, tmp_reply_str)
+            return
+        elif isMatchWordStart(tmp_reast_str, 'ti'):
+            dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck('即时症状', plugin_event.bot_info.hash)
+            tmp_reply_str = dictStrCustom['strDrawTi'].format(**dictTValue)
+            replyMsg(plugin_event, tmp_reply_str)
+            return
+        elif isMatchWordStart(tmp_reast_str, 'li'):
+            dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck('总结症状', plugin_event.bot_info.hash)
+            tmp_reply_str = dictStrCustom['strDrawLi'].format(**dictTValue)
+            replyMsg(plugin_event, tmp_reply_str)
+            return
+        elif isMatchWordStart(tmp_reast_str, 'name'):
+            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'name')
+            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            tmp_reast_str = tmp_reast_str.rstrip(' ')
+            if tmp_reast_str in ['cn', 'jp', 'en', 'enzh']:
+                dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck('随机姓名_%s' % tmp_reast_str, plugin_event.bot_info.hash)
+            else:
+                dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck('随机姓名', plugin_event.bot_info.hash)
+            tmp_reply_str = dictStrCustom['strDrawName'].format(**dictTValue)
+            replyMsg(plugin_event, tmp_reply_str)
             return
         elif isMatchWordStart(tmp_reast_str, 'nn'):
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'nn')
@@ -850,6 +1025,7 @@ def unity_reply(plugin_event, Proc):
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
             tmp_reply_str_show = ''
+            roll_times_count = 1
             if isMatchWordStart(tmp_reast_str, 'ra'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'ra')
             elif isMatchWordStart(tmp_reast_str, 'rc'):
@@ -864,6 +1040,36 @@ def unity_reply(plugin_event, Proc):
                     flag_hide_roll = True
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'h')
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            if len(tmp_reast_str) > 2:
+                tmp_reast_str_list_1 = tmp_reast_str.split('#')
+                if len(tmp_reast_str_list_1) > 1:
+                    if tmp_reast_str_list_1[0].isdigit():
+                        roll_times_count = int(tmp_reast_str_list_1[0])
+                        if roll_times_count > 10:
+                            roll_times_count = 10
+                        tmp_reast_str = tmp_reast_str_list_1[1]
+            # 0 
+            # 1 b
+            # 2 p
+            flag_bp_type = 0
+            flag_bp_count = None
+            if len(tmp_reast_str) > 0:
+                if isMatchWordStart(tmp_reast_str, 'b'):
+                    flag_bp_type = 1
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'b')
+                elif isMatchWordStart(tmp_reast_str, 'B'):
+                    flag_bp_type = 1
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'B')
+                elif isMatchWordStart(tmp_reast_str, 'p'):
+                    flag_bp_type = 2
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'p')
+                elif isMatchWordStart(tmp_reast_str, 'P'):
+                    flag_bp_type = 2
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'P')
+                if flag_bp_type != 0 and len(tmp_reast_str) > 1:
+                    if tmp_reast_str[0].isdigit():
+                        flag_bp_count = tmp_reast_str[0]
+                        tmp_reast_str = tmp_reast_str[1:]
             if len(tmp_reast_str) > 0:
                 [tmp_skill_name, tmp_reast_str] = getToNumberPara(tmp_reast_str)
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -922,61 +1128,137 @@ def unity_reply(plugin_event, Proc):
                 if tmp_Template != None:
                     if 'mainDice' in tmp_Template:
                         rd_para_str = tmp_Template['mainDice']
-                rd_para = OlivaDiceCore.onedice.RD(rd_para_str)
-                rd_para.roll()
-                if rd_para.resError == None:
-                    if rd_para.resDetail == None or rd_para.resDetail == '':
-                        dictTValue['tRollResult'] = '%s=%d' % (rd_para_str, rd_para.resInt)
-                    else:
-                        dictTValue['tRollResult'] = '%s=%s=%d' % (rd_para_str, rd_para.resDetail, rd_para.resInt)
-                    dictTValue['tSkillValue'] = str(tmp_skill_value)
-                    dictRuleTempData = {
-                        'roll': rd_para.resInt,
-                        'skill': tmp_skill_value
-                    }
-                    tmpSkillCheckType = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
-                        dictRuleTempData,
-                        tmp_Template,
-                        tmp_TemplateRuleName
-                    )
-                    if tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS:
-                        dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckSucceed']
-                    elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_HARD_SUCCESS:
-                        dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckHardSucceed']
-                    elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_EXTREME_HARD_SUCCESS:
-                        dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckExtremeHardSucceed']
-                    elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_SUCCESS:
-                        dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckGreatSucceed']
-                    elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FAIL:
-                        dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFailed']
-                    elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_FAIL:
-                        dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckGreatFailed']
-                    elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_01:
-                        dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate01']
-                    elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_02:
-                        dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate02']
-                    elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_03:
-                        dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate03']
-                    elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_04:
-                        dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate04']
-                    elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_05:
-                        dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate05']
-                    elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_06:
-                        dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate06']
-                    elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_07:
-                        dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate07']
-                    elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_08:
-                        dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate08']
-                    elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_09:
-                        dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate09']
-                    elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_10:
-                        dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate10']
-                    elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_11:
-                        dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate11']
-                    elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_NOPE:
-                        dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckNope']
-                    else:
-                        dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckError']
+                if flag_bp_type == 1:
+                    rd_para_str = 'B'
+                elif flag_bp_type == 2:
+                    rd_para_str = 'P'
+                if flag_bp_count != None:
+                    rd_para_str += flag_bp_count
+                flag_need_reply = False
+                if roll_times_count == 1:
+                    rd_para = OlivaDiceCore.onedice.RD(rd_para_str)
+                    rd_para.roll()
+                    if rd_para.resError == None:
+                        if rd_para.resDetail == None or rd_para.resDetail == '':
+                            dictTValue['tRollResult'] = '%s=%d' % (rd_para_str, rd_para.resInt)
+                        else:
+                            dictTValue['tRollResult'] = '%s=%s=%d' % (rd_para_str, rd_para.resDetail, rd_para.resInt)
+                        dictTValue['tSkillValue'] = str(tmp_skill_value)
+                        dictRuleTempData = {
+                            'roll': rd_para.resInt,
+                            'skill': tmp_skill_value
+                        }
+                        tmpSkillCheckType = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
+                            dictRuleTempData,
+                            tmp_Template,
+                            tmp_TemplateRuleName
+                        )
+                        if tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS:
+                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckSucceed']
+                        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_HARD_SUCCESS:
+                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckHardSucceed']
+                        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_EXTREME_HARD_SUCCESS:
+                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckExtremeHardSucceed']
+                        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_SUCCESS:
+                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckGreatSucceed']
+                        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FAIL:
+                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFailed']
+                        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_FAIL:
+                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckGreatFailed']
+                        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_01:
+                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate01']
+                        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_02:
+                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate02']
+                        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_03:
+                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate03']
+                        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_04:
+                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate04']
+                        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_05:
+                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate05']
+                        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_06:
+                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate06']
+                        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_07:
+                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate07']
+                        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_08:
+                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate08']
+                        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_09:
+                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate09']
+                        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_10:
+                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate10']
+                        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_11:
+                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFate11']
+                        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_NOPE:
+                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckNope']
+                        else:
+                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckError']
+                        flag_need_reply = True
+                else:
+                    flag_begin = True
+                    tmp_tSkillCheckReasult = ''
+                    for i in range(roll_times_count):
+                        rd_para = OlivaDiceCore.onedice.RD(rd_para_str)
+                        rd_para.roll()
+                        if rd_para.resError == None:
+                            tmp_tSkillCheckReasult += '\n'
+                            if flag_bp_type == 0:
+                                tmp_tSkillCheckReasult += '%s=%d ' % (rd_para_str, rd_para.resInt)
+                            else:
+                                tmp_tSkillCheckReasult += '%s=%s=%d ' % (rd_para_str, rd_para.resDetail, rd_para.resInt)
+                            dictTValue['tSkillValue'] = str(tmp_skill_value)
+                            dictRuleTempData = {
+                                'roll': rd_para.resInt,
+                                'skill': tmp_skill_value
+                            }
+                            tmpSkillCheckType = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
+                                dictRuleTempData,
+                                tmp_Template,
+                                tmp_TemplateRuleName
+                            )
+                            if tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS:
+                                tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckSucceed']
+                            elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_HARD_SUCCESS:
+                                tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckHardSucceed']
+                            elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_EXTREME_HARD_SUCCESS:
+                                tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckExtremeHardSucceed']
+                            elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_SUCCESS:
+                                tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckGreatSucceed']
+                            elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FAIL:
+                                tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckFailed']
+                            elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_FAIL:
+                                tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckGreatFailed']
+                            elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_01:
+                                tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckFate01']
+                            elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_02:
+                                tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckFate02']
+                            elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_03:
+                                tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckFate03']
+                            elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_04:
+                                tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckFate04']
+                            elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_05:
+                                tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckFate05']
+                            elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_06:
+                                tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckFate06']
+                            elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_07:
+                                tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckFate07']
+                            elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_08:
+                                tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckFate08']
+                            elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_09:
+                                tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckFate09']
+                            elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_10:
+                                tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckFate10']
+                            elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_11:
+                                tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckFate11']
+                            elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_NOPE:
+                                tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckNope']
+                            else:
+                                tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckError']
+                            flag_need_reply = True
+                        else:
+                            flag_need_reply = False
+                            break
+                    dictTValue['tRollResult'] = ''
+                    dictTValue['tSkillCheckReasult'] = tmp_tSkillCheckReasult
+                if flag_need_reply:
                     if tmp_skill_name != None:
                         dictTValue['tSkillName'] = tmp_skill_name
                         tmp_reply_str = dictStrCustom['strPcSkillCheckWithSkillName'].format(**dictTValue)
@@ -1048,6 +1330,7 @@ def unity_reply(plugin_event, Proc):
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'r')
             rd_para_str = '1D100'
             rd_reason_str = None
+            roll_times_count = 1
             flag_hide_roll = False
             flag_have_para = False
             if len(tmp_reast_str) > 0:
@@ -1055,6 +1338,14 @@ def unity_reply(plugin_event, Proc):
                     flag_hide_roll = True
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'h')
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            if len(tmp_reast_str) > 2:
+                tmp_reast_str_list_1 = tmp_reast_str.split('#')
+                if len(tmp_reast_str_list_1) > 1:
+                    if tmp_reast_str_list_1[0].isdigit():
+                        roll_times_count = int(tmp_reast_str_list_1[0])
+                        if roll_times_count > 10:
+                            roll_times_count = 10
+                        tmp_reast_str = tmp_reast_str_list_1[1]
             if len(tmp_reast_str) > 0:
                 tmp_rd_para_str = None
                 [tmp_rd_para_str, tmp_reast_str] = getExpression(tmp_reast_str)
@@ -1089,23 +1380,43 @@ def unity_reply(plugin_event, Proc):
                     tmp_template_customDefault = tmp_template['customDefault']
                 if 'mainDice' in tmp_template and not flag_have_para:
                     rd_para_str = tmp_template['mainDice']
-            rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_template_customDefault)
-            rd_para.roll()
-            tmp_reply_str_1 = ''
-            if rd_para.resError == None:
-                if len(rd_para.resDetail) == 0 or len(rd_para.resDetail) > 150:
-                    if len(str(rd_para.resInt)) > 100:
-                        tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
+            if roll_times_count == 1:
+                rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_template_customDefault)
+                rd_para.roll()
+                tmp_reply_str_1 = ''
+                if rd_para.resError == None:
+                    if len(rd_para.resDetail) == 0 or len(rd_para.resDetail) > 150:
+                        if len(str(rd_para.resInt)) > 100:
+                            tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
+                        else:
+                            tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)
                     else:
-                        tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)
+                        if len(str(rd_para.resInt)) > 50:
+                            tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resDetail) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
+                        else:
+                            tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resDetail) + '=' + str(rd_para.resInt)
                 else:
-                    if len(str(rd_para.resInt)) > 50:
-                        tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resDetail) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
-                    else:
-                        tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resDetail) + '=' + str(rd_para.resInt)
+                    tmp_reply_str_1 = str(rd_para.resError)
+                dictTValue['tRollResult'] = tmp_reply_str_1
             else:
-                tmp_reply_str_1 = str(rd_para.resError)
-            dictTValue['tRollResult'] = tmp_reply_str_1
+                flag_begin = True
+                tmp_reply_str_1 = ''
+                for i in range(roll_times_count):
+                    rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_template_customDefault)
+                    rd_para.roll()
+                    if rd_para.resError == None:
+                        if not flag_begin:
+                            tmp_reply_str_1 += ', '
+                        else:
+                            flag_begin = False
+                        if len(str(rd_para.resInt)) > 10:
+                            tmp_reply_str_1 += str(rd_para.resInt)[:10] + '...'
+                        else:
+                            tmp_reply_str_1 += str(rd_para.resInt)
+                    else:
+                        tmp_reply_str_1 = str(rd_para.resError)
+                        break
+                dictTValue['tRollResult'] = rd_para_str + '=' + tmp_reply_str_1
             if rd_reason_str != None:
                 dictTValue['tRollReason'] = rd_reason_str
                 tmp_reply_str = dictStrCustom['strRollWithReason'].format(**dictTValue)
@@ -1128,11 +1439,15 @@ def unity_reply(plugin_event, Proc):
 def replyMsg(plugin_event, message):
     return plugin_event.reply(str(message))
 
-def sendMsgByEvent(plugin_event, message, target_id, target_type):
-    return plugin_event.send(target_type, target_id, message)
+def sendMsgByEvent(plugin_event, message, target_id, target_type, host_id = None):
+    return plugin_event.send(target_type, target_id, message, host_id = host_id)
 
 def replyMsgPrivateByEvent(plugin_event, message):
-    return plugin_event.send('private', plugin_event.data.user_id, message)
+    if 'host_id' in plugin_event.data.__dict__:
+        plugin_event.send('private', plugin_event.data.user_id, message, host_id = plugin_event.data.host_id)
+    else:
+        plugin_event.send('private', plugin_event.data.user_id, message)
+    return 
 
 def replyMsgLazyHelpByEvent(plugin_event, help_key):
     tmp_reply_str = OlivaDiceCore.helpDoc.getHelp(str(help_key), plugin_event.bot_info.hash)
