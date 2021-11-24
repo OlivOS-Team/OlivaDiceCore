@@ -83,7 +83,7 @@ He dismissed the dismiss as worthless.
 .st set [人物卡名]    切换人物卡
 .st show    显示人物卡
 .st temp [人物卡模版名]    切换人物卡模版
-    默认可选：COC7，DND，FATE
+    默认可选：COC7，DND5E，FATE
 .st rule [人物卡模版规则名]    切换人物卡规则
 更多请使用[.help 人物卡模板]进行查看
 .st del [人物卡名]    删除人物卡''',

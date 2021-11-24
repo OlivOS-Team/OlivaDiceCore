@@ -423,11 +423,10 @@ def unity_reply(plugin_event, Proc):
         elif isMatchWordStart(tmp_reast_str, 'draw'):
             flag_hide = False
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'draw')
-            tmp_reast_str = skipSpaceStart(tmp_reast_str)
             if isMatchWordStart(tmp_reast_str, 'h'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'h')
-                tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 flag_hide = True
+            tmp_reast_str = skipSpaceStart(tmp_reast_str)
             tmp_reast_str = tmp_reast_str.rstrip(' ')
             tmp_reast_str = tmp_reast_str.lstrip('_')
             tmp_reast_str = skipSpaceStart(tmp_reast_str)

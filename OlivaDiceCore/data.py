@@ -24,9 +24,13 @@ exce_path = os.getcwd()
 
 bot_info_basic = 'OlivaDice By lunzhiPenxil Ver.' + str(OlivaDiceCore_ver)
 
+bot_info_basic_short = 'OlivaDice Ver.' + str(OlivaDiceCore_ver)
+
 bot_info = bot_info_basic + ' [Python ' + str(platform.python_version()) + ' For OlivOS]'
 
 bot_version_short = 'OlivaDice ' + str(OlivaDiceCore_ver)
+
+bot_version_short_header = 'OlivaDice/' + str(OlivaDiceCore_ver)
 
 bot_summary = bot_info_basic + '\n'
 bot_summary += 'Python ' + str(sys.version) + '\n'

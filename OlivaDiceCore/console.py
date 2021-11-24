@@ -24,10 +24,12 @@ dictConsoleSwitchTemplate = {
     'default' : {
         'globalEnable' : 1,
         'userConfigCount' : 100,
+        'pulseInterval' : 300,
         'autoAcceptGroupAdd' : 1,
         'autoAcceptFriendAdd' : 1,
         'masterList' : [],
-        'noticeGroupList' : []
+        'noticeGroupList' : [],
+        'pulseUrlList' : []
     }
 }
 
