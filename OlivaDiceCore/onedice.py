@@ -39,6 +39,8 @@ def get_data_from_random_org():
     res_text = res_text.lstrip('\n')
     res_text = res_text.rstrip('\n')
     res = res_text.split('\n')
+    if len(res) < 1000:
+        res = None
     return res
 
 dictOperationPriority = {
@@ -342,6 +344,7 @@ class RD(object):
     '''
     def random(self, nMin, nMax, mode = None):
         global dictRandomInt
+        global random_default_mode
         if mode == None:
             mode = random_default_mode
         res = None
@@ -352,6 +355,10 @@ class RD(object):
             if len(dictRandomInt['default']) <= 0:
                 try:
                     tmp_random_int_list = get_data_from_random_org()
+                    if tmp_random_int_list == None:
+                        random_default_mode = 'default'
+                        res = random.randint(nMin, nMax)
+                        return res
                     if len(tmp_random_int_list) > 0:
                         dictRandomInt['default'] = tmp_random_int_list
                     else:
