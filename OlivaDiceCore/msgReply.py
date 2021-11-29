@@ -726,6 +726,87 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = dictStrCustom['strPcTempRuleError'].format(**dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
+            tmp_reast_str_new = tmp_reast_str
+            if len(tmp_reast_str_new) > 0:
+                tmp_reast_str_list = tmp_reast_str_new.split(' ')
+                tmp_skill_update_flag = None
+                tmp_skill_value_update = None
+                [tmp_skill_name, tmp_skill_value] = getExpression(tmp_reast_str_new, reverse = True)
+                if tmp_skill_name == '':
+                    tmp_skill_name = None
+                if tmp_skill_value == '':
+                    tmp_skill_value = None
+                if len(tmp_skill_value) > 1 and tmp_skill_value[0] == '+':
+                    tmp_skill_update_flag = '+'
+                    tmp_skill_value_update = tmp_skill_value[1:]
+                elif len(tmp_skill_value) > 1 and tmp_skill_value[0] == '-':
+                    tmp_skill_update_flag = '-'
+                    tmp_skill_value_update = tmp_skill_value[1:]
+                else:
+                    tmp_skill_value = None
+                if tmp_skill_name != None and tmp_skill_value != None:
+                    tmp_skill_name = tmp_skill_name.strip()
+                    tmp_skill_name = tmp_skill_name.upper()
+                    tmp_pc_id = plugin_event.data.user_id
+                    tmp_pc_platform = plugin_event.platform['platform']
+                    tmp_skill_value_old = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
+                        OlivaDiceCore.pcCard.getPcHash(
+                            tmp_pc_id,
+                            tmp_pc_platform
+                        ),
+                        tmp_skill_name
+                    )
+                    rd_para_str = str(tmp_skill_value_old) + tmp_skill_value
+
+                    tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
+                        OlivaDiceCore.pcCard.getPcHash(
+                            tmp_pc_id,
+                            tmp_pc_platform
+                        )
+                    )
+                    if tmp_pc_name_1 != None:
+                        dictTValue['tName'] = tmp_pc_name_1
+                    tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
+                        OlivaDiceCore.pcCard.getPcHash(
+                            tmp_pc_id,
+                            tmp_pc_platform
+                        ),
+                        dictTValue['tName']
+                    )
+                    tmp_template_customDefault = None
+                    if tmp_template_name != None:
+                        tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
+                        if 'customDefault' in tmp_template:
+                            tmp_template_customDefault = tmp_template['customDefault']
+                    rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_template_customDefault)
+                    rd_para.roll()
+                    if rd_para.resError == None:
+                        tmp_skill_value_new = rd_para.resInt
+                        OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
+                            OlivaDiceCore.pcCard.getPcHash(
+                                tmp_pc_id,
+                                tmp_pc_platform
+                            ),
+                            tmp_skill_name,
+                            tmp_skill_value_new,
+                            dictTValue['tName']
+                        )
+                        dictTValue['tSkillName'] = tmp_skill_name
+                        if tmp_skill_value_update.isdigit() or len(rd_para.resDetail) > 100:
+                            if len(str(tmp_skill_value_new)) > 50:
+                                dictTValue['tSkillUpdate'] = '%s=%s' % (rd_para_str, str(tmp_skill_value_new)[:50] + '...')
+                            else:
+                                dictTValue['tSkillUpdate'] = '%s=%s' % (rd_para_str, str(tmp_skill_value_new))
+                        else:
+                            if len(str(tmp_skill_value_new)) > 50:
+                                dictTValue['tSkillUpdate'] = '%s=%s=%s' % (rd_para_str, rd_para.resDetail, str(tmp_skill_value_new)[:50] + '...')
+                            else:
+                                dictTValue['tSkillUpdate'] = '%s=%s=%s' % (rd_para_str, rd_para.resDetail, str(tmp_skill_value_new))
+                        tmp_reply_str = dictStrCustom['strPcUpdateSkillValue'].format(**dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
+                        return
+                tmp_skill_name = None
+                tmp_skill_value = None
             if len(tmp_reast_str) > 0:
                 tmp_reast_str_bak = tmp_reast_str
                 [tmp_pc_name, tmp_reast_str] = splitBy(tmp_reast_str, '-')
@@ -1508,7 +1589,7 @@ def splitBy(data, key):
             tmp_output_str_2 = data[tmp_total_offset:]
     return [tmp_output_str_1, tmp_output_str_2]
 
-def getExpression(data):
+def getExpression(data, reverse = False):
     tmp_output_str_1 = ''
     tmp_output_str_2 = ''
     if len(data) > 0:
@@ -1517,8 +1598,14 @@ def getExpression(data):
         tmp_total_offset = 0
         while True:
             tmp_offset += 1
-            tmp_total_offset = tmp_offset - 1
-            if tmp_total_offset >= len(data):
+            if reverse:
+                tmp_total_offset = len(data) - tmp_offset
+            else:
+                tmp_total_offset = tmp_offset - 1
+            if not reverse and tmp_total_offset >= len(data):
+                flag_have_para = True
+                break
+            if reverse and tmp_total_offset <= 0:
                 flag_have_para = True
                 break
             if data[tmp_total_offset].isdigit():
@@ -1529,6 +1616,8 @@ def getExpression(data):
                 pass
             else:
                 flag_have_para = True
+                if reverse:
+                    tmp_total_offset += 1
                 break
         if flag_have_para:
             tmp_output_str_1 = data[:tmp_total_offset]
