@@ -18,6 +18,7 @@ import OlivOS
 import OlivaDiceCore
 
 import time
+import uuid
 
 def logProc(Proc, level, message, segment):
     Proc.log(
@@ -36,6 +37,7 @@ def unity_init(plugin_event, Proc):
     OlivaDiceCore.console.readConsoleSwitch()
     OlivaDiceCore.console.saveConsoleSwitch()
     OlivaDiceCore.msgCustomManager.initMsgCustom(Proc.Proc_data['bot_info_dict'])
+    OlivaDiceCore.msgCustomManager.saveMsgCustom(Proc.Proc_data['bot_info_dict'])
     OlivaDiceCore.helpDoc.initHelpDoc(Proc.Proc_data['bot_info_dict'])
     OlivaDiceCore.drawCard.initDeck(Proc.Proc_data['bot_info_dict'])
     OlivaDiceCore.pcCard.dataPcCardLoadAll()
@@ -56,6 +58,13 @@ def unity_init(plugin_event, Proc):
         ('OlivaDice', 'default'),
         ('Init', 'default')
     ])
+    #显示Master认主信息
+    dictTValue['tInitMasterKey'] = '.master %s' % OlivaDiceCore.data.bot_content['masterKey']
+    tmp_log_str =  dictStrConst['strToBeMaster'].format(**dictTValue)
+    logProc(Proc, 2, tmp_log_str, [
+        ('OlivaDice', 'default'),
+        ('Init', 'default')
+    ])
 
 def unity_save(plugin_event, Proc):
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
@@ -63,6 +72,7 @@ def unity_save(plugin_event, Proc):
     dictGValue = OlivaDiceCore.msgCustom.dictGValue
     dictTValue.update(dictGValue)
     #save start
+    OlivaDiceCore.msgCustomManager.saveMsgCustom(Proc.Proc_data['bot_info_dict'])
     OlivaDiceCore.userConfig.releaseUnityMsgCount([], None, True)
     total_count = OlivaDiceCore.userConfig.dataUserConfigTotalCount()
     dictTValue['tInitDataCount'] = str(total_count)
@@ -81,6 +91,7 @@ def poke_reply(plugin_event, Proc):
 
 def unity_reply(plugin_event, Proc):
     OlivaDiceCore.userConfig.setMsgCount()
+    dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
     dictTValue['tName'] = plugin_event.data.sender['nickname']
     dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]
@@ -287,12 +298,50 @@ def unity_reply(plugin_event, Proc):
                             replyMsg(plugin_event, tmp_reply_str)
                             return
                 return
+            elif isMatchWordStart(tmp_reast_str, 'str'):
+                tmp_reast_str = tmp_reast_str.strip(' ')
+                tmp_reast_list = tmp_reast_str.split(' ')
+                if len(tmp_reast_list) == 1:
+                    if tmp_reast_list[0] in OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]:
+                        tmp_reply_str = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash][tmp_reast_list[0]]
+                        replyMsg(plugin_event, tmp_reply_str)
+                elif len(tmp_reast_list) >= 2:
+                    tmp_new_str = ' '.join(tmp_reast_list[1:])
+                    OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[plugin_event.bot_info.hash][tmp_reast_list[0]] = tmp_new_str
+                    OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash][tmp_reast_list[0]] = tmp_new_str
+                    OlivaDiceCore.msgCustomManager.saveMsgCustomByBotHash(plugin_event.bot_info.hash)
+                    dictTValue['tStrName'] = tmp_reast_list[0]
+                    tmp_reply_str = dictStrCustom['strSetStr'].format(**dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                return
+        else:
+            if isMatchWordStart(tmp_reast_str, 'master'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'master')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_reast_str = tmp_reast_str.strip(' ')
+                if tmp_reast_str == OlivaDiceCore.data.bot_content['masterKey']:
+                    OlivaDiceCore.data.bot_content['masterKey'] = str(uuid.uuid4())
+                    OlivaDiceCore.console.setMasterListAppend(plugin_event.bot_info.hash, [plugin_event.data.user_id, plugin_event.platform['platform']])
+                    OlivaDiceCore.console.saveConsoleSwitch()
+                    tmp_reply_str = dictStrCustom['strBecomeMaster'].format(**dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    #显示Master认主信息
+                    dictTValue['tInitMasterKey'] = '.master %s' % OlivaDiceCore.data.bot_content['masterKey']
+                    tmp_log_str =  dictStrConst['strToBeMaster'].format(**dictTValue)
+                    logProc(Proc, 2, tmp_log_str, [
+                        ('OlivaDice', 'default'),
+                        ('reply', 'default')
+                    ])
+                else:
+                    tmp_reply_str = dictStrCustom['strCantBecomeMaster'].format(**dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                return
         if isMatchWordStart(tmp_reast_str, 'bot'):
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'bot')
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             if isMatchWordStart(tmp_reast_str, 'on'):
                 if flag_is_from_group:
-                    if flag_is_from_group_have_admin and flag_is_from_group_admin or not flag_is_from_group_have_admin:
+                    if (flag_is_from_group_have_admin and flag_is_from_group_admin or not flag_is_from_group_have_admin) or flag_is_from_master:
                         if flag_groupEnable != True:
                             if flag_is_from_host:
                                 if flag_hostEnable:
@@ -341,7 +390,7 @@ def unity_reply(plugin_event, Proc):
                             replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'off'):
                 if flag_is_from_group:
-                    if flag_is_from_group_have_admin and flag_is_from_group_admin or not flag_is_from_group_have_admin:
+                    if (flag_is_from_group_have_admin and flag_is_from_group_admin or not flag_is_from_group_have_admin) or flag_is_from_master:
                         if flag_groupEnable != False:
                             if flag_is_from_host:
                                 if flag_hostEnable:
@@ -736,14 +785,15 @@ def unity_reply(plugin_event, Proc):
                     tmp_skill_name = None
                 if tmp_skill_value == '':
                     tmp_skill_value = None
-                if len(tmp_skill_value) > 1 and tmp_skill_value[0] == '+':
-                    tmp_skill_update_flag = '+'
-                    tmp_skill_value_update = tmp_skill_value[1:]
-                elif len(tmp_skill_value) > 1 and tmp_skill_value[0] == '-':
-                    tmp_skill_update_flag = '-'
-                    tmp_skill_value_update = tmp_skill_value[1:]
-                else:
-                    tmp_skill_value = None
+                if tmp_skill_value != None:
+                    if len(tmp_skill_value) > 1 and tmp_skill_value[0] == '+':
+                        tmp_skill_update_flag = '+'
+                        tmp_skill_value_update = tmp_skill_value[1:]
+                    elif len(tmp_skill_value) > 1 and tmp_skill_value[0] == '-':
+                        tmp_skill_update_flag = '-'
+                        tmp_skill_value_update = tmp_skill_value[1:]
+                    else:
+                        tmp_skill_value = None
                 if tmp_skill_name != None and tmp_skill_value != None:
                     tmp_skill_name = tmp_skill_name.strip()
                     tmp_skill_name = tmp_skill_name.upper()

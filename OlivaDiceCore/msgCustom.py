@@ -19,7 +19,12 @@ import OlivaDiceCore
 
 dictStrCustomDict = {}
 
+dictStrCustomUpdateDict = {}
+
 dictStrCustom = {
+    'strSetStr': '回复词[{tStrName}]已更新',
+    'strBecomeMaster': '口令正确，[{tName}]已成为Master',
+    'strCantBecomeMaster': '口令错误，拒绝认证',
     'strNeedMaster': '需要Master权限',
     'strHello': '欢迎使用本机器人! 请使用[.help]查看帮助',
     'strBot': '欢迎使用本机器人! 请使用[.help]查看帮助',
@@ -107,6 +112,7 @@ dictStrCustom = {
 }
 
 dictStrConst = {
+    'strToBeMaster' : '请使用[{tInitMasterKey}]指令以获取Master权限',
     'strInitData' : '[{tInitDataCount}]条[{tInitDataType}]数据已加载',
     'strInitBakData' : '[{tInitDataCount}]条[{tInitDataType}]数据已备份',
     'strSaveData' : '[{tInitDataCount}]条[{tInitDataType}]数据已写入'
@@ -118,6 +124,7 @@ dictGValue = {
 
 dictTValue = {
     'tName' : 'N/A',
+    'tStrName' : 'N/A',
     'tUserId' : 'N/A',
     'tGroupName' : '私聊',
     'tGroupId' : '私聊',
@@ -148,6 +155,7 @@ dictTValue = {
     'tPcTempName' : '',
     'tPcTempRuleName' : '',
     'tInitDataCount' : '0',
+    'tInitMasterKey': '不可用',
     'tInitDataType': '未知',
     'tHelpDocResult': 'N/A',
     'tDrawDeckResult': 'N/A'

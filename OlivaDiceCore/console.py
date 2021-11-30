@@ -92,7 +92,16 @@ def readConsoleSwitch():
                 dictConsoleSwitch[botHash].update(json.loads(consoleSwitchPath_f.read()))
         except:
             pass
-    
+
+def setMasterListAppend(botHash, dataList):
+    global dictConsoleSwitch
+    if botHash in dictConsoleSwitch:
+        if 'masterList' not in dictConsoleSwitch[botHash]:
+            dictConsoleSwitch[botHash]['masterList'] = []
+        if type(dictConsoleSwitch[botHash]['masterList']) != list:
+            dictConsoleSwitch[botHash]['masterList'] = []
+        dictConsoleSwitch[botHash]['masterList'].append(dataList)
+
 def releaseDir(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)

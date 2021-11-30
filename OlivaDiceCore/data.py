@@ -17,6 +17,7 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 import sys
 import platform
 import os
+import uuid
 
 OlivaDiceCore_ver = '3.0.7'
 
@@ -37,5 +38,9 @@ bot_summary += 'Python ' + str(sys.version) + '\n'
 bot_summary += str(platform.machine()) + '\n'
 bot_summary += str(platform.processor()) + '\n'
 bot_summary += str(os.name) + ':' + str(platform.platform())
+
+bot_content = {
+    'masterKey': str(uuid.uuid4())
+}
 
 dataDirRoot = './plugin/data/OlivaDice'
