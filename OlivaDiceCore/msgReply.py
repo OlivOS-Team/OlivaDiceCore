@@ -297,14 +297,48 @@ def unity_reply(plugin_event, Proc):
                             tmp_reply_str = dictStrCustom['strBotNotUnderHost'].format(**dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
                             return
+                else:
+                    tmp_reast_str = tmp_reast_str.strip(' ')
+                    tmp_reast_list = tmp_reast_str.split(' ')
+                    if len(tmp_reast_list) == 1:
+                        if plugin_event.bot_info.hash in OlivaDiceCore.console.dictConsoleSwitch:
+                            if tmp_reast_list[0] in OlivaDiceCore.console.dictConsoleSwitch[plugin_event.bot_info.hash]:
+                                if type(OlivaDiceCore.console.dictConsoleSwitch[plugin_event.bot_info.hash][tmp_reast_list[0]]) == int:
+                                    dictTValue['tConsoleKey'] = tmp_reast_list[0]
+                                    dictTValue['tConsoleValue'] = str(OlivaDiceCore.console.dictConsoleSwitch[plugin_event.bot_info.hash][tmp_reast_list[0]])
+                                    tmp_reply_str = dictStrCustom['strMasterConsoleShow'].format(**dictTValue)
+                                    replyMsg(plugin_event, tmp_reply_str)
+                                    return
+                        tmp_reply_str = dictStrCustom['strMasterConsoleNotFound'].format(**dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
+                    elif len(tmp_reast_list) > 1:
+                        tmp_reast_str = ' '.join(tmp_reast_list[1:])
+                        tmp_reast_str = tmp_reast_str.strip(' ')
+                        if not tmp_reast_str.isdigit():
+                            tmp_reply_str = dictStrCustom['strMasterConsoleSetInvalid'].format(**dictTValue)
+                            replyMsg(plugin_event, tmp_reply_str)
+                            return
+                        if plugin_event.bot_info.hash in OlivaDiceCore.console.dictConsoleSwitch:
+                            if tmp_reast_list[0] in OlivaDiceCore.console.dictConsoleSwitch[plugin_event.bot_info.hash]:
+                                if type(OlivaDiceCore.console.dictConsoleSwitch[plugin_event.bot_info.hash][tmp_reast_list[0]]) == int:
+                                    OlivaDiceCore.console.dictConsoleSwitch[plugin_event.bot_info.hash][tmp_reast_list[0]] = int(tmp_reast_str)
+                                    OlivaDiceCore.console.saveConsoleSwitch()   
+                                    dictTValue['tConsoleKey'] = tmp_reast_list[0]
+                                    dictTValue['tConsoleValue'] = tmp_reast_str
+                                    tmp_reply_str = dictStrCustom['strMasterConsoleSet'].format(**dictTValue)
+                                    replyMsg(plugin_event, tmp_reply_str)
+                                    return
+                        tmp_reply_str = dictStrCustom['strMasterConsoleNotFound'].format(**dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'str'):
                 tmp_reast_str = tmp_reast_str.strip(' ')
                 tmp_reast_list = tmp_reast_str.split(' ')
                 if len(tmp_reast_list) == 1:
-                    if tmp_reast_list[0] in OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]:
-                        tmp_reply_str = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash][tmp_reast_list[0]]
-                        replyMsg(plugin_event, tmp_reply_str)
+                    if plugin_event.bot_info.hash in OlivaDiceCore.msgCustom.dictStrCustomDict:
+                        if tmp_reast_list[0] in OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]:
+                            tmp_reply_str = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash][tmp_reast_list[0]]
+                            replyMsg(plugin_event, tmp_reply_str)
                 elif len(tmp_reast_list) >= 2:
                     tmp_new_str = ' '.join(tmp_reast_list[1:])
                     OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[plugin_event.bot_info.hash][tmp_reast_list[0]] = tmp_new_str

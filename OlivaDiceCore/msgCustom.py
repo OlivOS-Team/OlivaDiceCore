@@ -25,6 +25,10 @@ dictStrCustom = {
     'strSetStr': '回复词[{tStrName}]已更新',
     'strBecomeMaster': '口令正确，[{tName}]已成为Master',
     'strCantBecomeMaster': '口令错误，拒绝认证',
+    'strMasterConsoleShow': '[{tConsoleKey}]当前为[{tConsoleValue}]',
+    'strMasterConsoleSet': '[{tName}]已将[{tConsoleKey}]设置为[{tConsoleValue}]',
+    'strMasterConsoleSetInvalid': '非法的配置值',
+    'strMasterConsoleNotFound': '无法访问的配置项',
     'strNeedMaster': '需要Master权限',
     'strHello': '欢迎使用本机器人! 请使用[.help]查看帮助',
     'strBot': '欢迎使用本机器人! 请使用[.help]查看帮助',
@@ -158,5 +162,7 @@ dictTValue = {
     'tInitMasterKey': '不可用',
     'tInitDataType': '未知',
     'tHelpDocResult': 'N/A',
-    'tDrawDeckResult': 'N/A'
+    'tDrawDeckResult': 'N/A',
+    'tConsoleKey': 'N/A',
+    'tConsoleValue': 'N/A'
 }
