@@ -582,14 +582,14 @@ dictPcCardTemplateDefault = {
         'checkRules': {
             'default': {
                 'checkList': [
-                    'success',
-                    'fail'
+                    'greatSuccess',
+                    'greatFail'
                 ],
-                'success': {
-                    '.<=': ['$roll', '$skill']
+                'greatSuccess': {
+                    '.>=': ['$roll', 20]
                 },
-                'fail': {
-                    '.>': ['$roll', '$skill']
+                'greatFail': {
+                    '.<=': ['$roll', 1]
                 }
             }
         }

@@ -111,7 +111,7 @@ dictStrCustom = {
     'strPcSkillCheckFate09' : '[+6 惊异]',
     'strPcSkillCheckFate10' : '[+7 史诗]',
     'strPcSkillCheckFate11' : '[+8 传奇]',
-    'strPcSkillCheckNope' : '无事发生',
+    'strPcSkillCheckNope' : '需要解释',
     'strPcSkillCheckError' : '发生错误'
 }
 
