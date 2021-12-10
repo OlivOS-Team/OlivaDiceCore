@@ -183,6 +183,15 @@ def unity_reply(plugin_event, Proc):
                 userConfigKey = 'hostEnable',
                 botHash = plugin_event.bot_info.hash
             )
+        flag_hostLocalEnable = True
+        if flag_is_from_host:
+            flag_hostLocalEnable = OlivaDiceCore.userConfig.getUserConfigByKey(
+                userId = plugin_event.data.host_id,
+                userType = 'host',
+                platform = plugin_event.platform['platform'],
+                userConfigKey = 'hostLocalEnable',
+                botHash = plugin_event.bot_info.hash
+            )
         flag_groupEnable = True
         if flag_is_from_group:
             if flag_is_from_host:
@@ -471,6 +480,65 @@ def unity_reply(plugin_event, Proc):
                         else:
                             tmp_reply_str = dictStrCustom['strBotAlreadyOff'].format(**dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
+            elif isMatchWordStart(tmp_reast_str, 'host'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'host')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                if isMatchWordStart(tmp_reast_str, 'on'):
+                    if flag_is_from_group:
+                        if (flag_is_from_group_have_admin and flag_is_from_group_admin or not flag_is_from_group_have_admin) or flag_is_from_master:
+                            if flag_is_from_host:
+                                if flag_hostLocalEnable != True:
+                                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                                        userConfigKey = 'hostLocalEnable',
+                                        userConfigValue = True,
+                                        botHash = plugin_event.bot_info.hash,
+                                        userId = plugin_event.data.host_id,
+                                        userType = 'host',
+                                        platform = plugin_event.platform['platform']
+                                    )
+                                    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                                        userHash = OlivaDiceCore.userConfig.getUserHash(
+                                            userId = plugin_event.data.host_id,
+                                            userType = 'host',
+                                            platform = plugin_event.platform['platform']
+                                        )
+                                    )
+                                    tmp_reply_str = dictStrCustom['strBotHostLocalOn'].format(**dictTValue)
+                                    replyMsg(plugin_event, tmp_reply_str)
+                                else:
+                                    tmp_reply_str = dictStrCustom['strBotAlreadyHostLocalOn'].format(**dictTValue)
+                                    replyMsg(plugin_event, tmp_reply_str)
+                            else:
+                                tmp_reply_str = dictStrCustom['strBotNotUnderHost'].format(**dictTValue)
+                                replyMsg(plugin_event, tmp_reply_str)
+                elif isMatchWordStart(tmp_reast_str, 'off'):
+                    if flag_is_from_group:
+                        if (flag_is_from_group_have_admin and flag_is_from_group_admin or not flag_is_from_group_have_admin) or flag_is_from_master:
+                            if flag_is_from_host:
+                                if flag_hostLocalEnable != False:
+                                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                                        userConfigKey = 'hostLocalEnable',
+                                        userConfigValue = False,
+                                        botHash = plugin_event.bot_info.hash,
+                                        userId = plugin_event.data.host_id,
+                                        userType = 'host',
+                                        platform = plugin_event.platform['platform']
+                                    )
+                                    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                                        userHash = OlivaDiceCore.userConfig.getUserHash(
+                                            userId = plugin_event.data.host_id,
+                                            userType = 'host',
+                                            platform = plugin_event.platform['platform']
+                                        )
+                                    )
+                                    tmp_reply_str = dictStrCustom['strBotHostLocalOff'].format(**dictTValue)
+                                    replyMsg(plugin_event, tmp_reply_str)
+                                else:
+                                    tmp_reply_str = dictStrCustom['strBotAlreadyHostLocalOff'].format(**dictTValue)
+                                    replyMsg(plugin_event, tmp_reply_str)
+                            else:
+                                tmp_reply_str = dictStrCustom['strBotNotUnderHost'].format(**dictTValue)
+                                replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'exit'):
                 if flag_is_from_group:
                     if (flag_is_from_group_have_admin and flag_is_from_group_admin) or flag_is_from_master:
@@ -478,13 +546,16 @@ def unity_reply(plugin_event, Proc):
                         replyMsg(plugin_event, tmp_reply_str)
                         time.sleep(1)
                         plugin_event.set_group_leave(plugin_event.data.group_id)
-            elif isMatchWordStart(tmp_reast_str, 'summary'):
+            elif isMatchWordStart(tmp_reast_str, 'summary') and flag_is_from_master:
                 tmp_reply_str = ''
                 tmp_reply_str += OlivaDiceCore.data.bot_summary
                 replyMsg(plugin_event, tmp_reply_str)
             else:
                 tmp_reply_str = OlivaDiceCore.data.bot_info + '\n' + dictStrCustom['strBot'].format(**dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
+            return
+        #此频道关闭时中断处理
+        if not flag_hostLocalEnable and not flag_force_reply:
             return
         #此群关闭时中断处理
         if not flag_groupEnable and not flag_force_reply:

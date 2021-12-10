@@ -33,6 +33,7 @@ dictHelpDocTemp = {
 青果核心用户群：661366095''',
 
     '更新': '''[OlivaDiceCore]
+3.0.8: 对接官方频道
 3.0.7: 属性增量
 3.0.6: 心跳系统
 3.0.5: 固化版本
@@ -156,6 +157,8 @@ https://github.com/OlivOS-Team/onedice''',
 .name (cn/jp/en/enzh)
     后接cn/jp/en/enzh则限定生成中文/日文/英文/英文中译名''',
 
+    'random': '''OlivaDice默认随机数生成器一概采用由random.org提供的真随机数，基于量子源于大气噪声，如对随机数结果有异议请向random.org发起质疑''',
+
 
     'rc': '&ra',
     'ti': '&疯狂症状',
@@ -167,5 +170,7 @@ https://github.com/OlivOS-Team/onedice''',
     '理智检定': '&sc',
     '命名': '&nn',
     '人物卡': '&st',
-    '车卡coc': '&coc'
+    '车卡coc': '&coc',
+    '随机数': '&random',
+    '随机数算法': '&random'
 }

@@ -34,6 +34,7 @@ gUserConfigLock = threading.Lock()
 dictUserConfigNoteDefault = {
     'groupEnable' : True,
     'hostEnable' : True,
+    'hostLocalEnable' : True,
     'groupWithHostEnable' : False
 }
 
