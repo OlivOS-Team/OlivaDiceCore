@@ -31,14 +31,20 @@ def initDeck(bot_info_dict):
     for fileDeckList_this in fileDeckList:
         customDeckFile = fileDeckList_this
         customDeckPath = customDeckDir + '/' + customDeckFile
+        obj_Deck_this = None
         try:
             with open(customDeckPath, 'r', encoding = 'utf-8') as customDeckPath_f:
                 obj_Deck_this = json.loads(customDeckPath_f.read())
-                for bot_info_dict_this in OlivaDiceCore.drawCardData.dictDeck:
-                    botHash = bot_info_dict_this
-                    OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this)
         except:
-            continue
+            try:
+                with open(customDeckPath, 'r', encoding = 'utf_8_sig') as customDeckPath_f:
+                    obj_Deck_this = json.loads(customDeckPath_f.read())
+            except:
+                pass
+        if obj_Deck_this != None:
+            for bot_info_dict_this in OlivaDiceCore.drawCardData.dictDeck:
+                botHash = bot_info_dict_this
+                OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this)
     for bot_info_dict_this in OlivaDiceCore.drawCardData.dictDeck:
         botHash = bot_info_dict_this
         releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash)
@@ -49,12 +55,18 @@ def initDeck(bot_info_dict):
         for fileDeckList_this in fileDeckList:
             customDeckFile = fileDeckList_this
             customDeckPath = customDeckDir + '/' + customDeckFile
+            obj_Deck_this = None
             try:
                 with open(customDeckPath, 'r', encoding = 'utf-8') as customDeckPath_f:
                     obj_Deck_this = json.loads(customDeckPath_f.read())
-                    OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this)
             except:
-                continue
+                try:
+                    with open(customDeckPath, 'r', encoding = 'utf_8_sig') as customDeckPath_f:
+                        obj_Deck_this = json.loads(customDeckPath_f.read())
+                except:
+                    pass
+            if obj_Deck_this != None:
+                OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this)
 
 def getDrawDeck(key_str, bot_hash):
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
