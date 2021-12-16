@@ -24,7 +24,7 @@ dictStrCustomUpdateDict = {}
 dictStrCustom = {
     'strSetStr': '回复词[{tStrName}]已更新',
     'strBecomeMaster': '口令正确，[{tName}]已成为Master',
-    'strCantBecomeMaster': '口令错误，拒绝认证',
+    'strCantBecomeMaster': '无Master权限且口令错误，拒绝认证',
     'strMasterConsoleShow': '[{tConsoleKey}]当前为[{tConsoleValue}]',
     'strMasterConsoleSet': '[{tName}]已将[{tConsoleKey}]设置为[{tConsoleValue}]',
     'strMasterConsoleSetInvalid': '非法的配置值',

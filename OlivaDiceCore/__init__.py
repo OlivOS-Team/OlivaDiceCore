@@ -31,3 +31,4 @@ import OlivaDiceCore.helpDocData
 import OlivaDiceCore.drawCard
 import OlivaDiceCore.drawCardData
 import OlivaDiceCore.pulse
+import OlivaDiceCore.crossHook

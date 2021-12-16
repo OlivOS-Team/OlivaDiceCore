@@ -98,6 +98,22 @@ def unity_reply(plugin_event, Proc):
     dictGValue = OlivaDiceCore.msgCustom.dictGValue
     dictTValue.update(dictGValue)
 
+    tmp_hook_host_id = None
+    tmp_hook_group_id = None
+    tmp_hook_user_id = None
+    if 'host_id' in plugin_event.data.__dict__:
+        tmp_hook_host_id = plugin_event.data.host_id
+    if 'group_id' in plugin_event.data.__dict__:
+        tmp_hook_group_id = plugin_event.data.group_id
+    if 'user_id' in plugin_event.data.__dict__:
+        tmp_hook_user_id = plugin_event.data.user_id
+    OlivaDiceCore.crossHook.dictHookFunc['msgHook'](
+        plugin_event,
+        'recv', 
+        [tmp_hook_host_id, tmp_hook_group_id, tmp_hook_user_id],
+        str(plugin_event.data.message)
+    )
+
     tmp_at_str = OlivOS.messageAPI.PARA.at(plugin_event.base_info['self_id']).CQ()
     tmp_at_str_sub = None
     if 'sub_self_id' in plugin_event.data.extend:
@@ -549,6 +565,13 @@ def unity_reply(plugin_event, Proc):
             elif isMatchWordStart(tmp_reast_str, 'summary') and flag_is_from_master:
                 tmp_reply_str = ''
                 tmp_reply_str += OlivaDiceCore.data.bot_summary
+                replyMsg(plugin_event, tmp_reply_str)
+            elif isMatchWordStart(tmp_reast_str, 'model'):
+                tmp_reply_str = ''
+                tmp_reply_str_list = []
+                for sub_model_this in OlivaDiceCore.crossHook.dictHookList['model']:
+                    tmp_reply_str_list.append('%s V.%s' % (sub_model_this[0], sub_model_this[1]))
+                tmp_reply_str = '\n'.join(tmp_reply_str_list)
                 replyMsg(plugin_event, tmp_reply_str)
             else:
                 tmp_reply_str = OlivaDiceCore.data.bot_info + '\n' + dictStrCustom['strBot'].format(**dictTValue)
@@ -1673,12 +1696,54 @@ def unity_reply(plugin_event, Proc):
                 replyMsg(plugin_event, tmp_reply_str)
 
 def replyMsg(plugin_event, message):
+    host_id = None
+    group_id = None
+    user_id = None
+    if 'host_id' in plugin_event.data.__dict__:
+        host_id = plugin_event.data.host_id
+    if 'group_id' in plugin_event.data.__dict__:
+        group_id = plugin_event.data.group_id
+    if 'user_id' in plugin_event.data.__dict__:
+        user_id = plugin_event.data.user_id
+    OlivaDiceCore.crossHook.dictHookFunc['msgHook'](
+        plugin_event,
+        'reply', 
+        [host_id, group_id, user_id],
+        str(message)
+    )
     return plugin_event.reply(str(message))
 
 def sendMsgByEvent(plugin_event, message, target_id, target_type, host_id = None):
+    group_id = None
+    user_id = None
+    if target_type == 'private':
+        user_id = target_id
+    elif target_type == 'group':
+        group_id = target_id
+    OlivaDiceCore.crossHook.dictHookFunc['msgHook'](
+        plugin_event,
+        'send', 
+        [host_id, group_id, user_id],
+        str(message)
+    )
     return plugin_event.send(target_type, target_id, message, host_id = host_id)
 
 def replyMsgPrivateByEvent(plugin_event, message):
+    host_id = None
+    group_id = None
+    user_id = None
+    if 'host_id' in plugin_event.data.__dict__:
+        host_id = plugin_event.data.host_id
+    if 'group_id' in plugin_event.data.__dict__:
+        group_id = plugin_event.data.group_id
+    if 'user_id' in plugin_event.data.__dict__:
+        user_id = plugin_event.data.user_id
+    OlivaDiceCore.crossHook.dictHookFunc['msgHook'](
+        plugin_event,
+        'send_private', 
+        [host_id, group_id, user_id],
+        str(message)
+    )
     if 'host_id' in plugin_event.data.__dict__:
         plugin_event.send('private', plugin_event.data.user_id, message, host_id = plugin_event.data.host_id)
     else:
@@ -1687,7 +1752,7 @@ def replyMsgPrivateByEvent(plugin_event, message):
 
 def replyMsgLazyHelpByEvent(plugin_event, help_key):
     tmp_reply_str = OlivaDiceCore.helpDoc.getHelp(str(help_key), plugin_event.bot_info.hash)
-    return plugin_event.reply(str(tmp_reply_str))
+    return replyMsg(plugin_event, str(tmp_reply_str))
 
 def skipSpaceStart(data):
     tmp_output_str = ''
