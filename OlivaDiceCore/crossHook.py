@@ -20,13 +20,20 @@ listModel = [
     ['OlivaDiceCore', OlivaDiceCore.data.OlivaDiceCore_ver]
 ]
 
+listPrefix = [
+    '.',
+    '。',
+    '/'
+]
+
 def msgHook(event, funcType, dectData, message):
     [host_id, group_id, user_id] = dectData
     return None
 
 #跨模块注入点
 dictHookList = {
-    'model': listModel
+    'model': listModel,
+    'prefix': listPrefix
 }
 
 dictHookFunc = {

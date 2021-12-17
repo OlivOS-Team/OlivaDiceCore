@@ -119,9 +119,6 @@ def unity_reply(plugin_event, Proc):
     if 'sub_self_id' in plugin_event.data.extend:
         if plugin_event.data.extend['sub_self_id'] != None:
             tmp_at_str_sub = OlivOS.messageAPI.PARA.at(plugin_event.data.extend['sub_self_id']).CQ()
-    tmp_command_str_1 = '.'
-    tmp_command_str_2 = '。'
-    tmp_command_str_3 = '/'
     tmp_reast_str = plugin_event.data.message
     flag_force_reply = False
     flag_is_command = False
@@ -146,15 +143,10 @@ def unity_reply(plugin_event, Proc):
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, tmp_at_str_sub)
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             flag_force_reply = True
-    if isMatchWordStart(tmp_reast_str, tmp_command_str_1):
-        tmp_reast_str = getMatchWordStartRight(tmp_reast_str, tmp_command_str_1)
-        flag_is_command = True
-    elif isMatchWordStart(tmp_reast_str, tmp_command_str_2):
-        tmp_reast_str = getMatchWordStartRight(tmp_reast_str, tmp_command_str_2)
-        flag_is_command = True
-    elif isMatchWordStart(tmp_reast_str, tmp_command_str_3):
-        tmp_reast_str = getMatchWordStartRight(tmp_reast_str, tmp_command_str_3)
-        flag_is_command = True
+    [tmp_reast_str, flag_is_command] = msgIsCommand(
+        tmp_reast_str,
+        OlivaDiceCore.crossHook.dictHookList['prefix']
+    )
     if flag_is_command:
         tmp_list_hit = []
         flag_is_from_master = OlivaDiceCore.ordinaryInviteManager.isInMasterList(
@@ -1753,6 +1745,17 @@ def replyMsgPrivateByEvent(plugin_event, message):
 def replyMsgLazyHelpByEvent(plugin_event, help_key):
     tmp_reply_str = OlivaDiceCore.helpDoc.getHelp(str(help_key), plugin_event.bot_info.hash)
     return replyMsg(plugin_event, str(tmp_reply_str))
+
+def msgIsCommand(data, prefix_list):
+    res = False
+    res_data = data
+    if type(data) == str:
+        for prefix_list_this in prefix_list:
+            if isMatchWordStart(data, prefix_list_this):
+                res_data = getMatchWordStartRight(data, prefix_list_this)
+                res = True
+                break
+    return [res_data, res]
 
 def skipSpaceStart(data):
     tmp_output_str = ''
