@@ -52,6 +52,7 @@ def unity_heartbeat(plugin_event, Proc):
             tmp_master_list_1 = []
             if tmp_res['active'] == True:
                 tmp_nickname = tmp_res['data']['name']
+                OlivaDiceCore.msgCustom.dictGValue['gBotName'] = tmp_res['data']['name']
             for tmp_master_list_this in tmp_master_list:
                 tmp_master_list_1.append(str(tmp_master_list_this[0]))
             tmp_master = ','.join(tmp_master_list_1)

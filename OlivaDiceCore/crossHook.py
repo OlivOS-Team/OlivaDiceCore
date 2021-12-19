@@ -26,8 +26,14 @@ listPrefix = [
     '/'
 ]
 
-def msgHook(event, funcType, dectData, message):
+def msgHook(event, funcType, sender, dectData, message):
     [host_id, group_id, user_id] = dectData
+    tmp_name = 'N/A'
+    tmp_id = -1
+    if 'name' in sender:
+        tmp_name = sender['name']
+    if 'id' in sender:
+        tmp_id = sender['id']
     return None
 
 #跨模块注入点

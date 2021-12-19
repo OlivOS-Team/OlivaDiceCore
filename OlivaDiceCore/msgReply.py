@@ -93,7 +93,7 @@ def unity_reply(plugin_event, Proc):
     OlivaDiceCore.userConfig.setMsgCount()
     dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
-    dictTValue['tName'] = plugin_event.data.sender['nickname']
+    dictTValue['tName'] = plugin_event.data.sender['name']
     dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]
     dictGValue = OlivaDiceCore.msgCustom.dictGValue
     dictTValue.update(dictGValue)
@@ -109,7 +109,11 @@ def unity_reply(plugin_event, Proc):
         tmp_hook_user_id = plugin_event.data.user_id
     OlivaDiceCore.crossHook.dictHookFunc['msgHook'](
         plugin_event,
-        'recv', 
+        'recv',
+        {
+            'name': dictTValue['tName'],
+            'id': tmp_hook_user_id
+        }, 
         [tmp_hook_host_id, tmp_hook_group_id, tmp_hook_user_id],
         str(plugin_event.data.message)
     )
@@ -273,8 +277,8 @@ def unity_reply(plugin_event, Proc):
                                     )
                                     OlivaDiceCore.userConfig.writeUserConfigByUserHash(
                                         userHash = OlivaDiceCore.userConfig.getUserHash(
-                                            userId = plugin_event.data.group_id,
-                                            userType = 'group',
+                                            userId = plugin_event.data.host_id,
+                                            userType = 'host',
                                             platform = plugin_event.platform['platform']
                                         )
                                     )
@@ -301,8 +305,8 @@ def unity_reply(plugin_event, Proc):
                                     )
                                     OlivaDiceCore.userConfig.writeUserConfigByUserHash(
                                         userHash = OlivaDiceCore.userConfig.getUserHash(
-                                            userId = plugin_event.data.group_id,
-                                            userType = 'group',
+                                            userId = plugin_event.data.host_id,
+                                            userType = 'host',
                                             platform = plugin_event.platform['platform']
                                         )
                                     )
@@ -1691,6 +1695,8 @@ def replyMsg(plugin_event, message):
     host_id = None
     group_id = None
     user_id = None
+    tmp_name = OlivaDiceCore.msgCustom.dictGValue['gBotName']
+    tmp_self_id = plugin_event.bot_info.id
     if 'host_id' in plugin_event.data.__dict__:
         host_id = plugin_event.data.host_id
     if 'group_id' in plugin_event.data.__dict__:
@@ -1699,7 +1705,11 @@ def replyMsg(plugin_event, message):
         user_id = plugin_event.data.user_id
     OlivaDiceCore.crossHook.dictHookFunc['msgHook'](
         plugin_event,
-        'reply', 
+        'reply',
+        {
+            'name': tmp_name,
+            'id': tmp_self_id
+        },
         [host_id, group_id, user_id],
         str(message)
     )
@@ -1708,13 +1718,19 @@ def replyMsg(plugin_event, message):
 def sendMsgByEvent(plugin_event, message, target_id, target_type, host_id = None):
     group_id = None
     user_id = None
+    tmp_name = OlivaDiceCore.msgCustom.dictGValue['gBotName']
+    tmp_self_id = plugin_event.bot_info.id
     if target_type == 'private':
         user_id = target_id
     elif target_type == 'group':
         group_id = target_id
     OlivaDiceCore.crossHook.dictHookFunc['msgHook'](
         plugin_event,
-        'send', 
+        'send_%s' % target_type,
+        {
+            'name': tmp_name,
+            'id': tmp_self_id
+        },
         [host_id, group_id, user_id],
         str(message)
     )
@@ -1724,6 +1740,8 @@ def replyMsgPrivateByEvent(plugin_event, message):
     host_id = None
     group_id = None
     user_id = None
+    tmp_name = OlivaDiceCore.msgCustom.dictGValue['gBotName']
+    tmp_self_id = plugin_event.bot_info.id
     if 'host_id' in plugin_event.data.__dict__:
         host_id = plugin_event.data.host_id
     if 'group_id' in plugin_event.data.__dict__:
@@ -1732,7 +1750,11 @@ def replyMsgPrivateByEvent(plugin_event, message):
         user_id = plugin_event.data.user_id
     OlivaDiceCore.crossHook.dictHookFunc['msgHook'](
         plugin_event,
-        'send_private', 
+        'reply_private',
+        {
+            'name': tmp_name,
+            'id': tmp_self_id
+        },
         [host_id, group_id, user_id],
         str(message)
     )
