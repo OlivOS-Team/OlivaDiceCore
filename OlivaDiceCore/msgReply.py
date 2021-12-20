@@ -66,6 +66,26 @@ def unity_init(plugin_event, Proc):
         ('Init', 'default')
     ])
 
+def unity_init_after(plugin_event, Proc):
+    for bot_info_this in Proc.Proc_data['bot_info_dict']:
+        bot_info = Proc.Proc_data['bot_info_dict'][bot_info_this]
+        if bot_info.platform['sdk'] in [
+            'telegram_poll',
+            'fanbook_poll',
+            'dodo_poll',
+            'qqGuild_link'
+        ]:
+            plugin_event_fake = OlivOS.API.Event(
+                OlivOS.contentAPI.fake_sdk_event(
+                    bot_info
+                ),
+                Proc.log
+            )
+            res_data = plugin_event_fake.get_login_info(bot_info)
+            if res_data != None:
+                if res_data['active']:
+                    OlivaDiceCore.msgCustom.dictStrCustomDict[bot_info_this]['strBotName'] = res_data['data']['name']
+
 def unity_save(plugin_event, Proc):
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
     dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
@@ -1695,7 +1715,7 @@ def replyMsg(plugin_event, message):
     host_id = None
     group_id = None
     user_id = None
-    tmp_name = OlivaDiceCore.msgCustom.dictGValue['gBotName']
+    tmp_name = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]['strBotName']
     tmp_self_id = plugin_event.bot_info.id
     if 'host_id' in plugin_event.data.__dict__:
         host_id = plugin_event.data.host_id
@@ -1718,7 +1738,7 @@ def replyMsg(plugin_event, message):
 def sendMsgByEvent(plugin_event, message, target_id, target_type, host_id = None):
     group_id = None
     user_id = None
-    tmp_name = OlivaDiceCore.msgCustom.dictGValue['gBotName']
+    tmp_name = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]['strBotName']
     tmp_self_id = plugin_event.bot_info.id
     if target_type == 'private':
         user_id = target_id
@@ -1740,7 +1760,7 @@ def replyMsgPrivateByEvent(plugin_event, message):
     host_id = None
     group_id = None
     user_id = None
-    tmp_name = OlivaDiceCore.msgCustom.dictGValue['gBotName']
+    tmp_name = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]['strBotName']
     tmp_self_id = plugin_event.bot_info.id
     if 'host_id' in plugin_event.data.__dict__:
         host_id = plugin_event.data.host_id

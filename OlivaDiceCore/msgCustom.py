@@ -22,6 +22,7 @@ dictStrCustomDict = {}
 dictStrCustomUpdateDict = {}
 
 dictStrCustom = {
+    'strBotName': 'Bot',
     'strSetStr': '回复词[{tStrName}]已更新',
     'strBecomeMaster': '口令正确，[{tName}]已成为Master',
     'strCantBecomeMaster': '无Master权限且口令错误，拒绝认证',

@@ -21,6 +21,9 @@ class Event(object):
     def init(plugin_event, Proc):
         OlivaDiceCore.msgReply.unity_init(plugin_event, Proc)
 
+    def init_after(plugin_event, Proc):
+        OlivaDiceCore.msgReply.unity_init_after(plugin_event, Proc)
+
     def private_message(plugin_event, Proc):
         OlivaDiceCore.msgReply.unity_reply(plugin_event, Proc)
 

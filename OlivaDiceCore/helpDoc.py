@@ -114,7 +114,8 @@ def getHelpRecommend(key_str, bot_hash):
     tmp_for_list = range(min(8, len(tmp_RecommendRank_list)))
     for tmp_for_list_this in tmp_for_list:
         if tmp_RecommendRank_list[tmp_for_list_this][0] < 1000:
-            res.append(tmp_RecommendRank_list[tmp_for_list_this][1])
+            if len(tmp_RecommendRank_list[tmp_for_list_this][1]) > 25:
+                res.append(tmp_RecommendRank_list[tmp_for_list_this][1])
     return res
 
 def getRecommendRank(word1_in, word2_in):
