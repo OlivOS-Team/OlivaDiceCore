@@ -19,7 +19,7 @@ import platform
 import os
 import uuid
 
-OlivaDiceCore_ver = '3.1.0'
+OlivaDiceCore_ver = '3.1.1'
 
 exce_path = os.getcwd()
 

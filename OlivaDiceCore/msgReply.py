@@ -914,7 +914,6 @@ def unity_reply(plugin_event, Proc):
                         dictTValue['tPcTempName'] = tmp_template_name
                         dictTValue['tPcTempRuleName'] = tmp_template_rule_name
                         tmp_reply_str = dictStrCustom['strPcTempRuleShow'].format(**dictTValue)
-                        replyMsg(plugin_event, tmp_reply_str)
                     else:
                         tmp_reply_str = dictStrCustom['strPcTempRuleError'].format(**dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
