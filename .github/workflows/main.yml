@@ -1,0 +1,31 @@
+name: CI
+on:
+  workflow_dispatch:
+  push:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      PACK_NAME: ""
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Pack
+        run: |
+          if [ ! $PACK_NAME ]; then
+              PACK_NAME=${GITHUB_REPOSITORY##*/} 
+          fi
+          echo "PACK_NAME=$PACK_NAME" >> $GITHUB_ENV
+          cd $PACK_NAME
+          zip -r ../$PACK_NAME.opk ./
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: Artifacts
+          path: ${{ env.PACK_NAME }}.opk
+      - name: Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v1
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          files: ${{ env.PACK_NAME }}.opk
