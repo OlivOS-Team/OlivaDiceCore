@@ -33,6 +33,9 @@ dictHelpDocTemp = {
 青果核心用户群：661366095''',
 
     '更新': '''[OlivaDiceCore]
+3.1.3: 人物卡成长
+3.1.2: 人物作成优化
+3.1.1: 模块化优化
 3.0.8: 对接官方频道
 3.0.7: 属性增量
 3.0.6: 心跳系统
@@ -55,6 +58,7 @@ dictHelpDocTemp = {
 .r 掷骰
 .ra 检定
 .sc 理智检定
+.en 成长检定
 .ti/li 临时/总结症状
 .name 随机名称''',
 
@@ -92,11 +96,16 @@ He dismissed the dismiss as worthless.
 .st del [人物卡名]    删除人物卡''',
 
     'r': '''通用掷骰指令
+表达式支持OneDice标准:
+https://github.com/OlivOS-Team/onedice
+基于先进的OneDice标准，你不再需要除[.r]指令以外的其他掷骰指令（哪怕规则书告诉你应该那么做）。
+例如：
+[.r20a10]等同于[.ww20a10]
+[.r10c7]等同于[.dx10a7]
+指令用法：
 .r [掷骰表达式] [理由]    掷骰子
 .rh [掷骰表达式] [理由]    掷暗骰
-.r[次数]#[掷骰表达式] [理由]    多轮掷骰
-表达式支持OneDice标准:
-https://github.com/OlivOS-Team/onedice''',
+.r[次数]#[掷骰表达式] [理由]    多轮掷骰''',
 
     'ra': '''检定指令
 .ra [技能名] [技能值]    技能检定
@@ -107,6 +116,11 @@ https://github.com/OlivOS-Team/onedice''',
 
     'sc': '''理智检定
 .sc [成功表达式]/[失败表达式] [san值]   理智检定''',
+
+    'en': '''成长检定
+.en [技能名] [技能值]   成长检定
+省略技能值时将从人物卡中读取技能值
+省略技能名等时，将依据检定历史进行自动成长检定''',
 
     '疯狂症状': '''疯狂症状：
 .ti 临时疯狂症状
@@ -160,6 +174,8 @@ https://github.com/OlivOS-Team/onedice''',
     'random': '''OlivaDice默认随机数生成器一概采用由random.org提供的真随机数，基于量子源于大气噪声，如对随机数结果有异议请向random.org发起质疑''',
 
 
+    'ww': '&r',
+    'dx': '&r',
     'rc': '&ra',
     'ti': '&疯狂症状',
     'li': '&疯狂症状',
@@ -168,6 +184,7 @@ https://github.com/OlivOS-Team/onedice''',
     '掷骰': '&r',
     '检定': '&ra',
     '理智检定': '&sc',
+    '成长检定': '&en',
     '命名': '&nn',
     '人物卡': '&st',
     '车卡coc': '&coc',

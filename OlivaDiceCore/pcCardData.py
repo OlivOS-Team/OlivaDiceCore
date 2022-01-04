@@ -579,6 +579,22 @@ dictPcCardTemplateDefault = {
                 }
             }
         },
+        'init': {
+            'STR': '4d6k3',
+            'DEX': '4d6k3',
+            'CON': '4d6k3',
+            'INT': '4d6k3',
+            'POW': '4d6k3',
+            'APP': '4d6k3'
+        },
+        'showName': {
+            'STR': '力量',
+            'DEX': '敏捷',
+            'CON': '体质',
+            'INT': '智力',
+            'POW': '感知',
+            'APP': '魅力',
+        },
         'checkRules': {
             'default': {
                 'checkList': [

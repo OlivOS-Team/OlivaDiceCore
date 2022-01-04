@@ -19,7 +19,7 @@ import platform
 import os
 import uuid
 
-OlivaDiceCore_ver = '3.1.1'
+OlivaDiceCore_ver = '3.1.3'
 
 exce_path = os.getcwd()
 
@@ -44,3 +44,5 @@ bot_content = {
 }
 
 dataDirRoot = './plugin/data/OlivaDice'
+
+defaultOlivaDicePulseUrl = 'https://api.dice.center/dicestatusup/'

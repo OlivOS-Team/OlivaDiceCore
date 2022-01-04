@@ -279,6 +279,22 @@ def unity_reply(plugin_event, Proc):
                         replyMsg(plugin_event, tmp_reply_str)
                         time.sleep(1)
                         plugin_event.set_group_add_request(tmp_flag, 'invite', True, '')
+                #关闭开发中功能
+                elif False and isMatchWordStart(tmp_reast_str, 'pulse'):
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'pulse')
+                    tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                    tmp_reast_str = tmp_reast_str.rstrip()
+                    tmp_reast_str_list = tmp_reast_str.split(' ')
+                    tmp_pulseUrl = None
+                    tmp_pulseToken = None
+                    if len(tmp_reast_str_list) == 1:
+                        tmp_pulseUrl = OlivaDiceCore.data.defaultOlivaDicePulseUrl
+                        tmp_pulseToken = tmp_reast_str_list[0]
+                    elif len(tmp_reast_str_list) >= 2:
+                        tmp_pulseUrl = tmp_reast_str_list[0]
+                        tmp_pulseToken = tmp_reast_str_list[1]
+                    if tmp_pulseUrl != None and tmp_pulseToken != None:
+                        pass
                 elif isMatchWordStart(tmp_reast_str, 'host'):
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'host')
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -1097,15 +1113,20 @@ def unity_reply(plugin_event, Proc):
                 dictTValue['tSkillValue'] = str(tmp_skill_value_find)
                 tmp_reply_str = dictStrCustom['strPcGetSingleSkillValue'].format(**dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
-        elif isMatchWordStart(tmp_reast_str, 'coc'):
+        elif isMatchWordStart(tmp_reast_str, 'coc') or isMatchWordStart(tmp_reast_str, 'dnd'):
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
             tmp_reply_str_1 = ''
-            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'coc')
+            tmp_pcCardTemplateName = 'default'
+            if isMatchWordStart(tmp_reast_str, 'coc'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'coc')
+                tmp_pcCardTemplateName = 'COC7'
+            elif isMatchWordStart(tmp_reast_str, 'dnd'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'dnd')
+                tmp_pcCardTemplateName = 'DND5E'
             tmp_roll_count = 1
             tmp_roll_count_str = None
-            tmp_pcCardTemplateName = 'COC7'
             tmp_pcCardTemplate = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_pcCardTemplateName)
             tmp_res_list = []
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -1141,7 +1162,8 @@ def unity_reply(plugin_event, Proc):
                         tmp_total_count_2 += tmp_res_list_this[tmp_res_list_this_this]
                         if tmp_res_list_this_this != 'LUC':
                             tmp_total_count_1 += tmp_res_list_this[tmp_res_list_this_this]
-                    tmp_reply_str_1 += '共计:%d/%d %.2f%%' % (tmp_total_count_1, tmp_total_count_2, 100 * tmp_total_count_1 / tmp_total_count_2)
+                    if tmp_pcCardTemplateName == 'COC7':
+                        tmp_reply_str_1 += '共计:%d/%d %.2f%%' % (tmp_total_count_1, tmp_total_count_2, 100 * tmp_total_count_1 / tmp_total_count_2)
                 dictTValue['tPcInitResult'] = tmp_reply_str_1
                 tmp_reply_str = dictStrCustom['strPcInit'].format(**dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
@@ -1299,6 +1321,7 @@ def unity_reply(plugin_event, Proc):
             tmp_reply_str = ''
             tmp_reply_str_show = ''
             roll_times_count = 1
+            flag_check_success = False
             if isMatchWordStart(tmp_reast_str, 'ra'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'ra')
             elif isMatchWordStart(tmp_reast_str, 'rc'):
@@ -1429,12 +1452,16 @@ def unity_reply(plugin_event, Proc):
                         )
                         if tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS:
                             dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckSucceed']
+                            flag_check_success = True
                         elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_HARD_SUCCESS:
                             dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckHardSucceed']
+                            flag_check_success = True
                         elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_EXTREME_HARD_SUCCESS:
                             dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckExtremeHardSucceed']
+                            flag_check_success = True
                         elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_SUCCESS:
                             dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckGreatSucceed']
+                            flag_check_success = True
                         elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FAIL:
                             dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFailed']
                         elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_FAIL:
@@ -1490,12 +1517,16 @@ def unity_reply(plugin_event, Proc):
                             )
                             if tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS:
                                 tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckSucceed']
+                                flag_check_success = True
                             elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_HARD_SUCCESS:
                                 tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckHardSucceed']
+                                flag_check_success = True
                             elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_EXTREME_HARD_SUCCESS:
                                 tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckExtremeHardSucceed']
+                                flag_check_success = True
                             elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_SUCCESS:
                                 tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckGreatSucceed']
+                                flag_check_success = True
                             elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FAIL:
                                 tmp_tSkillCheckReasult += dictStrCustom['strPcSkillCheckFailed']
                             elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_FAIL:
@@ -1532,6 +1563,28 @@ def unity_reply(plugin_event, Proc):
                             break
                     dictTValue['tRollResult'] = ''
                     dictTValue['tSkillCheckReasult'] = tmp_tSkillCheckReasult
+                if flag_check_success:
+                    if tmp_pc_name_1 != None and tmp_skill_name != None:
+                        tmp_enhanceList = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                            OlivaDiceCore.pcCard.getPcHash(
+                                tmp_pc_id,
+                                tmp_pc_platform
+                            ),
+                            tmp_pc_name_1,
+                            'enhanceList',
+                            []
+                        )
+                        if tmp_skill_name not in tmp_enhanceList:
+                            tmp_enhanceList.append(tmp_skill_name)
+                        OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
+                            OlivaDiceCore.pcCard.getPcHash(
+                                tmp_pc_id,
+                                tmp_pc_platform
+                            ),
+                            tmp_pc_name_1,
+                            'enhanceList',
+                            tmp_enhanceList
+                        )
                 if flag_need_reply:
                     if tmp_skill_name != None:
                         dictTValue['tSkillName'] = tmp_skill_name
@@ -1551,7 +1604,183 @@ def unity_reply(plugin_event, Proc):
                         replyMsgPrivateByEvent(plugin_event, tmp_reply_str)
                     else:
                         replyMsg(plugin_event, tmp_reply_str)
-        elif isMatchWordStart(tmp_reast_str, 'rrange'):
+        elif isMatchWordStart(tmp_reast_str, 'en'):
+            tmp_pc_id = plugin_event.data.user_id
+            tmp_pc_platform = plugin_event.platform['platform']
+            tmp_reply_str = ''
+            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'en')
+            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            tmp_reast_str = tmp_reast_str.rstrip()
+            tmp_skill_name = None
+            tmp_skill_value = None
+            tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
+                OlivaDiceCore.pcCard.getPcHash(
+                    tmp_pc_id,
+                    tmp_pc_platform
+                )
+            )
+            if tmp_pc_name_1 != None:
+                dictTValue['tName'] = tmp_pc_name_1
+            if len(tmp_reast_str) > 0:
+                [tmp_skill_name, tmp_reast_str] = getToNumberPara(tmp_reast_str)
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                if len(tmp_reast_str) > 0:
+                    [tmp_skill_value, tmp_reast_str] = getNumberPara(tmp_reast_str)
+                    tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            if tmp_skill_name == '':
+                tmp_skill_name = None
+            if tmp_skill_value == '':
+                tmp_skill_value = None
+            if tmp_skill_name != None:
+                tmp_skill_name = tmp_skill_name.upper()
+            if tmp_skill_value != None:
+                tmp_skill_value = int(tmp_skill_value)
+            if tmp_skill_name != None:
+                if tmp_skill_value == None:
+                    tmp_skill_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
+                        OlivaDiceCore.pcCard.getPcHash(
+                            tmp_pc_id,
+                            tmp_pc_platform
+                        ),
+                        tmp_skill_name
+                    )
+                if tmp_skill_value != None:
+                    rd_para_1 = OlivaDiceCore.onedice.RD('1D100')
+                    rd_para_1.roll()
+                    if rd_para_1.resError == None:
+                        dictTValue['tSkillName'] = tmp_skill_name
+                        dictTValue['tSkillValue'] = tmp_skill_value
+                        dictTValue['tRollResult'] = '1D100=%s' % str(rd_para_1.resInt)
+                        if rd_para_1.resInt > tmp_skill_value or rd_para_1.resInt >= 96:
+                            rd_para_str_2 = '%s+1D10' % str(tmp_skill_value)
+                            rd_para_2 = OlivaDiceCore.onedice.RD(rd_para_str_2)
+                            rd_para_2.roll()
+                            if rd_para_2.resError == None:
+                                OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
+                                    OlivaDiceCore.pcCard.getPcHash(
+                                        tmp_pc_id,
+                                        tmp_pc_platform
+                                    ),
+                                    tmp_skill_name,
+                                    rd_para_2.resInt,
+                                    dictTValue['tName']
+                                )
+                                dictTValue['tRollSubResult'] = '%s=%s=%s' % (rd_para_str_2, rd_para_2.resDetail, (rd_para_2.resInt))
+                                dictTValue['tSkillCheckReasult'] = '%s%s' % (
+                                    dictStrCustom['strPcSkillCheckSucceed'].format(**dictTValue),
+                                    dictStrCustom['strPcSkillEnhanceContent'].format(**dictTValue)
+                                )
+                                tmp_reply_str = dictStrCustom['strPcSkillEnhanceCheck'].format(**dictTValue)
+                                replyMsg(plugin_event, tmp_reply_str)
+                        else:
+                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFailed'].format(**dictTValue)
+                            tmp_reply_str = dictStrCustom['strPcSkillEnhanceCheck'].format(**dictTValue)
+                            replyMsg(plugin_event, tmp_reply_str)
+                        if tmp_pc_name_1 != None:
+                            tmp_enhanceList_new = []
+                            tmp_enhanceList = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                                OlivaDiceCore.pcCard.getPcHash(
+                                    tmp_pc_id,
+                                    tmp_pc_platform
+                                ),
+                                tmp_pc_name_1,
+                                'enhanceList',
+                                []
+                            )
+                            for tmp_enhanceList_this in tmp_enhanceList:
+                                if tmp_enhanceList_this != tmp_skill_name:
+                                    tmp_enhanceList_new.append(tmp_enhanceList_this)
+                            OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
+                                OlivaDiceCore.pcCard.getPcHash(
+                                    tmp_pc_id,
+                                    tmp_pc_platform
+                                ),
+                                tmp_pc_name_1,
+                                'enhanceList',
+                                tmp_enhanceList_new
+                            )
+                        return
+            else:
+                if tmp_pc_name_1 != None:
+                    tmp_enhance_count = 0
+                    tmp_enhance_succeed_count = 0
+                    tmp_enhance_succeed_list = []
+                    tmp_enhanceList = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                        OlivaDiceCore.pcCard.getPcHash(
+                            tmp_pc_id,
+                            tmp_pc_platform
+                        ),
+                        tmp_pc_name_1,
+                        'enhanceList',
+                        []
+                    )
+                    for tmp_enhanceList_this in tmp_enhanceList:
+                        tmp_skill_name = tmp_enhanceList_this
+                        if tmp_skill_name in [
+                            'SAN'
+                        ]:
+                            continue
+                        tmp_skill_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
+                            OlivaDiceCore.pcCard.getPcHash(
+                                tmp_pc_id,
+                                tmp_pc_platform
+                            ),
+                            tmp_skill_name
+                        )
+                        rd_para_1 = OlivaDiceCore.onedice.RD('1D100')
+                        rd_para_1.roll()
+                        if rd_para_1.resInt > tmp_skill_value or rd_para_1.resInt >= 96:
+                            rd_para_str_2 = '%s+1D10' % str(tmp_skill_value)
+                            rd_para_2 = OlivaDiceCore.onedice.RD(rd_para_str_2)
+                            rd_para_2.roll()
+                            if rd_para_2.resError == None:
+                                OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
+                                    OlivaDiceCore.pcCard.getPcHash(
+                                        tmp_pc_id,
+                                        tmp_pc_platform
+                                    ),
+                                    tmp_skill_name,
+                                    rd_para_2.resInt,
+                                    tmp_pc_name_1
+                                )
+                            tmp_enhance_succeed_count += 1
+                            tmp_enhance_succeed_list.append([
+                                tmp_skill_name,
+                                tmp_skill_value,
+                                rd_para_2.resInt
+                            ])
+                        tmp_enhance_count += 1
+                    OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
+                        OlivaDiceCore.pcCard.getPcHash(
+                            tmp_pc_id,
+                            tmp_pc_platform
+                        ),
+                        tmp_pc_name_1,
+                        'enhanceList',
+                        []
+                    )
+                    dictTValue['tSkillEnhanceCount'] = str(tmp_enhance_count)
+                    dictTValue['tSkillEnhanceSucceedCount'] = str(tmp_enhance_succeed_count)
+                    tmp_enhance_succeed_list_2 = []
+                    for tmp_enhance_succeed_list_this in tmp_enhance_succeed_list:
+                        tmp_enhance_succeed_list_2.append('%s:[%s+%s]' % (
+                                tmp_enhance_succeed_list_this[0],
+                                str(tmp_enhance_succeed_list_this[1]),
+                                str(tmp_enhance_succeed_list_this[2] - tmp_enhance_succeed_list_this[1])
+                            )
+                        )
+                    if len(tmp_enhance_succeed_list_2) > 0:
+                        dictTValue['tSkillEnhanceSucceedList'] = '\n%s' % ' '.join(tmp_enhance_succeed_list_2)
+                    else:
+                        dictTValue['tSkillEnhanceSucceedList'] = ''
+                    tmp_reply_str = dictStrCustom['strPcSkillEnhanceAll'].format(**dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
+                else:
+                    tmp_reply_str = dictStrCustom['strPcSkillEnhanceError'].format(**dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+        #关闭该调试性质指令
+        elif False and isMatchWordStart(tmp_reast_str, 'rrange'):
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
@@ -1596,6 +1825,13 @@ def unity_reply(plugin_event, Proc):
                 dictTValue['tRollResultInt'] = str(rd_para.resError)
             tmp_reply_str = dictStrCustom['strRollRange'].format(**dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
+        
+        elif isMatchWordStart(tmp_reast_str, 'ww'):
+            replyMsgLazyHelpByEvent(plugin_event, 'r')
+            return
+        elif isMatchWordStart(tmp_reast_str, 'dx'):
+            replyMsgLazyHelpByEvent(plugin_event, 'r')
+            return
         elif isMatchWordStart(tmp_reast_str, 'r'):
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']

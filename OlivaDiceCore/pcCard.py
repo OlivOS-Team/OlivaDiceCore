@@ -334,6 +334,40 @@ def pcCardDataSetTemplateKey(pcHash, pcCardName, templateName = 'default', ruleN
     else:
         return False
 
+#更通用的接口
+
+def pcCardDataGetTemplateDataByKey(pcHash, pcCardName, dataKey, resDefault = None):
+    global dictPcCardTemplate
+    selection_key = dataKey
+    tmp_pc_template_name_key = resDefault
+    if pcHash not in dictPcCardTemplate['unity']:
+        return tmp_pc_template_name_key
+    if pcCardName not in dictPcCardTemplate['unity'][pcHash]:
+        return tmp_pc_template_name_key
+    if selection_key not in dictPcCardTemplate['unity'][pcHash][pcCardName]:
+        return tmp_pc_template_name_key
+    else:
+        tmp_pc_template_name_key = dictPcCardTemplate['unity'][pcHash][pcCardName][selection_key]
+    return tmp_pc_template_name_key
+
+def pcCardDataSetTemplateDataByKey(pcHash, pcCardName, dataKey, dataContent):
+    selection_key = dataKey
+    tmp_pc_card_name_key = pcCardName
+    tmp_card_dict = {}
+    if pcHash in dictPcCardData['unity']:
+        tmp_card_dict = dictPcCardData['unity'][pcHash]
+    if tmp_pc_card_name_key in tmp_card_dict:
+        if pcHash not in dictPcCardTemplate['unity']:
+            dictPcCardTemplate['unity'][pcHash] = {}
+        if tmp_pc_card_name_key not in dictPcCardTemplate['unity'][pcHash]:
+            dictPcCardTemplate['unity'][pcHash][tmp_pc_card_name_key] = {}
+        dictPcCardTemplate['unity'][pcHash][tmp_pc_card_name_key][selection_key] = dataContent
+        dataPcCardSave('unity', pcHash)
+        return True
+    else:
+        return False
+
+
 def pcCardDataGetUserAll(pcHash):
     selection_key = 'selection'
     tmp_card_dict = {}
