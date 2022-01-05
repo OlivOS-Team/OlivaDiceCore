@@ -27,12 +27,14 @@ dictHelpDocTemp = {
 输入[.bot on]/[.bot off]可以开关骰子功能
 (如群内有多个骰子,请在@后追加指令)
 [.help指令] 查看指令列表
+[.help管理] 查看管理指令
 [.help链接] 查看源码文档
 [.help更新] 查看更新日志
 有问题请联系(请优先加群)
 青果核心用户群：661366095''',
 
     '更新': '''[OlivaDiceCore]
+3.1.4: 骰主指令增强
 3.1.3: 人物卡成长
 3.1.2: 人物作成优化
 3.1.1: 模块化优化
@@ -61,6 +63,16 @@ dictHelpDocTemp = {
 .en 成长检定
 .ti/li 临时/总结症状
 .name 随机名称''',
+
+    '管理': '''管理指令
+在插件启动时将会显示有关骰子认主指令的具体提示，每完成一次认主，口令将会刷新
+.master [验证口令]  骰子认主
+.master master (del) [ID]  添加(删除)骰主
+.master notice (del) [群号]  添加(删除)通知群
+.master pulse [TOKEN]  添加心跳TOKEN
+.master pulse del [URL/TOKEN]  删除心跳配置
+.master pulse [URL] [TOKEN]  添加第三方心跳TOKEN
+.master [配置项] [配置值]  修改配置项''',
 
     '链接': '''查看源码: https://github.com/OlivOS-Team/OlivaDiceCore
 OneDice标准: https://github.com/OlivOS-Team/onedice

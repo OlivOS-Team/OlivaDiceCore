@@ -279,22 +279,209 @@ def unity_reply(plugin_event, Proc):
                         replyMsg(plugin_event, tmp_reply_str)
                         time.sleep(1)
                         plugin_event.set_group_add_request(tmp_flag, 'invite', True, '')
-                #关闭开发中功能
-                elif False and isMatchWordStart(tmp_reast_str, 'pulse'):
+                elif isMatchWordStart(tmp_reast_str, 'pulse'):
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'pulse')
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
                     tmp_reast_str = tmp_reast_str.rstrip()
                     tmp_reast_str_list = tmp_reast_str.split(' ')
+                    tmp_reast_str_list_2 = []
+                    tmp_editKey = 'pulseUrlList'
                     tmp_pulseUrl = None
                     tmp_pulseToken = None
+                    flag_action = None
+                    for tmp_reast_str_list_this in tmp_reast_str_list:
+                        if len(tmp_reast_str_list_this) != 0:
+                            tmp_reast_str_list_2.append(tmp_reast_str_list_this)
+                    tmp_reast_str_list = tmp_reast_str_list_2.copy()
                     if len(tmp_reast_str_list) == 1:
                         tmp_pulseUrl = OlivaDiceCore.data.defaultOlivaDicePulseUrl
                         tmp_pulseToken = tmp_reast_str_list[0]
+                        flag_action = 'add'
                     elif len(tmp_reast_str_list) >= 2:
                         tmp_pulseUrl = tmp_reast_str_list[0]
                         tmp_pulseToken = tmp_reast_str_list[1]
+                        if tmp_pulseUrl == 'del':
+                            flag_action = 'del'
+                        else:
+                            flag_action = 'add'
                     if tmp_pulseUrl != None and tmp_pulseToken != None:
-                        pass
+                        tmp_pulseUrlList_new = []
+                        tmp_pulseUrlList = OlivaDiceCore.console.getConsoleSwitchByHash(
+                            tmp_editKey,
+                            plugin_event.bot_info.hash
+                        )
+                        flag_done = False
+                        if flag_action == 'add':
+                            for tmp_pulseUrlList_this in tmp_pulseUrlList:
+                                if len(tmp_pulseUrlList_this) == 2:
+                                    if tmp_pulseUrlList_this[0] == tmp_pulseUrl:
+                                        tmp_pulseUrlList_new.append(
+                                            [
+                                                tmp_pulseUrl,
+                                                tmp_pulseToken
+                                            ]
+                                        )
+                                        flag_done = True
+                                    else:
+                                        tmp_pulseUrlList_new.append(tmp_pulseUrlList_this)
+                            if not flag_done:
+                                tmp_pulseUrlList_new.append(
+                                    [
+                                        tmp_pulseUrl,
+                                        tmp_pulseToken
+                                    ]
+                                )
+                                flag_done = True
+                        elif flag_action == 'del':
+                            for tmp_pulseUrlList_this in tmp_pulseUrlList:
+                                if len(tmp_pulseUrlList_this) == 2:
+                                    if tmp_pulseToken not in tmp_pulseUrlList_this:
+                                        tmp_pulseUrlList_new.append(tmp_pulseUrlList_this)
+                            flag_done = True
+                        else:
+                            tmp_reply_str = dictStrCustom['strMasterConsoleSetInvalid'].format(**dictTValue)
+                            replyMsg(plugin_event, tmp_reply_str)
+                            return
+                        tmp_pulseUrlList = OlivaDiceCore.console.setConsoleSwitchByHash(
+                            tmp_editKey,
+                            tmp_pulseUrlList_new,
+                            plugin_event.bot_info.hash
+                        )
+                        OlivaDiceCore.console.saveConsoleSwitch()
+                        dictTValue['tConsoleKey'] = tmp_editKey
+                        tmp_reply_str = dictStrCustom['strMasterConsoleAppend'].format(**dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
+                    return
+                elif isMatchWordStart(tmp_reast_str, 'notice') or isMatchWordStart(tmp_reast_str, 'master'):
+                    tmp_editKey = None
+                    if isMatchWordStart(tmp_reast_str, 'notice'):
+                        tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'notice')
+                        tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                        tmp_editKey = 'noticeGroupList'
+                    elif isMatchWordStart(tmp_reast_str, 'master'):
+                        tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'master')
+                        tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                        tmp_editKey = 'masterList'
+                    else:
+                        return
+                    tmp_reast_str = tmp_reast_str.rstrip()
+                    tmp_reast_str_list = tmp_reast_str.split(' ')
+                    tmp_reast_str_list_2 = []
+                    tmp_listValue = None
+                    flag_action = None
+                    for tmp_reast_str_list_this in tmp_reast_str_list:
+                        if len(tmp_reast_str_list_this) != 0:
+                            tmp_reast_str_list_2.append(tmp_reast_str_list_this)
+                    tmp_reast_str_list = tmp_reast_str_list_2.copy()
+                    if len(tmp_reast_str_list) == 1:
+                        if tmp_reast_str_list[0] == 'show':
+                            flag_action = 'show'
+                        else:
+                            tmp_listValue = tmp_reast_str_list[-1]
+                            flag_action = 'add'
+                    elif len(tmp_reast_str_list) >= 2:
+                        tmp_listValue = tmp_reast_str_list[-1]
+                        if tmp_reast_str_list[0] == 'add':
+                            flag_action = 'add'
+                        elif tmp_reast_str_list[0] == 'del':
+                            flag_action = 'del'
+                        elif tmp_reast_str_list[0] == 'show':
+                            flag_action = 'show'
+                    if tmp_listValue != None:
+                        if type(tmp_listValue) == str:
+                            if tmp_listValue.isdigit() and tmp_editKey in [
+                                'noticeGroupList',
+                                'masterList'
+                            ] and plugin_event.platform['platform'] not in [
+                                'qqGuild'
+                            ]:
+                                tmp_listValue = int(tmp_listValue)
+                            elif tmp_listValue == 'this' and flag_is_from_group and tmp_editKey in [
+                                'noticeGroupList'
+                            ]:
+                                if 'host_id' in plugin_event.data.__dict__:
+                                    if plugin_event.data.host_id != None:
+                                        tmp_reply_str = dictStrCustom['strMasterConsoleSetInvalid'].format(**dictTValue)
+                                        replyMsg(plugin_event, tmp_reply_str)
+                                        return
+                                tmp_listValue = plugin_event.data.group_id
+                            elif tmp_listValue == 'this' and tmp_editKey in [
+                                'masterList'
+                            ]:
+                                tmp_listValue = plugin_event.data.user_id
+                            elif isMatchWordStart(tmp_listValue, '[CQ:at,qq=') and tmp_listValue[-1] == ']' and tmp_editKey in [
+                                'masterList'
+                            ]:
+                                tmp_listValue_new = tmp_listValue[len('[CQ:at,qq='):-len(']')]
+                                if plugin_event.platform['platform'] not in [
+                                    'qqGuild'
+                                ]:
+                                    if tmp_listValue_new.isdigit():
+                                        tmp_listValue = int(tmp_listValue_new)
+                                    else:
+                                        tmp_reply_str = dictStrCustom['strMasterConsoleSetInvalid'].format(**dictTValue)
+                                        replyMsg(plugin_event, tmp_reply_str)
+                                        return
+                                else:
+                                    tmp_listValue = tmp_listValue_new
+                            else:
+                                tmp_reply_str = dictStrCustom['strMasterConsoleSetInvalid'].format(**dictTValue)
+                                replyMsg(plugin_event, tmp_reply_str)
+                                return
+                    if tmp_listValue != None and tmp_editKey != None:
+                        tmp_dataList_new = []
+                        tmp_dataList = OlivaDiceCore.console.getConsoleSwitchByHash(
+                            tmp_editKey,
+                            plugin_event.bot_info.hash
+                        )
+                        flag_done = False
+                        if flag_action == 'add':
+                            for tmp_dataList_this in tmp_dataList:
+                                if len(tmp_dataList_this) == 2:
+                                    if tmp_dataList_this[0] == tmp_listValue:
+                                        flag_done = True
+                                    tmp_dataList_new.append(tmp_dataList_this)
+                            if not flag_done:
+                                tmp_dataList_new.append(
+                                    [
+                                        tmp_listValue,
+                                        plugin_event.platform['platform']
+                                    ]
+                                )
+                                flag_done = True
+                        elif flag_action == 'del':
+                            for tmp_dataList_this in tmp_dataList:
+                                if len(tmp_dataList_this) == 2:
+                                    if tmp_dataList_this[0] != tmp_listValue:
+                                        tmp_dataList_new.append(tmp_dataList_this)
+                            flag_done = True
+                        else:
+                            tmp_reply_str = dictStrCustom['strMasterConsoleSetInvalid'].format(**dictTValue)
+                            replyMsg(plugin_event, tmp_reply_str)
+                            return
+                        tmp_dataList = OlivaDiceCore.console.setConsoleSwitchByHash(
+                            tmp_editKey,
+                            tmp_dataList_new,
+                            plugin_event.bot_info.hash
+                        )
+                        OlivaDiceCore.console.saveConsoleSwitch()
+                        dictTValue['tConsoleKey'] = tmp_editKey
+                        tmp_reply_str = dictStrCustom['strMasterConsoleAppend'].format(**dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
+                    elif flag_action == 'show' and tmp_listValue == None and tmp_editKey != None:
+                        tmp_dataList_new = []
+                        tmp_dataList = OlivaDiceCore.console.getConsoleSwitchByHash(
+                            tmp_editKey,
+                            plugin_event.bot_info.hash
+                        )
+                        for tmp_dataList_this in tmp_dataList:
+                            if len(tmp_dataList_this) == 2:
+                                tmp_dataList_new.append(str(tmp_dataList_this[0]))
+                        dictTValue['tConsoleKey'] = tmp_editKey
+                        dictTValue['tConsoleValue'] = '\n'.join(tmp_dataList_new)
+                        tmp_reply_str = dictStrCustom['strMasterConsoleShowList'].format(**dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
+                    return
                 elif isMatchWordStart(tmp_reast_str, 'host'):
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'host')
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -623,7 +810,19 @@ def unity_reply(plugin_event, Proc):
             if tmp_reast_str == '':
                 tmp_reast_str = None
             if tmp_reast_str != None:
-                tmp_reply_str = OlivaDiceCore.helpDoc.getHelp(tmp_reast_str, plugin_event.bot_info.hash)
+                if tmp_reast_str == 'master':
+                    tmp_dataList_new = []
+                    tmp_dataList = OlivaDiceCore.console.getConsoleSwitchByHash(
+                        'masterList',
+                        plugin_event.bot_info.hash
+                    )
+                    for tmp_dataList_this in tmp_dataList:
+                        if len(tmp_dataList_this) == 2:
+                            tmp_dataList_new.append(str(tmp_dataList_this[0]))
+                    dictTValue['tHelpDocResult'] = ', '.join(tmp_dataList_new)
+                    tmp_reply_str = dictStrCustom['strHelpDoc'].format(**dictTValue)
+                else:
+                    tmp_reply_str = OlivaDiceCore.helpDoc.getHelp(tmp_reast_str, plugin_event.bot_info.hash)
             else:
                 tmp_reply_str = OlivaDiceCore.helpDoc.getHelp('default', plugin_event.bot_info.hash)
             if tmp_reply_str != None:
