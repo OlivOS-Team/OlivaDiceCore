@@ -185,7 +185,11 @@ def dataUserConfigTotalCount():
 
 def getUserHash(userId, userType, platform, subId = None):
     hash_tmp = hashlib.new('md5')
-    hash_tmp.update(str(userId).encode(encoding='UTF-8'))
+    if subId != None:
+        tmp_strID = '%s|%s' % (str(subId), str(userId))
+        hash_tmp.update(tmp_strID.encode(encoding='UTF-8'))
+    else:
+        hash_tmp.update(str(userId).encode(encoding='UTF-8'))
     hash_tmp.update(str(userType).encode(encoding='UTF-8'))
     hash_tmp.update(str(platform).encode(encoding='UTF-8'))
     if subId != None:

@@ -33,7 +33,16 @@ dictHelpDocTemp = {
 有问题请联系(请优先加群)
 青果核心用户群：661366095''',
 
+    'OlivaDiceCore': '''[OlivaDiceCore]
+OlivaDice核心模块
+本模块为青果跑团掷骰机器人(OlivaDice)基础核心模块，集成跑团相关的核心功能（包括OneDice标准库、人物卡引擎、配置符号表、用户记录引擎等），并向其他子模块提供挂载点。
+核心开发者: lunzhiPenxil仑质
+[.help OlivaDiceCore更新] 查看本模块更新日志
+注: 本模块为必需模块。''',
+
     '更新': '''[OlivaDiceCore]
+3.1.6: 掷骰体验优化
+3.1.5: 用户记录优化
 3.1.4: 骰主指令增强
 3.1.3: 人物卡成长
 3.1.2: 人物作成优化
@@ -186,6 +195,7 @@ https://github.com/OlivOS-Team/onedice
     'random': '''OlivaDice默认随机数生成器一概采用由random.org提供的真随机数，基于量子源于大气噪声，如对随机数结果有异议请向random.org发起质疑''',
 
 
+    'OlivaDiceCore更新': '&更新',
     'ww': '&r',
     'dx': '&r',
     'rc': '&ra',

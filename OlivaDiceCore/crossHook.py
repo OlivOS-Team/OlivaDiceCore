@@ -17,7 +17,7 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 import OlivaDiceCore
 
 listModel = [
-    ['OlivaDiceCore', OlivaDiceCore.data.OlivaDiceCore_ver]
+    ['OlivaDiceCore', OlivaDiceCore.data.OlivaDiceCore_ver_short]
 ]
 
 listPrefix = [

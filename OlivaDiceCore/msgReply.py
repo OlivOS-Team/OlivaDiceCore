@@ -149,6 +149,7 @@ def unity_reply(plugin_event, Proc):
     flag_is_from_host = False
     flag_is_from_group = False
     flag_is_from_group_admin = False
+    flag_is_from_group_sub_admin = False
     flag_is_from_group_have_admin = False
     flag_is_from_master = False
     if isMatchWordStart(tmp_reast_str, '[CQ:reply,id='):
@@ -172,6 +173,7 @@ def unity_reply(plugin_event, Proc):
         OlivaDiceCore.crossHook.dictHookList['prefix']
     )
     if flag_is_command:
+        tmp_hagID = None
         tmp_list_hit = []
         flag_is_from_master = OlivaDiceCore.ordinaryInviteManager.isInMasterList(
             plugin_event.bot_info.hash,
@@ -185,7 +187,7 @@ def unity_reply(plugin_event, Proc):
             if plugin_event.data.host_id != None:
                 tmp_list_hit = [
                     [plugin_event.data.host_id, 'host', plugin_event.platform['platform']],
-                    [plugin_event.data.group_id, 'group', plugin_event.platform['platform']],
+                    ['%s|%s' % (str(plugin_event.data.host_id), str(plugin_event.data.group_id)), 'group', plugin_event.platform['platform']],
                     [plugin_event.data.user_id,  'user',  plugin_event.platform['platform']]
                 ]
                 flag_is_from_host = True
@@ -205,6 +207,13 @@ def unity_reply(plugin_event, Proc):
                 flag_is_from_group_have_admin = True
                 if plugin_event.data.sender['role'] in ['owner', 'admin']:
                     flag_is_from_group_admin = True
+                elif plugin_event.data.sender['role'] in ['sub_admin']:
+                    flag_is_from_group_admin = True
+                    flag_is_from_group_sub_admin = True
+        if flag_is_from_host and flag_is_from_group:
+            tmp_hagID = '%s|%s' % (str(plugin_event.data.host_id), str(plugin_event.data.group_id))
+        elif flag_is_from_group:
+            tmp_hagID = str(plugin_event.data.group_id)
         OlivaDiceCore.userConfig.releaseUnityMsgCount(tmp_list_hit, plugin_event.bot_info.hash)
         flag_hostEnable = True
         if flag_is_from_host:
@@ -229,7 +238,7 @@ def unity_reply(plugin_event, Proc):
             if flag_is_from_host:
                 if flag_hostEnable:
                     flag_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKey(
-                        userId = plugin_event.data.group_id,
+                        userId = tmp_hagID,
                         userType = 'group',
                         platform = plugin_event.platform['platform'],
                         userConfigKey = 'groupEnable',
@@ -237,7 +246,7 @@ def unity_reply(plugin_event, Proc):
                     )
                 else:
                     flag_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKey(
-                        userId = plugin_event.data.group_id,
+                        userId = tmp_hagID,
                         userType = 'group',
                         platform = plugin_event.platform['platform'],
                         userConfigKey = 'groupWithHostEnable',
@@ -245,7 +254,7 @@ def unity_reply(plugin_event, Proc):
                     )
             else:
                 flag_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKey(
-                    userId = plugin_event.data.group_id,
+                    userId = tmp_hagID,
                     userType = 'group',
                     platform = plugin_event.platform['platform'],
                     userConfigKey = 'groupEnable',
@@ -611,6 +620,8 @@ def unity_reply(plugin_event, Proc):
                         ('reply', 'default')
                     ])
                 else:
+                    if (not flag_hostLocalEnable or not flag_groupEnable) and not flag_force_reply:
+                        return
                     tmp_reply_str = dictStrCustom['strCantBecomeMaster'].format(**dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
@@ -627,7 +638,7 @@ def unity_reply(plugin_event, Proc):
                                         userConfigKey = 'groupEnable',
                                         userConfigValue = True,
                                         botHash = plugin_event.bot_info.hash,
-                                        userId = plugin_event.data.group_id,
+                                        userId = tmp_hagID,
                                         userType = 'group',
                                         platform = plugin_event.platform['platform']
                                     )
@@ -637,7 +648,7 @@ def unity_reply(plugin_event, Proc):
                                             userConfigKey = 'groupWithHostEnable',
                                             userConfigValue = True,
                                             botHash = plugin_event.bot_info.hash,
-                                            userId = plugin_event.data.group_id,
+                                            userId = tmp_hagID,
                                             userType = 'group',
                                             platform = plugin_event.platform['platform']
                                         )
@@ -650,13 +661,13 @@ def unity_reply(plugin_event, Proc):
                                     userConfigKey = 'groupEnable',
                                     userConfigValue = True,
                                     botHash = plugin_event.bot_info.hash,
-                                    userId = plugin_event.data.group_id,
+                                    userId = tmp_hagID,
                                     userType = 'group',
                                     platform = plugin_event.platform['platform']
                                 )
                             OlivaDiceCore.userConfig.writeUserConfigByUserHash(
                                 userHash = OlivaDiceCore.userConfig.getUserHash(
-                                    userId = plugin_event.data.group_id,
+                                    userId = tmp_hagID,
                                     userType = 'group',
                                     platform = plugin_event.platform['platform']
                                 )
@@ -676,7 +687,7 @@ def unity_reply(plugin_event, Proc):
                                         userConfigKey = 'groupEnable',
                                         userConfigValue = False,
                                         botHash = plugin_event.bot_info.hash,
-                                        userId = plugin_event.data.group_id,
+                                        userId = tmp_hagID,
                                         userType = 'group',
                                         platform = plugin_event.platform['platform']
                                     )
@@ -686,7 +697,7 @@ def unity_reply(plugin_event, Proc):
                                             userConfigKey = 'groupWithHostEnable',
                                             userConfigValue = False,
                                             botHash = plugin_event.bot_info.hash,
-                                            userId = plugin_event.data.group_id,
+                                            userId = tmp_hagID,
                                             userType = 'group',
                                             platform = plugin_event.platform['platform']
                                         )
@@ -699,13 +710,13 @@ def unity_reply(plugin_event, Proc):
                                     userConfigKey = 'groupEnable',
                                     userConfigValue = False,
                                     botHash = plugin_event.bot_info.hash,
-                                    userId = plugin_event.data.group_id,
+                                    userId = tmp_hagID,
                                     userType = 'group',
                                     platform = plugin_event.platform['platform']
                                 )
                             OlivaDiceCore.userConfig.writeUserConfigByUserHash(
                                 userHash = OlivaDiceCore.userConfig.getUserHash(
-                                    userId = plugin_event.data.group_id,
+                                    userId = tmp_hagID,
                                     userType = 'group',
                                     platform = plugin_event.platform['platform']
                                 )
@@ -720,7 +731,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 if isMatchWordStart(tmp_reast_str, 'on'):
                     if flag_is_from_group:
-                        if (flag_is_from_group_have_admin and flag_is_from_group_admin or not flag_is_from_group_have_admin) or flag_is_from_master:
+                        if ((flag_is_from_group_have_admin and flag_is_from_group_admin and not flag_is_from_group_sub_admin) or not flag_is_from_group_have_admin) or flag_is_from_master:
                             if flag_is_from_host:
                                 if flag_hostLocalEnable != True:
                                     OlivaDiceCore.userConfig.setUserConfigByKey(
@@ -748,7 +759,7 @@ def unity_reply(plugin_event, Proc):
                                 replyMsg(plugin_event, tmp_reply_str)
                 elif isMatchWordStart(tmp_reast_str, 'off'):
                     if flag_is_from_group:
-                        if (flag_is_from_group_have_admin and flag_is_from_group_admin or not flag_is_from_group_have_admin) or flag_is_from_master:
+                        if ((flag_is_from_group_have_admin and flag_is_from_group_admin and not flag_is_from_group_sub_admin) or not flag_is_from_group_have_admin) or flag_is_from_master:
                             if flag_is_from_host:
                                 if flag_hostLocalEnable != False:
                                     OlivaDiceCore.userConfig.setUserConfigByKey(
@@ -1916,7 +1927,9 @@ def unity_reply(plugin_event, Proc):
                     for tmp_enhanceList_this in tmp_enhanceList:
                         tmp_skill_name = tmp_enhanceList_this
                         if tmp_skill_name in [
-                            'SAN'
+                            'SAN',
+                            '克苏鲁神话',
+                            '信用'
                         ]:
                             continue
                         tmp_skill_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
@@ -2024,7 +2037,7 @@ def unity_reply(plugin_event, Proc):
                 dictTValue['tRollResultInt'] = str(rd_para.resError)
             tmp_reply_str = dictStrCustom['strRollRange'].format(**dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
-        
+        #基于OneDice标准，这些指令不再需要，指引用户看HelpDoc
         elif isMatchWordStart(tmp_reast_str, 'ww'):
             replyMsgLazyHelpByEvent(plugin_event, 'r')
             return
@@ -2105,7 +2118,34 @@ def unity_reply(plugin_event, Proc):
                         else:
                             tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resDetail) + '=' + str(rd_para.resInt)
                 else:
-                    tmp_reply_str_1 = str(rd_para.resError)
+                    dictTValue['tResult'] = str(rd_para.resError)
+                    if rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_GENERATE_FATAL:
+                        tmp_reply_str_1 = dictStrCustom['strRollError01'].format(**dictTValue)
+                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_COMPLETE_FATAL:
+                        tmp_reply_str_1 = dictStrCustom['strRollError02'].format(**dictTValue)
+                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.INPUT_RAW_INVALID:
+                        tmp_reply_str_1 = dictStrCustom['strRollError03'].format(**dictTValue)
+                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.INPUT_CHILD_PARA_INVALID:
+                        tmp_reply_str_1 = dictStrCustom['strRollError04'].format(**dictTValue)
+                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.INPUT_NODE_OPERATION_INVALID:
+                        tmp_reply_str_1 = dictStrCustom['strRollError05'].format(**dictTValue)
+                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_OPERATION_INVALID:
+                        tmp_reply_str_1 = dictStrCustom['strRollError06'].format(**dictTValue)
+                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_STACK_EMPTY:
+                        tmp_reply_str_1 = dictStrCustom['strRollError07'].format(**dictTValue)
+                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_LEFT_VAL_INVALID:
+                        tmp_reply_str_1 = dictStrCustom['strRollError08'].format(**dictTValue)
+                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_RIGHT_VAL_INVALID:
+                        tmp_reply_str_1 = dictStrCustom['strRollError09'].format(**dictTValue)
+                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_SUB_VAL_INVALID:
+                        tmp_reply_str_1 = dictStrCustom['strRollError10'].format(**dictTValue)
+                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_EXTREME_VAL_INVALID:
+                        tmp_reply_str_1 = dictStrCustom['strRollError11'].format(**dictTValue)
+                    else:
+                        tmp_reply_str_1 = dictStrCustom['strRollErrorUnknown'].format(**dictTValue)
+                    tmp_reply_str_1 += dictStrCustom['strRollErrorHelp'].format(**dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str_1)
+                    return
                 dictTValue['tRollResult'] = tmp_reply_str_1
             else:
                 flag_begin = True
