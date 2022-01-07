@@ -1,0 +1,32 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download & Unpack
+        run: |
+          mkdir ./download
+          mkdir ./unpack
+          mkdir ./release
+          curl -L https://github.com/OlivOS-Team/OlivOS/releases/latest/download/OlivOS-Win.zip -o ./download/OlivOS-Win.zip
+          curl -L https://github.com/OlivOS-Team/OlivaDiceCore/releases/latest/download/OlivaDiceCore.opk -o ./download/OlivaDiceCore.opk
+          curl -L https://github.com/OlivOS-Team/OlivaDiceJoy/releases/latest/download/OlivaDiceJoy.opk -o ./download/OlivaDiceJoy.opk
+          curl -L https://github.com/OlivOS-Team/OlivaDiceLogger/releases/latest/download/OlivaDiceLogger.opk -o ./download/OlivaDiceLogger.opk
+          mkdir ./unpack/OlivOS
+          unzip ./download/OlivOS-Win.zip -d ./unpack/OlivOS
+          cp ./download/*.opk ./unpack/
+          cp -r ./unpack/OlivOS ./release/OlivOS
+          mkdir ./release/OlivOS/plugin
+          mkdir ./release/OlivOS/plugin/app
+          cp ./unpack/*.opk ./release/OlivOS/plugin/app
+      - uses: actions/upload-artifact@v2
+        with:
+          name: OlivOS-Win
+          path: ./release/OlivOS
