@@ -16,11 +16,13 @@ jobs:
           mkdir ./unpack
           mkdir ./release
           curl -L https://github.com/OlivOS-Team/OlivOS/releases/latest/download/OlivOS-Win.zip -o ./download/OlivOS-Win.zip
+          echo "Download OlivOS Done"
           mkdir ./unpack/OlivOS
           unzip ./download/OlivOS-Win.zip -d ./unpack/OlivOS
           cp -r ./unpack/OlivOS ./release/OlivOS
           mkdir ./release/OlivOS/plugin
           mkdir ./release/OlivOS/plugin/app
+          echo "Unpack OlivOS Done"
       - name: Checkout OlivaDiceCore
         uses: actions/checkout@v2.4.0
         with:
@@ -38,10 +40,22 @@ jobs:
           path: ./download/OlivaDiceLogger/
       - name: Pack & Setup OlivaDice
         run: |
-          zip -r ./unpack/OlivaDiceCore.opk ./download/OlivaDiceCore/OlivaDiceCore
-          zip -r ./unpack/OlivaDiceJoy.opk ./download/OlivaDiceJoy/OlivaDiceJoy
-          zip -r ./unpack/OlivaDiceLogger.opk ./download/OlivaDiceLogger/OlivaDiceLogger
+          cd ./download/
+          cd ./OlivaDiceCore/OlivaDiceCore
+          zip -r ../../../unpack/OlivaDiceCore.opk ./
+          cd ../../
+          echo "Pack OlivaDiceCore Done"
+          cd ./OlivaDiceJoy/OlivaDiceJoy
+          zip -r ../../../unpack/OlivaDiceJoy.opk ./
+          cd ../../
+          echo "Pack OlivaDiceJoy Done"
+          cd ./OlivaDiceLogger/OlivaDiceLogger
+          zip -r ../../../unpack/OlivaDiceLogger.opk ./
+          cd ../../
+          echo "Pack OlivaDiceLogger Done"
+          cd ../
           cp ./unpack/*.opk ./release/OlivOS/plugin/app
+          echo "Setup OlivaDice Done"
       - uses: actions/upload-artifact@v2
         with:
           name: OlivaDice-OlivOS-Win
