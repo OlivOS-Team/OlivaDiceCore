@@ -1374,6 +1374,8 @@ def unity_reply(plugin_event, Proc):
                             tmp_total_count_1 += tmp_res_list_this[tmp_res_list_this_this]
                     if tmp_pcCardTemplateName == 'COC7':
                         tmp_reply_str_1 += '共计:%d/%d %.2f%%' % (tmp_total_count_1, tmp_total_count_2, 100 * tmp_total_count_1 / tmp_total_count_2)
+                    elif tmp_pcCardTemplateName == 'DND5E':
+                        tmp_reply_str_1 += '共计:%d' % tmp_total_count_1
                 dictTValue['tPcInitResult'] = tmp_reply_str_1
                 tmp_reply_str = dictStrCustom['strPcInit'].format(**dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
@@ -2414,16 +2416,26 @@ def getToNumberPara(data):
             tmp_output_str_2 = data
     return [tmp_output_str_1, tmp_output_str_2]
 
-def isMatchWordStart(data, key):
+def isMatchWordStart(data, key, ignoreCase = True):
     tmp_output = False
-    if len(data) >= len(key):
-        if data[:len(key)] == key:
+    tmp_data = data
+    tmp_key = key
+    if ignoreCase:
+        tmp_data = tmp_data.lower()
+        tmp_key = tmp_key.lower()
+    if len(tmp_data) >= len(tmp_key):
+        if tmp_data[:len(tmp_key)] == tmp_key:
             tmp_output = True
     return tmp_output
 
-def getMatchWordStartRight(data, key):
+def getMatchWordStartRight(data, key, ignoreCase = True):
     tmp_output_str = ''
-    if len(data) > len(key):
-        if data[:len(key)] == key:
+    tmp_data = data
+    tmp_key = key
+    if ignoreCase:
+        tmp_data = tmp_data.lower()
+        tmp_key = tmp_key.lower()
+    if len(tmp_data) > len(tmp_key):
+        if tmp_data[:len(tmp_key)] == tmp_key:
             tmp_output_str = data[len(key):]
     return tmp_output_str
