@@ -10,23 +10,40 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Download & Unpack
+      - name: Download & Unpack OlivOS
         run: |
           mkdir ./download
           mkdir ./unpack
           mkdir ./release
           curl -L https://github.com/OlivOS-Team/OlivOS/releases/latest/download/OlivOS-Win.zip -o ./download/OlivOS-Win.zip
-          curl -L https://github.com/OlivOS-Team/OlivaDiceCore/releases/latest/download/OlivaDiceCore.opk -o ./download/OlivaDiceCore.opk
-          curl -L https://github.com/OlivOS-Team/OlivaDiceJoy/releases/latest/download/OlivaDiceJoy.opk -o ./download/OlivaDiceJoy.opk
-          curl -L https://github.com/OlivOS-Team/OlivaDiceLogger/releases/latest/download/OlivaDiceLogger.opk -o ./download/OlivaDiceLogger.opk
           mkdir ./unpack/OlivOS
           unzip ./download/OlivOS-Win.zip -d ./unpack/OlivOS
-          cp ./download/*.opk ./unpack/
           cp -r ./unpack/OlivOS ./release/OlivOS
           mkdir ./release/OlivOS/plugin
           mkdir ./release/OlivOS/plugin/app
+      - name: Checkout OlivaDiceCore
+        uses: actions/checkout@v2.4.0
+        with:
+          repository: OlivOS-Team/OlivaDiceCore
+          path: ./download/OlivaDiceCore/
+      - name: Checkout OlivaDiceJoy
+        uses: actions/checkout@v2.4.0
+        with:
+          repository: OlivOS-Team/OlivaDiceJoy
+          path: ./download/OlivaDiceJoy/
+      - name: Checkout OlivaDiceLogger
+        uses: actions/checkout@v2.4.0
+        with:
+          repository: OlivOS-Team/OlivaDiceLogger
+          path: ./download/OlivaDiceLogger/
+      - uses: actions/checkout@v2
+      - name: Pack & Setup OlivaDice
+        run: |
+          zip -r ./unpack/OlivaDiceCore.opk ./download/OlivaDiceCore/OlivaDiceCore
+          zip -r ./unpack/OlivaDiceJoy.opk ./download/OlivaDiceJoy/OlivaDiceJoy
+          zip -r ./unpack/OlivaDiceLogger.opk ./download/OlivaDiceLogger/OlivaDiceLogger
           cp ./unpack/*.opk ./release/OlivOS/plugin/app
       - uses: actions/upload-artifact@v2
         with:
-          name: OlivOS-Win
+          name: OlivaDice-OlivOS-Win
           path: ./release/OlivOS
