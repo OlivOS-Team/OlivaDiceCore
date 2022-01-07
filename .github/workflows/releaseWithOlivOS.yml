@@ -36,7 +36,6 @@ jobs:
         with:
           repository: OlivOS-Team/OlivaDiceLogger
           path: ./download/OlivaDiceLogger/
-      - uses: actions/checkout@v2
       - name: Pack & Setup OlivaDice
         run: |
           zip -r ./unpack/OlivaDiceCore.opk ./download/OlivaDiceCore/OlivaDiceCore
