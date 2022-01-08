@@ -584,6 +584,17 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = dictStrCustom['strMasterConsoleNotFound'].format(**dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                 return
+            elif isMatchWordStart(tmp_reast_str, 'system'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'system')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                if isMatchWordStart(tmp_reast_str, 'restart'):
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'restart')
+                    tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                    tmp_reply_str = dictStrCustom['strMasterSystemRestart'].format(**dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    time.sleep(1)
+                    Proc.set_restart()
+                return
             elif isMatchWordStart(tmp_reast_str, 'str'):
                 tmp_reast_str = tmp_reast_str.strip(' ')
                 tmp_reast_list = tmp_reast_str.split(' ')

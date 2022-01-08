@@ -26,6 +26,7 @@ dictStrCustom = {
     'strSetStr': '回复词[{tStrName}]已更新',
     'strBecomeMaster': '口令正确，[{tName}]已成为Master',
     'strCantBecomeMaster': '无Master权限且口令错误，拒绝认证',
+    'strMasterSystemRestart': '[{tName}]远程调用重载',
     'strMasterConsoleShow': '[{tConsoleKey}]当前为[{tConsoleValue}]',
     'strMasterConsoleShowList': '[{tConsoleKey}]当前为:\n{tConsoleValue}',
     'strMasterConsoleSet': '[{tName}]已将[{tConsoleKey}]设置为[{tConsoleValue}]',
