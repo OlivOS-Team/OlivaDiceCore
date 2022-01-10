@@ -54,7 +54,14 @@ def initConsoleSwitch(botHash, templateName = 'default'):
     global dictConsoleSwitchTemplate
     if botHash not in dictConsoleSwitch:
         if templateName in dictConsoleSwitchTemplate:
-            dictConsoleSwitch[botHash] = dictConsoleSwitchTemplate[templateName].copy()
+            dictConsoleSwitch[botHash] = {}
+            for template_key_this in dictConsoleSwitchTemplate[templateName]:
+                if type(dictConsoleSwitchTemplate[templateName][template_key_this]) in [
+                    list
+                ]:
+                    dictConsoleSwitch[botHash][template_key_this] = dictConsoleSwitchTemplate[templateName][template_key_this].copy()
+                else:
+                    dictConsoleSwitch[botHash][template_key_this] = dictConsoleSwitchTemplate[templateName][template_key_this]
 
 def initConsoleSwitchByBotDict(botDict):
     global dictConsoleSwitch

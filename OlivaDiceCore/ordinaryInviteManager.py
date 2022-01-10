@@ -81,7 +81,7 @@ def unity_friend_add_request(plugin_event, Proc):
 
 def isInMasterList(bot_hash, user_hash):
     res = False
-    for bot_hash_this in [bot_hash, 'unity']:
+    for bot_hash_this in [bot_hash]:
         if bot_hash_this in OlivaDiceCore.console.dictConsoleSwitch:
             if 'masterList' in OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this]:
                 if type(OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this]['masterList']) == list:
