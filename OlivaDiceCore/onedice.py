@@ -1934,14 +1934,14 @@ class RD(object):
                         flag_begin = True
                         for tmp_node_this_output_list_this in tmp_node_this_output_list:
                             if flag_begin:
-                                    flag_begin = False
+                                flag_begin = False
                             else:
                                 tmp_node_this_output_str_1 += ','
                             tmp_node_this_output_str_1 += str(tmp_node_this_output_list_this)
                         flag_begin = True
                         for tmp_node_this_output_list_this in tmp_node_this_output_list_2:
                             if flag_begin:
-                                    flag_begin = False
+                                flag_begin = False
                             else:
                                 tmp_node_this_output_str_2 += '+'
                             tmp_node_this_output_str_2 += str(tmp_node_this_output_list_this)
@@ -2248,7 +2248,7 @@ class RD(object):
                     if tmp_main_val_left[0] <= 0 or tmp_main_val_left[0] >= 10000:
                         self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
                         return resNoneTemplate
-                    if tmp_main_val_left_obj.resIntMax == self.resExtremeType.INT_POSITIVE_INFINITE:
+                    if tmp_main_val_left_obj.resIntMaxType == self.resExtremeType.INT_POSITIVE_INFINITE:
                         tmp_node_this_output_MaxType = self.resExtremeType.INT_POSITIVE_INFINITE
                         tmp_node_this_output_MinType = self.resExtremeType.INT_NEGATIVE_INFINITE
                     else:
@@ -2272,7 +2272,7 @@ class RD(object):
                     flag_begin = True
                     for tmp_node_this_output_list_this in tmp_node_this_output_list:
                         if flag_begin:
-                                flag_begin = False
+                            flag_begin = False
                         else:
                             tmp_node_this_output_str_1 += ' '
                             if tmp_node_this_output_list_this >= 0:
