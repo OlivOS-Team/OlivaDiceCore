@@ -220,6 +220,7 @@ class calOperationNode(calNode):
             self.vals['q'] = None
             self.vals['p'] = None
             self.vals['b'] = None
+            self.vals['a'] = None
             self.valsDefault['p'] = 1
             self.valsDefault['b'] = 1
         elif self.data == 'a':
@@ -1549,7 +1550,10 @@ class RD(object):
                         else:
                             tmp_node_this_output_MaxType = self.resExtremeType.INT_POSITIVE_INFINITE
                             tmp_node_this_output_MinType = self.resExtremeType.INT_LIMITED
-                            tmp_node_this_output_Min = 0
+                            if tmp_main_val_left_obj.resIntMin == 0:
+                                tmp_node_this_output_Min = 0
+                            else:
+                                tmp_node_this_output_Min = int(tmp_main_val_left_obj.resIntMin ** tmp_main_val_right_obj.resIntMin)
                     elif boolByListAnd([
                         tmp_main_val_left_obj.resIntMaxType == self.resExtremeType.INT_POSITIVE_INFINITE,
                         tmp_main_val_left_obj.resIntMinType == self.resExtremeType.INT_NEGATIVE_INFINITE,
@@ -1844,6 +1848,27 @@ class RD(object):
                     tmp_node_this_output_str_1 = ''
                     tmp_node_this_output_str_2 = ''
                     tmp_node_this_output_str_3 = ''
+                    if tmp_node_this.vals['a'] != None:
+                        tmp_RD = RD('%sa(%s+1)k%sm%s' % (
+                                str(tmp_main_val_left[0]),
+                                str(tmp_main_val_right[0]),
+                                str(tmp_node_this.vals['a']),
+                                str(tmp_main_val_right[0])
+                            ),
+                            self.customDefault
+                        )
+                        tmp_RD.roll()
+                        if tmp_RD.resError != None:
+                            return tmp_RD.resError
+                        else:
+                            resRecursiveObj = self.resRecursive()
+                            resRecursiveObj.resInt = tmp_RD.resInt
+                            resRecursiveObj.resIntMax = tmp_RD.resIntMax
+                            resRecursiveObj.resIntMin = tmp_RD.resIntMin
+                            resRecursiveObj.resIntMaxType = tmp_RD.resIntMaxType
+                            resRecursiveObj.resIntMinType = tmp_RD.resIntMinType
+                            resRecursiveObj.resDetail = tmp_RD.resDetail
+                            return resRecursiveObj
                     if tmp_node_this.vals['k'] != None and tmp_node_this.vals['q'] != None:
                         self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
                         return resNoneTemplate
@@ -1990,8 +2015,12 @@ class RD(object):
                         if tmp_node_this.vals['m'] >= tmp_main_val_right_obj.resIntMin or tmp_main_val_right_obj.resIntMinType == self.resExtremeType.INT_NEGATIVE_INFINITE:
                             tmp_node_this_output_MaxType = self.resExtremeType.INT_POSITIVE_INFINITE
                         else:
-                            tmp_node_this_output_MaxType = self.resExtremeType.INT_LIMITED
-                            tmp_node_this_output_Max = tmp_main_val_left_obj.resIntMax * tmp_node_this.vals['m']
+                            if tmp_main_val_left_obj.resIntMaxType == self.resExtremeType.INT_LIMITED:
+                                tmp_node_this_output_MaxType = self.resExtremeType.INT_LIMITED
+                                tmp_node_this_output_Max = tmp_main_val_left_obj.resIntMax
+                            else:
+                                tmp_node_this_output_MaxType = self.resExtremeType.INT_POSITIVE_INFINITE
+                                tmp_node_this_output_Max = 0
                     else:
                         tmp_node_this_output_MaxType = self.resExtremeType.INT_LIMITED
                         tmp_node_this_output_Max = 0
@@ -2076,7 +2105,7 @@ class RD(object):
                         tmp_node_this_output_MaxType = self.resExtremeType.INT_LIMITED
                         tmp_node_this_output_Max = tmp_main_val_left_obj.resIntMax * tmp_node_this.vals['m']
                     tmp_node_this_output_MinType = self.resExtremeType.INT_LIMITED
-                    tmp_node_this_output_Min = 0
+                    tmp_node_this_output_Min = 1
                     flag_add_roll_not_empty = True
                     tmp_add_roll_first = tmp_main_val_left[0]
                     tmp_add_roll_threshold = tmp_main_val_right[0]
