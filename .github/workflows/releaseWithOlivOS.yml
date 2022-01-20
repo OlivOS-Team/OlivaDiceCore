@@ -38,6 +38,11 @@ jobs:
         with:
           repository: OlivOS-Team/OlivaDiceLogger
           path: ./download/OlivaDiceLogger/
+      - name: Checkout OlivaDiceMaster
+        uses: actions/checkout@v2.4.0
+        with:
+          repository: OlivOS-Team/OlivaDiceMaster
+          path: ./download/OlivaDiceMaster/
       - name: Pack & Setup OlivaDice
         run: |
           cd ./download/
@@ -53,6 +58,10 @@ jobs:
           zip -r ../../../unpack/OlivaDiceLogger.opk ./
           cd ../../
           echo "Pack OlivaDiceLogger Done"
+          cd ./OlivaDiceMaster/OlivaDiceMaster
+          zip -r ../../../unpack/OlivaDiceMaster.opk ./
+          cd ../../
+          echo "Pack OlivaDiceMaster Done"
           cd ../
           cp ./unpack/*.opk ./release/OlivOS/plugin/app
           echo "Setup OlivaDice Done"
