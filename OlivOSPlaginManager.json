@@ -4,8 +4,8 @@
             "main": {
                 "command": "OlivaDiceCore",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceCore.opk",
-                "svn": 1012,
-                "version": "3.1.7"
+                "svn": 1018,
+                "version": "3.1.8"
             },
             "github": {
                 "command": "OlivaDiceCore",
