@@ -3,8 +3,8 @@
     "author" : "lunzhiPenxil",
     "namespace" : "OlivaDiceCore",
     "message_mode" : "old_string",
-    "version" : "3.1.7",
-    "svn" : 1012,
+    "version" : "3.1.8",
+    "svn" : 1018,
     "compatible_svn" : 81,
     "priority" : 30000,
     "support" : [
