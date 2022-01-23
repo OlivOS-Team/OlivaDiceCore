@@ -2244,6 +2244,12 @@ def sendMsgByEvent(plugin_event, message, target_id, target_type, host_id = None
     return plugin_event.send(target_type, target_id, message, host_id = host_id)
 
 def replyMsgPrivateByEvent(plugin_event, message):
+    if OlivaDiceCore.console.getConsoleSwitchByHash(
+        'disableReplyPrivate',
+        plugin_event.bot_info.hash
+    ) == 1:
+        #2022-01-19腾讯暗改临时会话协议，在此提供关闭群聊向私聊回复的办法
+        return
     host_id = None
     group_id = None
     user_id = None
@@ -2269,7 +2275,7 @@ def replyMsgPrivateByEvent(plugin_event, message):
         plugin_event.send('private', plugin_event.data.user_id, message, host_id = plugin_event.data.host_id)
     else:
         plugin_event.send('private', plugin_event.data.user_id, message)
-    return 
+    return
 
 def replyMsgLazyHelpByEvent(plugin_event, help_key):
     tmp_reply_str = OlivaDiceCore.helpDoc.getHelp(str(help_key), plugin_event.bot_info.hash)

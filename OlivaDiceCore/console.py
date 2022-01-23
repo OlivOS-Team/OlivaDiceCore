@@ -27,6 +27,7 @@ dictConsoleSwitchTemplate = {
         'pulseInterval' : 300,
         'autoAcceptGroupAdd' : 1,
         'autoAcceptFriendAdd' : 1,
+        'disableReplyPrivate' : 0,
         'masterList' : [],
         'noticeGroupList' : [],
         'pulseUrlList' : []
