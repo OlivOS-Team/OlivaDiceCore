@@ -10,8 +10,8 @@
             "github": {
                 "command": "OlivaDiceCore",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceCore/releases/latest/download/OlivaDiceCore.opk",
-                "svn": 1012,
-                "version": "3.1.7"
+                "svn": 1019,
+                "version": "3.1.9"
             }
         },
         "OlivaDiceJoy": {
