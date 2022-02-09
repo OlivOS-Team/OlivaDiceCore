@@ -72,8 +72,9 @@ def unity_init_after(plugin_event, Proc):
         if bot_info.platform['sdk'] in [
             'telegram_poll',
             'fanbook_poll',
-            'dodo_poll',
-            'qqGuild_link'
+            'dodo_link',
+            'qqGuild_link',
+            'kaiheila_link'
         ]:
             plugin_event_fake = OlivOS.API.Event(
                 OlivOS.contentAPI.fake_sdk_event(
