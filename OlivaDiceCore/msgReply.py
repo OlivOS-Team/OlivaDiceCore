@@ -269,8 +269,12 @@ def unity_reply(plugin_event, Proc):
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'exit')
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
                     tmp_reast_str = tmp_reast_str.rstrip(' ')
+                    tmp_group_id = None
                     if tmp_reast_str.isdigit():
                         tmp_group_id = int(tmp_reast_str)
+                    elif tmp_reast_str[0] == '-' and tmp_reast_str[1:].isdigit():
+                        tmp_group_id = (-1) * int(tmp_reast_str[1:])
+                    if tmp_group_id != None:
                         dictTValue['tGroupId'] = str(tmp_group_id)
                         tmp_reply_str = dictStrCustom['strBotExitRemote'].format(**dictTValue)
                         sendMsgByEvent(plugin_event, tmp_reply_str, tmp_group_id, 'group')
