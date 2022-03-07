@@ -65,6 +65,12 @@ def unity_init(plugin_event, Proc):
         ('OlivaDice', 'default'),
         ('Init', 'default')
     ])
+    dictTValue['tVersion'] = OlivaDiceCore.data.OlivaDiceCore_ver_short
+    tmp_log_str =  dictStrConst['strShowVersionOnLog'].format(**dictTValue)
+    logProc(Proc, 2, tmp_log_str, [
+        ('OlivaDice', 'default'),
+        ('Init', 'default')
+    ])
 
 def unity_init_after(plugin_event, Proc):
     for bot_info_this in Proc.Proc_data['bot_info_dict']:
@@ -819,7 +825,7 @@ def unity_reply(plugin_event, Proc):
                     tmp_reply_str_list.append('%s V.%s' % (sub_model_this[0], sub_model_this[1]))
                 tmp_reply_str = '\n'.join(tmp_reply_str_list)
                 replyMsg(plugin_event, tmp_reply_str)
-            else:
+            elif len(tmp_reast_str) == 0:
                 tmp_reply_str = OlivaDiceCore.data.bot_info + '\n' + dictStrCustom['strBot'].format(**dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
             return
@@ -880,12 +886,12 @@ def unity_reply(plugin_event, Proc):
             if tmp_reply_str != None:
                 replyMsg(plugin_event, tmp_reply_str)
             return
-        elif isMatchWordStart(tmp_reast_str, 'ti'):
+        elif isMatchWordStart(tmp_reast_str, 'ti', fullMatch = True):
             dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck('即时症状', plugin_event.bot_info.hash)
             tmp_reply_str = dictStrCustom['strDrawTi'].format(**dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
             return
-        elif isMatchWordStart(tmp_reast_str, 'li'):
+        elif isMatchWordStart(tmp_reast_str, 'li', fullMatch = True):
             dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck('总结症状', plugin_event.bot_info.hash)
             tmp_reply_str = dictStrCustom['strDrawLi'].format(**dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
@@ -2438,16 +2444,18 @@ def getToNumberPara(data):
             tmp_output_str_2 = data
     return [tmp_output_str_1, tmp_output_str_2]
 
-def isMatchWordStart(data, key, ignoreCase = True):
+def isMatchWordStart(data, key, ignoreCase = True, fullMatch = False):
     tmp_output = False
     tmp_data = data
     tmp_key = key
     if ignoreCase:
         tmp_data = tmp_data.lower()
         tmp_key = tmp_key.lower()
-    if len(tmp_data) >= len(tmp_key):
+    if not fullMatch and len(tmp_data) >= len(tmp_key):
         if tmp_data[:len(tmp_key)] == tmp_key:
             tmp_output = True
+    elif fullMatch and tmp_data == tmp_key:
+        tmp_output = True
     return tmp_output
 
 def getMatchWordStartRight(data, key, ignoreCase = True):

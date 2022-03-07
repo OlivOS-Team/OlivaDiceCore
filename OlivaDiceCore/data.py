@@ -21,8 +21,8 @@ import uuid
 
 import OlivOS
 
-OlivaDiceCore_ver = '3.1.9'
-OlivaDiceCore_svn = 1019
+OlivaDiceCore_ver = '3.1.10'
+OlivaDiceCore_svn = 1020
 OlivaDiceCore_ver_short = '%s(%s)' % (str(OlivaDiceCore_ver), str(OlivaDiceCore_svn))
 
 exce_path = os.getcwd()

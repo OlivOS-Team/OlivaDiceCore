@@ -144,7 +144,8 @@ dictStrConst = {
     'strToBeMaster' : '请使用[{tInitMasterKey}]指令以获取Master权限',
     'strInitData' : '[{tInitDataCount}]条[{tInitDataType}]数据已加载',
     'strInitBakData' : '[{tInitDataCount}]条[{tInitDataType}]数据已备份',
-    'strSaveData' : '[{tInitDataCount}]条[{tInitDataType}]数据已写入'
+    'strSaveData' : '[{tInitDataCount}]条[{tInitDataType}]数据已写入',
+    'strShowVersionOnLog' : '当前版本为[{tVersion}]'
 }
 
 dictGValue = {
@@ -152,6 +153,7 @@ dictGValue = {
 }
 
 dictTValue = {
+    'tVersion' : 'N/A',
     'tName' : 'N/A',
     'tStrName' : 'N/A',
     'tUserId' : 'N/A',
