@@ -84,7 +84,8 @@ def unity_init_after(plugin_event, Proc):
         ]:
             plugin_event_fake = OlivOS.API.Event(
                 OlivOS.contentAPI.fake_sdk_event(
-                    bot_info
+                    bot_info = bot_info,
+                    fakename = OlivaDiceCore.data.OlivaDiceCore_name
                 ),
                 Proc.log
             )
