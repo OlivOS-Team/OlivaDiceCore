@@ -268,6 +268,17 @@ def unity_reply(plugin_event, Proc):
                     userConfigKey = 'groupEnable',
                     botHash = plugin_event.bot_info.hash
                 )
+        flag_messageFliterModeDisabled = False
+        flag_messageFliterMode = OlivaDiceCore.console.getConsoleSwitchByHash(
+            'messageFliterMode',
+            plugin_event.bot_info.hash
+        )
+        if flag_messageFliterMode == 1 and flag_is_from_group and not flag_is_from_host:
+            flag_messageFliterModeDisabled = True
+        elif flag_messageFliterMode == 2 and flag_is_from_host:
+            flag_messageFliterModeDisabled = True
+        elif flag_messageFliterMode == 3 and flag_is_from_group:
+            flag_messageFliterModeDisabled = True
         if flag_is_from_master:
             if isMatchWordStart(tmp_reast_str, 'master'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'master')
@@ -625,6 +636,9 @@ def unity_reply(plugin_event, Proc):
                     replyMsg(plugin_event, tmp_reply_str)
                 return
         else:
+            if flag_messageFliterModeDisabled:
+                plugin_event.set_block()
+                return
             if isMatchWordStart(tmp_reast_str, 'master'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'master')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -648,6 +662,9 @@ def unity_reply(plugin_event, Proc):
                     tmp_reply_str = dictStrCustom['strCantBecomeMaster'].format(**dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
+        if flag_messageFliterModeDisabled:
+            plugin_event.set_block()
+            return
         if isMatchWordStart(tmp_reast_str, 'bot'):
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'bot')
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
