@@ -58,16 +58,19 @@ def unity_heartbeat(plugin_event, Proc):
             tmp_master = ','.join(tmp_master_list_1)
         except:
             pass
-        for tmp_pulse_url_list_this in tmp_pulse_url_list:
-            do_pulse(
-                user_id = tmp_user_id,
-                name = tmp_nickname,
-                token = tmp_pulse_url_list_this[1],
-                time_ts = tmp_ts,
-                masterid = tmp_master,
-                platform = plugin_event.platform['platform'],
-                url = tmp_pulse_url_list_this[0]
-            )
+        try:
+            for tmp_pulse_url_list_this in tmp_pulse_url_list:
+                do_pulse(
+                    user_id = tmp_user_id,
+                    name = tmp_nickname,
+                    token = tmp_pulse_url_list_this[1],
+                    time_ts = tmp_ts,
+                    masterid = tmp_master,
+                    platform = plugin_event.platform['platform'],
+                    url = tmp_pulse_url_list_this[0]
+                )
+        except:
+            pass
 
 def do_pulse(user_id, name, token, time_ts, masterid = '0', platform = 'default', url = None):
     tmp_payload_dict = {
