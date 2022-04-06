@@ -881,11 +881,19 @@ def unity_reply(plugin_event, Proc):
             return
         elif isMatchWordStart(tmp_reast_str, 'draw'):
             flag_hide = False
+            tmp_card_count = 1
+            tmp_card_count_str = None
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'draw')
             if isMatchWordStart(tmp_reast_str, 'h'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'h')
                 flag_hide = True
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            tmp_reast_str = tmp_reast_str.rstrip(' ')
+            [tmp_reast_str, tmp_card_count_str] = getNumberPara(tmp_reast_str, reverse = True)
+            if tmp_card_count_str == '':
+                tmp_card_count_str = None
+            if tmp_card_count_str != None:
+                tmp_card_count = int(tmp_card_count_str)
             tmp_reast_str = tmp_reast_str.rstrip(' ')
             tmp_reast_str = tmp_reast_str.lstrip('_')
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -893,7 +901,11 @@ def unity_reply(plugin_event, Proc):
             if tmp_reast_str == '':
                 tmp_reast_str = None
             if tmp_reast_str != None:
-                tmp_reply_str = OlivaDiceCore.drawCard.getDrawDeck(tmp_reast_str, plugin_event.bot_info.hash)
+                tmp_reply_str = OlivaDiceCore.drawCard.getDrawDeck(
+                    tmp_reast_str,
+                    plugin_event.bot_info.hash,
+                    count = tmp_card_count
+                )
                 if flag_hide:
                     replyMsgPrivateByEvent(plugin_event, tmp_reply_str)
                     tmp_reply_str = dictStrCustom['strDrawDeckHideShow'].format(**dictTValue)
@@ -915,13 +927,29 @@ def unity_reply(plugin_event, Proc):
             replyMsg(plugin_event, tmp_reply_str)
             return
         elif isMatchWordStart(tmp_reast_str, 'name'):
+            tmp_card_count = 1
+            tmp_card_count_str = None
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'name')
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             tmp_reast_str = tmp_reast_str.rstrip(' ')
+            [tmp_reast_str, tmp_card_count_str] = getNumberPara(tmp_reast_str, reverse = True)
+            if tmp_card_count_str == '':
+                tmp_card_count_str = None
+            if tmp_card_count_str != None:
+                tmp_card_count = int(tmp_card_count_str)
+            tmp_reast_str = tmp_reast_str.rstrip(' ')
             if tmp_reast_str in ['cn', 'jp', 'en', 'enzh']:
-                dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck('随机姓名_%s' % tmp_reast_str, plugin_event.bot_info.hash)
+                dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck(
+                    '随机姓名_%s' % tmp_reast_str, 
+                    plugin_event.bot_info.hash,
+                    count = tmp_card_count
+                )
             else:
-                dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck('随机姓名', plugin_event.bot_info.hash)
+                dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck(
+                    '随机姓名',
+                    plugin_event.bot_info.hash,
+                    count = tmp_card_count
+                )
             tmp_reply_str = dictStrCustom['strDrawName'].format(**dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
             return
@@ -2412,7 +2440,7 @@ def getExpression(data, reverse = False):
             tmp_output_str_2 = data[tmp_total_offset:]
     return [tmp_output_str_1, tmp_output_str_2]
 
-def getNumberPara(data):
+def getNumberPara(data, reverse = False):
     tmp_output_str_1 = ''
     tmp_output_str_2 = ''
     if len(data) > 0:
@@ -2421,14 +2449,22 @@ def getNumberPara(data):
         tmp_total_offset = 0
         while True:
             tmp_offset += 1
-            tmp_total_offset = tmp_offset - 1
-            if tmp_total_offset >= len(data):
+            if reverse:
+                tmp_total_offset = len(data) - tmp_offset
+            else:
+                tmp_total_offset = tmp_offset - 1
+            if not reverse and tmp_total_offset >= len(data):
+                flag_have_para = True
+                break
+            if reverse and tmp_total_offset <= 0:
                 flag_have_para = True
                 break
             if data[tmp_total_offset].isdigit():
                 pass
             else:
                 flag_have_para = True
+                if reverse:
+                    tmp_total_offset += 1
                 break
         if flag_have_para:
             tmp_output_str_1 = data[:tmp_total_offset]

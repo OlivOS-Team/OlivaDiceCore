@@ -68,7 +68,7 @@ def initDeck(bot_info_dict):
             if obj_Deck_this != None:
                 OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this)
 
-def getDrawDeck(key_str, bot_hash):
+def getDrawDeck(key_str, bot_hash, count = 1):
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
     dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustom
     tmp_reply_str = None
@@ -76,9 +76,14 @@ def getDrawDeck(key_str, bot_hash):
         dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[bot_hash]
     if bot_hash in OlivaDiceCore.drawCardData.dictDeck:
         if key_str in OlivaDiceCore.drawCardData.dictDeck[bot_hash]:
-            tmp_draw_str = draw(key_str, bot_hash)
-            if tmp_draw_str != None and type(tmp_draw_str) == str:
-                dictTValue['tDrawDeckResult'] = tmp_draw_str
+            if count >= 1 and count <= 10:
+                tmp_for_list = range(count)
+                tmp_card_list = []
+                for tmp_for_list_this in tmp_for_list:
+                    tmp_draw_str = draw(key_str, bot_hash)
+                    if tmp_draw_str != None and type(tmp_draw_str) == str:
+                        tmp_card_list.append(tmp_draw_str)
+                dictTValue['tDrawDeckResult'] = '\n'.join(tmp_card_list)
                 tmp_reply_str = dictStrCustom['strDrawDeck'].format(**dictTValue)
                 return tmp_reply_str
     tmp_reply_str = dictStrCustom['strDrawDeckNotFound'].format(**dictTValue)
