@@ -46,25 +46,30 @@ def get_data_from_random_org():
 dictOperationPriority = {
     '(' : None,
     ')' : None,
-    '+' : 1,
-    '-' : 1,
-    '*' : 2,
-    'x' : 2,
-    'X' : 2,
-    '/' : 2,
-    '^' : 3,
-    'd' : 4,
-    'D' : 4,
-    'a' : 4,
-    'A' : 4,
-    'c' : 4,
-    'C' : 4,
-    'f' : 4,
-    'F' : 4,
-    'b' : 4,
-    'B' : 4,
-    'p' : 4,
-    'P' : 4
+    '<' : 1,
+    '>' : 1,
+    '&' : 2,
+    '|' : 2,
+    '+' : 3,
+    '-' : 3,
+    '*' : 4,
+    'x' : 4,
+    'X' : 4,
+    '/' : 4,
+    '^' : 5,
+    'd' : 6,
+    'D' : 6,
+    'a' : 6,
+    'A' : 6,
+    'c' : 6,
+    'C' : 6,
+    'f' : 6,
+    'F' : 6,
+    'b' : 6,
+    'B' : 6,
+    'p' : 6,
+    'P' : 6,
+    '?' : 7
 }
 
 listOperationSub = [
@@ -77,7 +82,8 @@ listOperationSub = [
     'b',
     'B',
     'p',
-    'P'
+    'P',
+    ':'
 ]
 
 '''
@@ -237,6 +243,9 @@ class calOperationNode(calNode):
         elif self.data == 'f':
             self.valLeftDefault = 4
             self.valRightDefault = 3
+        elif self.data == '?':
+            self.valRightDefault = 0
+            self.vals[':'] = None
         if self.customDefault != None:
             if self.data in self.customDefault:
                 if 'leftD' in self.customDefault[self.data]:
@@ -625,7 +634,55 @@ class RD(object):
                     return resNoneTemplate
                 tmp_main_val_right = [tmp_main_val_right_obj.resInt, tmp_main_val_right_obj.resDetail]
                 tmp_main_val_left = [tmp_main_val_left_obj.resInt, tmp_main_val_left_obj.resDetail]
-                if tmp_node_this.data == '+':
+                if tmp_node_this.data == '>':
+                    if tmp_main_val_left[0] > tmp_main_val_right[0]:
+                        tmp_node_this_output = 1
+                    else:
+                        tmp_node_this_output = 0
+                    tmp_node_this_output_Min = 0
+                    tmp_node_this_output_Max = 1
+                    tmp_node_this_output_str = '%s>%s' % (
+                        str(tmp_main_val_left[1]),
+                        str(tmp_main_val_right[1])
+                    )
+                    if tmp_priority_this < rootPriority:
+                        tmp_node_this_output_str = '(' + tmp_node_this_output_str + ')'
+                elif tmp_node_this.data == '<':
+                    if tmp_main_val_left[0] < tmp_main_val_right[0]:
+                        tmp_node_this_output = 1
+                    else:
+                        tmp_node_this_output = 0
+                    tmp_node_this_output_Min = 0
+                    tmp_node_this_output_Max = 1
+                    tmp_node_this_output_str = '%s<%s' % (
+                        str(tmp_main_val_left[1]),
+                        str(tmp_main_val_right[1])
+                    )
+                    if tmp_priority_this < rootPriority:
+                        tmp_node_this_output_str = '(' + tmp_node_this_output_str + ')'
+                elif tmp_node_this.data == '&':
+                    tmp_node_this_output = tmp_main_val_left[0] & tmp_main_val_right[0]
+                    tmp_node_this_output_Min = str(tmp_node_this_output)
+                    tmp_node_this_output_Max = str(tmp_node_this_output)
+                    tmp_node_this_output_str = '{%s&%s}[%s&%s](%s)' % (
+                        tmp_main_val_left[1],
+                        tmp_main_val_right[1],
+                        tmp_main_val_left[0],
+                        tmp_main_val_right[0],
+                        str(tmp_node_this_output)
+                    )
+                elif tmp_node_this.data == '|':
+                    tmp_node_this_output = tmp_main_val_left[0] | tmp_main_val_right[0]
+                    tmp_node_this_output_Min = str(tmp_node_this_output)
+                    tmp_node_this_output_Max = str(tmp_node_this_output)
+                    tmp_node_this_output_str = '{%s|%s}[%s|%s](%s)' % (
+                        tmp_main_val_left[1],
+                        tmp_main_val_right[1],
+                        tmp_main_val_left[0],
+                        tmp_main_val_right[0],
+                        str(tmp_node_this_output)
+                    )
+                elif tmp_node_this.data == '+':
                     tmp_node_this_output = tmp_main_val_left[0] + tmp_main_val_right[0]
                     if boolByListAnd([
                         tmp_main_val_left_obj.resIntMaxType == self.resExtremeType.INT_LIMITED,
@@ -2314,6 +2371,36 @@ class RD(object):
                             tmp_node_this_output_str_1 += '+'
                         tmp_node_this_output_str_2 += str(tmp_node_this_output_list_this)
                     tmp_node_this_output_str = '{%s}[%s](%d)' % (tmp_node_this_output_str_1, tmp_node_this_output_str_2, tmp_node_this_output)
+                elif tmp_node_this.data == '?':
+                    if tmp_node_this.vals[':'] != None:
+                        tmp_flag_True = True
+                        if tmp_main_val_left[0] == 0:
+                            tmp_flag_True = False
+                        if tmp_flag_True:
+                            tmp_node_this_output = tmp_main_val_right[0]
+                        else:
+                            tmp_node_this_output = tmp_node_this.vals[':']
+                        tmp_node_this_output_Min = tmp_node_this_output
+                        tmp_node_this_output_Max = tmp_node_this_output
+                        tmp_node_this_output_str = '{%s?%s:%s}(%s)' % (
+                            str(tmp_main_val_left[1]),
+                            str(tmp_main_val_right[0]),
+                            str(tmp_node_this.vals[':']),
+                            tmp_node_this_output
+                        )
+                    else:
+                        if tmp_main_val_left[0] < 0:
+                            self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
+                            return resNoneTemplate
+                        tmp_last_num = tmp_main_val_left[0]
+                        tmp_node_this_output = int(tmp_last_num * (1 + tmp_last_num) / 2)
+                        tmp_node_this_output_Min = tmp_node_this_output
+                        tmp_node_this_output_Max = tmp_node_this_output
+                        tmp_node_this_output_str = '{%s?}[%s?](%s)' % (
+                            tmp_main_val_left[1],
+                            tmp_main_val_left[0],
+                            str(tmp_node_this_output)
+                        )
                 else:
                     self.resError = self.resErrorType.NODE_OPERATION_INVALID
                     return resNoneTemplate
@@ -2351,7 +2438,13 @@ if __name__ == '__main__':
         '10d10',
         '1d(7a5k7)a7',
         '(1d100)^(7a5k7)',
-        '(1d100)^(1d20)'
+        '(1d100)^(1d20)',
+        '1-1>2',
+        '1+2>2',
+        '((1-1>2)|(1-1<2))?(1+1):(1-2)',
+        '(100-50+50)?',
+        '1|2',
+        '1&2'
     ]
     for str_para in str_para_list:
         rd_para = RD(str_para)
