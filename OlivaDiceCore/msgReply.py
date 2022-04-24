@@ -2120,6 +2120,9 @@ def unity_reply(plugin_event, Proc):
             tmp_reply_str = ''
             tmp_reply_str_show = ''
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'r')
+            #此处只对实体化后的&做处理，因为这是运算符，其余保持原样
+            #如果以后有全面反实体化的需求则需直接调整这里
+            tmp_reast_str = tmp_reast_str.replace('&amp;', '&')
             rd_para_str = '1D100'
             rd_reason_str = None
             roll_times_count = 1
