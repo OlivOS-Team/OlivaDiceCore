@@ -5,7 +5,7 @@
     "message_mode" : "old_string",
     "version" : "3.1.11",
     "svn" : 1021,
-    "compatible_svn" : 94,
+    "compatible_svn" : 95,
     "priority" : 30000,
     "support" : [
         {
