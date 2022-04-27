@@ -46,27 +46,29 @@ dictPcCardTemplateDefault = {
             'EDU': '(2d6+6)x5',
             'LUC': '3d6x5'
         },
+        'synonyms':{
+            'STR': ['力量', 'STR'],
+            'CON': ['体质', 'CON'],
+            'SIZ': ['体型', 'SIZ'],
+            'DEX': ['敏捷', 'DEX'],
+            'APP': ['外貌', 'APP'],
+            'INT': ['智力', 'INT'],
+            'POW': ['意志', 'POW'],
+            'EDU': ['教育', 'EDU'],
+            'LUC': ['幸运', 'LUC'],
+            'SAN': ['理智', 'SAN']
+        },
         'redirect': {
             '力量': 'STR',
-            'str': 'STR',
             '体质': 'CON',
-            'con': 'CON',
             '体型': 'SIZ',
-            'siz': 'SIZ',
             '敏捷': 'DEX',
-            'dex': 'DEX',
             '外貌': 'APP',
-            'app': 'APP',
             '智力': 'INT',
-            'int': 'INT',
             '意志': 'POW',
-            'pow': 'POW',
             '教育': 'EDU',
-            'edu': 'EDU',
             '幸运': 'LUC',
-            'luc': 'LUC',
             '理智': 'SAN',
-            'san': 'SAN'
         },
         'showName': {
             'STR': '力量',
@@ -173,27 +175,29 @@ dictPcCardTemplateDefault = {
             'EDU': '(2d6+6)x5',
             'LUC': '3d6x5'
         },
+        'synonyms':{
+            'STR': ['力量', 'STR'],
+            'CON': ['体质', 'CON'],
+            'SIZ': ['体型', 'SIZ'],
+            'DEX': ['敏捷', 'DEX'],
+            'APP': ['外貌', 'APP'],
+            'INT': ['智力', 'INT'],
+            'POW': ['意志', 'POW'],
+            'EDU': ['教育', 'EDU'],
+            'LUC': ['幸运', 'LUC'],
+            'SAN': ['理智', 'SAN']
+        },
         'redirect': {
             '力量': 'STR',
-            'str': 'STR',
             '体质': 'CON',
-            'con': 'CON',
             '体型': 'SIZ',
-            'siz': 'SIZ',
             '敏捷': 'DEX',
-            'dex': 'DEX',
             '外貌': 'APP',
-            'app': 'APP',
             '智力': 'INT',
-            'int': 'INT',
             '意志': 'POW',
-            'pow': 'POW',
             '教育': 'EDU',
-            'edu': 'EDU',
             '幸运': 'LUC',
-            'luc': 'LUC',
             '理智': 'SAN',
-            'san': 'SAN'
         },
         'showName': {
             'STR': '力量',
@@ -586,6 +590,14 @@ dictPcCardTemplateDefault = {
             'INT': '4d6k3',
             'POW': '4d6k3',
             'APP': '4d6k3'
+        },
+        'synonyms':{
+            'STR': ['力量', 'STR'],
+            'DEX': ['敏捷', 'DEX'],
+            'CON': ['体质', 'CON'],
+            'INT': ['智力', 'INT'],
+            'POW': ['感知', 'POW'],
+            'APP': ['魅力', 'APP']
         },
         'showName': {
             'STR': '力量',

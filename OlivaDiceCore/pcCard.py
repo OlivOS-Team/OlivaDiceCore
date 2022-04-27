@@ -196,7 +196,16 @@ def pcCardDataSetBySkillName(pcHash, skillName, skillValue, pcCardName = 'defaul
         dictPcCardData['unity'][pcHash] = {}
     if tmp_pc_card_name_key not in dictPcCardData['unity'][pcHash]:
         dictPcCardData['unity'][pcHash][tmp_pc_card_name_key] = {}
-    dictPcCardData['unity'][pcHash][tmp_pc_card_name_key][str(skillName)] = skillValue
+    tmp_pc_card_synonyms = []
+    tmp_pc_card_synonyms_name = pcCardDataGetTemplateDataByKey(pcHash, pcCardName, 'template', 'default')
+    if 'synonyms' in OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[tmp_pc_card_synonyms_name]:
+        tmp_pc_card_synonyms = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[tmp_pc_card_synonyms_name]['synonyms']
+    tmp_pc_card_synonyms_hit = [str(skillName)]
+    for tmp_pc_card_synonyms_this in tmp_pc_card_synonyms:
+        if str(skillName) in tmp_pc_card_synonyms[tmp_pc_card_synonyms_this]:
+            tmp_pc_card_synonyms_hit = tmp_pc_card_synonyms[tmp_pc_card_synonyms_this]
+    for tmp_pc_card_synonyms_hit_this in tmp_pc_card_synonyms_hit:
+        dictPcCardData['unity'][pcHash][tmp_pc_card_name_key][tmp_pc_card_synonyms_hit_this] = skillValue
     dataPcCardSave('unity', pcHash)
 
 def pcCardDataGetBySkillName(pcHash, skillName):
