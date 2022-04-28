@@ -184,6 +184,27 @@ def pcCardDataSetBySkillNameReplace(pcHash, skillName, skillValue, pcCardName = 
         dictPcCardSelection['unity'][pcHash][selection_key] = tmp_pc_card_name_key_new
     dataPcCardSave('unity', pcHash)
 
+def pcCardDataSkillNameMapper(pcHash, skillName, flagShow = False):
+    pcCardName = pcCardDataGetSelectionKey(pcHash)
+    pcCardSynonyms_hit = str(skillName)
+    res = str(skillName)
+    pcCardTemplateName = 'default'
+    tmp_pcCardSynonyms = {}
+    if pcCardName != None:
+        pcCardTemplateName = pcCardDataGetTemplateDataByKey(pcHash, pcCardName, 'template', 'default')
+    if 'synonyms' in OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[pcCardTemplateName]:
+        tmp_pcCardSynonyms = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[pcCardTemplateName]['synonyms']
+    for tmp_pcCardSynonyms_this in tmp_pcCardSynonyms:
+        if str(skillName) in tmp_pcCardSynonyms[tmp_pcCardSynonyms_this]:
+            pcCardSynonyms_hit = tmp_pcCardSynonyms_this
+    res = pcCardSynonyms_hit
+    if flagShow:
+        if 'showName' in OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[pcCardTemplateName]:
+            if type(OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[pcCardTemplateName]['showName']) == dict:
+                if pcCardSynonyms_hit in OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[pcCardTemplateName]['showName']:
+                    res = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[pcCardTemplateName]['showName'][pcCardSynonyms_hit]
+    return res
+
 def pcCardDataSetBySkillName(pcHash, skillName, skillValue, pcCardName = 'default'):
     selection_key = 'selection'
     tmp_pc_card_name_key = pcCardName
@@ -196,7 +217,7 @@ def pcCardDataSetBySkillName(pcHash, skillName, skillValue, pcCardName = 'defaul
         dictPcCardData['unity'][pcHash] = {}
     if tmp_pc_card_name_key not in dictPcCardData['unity'][pcHash]:
         dictPcCardData['unity'][pcHash][tmp_pc_card_name_key] = {}
-    tmp_pc_card_synonyms = []
+    tmp_pc_card_synonyms = {}
     tmp_pc_card_synonyms_name = pcCardDataGetTemplateDataByKey(pcHash, pcCardName, 'template', 'default')
     if 'synonyms' in OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[tmp_pc_card_synonyms_name]:
         tmp_pc_card_synonyms = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[tmp_pc_card_synonyms_name]['synonyms']
