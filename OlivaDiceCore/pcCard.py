@@ -128,6 +128,19 @@ def dataPcCardLoadAll():
             pcHash = pcCardDataPCHashList_this
             dataPcCardLoad(hostKey, pcHash)
 
+def dataPcCardTemplateInit():
+    for temp_this in OlivaDiceCore.pcCardData.dictPcCardTemplateDefault:
+        if 'synonyms' in OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[temp_this]:
+            tmp_res = {}
+            for key_this in OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[temp_this]['synonyms']:
+                tmp_res_res = [key_this.upper()]
+                for res_this in OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[temp_this]['synonyms'][key_this]:
+                    if res_this.upper() not in tmp_res_res:
+                        tmp_res_res.append(res_this.upper())
+                tmp_res[key_this.upper()] = tmp_res_res
+            OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[temp_this]['synonyms'] = tmp_res
+    dictPcCardTemplateDefault['unity'] = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault.copy()
+
 def pcCardRebase(pcHash, pcCardName):
     selection_key = 'selection'
     pcCardNameOld = None
