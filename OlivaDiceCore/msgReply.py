@@ -2452,19 +2452,19 @@ def getExpression(data, reverse = False, valueTable = None):
             if reverse and tmp_total_offset <= 0:
                 flag_have_para = True
                 break
-            if data[tmp_total_offset].isdigit():
+            if flag_not_hit and data[tmp_total_offset].isdigit():
                 flag_not_hit = False
-            elif data[tmp_total_offset] in OlivaDiceCore.onedice.dictOperationPriority:
-                flag_not_hit = False
-            elif data[tmp_total_offset] in OlivaDiceCore.onedice.listOperationSub:
-                flag_not_hit = False
-            elif not reverse and valueTable != None:
+            if flag_not_hit and not reverse and valueTable != None:
                 for idx in range(tmp_total_offset, len(data)):
                     if data[tmp_total_offset:idx + 1].upper() in valueTable:
                         tmp_offset_len = idx - tmp_total_offset + 1
                         flag_not_hit = False
                         flag_value = True
                         break
+            if flag_not_hit and data[tmp_total_offset] in OlivaDiceCore.onedice.dictOperationPriority:
+                flag_not_hit = False
+            if flag_not_hit and data[tmp_total_offset] in OlivaDiceCore.onedice.listOperationSub:
+                flag_not_hit = False
             if flag_not_hit:
                 flag_have_para = True
                 if reverse:
