@@ -273,7 +273,7 @@ class calOperationNode(calNode):
         return res
 
 class RD(object):
-    def __init__(self, initData, customDefault = None):
+    def __init__(self, initData, customDefault = None, valueTable = None):
         self.originData = initData.lower()
         self.calTree = calNodeStack([])
         self.resInt = None
@@ -285,8 +285,16 @@ class RD(object):
         self.resError = None
         self.dictOperationPriority = dictOperationPriority
         self.customDefault = customDefault
+        self.valueTable = valueTable
 
     def roll(self):
+        try:
+            self.__replace()
+        except:
+            if self.resError == None:
+                self.resError = self.resErrorType.UNKNOWN_REPLACE_FATAL
+        if self.resError != None:
+            return
         try:
             self.__getCalTree()
         except:
@@ -322,6 +330,7 @@ class RD(object):
         NODE_RIGHT_VAL_INVALID = -9
         NODE_SUB_VAL_INVALID = -10
         NODE_EXTREME_VAL_INVALID = -11
+        UNKNOWN_REPLACE_FATAL = -12
 
     class resExtremeType(Enum):
         INT_LIMITED = 0
@@ -386,6 +395,52 @@ class RD(object):
                     return res
             res = random.randint(nMin, nMax)
         return res
+
+    '''
+    该方法用状态机实现高宽容度的变量引用
+    '''
+    def __replace(self):
+        raw = self.originData
+        res = ''
+        reg_res = ''
+        reg_key = ''
+        flagType = 'str'
+        for i in raw:
+            if flagType == 'str':
+                if i == '{':
+                    flagType = 'left'
+                else:
+                    reg_res += i
+                    flagType = 'str'
+            elif flagType == 'left':
+                if i == '}':
+                    reg_key = ''
+                    flagType = 'right'
+                else:
+                    reg_key = i
+                    flagType = 'key'
+            elif flagType == 'key':
+                if i == '}':
+                    if reg_key.upper() in self.valueTable:
+                        reg_res += str(self.valueTable[reg_key.upper()])
+                    else:
+                        reg_res += '{%s}' % reg_key.upper()
+                    flagType = 'right'
+                else:
+                    reg_key += i
+                    flagType = 'key'
+            elif flagType == 'right':
+                reg_key = ''
+                if i == '{':
+                    flagType = 'left'
+                else:
+                    reg_res += i
+                    flagType = 'str'
+        if flagType == 'key':
+            reg_res += '{%s' % reg_key.upper()
+        res = reg_res
+        self.originData = res
+        return
 
     '''
     该方法实现基于表达式生成语法树
@@ -2444,10 +2499,18 @@ if __name__ == '__main__':
         '((1-1>2)|(1-1<2))?(1+1):(1-2)',
         '(100-50+50)?',
         '1|2',
-        '1&2'
+        '1&2',
+        '{力量}+1*{魔法}',
+        '{力量}+2',
+        '1*{力量}+2{{STR}',
+        '1*{力量}+2{{STR'
     ]
+    val_table = {
+        '力量': 60,
+        'STR': 50
+    }
     for str_para in str_para_list:
-        rd_para = RD(str_para)
+        rd_para = RD(str_para, valueTable=val_table)
         print(rd_para.originData)
         rd_para.roll()
         print('----------------')
