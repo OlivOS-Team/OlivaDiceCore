@@ -86,6 +86,7 @@ dictStrCustom = {
     'strRollError09' : '掷骰错误！错误的右值！',
     'strRollError10' : '掷骰错误！错误的子参数！',
     'strRollError11' : '掷骰错误！计算极值时出错！',
+    'strRollError11' : '掷骰错误！解析技能变量时出错！',
     'strRollErrorUnknown' : '掷骰错误！未知的错误: {tResult}',
     'strRollErrorHelp' : '\n请使用[.help r]查看掷骰帮助，或使用[.help onedice]查看先进的OneDice标准。',
     'strPcInit' : '[{tPcTempName}]人物卡作成:{tPcInitResult}',

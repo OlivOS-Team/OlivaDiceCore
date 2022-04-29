@@ -289,7 +289,8 @@ class RD(object):
 
     def roll(self):
         try:
-            self.__replace()
+            if type(self.valueTable) == dict:
+                self.__replace()
         except:
             if self.resError == None:
                 self.resError = self.resErrorType.UNKNOWN_REPLACE_FATAL

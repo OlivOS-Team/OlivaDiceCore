@@ -2138,6 +2138,13 @@ def unity_reply(plugin_event, Proc):
             roll_times_count = 1
             flag_hide_roll = False
             flag_have_para = False
+            tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
+                tmp_pc_id,
+                tmp_pc_platform
+            )
+            skill_valueTable = OlivaDiceCore.pcCard.pcCardDataGetByPcName(
+                tmp_pcHash
+            )
             if len(tmp_reast_str) > 0:
                 if isMatchWordStart(tmp_reast_str, 'h'):
                     flag_hide_roll = True
@@ -2153,7 +2160,7 @@ def unity_reply(plugin_event, Proc):
                         tmp_reast_str = tmp_reast_str_list_1[1]
             if len(tmp_reast_str) > 0:
                 tmp_rd_para_str = None
-                [tmp_rd_para_str, tmp_reast_str] = getExpression(tmp_reast_str)
+                [tmp_rd_para_str, tmp_reast_str] = getExpression(tmp_reast_str, valueTable = skill_valueTable)
                 if tmp_rd_para_str != None and tmp_rd_para_str != '':
                     rd_para_str = tmp_rd_para_str
                     flag_have_para = True
@@ -2186,7 +2193,7 @@ def unity_reply(plugin_event, Proc):
                 if 'mainDice' in tmp_template and not flag_have_para:
                     rd_para_str = tmp_template['mainDice']
             if roll_times_count == 1:
-                rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_template_customDefault)
+                rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_template_customDefault, valueTable = skill_valueTable)
                 rd_para.roll()
                 tmp_reply_str_1 = ''
                 if rd_para.resError == None:
@@ -2224,6 +2231,8 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str_1 = dictStrCustom['strRollError10'].format(**dictTValue)
                     elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_EXTREME_VAL_INVALID:
                         tmp_reply_str_1 = dictStrCustom['strRollError11'].format(**dictTValue)
+                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_REPLACE_FATAL:
+                        tmp_reply_str_1 = dictStrCustom['strRollError12'].format(**dictTValue)
                     else:
                         tmp_reply_str_1 = dictStrCustom['strRollErrorUnknown'].format(**dictTValue)
                     tmp_reply_str_1 += dictStrCustom['strRollErrorHelp'].format(**dictTValue)
@@ -2418,15 +2427,21 @@ def splitBy(data, key):
             tmp_output_str_2 = data[tmp_total_offset:]
     return [tmp_output_str_1, tmp_output_str_2]
 
-def getExpression(data, reverse = False):
+def getExpression(data, reverse = False, valueTable = None):
     tmp_output_str_1 = ''
+    tmp_output_str_reg = ''
     tmp_output_str_2 = ''
     if len(data) > 0:
         flag_have_para = False
         tmp_offset = 0
         tmp_total_offset = 0
+        tmp_offset_len = 1
+        flag_not_hit = True
         while True:
-            tmp_offset += 1
+            flag_not_hit = True
+            flag_value = False
+            tmp_offset += tmp_offset_len
+            tmp_offset_len = 1
             if reverse:
                 tmp_total_offset = len(data) - tmp_offset
             else:
@@ -2438,19 +2453,33 @@ def getExpression(data, reverse = False):
                 flag_have_para = True
                 break
             if data[tmp_total_offset].isdigit():
-                pass
+                flag_not_hit = False
             elif data[tmp_total_offset] in OlivaDiceCore.onedice.dictOperationPriority:
-                pass
+                flag_not_hit = False
             elif data[tmp_total_offset] in OlivaDiceCore.onedice.listOperationSub:
-                pass
-            else:
+                flag_not_hit = False
+            elif not reverse and valueTable != None:
+                for idx in range(tmp_total_offset, len(data)):
+                    if data[tmp_total_offset:idx + 1].upper() in valueTable:
+                        tmp_offset_len = idx - tmp_total_offset + 1
+                        flag_not_hit = False
+                        flag_value = True
+                        break
+            if flag_not_hit:
                 flag_have_para = True
                 if reverse:
                     tmp_total_offset += 1
                 break
+            else:
+                if flag_value:
+                    tmp_output_str_reg += '{%s}' % data[tmp_total_offset:tmp_total_offset + tmp_offset_len].upper()
+                else:
+                    tmp_output_str_reg += data[tmp_total_offset:tmp_total_offset + tmp_offset_len]
         if flag_have_para:
             tmp_output_str_1 = data[:tmp_total_offset]
             tmp_output_str_2 = data[tmp_total_offset:]
+            if not reverse and valueTable != None:
+                tmp_output_str_1 = tmp_output_str_reg
     return [tmp_output_str_1, tmp_output_str_2]
 
 def getNumberPara(data, reverse = False):
