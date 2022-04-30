@@ -118,7 +118,10 @@ He dismissed the dismiss as worthless.
     默认可选：COC7，DND5E，FATE
 .st rule [人物卡模版规则名]    切换人物卡规则
 更多请使用[.help 人物卡模板]进行查看
-.st del [人物卡名]    删除人物卡''',
+.st del [人物卡名]    删除人物卡
+    默认删除当前人物卡
+.st clear    清空当前人物卡
+.st rm [技能名]    删除对应技能''',
 
     'r': '''通用掷骰指令
 表达式支持OneDice标准:

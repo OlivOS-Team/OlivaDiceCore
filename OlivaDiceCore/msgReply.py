@@ -1095,21 +1095,87 @@ def unity_reply(plugin_event, Proc):
             elif isMatchWordStart(tmp_reast_str, 'del'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'del')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
-                if len(tmp_reast_str) > 0:
-                    tmp_pc_name = tmp_reast_str
-                    tmp_pc_name = tmp_pc_name.strip()
+                tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
+                    tmp_pc_id,
+                    tmp_pc_platform
+                )
+                tmp_pc_name = tmp_reast_str
+                tmp_pc_name = tmp_pc_name.strip()
+                if len(tmp_pc_name) == 0:
+                    tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
+                        tmp_pcHash
+                    )
+                if tmp_pc_name != None:
                     if OlivaDiceCore.pcCard.pcCardDataDelSelectionKey(
-                        OlivaDiceCore.pcCard.getPcHash(
-                            tmp_pc_id,
-                            tmp_pc_platform
-                        ),
+                        tmp_pcHash,
                         tmp_pc_name
                     ):
                         dictTValue['tPcSelection'] = tmp_pc_name
                         tmp_reply_str = dictStrCustom['strPcDel'].format(**dictTValue)
                     else:
                         tmp_reply_str = dictStrCustom['strPcDelError'].format(**dictTValue)
+                else:
+                    tmp_reply_str = dictStrCustom['strPcDelNone'].format(**dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
+                return
+            elif isMatchWordStart(tmp_reast_str, 'clear'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'clear')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
+                    tmp_pc_id,
+                    tmp_pc_platform
+                )
+                tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
+                    tmp_pcHash
+                )
+                if tmp_pc_name != None:
+                    OlivaDiceCore.pcCard.pcCardDataDelSelectionKey(
+                        tmp_pcHash,
+                        tmp_pc_name
+                    )
+                    OlivaDiceCore.pcCard.pcCardRebase(
+                        tmp_pcHash,
+                        tmp_pc_name
+                    )
+                    dictTValue['tPcSelection'] = tmp_pc_name
+                    tmp_reply_str = dictStrCustom['strPcClear'].format(**dictTValue)
+                else:
+                    tmp_reply_str = dictStrCustom['strPcClearNone'].format(**dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
+                return
+            elif isMatchWordStart(tmp_reast_str, 'rm'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rm')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
+                    tmp_pc_id,
+                    tmp_pc_platform
+                )
+                tmp_pcCard = OlivaDiceCore.pcCard.pcCardDataGetByPcName(
+                    tmp_pcHash
+                )
+                tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
+                    tmp_pcHash
+                )
+                tmp_pcSkillName = tmp_reast_str
+                tmp_pcSkillName = tmp_pcSkillName.strip()
+                tmp_pcSkillName = tmp_pcSkillName.upper()
+                if tmp_pcSkillName == '':
+                    tmp_pcSkillName = None
+                if tmp_pc_name != None and tmp_pcSkillName != None:
+                    OlivaDiceCore.pcCard.pcCardDataDelBySkillName(
+                        tmp_pcHash,
+                        tmp_pcSkillName,
+                        tmp_pc_name
+                    )
+                    dictTValue['tPcSelection'] = tmp_pc_name
+                    dictTValue['tSkillName'] = tmp_pcSkillName
+                    tmp_reply_str = dictStrCustom['strPcRm'].format(**dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
+                elif tmp_pcSkillName != None:
+                    tmp_reply_str = dictStrCustom['strPcRmCardNone'].format(**dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                else:
+                    replyMsgLazyHelpByEvent(plugin_event, 'st')
                 return
             elif isMatchWordStart(tmp_reast_str, 'temp'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'temp')
@@ -2460,7 +2526,6 @@ def getExpression(data, reverse = False, valueTable = None):
                         tmp_offset_len = idx - tmp_total_offset + 1
                         flag_not_hit = False
                         flag_value = True
-                        break
             if flag_not_hit and data[tmp_total_offset] in OlivaDiceCore.onedice.dictOperationPriority:
                 flag_not_hit = False
             if flag_not_hit and data[tmp_total_offset] in OlivaDiceCore.onedice.listOperationSub:

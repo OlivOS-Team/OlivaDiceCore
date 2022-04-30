@@ -242,6 +242,31 @@ def pcCardDataSetBySkillName(pcHash, skillName, skillValue, pcCardName = 'defaul
         dictPcCardData['unity'][pcHash][tmp_pc_card_name_key][tmp_pc_card_synonyms_hit_this] = skillValue
     dataPcCardSave('unity', pcHash)
 
+def pcCardDataDelBySkillName(pcHash, skillName, pcCardName = 'default'):
+    selection_key = 'selection'
+    tmp_pc_card_name_key = pcCardName
+    if pcHash not in dictPcCardSelection['unity']:
+        dictPcCardSelection['unity'][pcHash] = {}
+    dictPcCardSelection['unity'][pcHash][selection_key] = tmp_pc_card_name_key
+    if pcHash in dictPcCardData['unity']:
+        pass
+    else:
+        dictPcCardData['unity'][pcHash] = {}
+    if tmp_pc_card_name_key not in dictPcCardData['unity'][pcHash]:
+        dictPcCardData['unity'][pcHash][tmp_pc_card_name_key] = {}
+    tmp_pc_card_synonyms = {}
+    tmp_pc_card_synonyms_name = pcCardDataGetTemplateDataByKey(pcHash, pcCardName, 'template', 'default')
+    if 'synonyms' in OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[tmp_pc_card_synonyms_name]:
+        tmp_pc_card_synonyms = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[tmp_pc_card_synonyms_name]['synonyms']
+    tmp_pc_card_synonyms_hit = [str(skillName)]
+    for tmp_pc_card_synonyms_this in tmp_pc_card_synonyms:
+        if str(skillName) in tmp_pc_card_synonyms[tmp_pc_card_synonyms_this]:
+            tmp_pc_card_synonyms_hit = tmp_pc_card_synonyms[tmp_pc_card_synonyms_this]
+    for tmp_pc_card_synonyms_hit_this in tmp_pc_card_synonyms_hit:
+        if tmp_pc_card_synonyms_hit_this in dictPcCardData['unity'][pcHash][tmp_pc_card_name_key]:
+            dictPcCardData['unity'][pcHash][tmp_pc_card_name_key].pop(tmp_pc_card_synonyms_hit_this)
+    dataPcCardSave('unity', pcHash)
+
 def pcCardDataGetBySkillName(pcHash, skillName):
     selection_key = 'selection'
     tmp_skill_value = 0
