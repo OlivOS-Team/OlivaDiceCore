@@ -44,10 +44,7 @@ dictPcCardTemplateDefault = {
             'INT': '(2d6+6)x5',
             'POW': '3d6x5',
             'EDU': '(2d6+6)x5',
-            'LUC': '3d6x5',
-            'SAN': '{POW}',
-            'HP': '({CON}+{SIZ})/10',
-            'MP': '{POW}/5'
+            'LUC': '3d6x5'
         },
         'mapping': {
             'SAN': '{POW}',
@@ -229,10 +226,7 @@ dictPcCardTemplateDefault = {
             'INT': '(2d6+6)x5',
             'POW': '3d6x5',
             'EDU': '(2d6+6)x5',
-            'LUC': '3d6x5',
-            'SAN': '{POW}',
-            'HP': '({CON}+{SIZ})/10',
-            'MP': '{POW}/5'
+            'LUC': '3d6x5'
         },
         'mapping': {
             'SAN': '{POW}',
