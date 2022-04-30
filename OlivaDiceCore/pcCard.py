@@ -218,7 +218,10 @@ def pcCardDataSkillNameMapper(pcHash, skillName, flagShow = False):
                     res = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[pcCardTemplateName]['showName'][pcCardSynonyms_hit]
     return res
 
-def pcCardDataSetBySkillName(pcHash, skillName, skillValue, pcCardName = 'default'):
+def pcCardDataSetBySkillName(pcHash, skillName, skillValue, pcCardName = 'default', hitList = None, forceMapping = False):
+    tmp_hitList = hitList
+    if tmp_hitList == None:
+        tmp_hitList = []
     selection_key = 'selection'
     tmp_pc_card_name_key = pcCardName
     if pcHash not in dictPcCardSelection['unity']:
@@ -231,16 +234,47 @@ def pcCardDataSetBySkillName(pcHash, skillName, skillValue, pcCardName = 'defaul
     if tmp_pc_card_name_key not in dictPcCardData['unity'][pcHash]:
         dictPcCardData['unity'][pcHash][tmp_pc_card_name_key] = {}
     tmp_pc_card_synonyms = {}
-    tmp_pc_card_synonyms_name = pcCardDataGetTemplateDataByKey(pcHash, pcCardName, 'template', 'default')
-    if 'synonyms' in OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[tmp_pc_card_synonyms_name]:
-        tmp_pc_card_synonyms = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[tmp_pc_card_synonyms_name]['synonyms']
+    tmp_pc_card_mapping = {}
+    tmp_pc_card_template_name = pcCardDataGetTemplateDataByKey(pcHash, pcCardName, 'template', 'default')
+    if 'synonyms' in OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[tmp_pc_card_template_name]:
+        tmp_pc_card_synonyms = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[tmp_pc_card_template_name]['synonyms']
+    if 'mapping' in OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[tmp_pc_card_template_name]:
+        tmp_pc_card_mapping = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[tmp_pc_card_template_name]['mapping']
     tmp_pc_card_synonyms_hit = [str(skillName)]
     for tmp_pc_card_synonyms_this in tmp_pc_card_synonyms:
         if str(skillName) in tmp_pc_card_synonyms[tmp_pc_card_synonyms_this]:
             tmp_pc_card_synonyms_hit = tmp_pc_card_synonyms[tmp_pc_card_synonyms_this]
     for tmp_pc_card_synonyms_hit_this in tmp_pc_card_synonyms_hit:
-        dictPcCardData['unity'][pcHash][tmp_pc_card_name_key][tmp_pc_card_synonyms_hit_this] = skillValue
-    dataPcCardSave('unity', pcHash)
+        if tmp_pc_card_synonyms_hit_this not in tmp_hitList:
+            dictPcCardData['unity'][pcHash][tmp_pc_card_name_key][tmp_pc_card_synonyms_hit_this] = skillValue
+            tmp_hitList.append(tmp_pc_card_synonyms_hit_this)
+    for tmp_pc_card_mapping_hit_this in tmp_pc_card_mapping:
+        if tmp_pc_card_mapping_hit_this not in tmp_hitList:
+            if forceMapping or tmp_pc_card_mapping_hit_this not in dictPcCardData['unity'][pcHash][tmp_pc_card_name_key]:
+                if type(tmp_pc_card_mapping[tmp_pc_card_mapping_hit_this]) == str:
+                    tmp_template_customDefault = None
+                    tmp_template_name = pcCardDataGetTemplateKey(pcHash, pcCardName)
+                    if tmp_template_name != None:
+                        tmp_template = pcCardDataGetTemplateByKey(tmp_template_name)
+                        if 'customDefault' in tmp_template:
+                            tmp_template_customDefault = tmp_template['customDefault']
+                    tmp_skill_rd = OlivaDiceCore.onedice.RD(
+                        tmp_pc_card_mapping[tmp_pc_card_mapping_hit_this],
+                        tmp_template_customDefault,
+                        valueTable = dictPcCardData['unity'][pcHash][tmp_pc_card_name_key]
+                    )
+                    tmp_skill_rd.roll()
+                    if tmp_skill_rd.resError == None:
+                        pcCardDataSetBySkillName(
+                            pcHash,
+                            tmp_pc_card_mapping_hit_this,
+                            tmp_skill_rd.resInt,
+                            tmp_pc_card_name_key,
+                            hitList = tmp_hitList,
+                            forceMapping = forceMapping
+                        )
+    if hitList == None:
+        dataPcCardSave('unity', pcHash)
 
 def pcCardDataDelBySkillName(pcHash, skillName, pcCardName = 'default'):
     selection_key = 'selection'
