@@ -236,10 +236,11 @@ def pcCardDataSetBySkillName(pcHash, skillName, skillValue, pcCardName = 'defaul
     tmp_pc_card_synonyms = {}
     tmp_pc_card_mapping = {}
     tmp_pc_card_template_name = pcCardDataGetTemplateDataByKey(pcHash, pcCardName, 'template', 'default')
-    if 'synonyms' in OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[tmp_pc_card_template_name]:
-        tmp_pc_card_synonyms = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[tmp_pc_card_template_name]['synonyms']
-    if 'mapping' in OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[tmp_pc_card_template_name]:
-        tmp_pc_card_mapping = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[tmp_pc_card_template_name]['mapping']
+    tmp_pc_card_template = pcCardDataGetTemplateByKey(tmp_pc_card_template_name)
+    if 'synonyms' in tmp_pc_card_template:
+        tmp_pc_card_synonyms = tmp_pc_card_template['synonyms']
+    if 'mapping' in tmp_pc_card_template:
+        tmp_pc_card_mapping = tmp_pc_card_template['mapping']
     tmp_pc_card_synonyms_hit = [str(skillName)]
     for tmp_pc_card_synonyms_this in tmp_pc_card_synonyms:
         if str(skillName) in tmp_pc_card_synonyms[tmp_pc_card_synonyms_this]:
@@ -290,8 +291,9 @@ def pcCardDataDelBySkillName(pcHash, skillName, pcCardName = 'default'):
         dictPcCardData['unity'][pcHash][tmp_pc_card_name_key] = {}
     tmp_pc_card_synonyms = {}
     tmp_pc_card_synonyms_name = pcCardDataGetTemplateDataByKey(pcHash, pcCardName, 'template', 'default')
-    if 'synonyms' in OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[tmp_pc_card_synonyms_name]:
-        tmp_pc_card_synonyms = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[tmp_pc_card_synonyms_name]['synonyms']
+    tmp_pc_card_template = pcCardDataGetTemplateByKey(tmp_pc_card_synonyms_name)
+    if 'synonyms' in tmp_pc_card_template:
+        tmp_pc_card_synonyms = tmp_pc_card_template['synonyms']
     tmp_pc_card_synonyms_hit = [str(skillName)]
     for tmp_pc_card_synonyms_this in tmp_pc_card_synonyms:
         if str(skillName) in tmp_pc_card_synonyms[tmp_pc_card_synonyms_this]:

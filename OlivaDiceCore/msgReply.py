@@ -1025,24 +1025,60 @@ def unity_reply(plugin_event, Proc):
                         )
                     ] = tmp_dict_pc_card[tmp_dict_pc_card_key]
                 tmp_reply_str_1_list = []
+                tmp_reply_str_1_dict = {}
                 tmp_enhanceList = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
                     tmp_pcHash,
                     tmp_pc_name_1,
                     'enhanceList',
                     []
                 )
+                tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                    tmp_pcHash,
+                    tmp_pc_name_1,
+                    'template',
+                    'default'
+                )
+                tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
+                tmp_skill_dict = {}
+                if 'skill' in tmp_template:
+                    tmp_skill_dict = tmp_template['skill']
+                flag_hit_skill_list_name_default = '其它'
                 for tmp_dict_pc_card_key in tmp_dict_pc_card_dump:
+                    flag_hit_skill_list_name = flag_hit_skill_list_name_default
+                    tmp_dict_pc_card_key_core = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
+                        tmp_pcHash,
+                        tmp_dict_pc_card_key
+                    )
                     tmp_reply_str_1_list_this = '%s:%s' % (
                         tmp_dict_pc_card_key,
                         tmp_dict_pc_card_dump[tmp_dict_pc_card_key]
                     )
-                    if OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
-                        tmp_pcHash,
-                        tmp_dict_pc_card_key
-                    ) in tmp_enhanceList:
+                    if tmp_dict_pc_card_key_core in tmp_enhanceList:
                         tmp_reply_str_1_list_this = '[*]' + tmp_reply_str_1_list_this
-                    tmp_reply_str_1_list.append(tmp_reply_str_1_list_this)
-                tmp_reply_str_1 = ' '.join(tmp_reply_str_1_list)
+                    for tmp_skill_dict_this in tmp_skill_dict:
+                        if type(tmp_skill_dict[tmp_skill_dict_this]) == list:
+                            if tmp_dict_pc_card_key_core in tmp_skill_dict[tmp_skill_dict_this]:
+                                flag_hit_skill_list_name = tmp_skill_dict_this
+                                break
+                    if flag_hit_skill_list_name not in tmp_reply_str_1_dict:
+                        tmp_reply_str_1_dict[flag_hit_skill_list_name] = []
+                    tmp_reply_str_1_dict[flag_hit_skill_list_name].append(tmp_reply_str_1_list_this)
+                for tmp_reply_str_1_dict_this in tmp_reply_str_1_dict:
+                    if tmp_reply_str_1_dict_this != flag_hit_skill_list_name_default:
+                        tmp_reply_str_1_list.append(
+                            '<%s>\n%s' % (
+                                tmp_reply_str_1_dict_this,
+                                ' '.join(tmp_reply_str_1_dict[tmp_reply_str_1_dict_this])
+                            )
+                        )
+                if flag_hit_skill_list_name_default in tmp_reply_str_1_dict:
+                    tmp_reply_str_1_list.append(
+                        '<%s>\n%s' % (
+                            flag_hit_skill_list_name_default,
+                            ' '.join(tmp_reply_str_1_dict[flag_hit_skill_list_name_default])
+                        )
+                    )
+                tmp_reply_str_1 = '\n'.join(tmp_reply_str_1_list)
                 dictTValue['tPcShow'] = tmp_reply_str_1
                 tmp_reply_str = dictStrCustom['strPcShow'].format(**dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
@@ -1942,17 +1978,26 @@ def unity_reply(plugin_event, Proc):
                             'enhanceList',
                             []
                         )
+                        tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                            tmp_pcHash,
+                            tmp_pc_name_1,
+                            'template',
+                            'default'
+                        )
                         tmp_skill_name_core = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
                             tmp_pcHash,
                             tmp_skill_name
                         )
-                        if tmp_skill_name_core not in tmp_enhanceList:
+                        tmp_skipEnhance_list = []
+                        tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
+                        if 'skillConfig' in tmp_template:
+                            if 'skipEnhance' in tmp_template['skillConfig']:
+                                if type(tmp_template['skillConfig']['skipEnhance']):
+                                    tmp_skipEnhance_list = tmp_template['skillConfig']['skipEnhance']
+                        if tmp_skill_name_core not in tmp_enhanceList and tmp_skill_name_core not in tmp_skipEnhance_list:
                             tmp_enhanceList.append(tmp_skill_name_core)
                         OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
-                            OlivaDiceCore.pcCard.getPcHash(
-                                tmp_pc_id,
-                                tmp_pc_platform
-                            ),
+                            tmp_pcHash,
                             tmp_pc_name_1,
                             'enhanceList',
                             tmp_enhanceList
@@ -2077,12 +2122,6 @@ def unity_reply(plugin_event, Proc):
                     )
                     for tmp_enhanceList_this in tmp_enhanceList:
                         tmp_skill_name = tmp_enhanceList_this
-                        if tmp_skill_name in [
-                            'SAN',
-                            '克苏鲁神话',
-                            '信用'
-                        ]:
-                            continue
                         tmp_skill_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
                             tmp_pcHash,
                             tmp_skill_name
