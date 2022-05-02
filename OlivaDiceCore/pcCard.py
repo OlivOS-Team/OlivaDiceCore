@@ -219,6 +219,8 @@ def pcCardDataSkillNameMapper(pcHash, skillName, flagShow = False):
     return res
 
 def pcCardDataSetBySkillName(pcHash, skillName, skillValue, pcCardName = 'default', hitList = None, forceMapping = False):
+    if skillName == '':
+        return
     tmp_hitList = hitList
     if tmp_hitList == None:
         tmp_hitList = []
