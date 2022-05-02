@@ -16,12 +16,24 @@ jobs:
           mkdir ./unpack
           mkdir ./release
           curl -L https://github.com/OlivOS-Team/OlivOS/releases/latest/download/OlivOS-Win.zip -o ./download/OlivOS-Win.zip
+          curl -L https://github.com/OlivOS-Team/OlivOS/releases/latest/download/OlivOS-Win-32.zip -o ./download/OlivOS-Win-32.zip
+          curl -L https://github.com/OlivOS-Team/OlivOS/releases/latest/download/OlivOS-Linux.zip -o ./download/OlivOS-Linux.zip
           echo "Download OlivOS Done"
           mkdir ./unpack/OlivOS
+          mkdir ./unpack/OlivOS-Win-32
+          mkdir ./unpack/OlivOS-Linux
           unzip ./download/OlivOS-Win.zip -d ./unpack/OlivOS
+          unzip ./download/OlivOS-Win-32.zip -d ./unpack/OlivOS-Win-32
+          unzip ./download/OlivOS-Linux.zip -d ./unpack/OlivOS-Linux
           cp -r ./unpack/OlivOS ./release/OlivOS
+          cp -r ./unpack/OlivOS-Win-32 ./release/OlivOS-Win-32
+          cp -r ./unpack/OlivOS-Linux ./release/OlivOS-Linux
           mkdir ./release/OlivOS/plugin
           mkdir ./release/OlivOS/plugin/app
+          mkdir ./release/OlivOS-Win-32/plugin
+          mkdir ./release/OlivOS-Win-32/plugin/app
+          mkdir ./release/OlivOS-Linux/plugin
+          mkdir ./release/OlivOS-Linux/plugin/app
           echo "Unpack OlivOS Done"
       - name: Checkout OlivaDiceCore
         uses: actions/checkout@v2.4.0
@@ -64,8 +76,18 @@ jobs:
           echo "Pack OlivaDiceMaster Done"
           cd ../
           cp ./unpack/*.opk ./release/OlivOS/plugin/app
+          cp ./unpack/*.opk ./release/OlivOS-Win-32/plugin/app
+          cp ./unpack/*.opk ./release/OlivOS-Linux/plugin/app
           echo "Setup OlivaDice Done"
       - uses: actions/upload-artifact@v2
         with:
           name: OlivaDice-OlivOS-Win
           path: ./release/OlivOS
+      - uses: actions/upload-artifact@v2
+        with:
+          name: OlivaDice-OlivOS-Win-32
+          path: ./release/OlivOS-Win-32
+      - uses: actions/upload-artifact@v2
+        with:
+          name: OlivaDice-OlivOS-Linux
+          path: ./release/OlivOS-Linux
