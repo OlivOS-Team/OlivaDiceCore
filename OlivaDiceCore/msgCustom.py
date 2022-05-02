@@ -95,6 +95,7 @@ dictStrCustom = {
     'strPcGetSingleSkillValue' : '[{tName}]的[{tSkillName}]: {tSkillValue}',
     'strPcShow' : '人物卡[{tName}]:\n{tPcShow}',
     'strPcList' : '[{tName}]的人物卡:\n{tPcList}\n当前选择:{tPcSelection}',
+    'strPcInitSt' : '人物卡[{tName}]已按照[{tPcTempName}]完成人物卡作成:{tPcInitResult}',
     'strPcSet' : '人物卡已切换至[{tPcSelection}]',
     'strPcSetError' : '试图切入的人物卡不存在',
     'strPcDel' : '人物卡[{tPcSelection}]已删除',

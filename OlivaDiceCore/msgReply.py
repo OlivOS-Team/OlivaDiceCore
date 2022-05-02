@@ -1028,13 +1028,13 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str_1_dict = {}
                 tmp_enhanceList = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
                     tmp_pcHash,
-                    tmp_pc_name_1,
+                    dictTValue['tName'],
                     'enhanceList',
                     []
                 )
                 tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
                     tmp_pcHash,
-                    tmp_pc_name_1,
+                    dictTValue['tName'],
                     'template',
                     'default'
                 )
@@ -1128,6 +1128,74 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = dictStrCustom['strPcSetError'].format(**dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
+            elif isMatchWordStart(tmp_reast_str, 'init'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'init')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                flag_force_init = False
+                if isMatchWordStart(tmp_reast_str, 'force'):
+                    flag_force_init = True
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'force')
+                    tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
+                    tmp_pc_id,
+                    tmp_pc_platform
+                )
+                tmp_dict_pc_card = OlivaDiceCore.pcCard.pcCardDataGetByPcName(
+                    tmp_pcHash
+                )
+                tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
+                    tmp_pcHash
+                )
+                tmp_template_name = 'default'
+                if tmp_pc_name != None:
+                    dictTValue['tName'] = tmp_pc_name
+                tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                    tmp_pcHash,
+                    dictTValue['tName'],
+                    'template',
+                    'default'
+                )
+                tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
+                tmp_init_dict = {}
+                tmp_template_customDefault = None
+                if 'init' in tmp_template:
+                    tmp_init_dict = tmp_template['init']
+                if 'customDefault' in tmp_template:
+                    tmp_template_customDefault = tmp_template['customDefault']
+                tmp_pcCard_list = []
+                for tmp_init_dict_this in tmp_init_dict:
+                    if not flag_force_init and tmp_init_dict_this in tmp_dict_pc_card:
+                        continue
+                    if type(tmp_init_dict[tmp_init_dict_this]) == str:
+                        tmp_skill_rd = OlivaDiceCore.onedice.RD(
+                            tmp_init_dict[tmp_init_dict_this],
+                            tmp_template_customDefault,
+                            valueTable = tmp_dict_pc_card
+                        )
+                        tmp_skill_rd.roll()
+                        if tmp_skill_rd.resError == None:
+                            OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
+                                tmp_pcHash,
+                                tmp_init_dict_this,
+                                tmp_skill_rd.resInt,
+                                dictTValue['tName'],
+                                hitList = None,
+                                forceMapping = flag_force_init
+                            )
+                            tmp_pcCard_list.append(
+                                '%s:%s' % (
+                                    OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
+                                        tmp_pcHash,
+                                        tmp_init_dict_this,
+                                        flagShow = True
+                                    ),
+                                    str(tmp_skill_rd.resInt)
+                                )
+                            )
+                dictTValue['tPcInitResult'] = '\n%s' % ' '.join(tmp_pcCard_list)
+                dictTValue['tPcTempName'] = tmp_template_name
+                tmp_reply_str = dictStrCustom['strPcInitSt'].format(**dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'del'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'del')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -1185,9 +1253,6 @@ def unity_reply(plugin_event, Proc):
                 tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
                     tmp_pc_id,
                     tmp_pc_platform
-                )
-                tmp_pcCard = OlivaDiceCore.pcCard.pcCardDataGetByPcName(
-                    tmp_pcHash
                 )
                 tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
                     tmp_pcHash
