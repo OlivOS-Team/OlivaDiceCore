@@ -111,11 +111,14 @@ He dismissed the dismiss as worthless.
 .bot off 停用指令''',
 
     'st': '''.st [人物卡名]-[技能名][技能值][技能名][技能值]……    人物卡批量录入
+.nn [人物卡名]    重命名人物卡
 .st list    显示人物卡列表
 .st set [人物卡名]    切换人物卡
 .st show    显示人物卡
 .st temp [人物卡模版名]    切换人物卡模版
     默认可选：COC7，DND5E，FATE
+.st init (force)    人物卡作成
+    将依照当前人物卡进行作成，作成前请先行切换人物卡
 .st rule [人物卡模版规则名]    切换人物卡规则
 更多请使用[.help 人物卡模板]进行查看
 .st del [人物卡名]    删除人物卡
