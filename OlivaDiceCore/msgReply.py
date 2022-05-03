@@ -154,6 +154,8 @@ def unity_reply(plugin_event, Proc):
         if plugin_event.data.extend['sub_self_id'] != None:
             tmp_at_str_sub = OlivOS.messageAPI.PARA.at(plugin_event.data.extend['sub_self_id']).CQ()
     tmp_reast_str = plugin_event.data.message
+    #反实例化临时方案，用于对齐OlivOS不同平台字符串标准
+    tmp_reast_str = htmlUnescape(tmp_reast_str)
     flag_force_reply = False
     flag_is_command = False
     flag_is_from_host = False
@@ -990,7 +992,6 @@ def unity_reply(plugin_event, Proc):
                 replyMsgLazyHelpByEvent(plugin_event, 'nn')
             return
         elif isMatchWordStart(tmp_reast_str, 'st'):
-            tmp_reast_str = htmlUnescape(tmp_reast_str)
             tmp_pc_name = None
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
@@ -1786,7 +1787,6 @@ def unity_reply(plugin_event, Proc):
                             tmp_reply_str = dictStrCustom['strSanCheck'].format(**dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
         elif isMatchWordStart(tmp_reast_str, 'ra') or isMatchWordStart(tmp_reast_str, 'rc'):
-            tmp_reast_str = htmlUnescape(tmp_reast_str)
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
@@ -2090,7 +2090,6 @@ def unity_reply(plugin_event, Proc):
                     else:
                         replyMsg(plugin_event, tmp_reply_str)
         elif isMatchWordStart(tmp_reast_str, 'en'):
-            tmp_reast_str = htmlUnescape(tmp_reast_str)
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
@@ -2306,7 +2305,7 @@ def unity_reply(plugin_event, Proc):
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'r')
             #此处只对实体化后的&做处理，因为这是运算符，其余保持原样
             #如果以后有全面反实体化的需求则需直接调整这里
-            tmp_reast_str = tmp_reast_str.replace('&amp;', '&')
+            #tmp_reast_str = tmp_reast_str.replace('&amp;', '&')
             rd_para_str = '1D100'
             rd_reason_str = None
             roll_times_count = 1
