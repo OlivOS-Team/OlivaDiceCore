@@ -17,6 +17,7 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 import OlivOS
 import OlivaDiceCore
 
+import html
 import time
 import uuid
 
@@ -989,6 +990,7 @@ def unity_reply(plugin_event, Proc):
                 replyMsgLazyHelpByEvent(plugin_event, 'nn')
             return
         elif isMatchWordStart(tmp_reast_str, 'st'):
+            tmp_reast_str = htmlUnescape(tmp_reast_str)
             tmp_pc_name = None
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
@@ -1784,6 +1786,7 @@ def unity_reply(plugin_event, Proc):
                             tmp_reply_str = dictStrCustom['strSanCheck'].format(**dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
         elif isMatchWordStart(tmp_reast_str, 'ra') or isMatchWordStart(tmp_reast_str, 'rc'):
+            tmp_reast_str = htmlUnescape(tmp_reast_str)
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
@@ -2087,6 +2090,7 @@ def unity_reply(plugin_event, Proc):
                     else:
                         replyMsg(plugin_event, tmp_reply_str)
         elif isMatchWordStart(tmp_reast_str, 'en'):
+            tmp_reast_str = htmlUnescape(tmp_reast_str)
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
@@ -2529,6 +2533,9 @@ def replyMsgPrivateByEvent(plugin_event, message):
 def replyMsgLazyHelpByEvent(plugin_event, help_key):
     tmp_reply_str = OlivaDiceCore.helpDoc.getHelp(str(help_key), plugin_event.bot_info.hash)
     return replyMsg(plugin_event, str(tmp_reply_str))
+
+def htmlUnescape(input):
+    return html.unescape(input)
 
 def msgIsCommand(data, prefix_list):
     res = False
