@@ -1674,6 +1674,13 @@ def unity_reply(plugin_event, Proc):
                         platform = tmp_user_platform
                     )
                     tmp_reply_str = dictStrCustom['strDelGroupTempRule'].format(**dictTValue)
+                OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                    userHash = OlivaDiceCore.userConfig.getUserHash(
+                        userId = tmp_hag_id,
+                        userType = 'group',
+                        platform = tmp_user_platform
+                    )
+                )
             else:
                 tmp_reply_str = dictStrCustom['strForGroupOnly'].format(**dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
