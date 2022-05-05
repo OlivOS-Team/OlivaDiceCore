@@ -23,6 +23,7 @@ dictStrCustomUpdateDict = {}
 
 dictStrCustom = {
     'strBotName': 'Bot',
+    'strForGroupOnly': '此功能仅对群聊开放',
     'strSetStr': '回复词[{tStrName}]已更新',
     'strBecomeMaster': '口令正确，[{tName}]已成为Master',
     'strCantBecomeMaster': '无Master权限且口令错误，拒绝认证',
@@ -89,6 +90,8 @@ dictStrCustom = {
     'strRollError11' : '掷骰错误！解析技能变量时出错！',
     'strRollErrorUnknown' : '掷骰错误！未知的错误: {tResult}',
     'strRollErrorHelp' : '\n请使用[.help r]查看掷骰帮助，或使用[.help onedice]查看先进的OneDice标准。',
+    'strSetGroupTempRule' : '已设置本群套用模板[{tPcTempName}]的规则[{tPcTempRuleName}]{tLazyResult}',
+    'strDelGroupTempRule' : '已清除本群套用模板与规则，将按照人物卡设置各自进行检定',
     'strPcInit' : '[{tPcTempName}]人物卡作成:{tPcInitResult}',
     'strPcUpdateSkillValue' : '[{tName}]的人物卡已更新:\n[{tSkillName}]: {tSkillUpdate}',
     'strPcSetSkillValue' : '[{tName}]的人物卡已保存',
@@ -172,6 +175,7 @@ dictTValue = {
     'tInvateFlag' : 'N/A',
     'tComment' : 'N/A',
     'tResult' : 'N/A',
+    'tLazyResult' : '',
     'tAcceptCommand' : 'N/A',
     'tRollResult' : '',
     'tRollSubResult' : '',
@@ -203,4 +207,22 @@ dictTValue = {
     'tDrawDeckResult': 'N/A',
     'tConsoleKey': 'N/A',
     'tConsoleValue': 'N/A'
+}
+
+dictSetCOCDetail = {
+    'C0': '''出1大成功
+不满50出96 - 100大失败，满50出100大失败''',
+    'C1': '''不满50出1大成功，满50出1 - 5大成功
+不满50出96 - 100大失败，满50出100大失败''',
+    'C2': '''出1 - 5且 <= 成功率大成功
+出100或出96 - 99且 > 成功率大失败''',
+    'C3': '''出1 - 5大成功
+出96 - 100大失败''',
+    'C4': '''出1 - 5且 <= 十分之一大成功
+不满50出 >= 96 + 十分之一大失败，满50出100大失败''',
+    'C5': '''出1 - 2且 < 五分之一大成功
+不满50出96 - 100大失败，满50出99 - 100大失败''',
+    'DeltaGreen': '''小于等于检定目标成功，若结果为1或两骰相同为大成功（相当于整除11）
+大于检定目标失败，若结果为100或两骰相同为大失败（相当于整除11）
+没有极难成功/困难成功'''
 }

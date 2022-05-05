@@ -35,7 +35,9 @@ dictUserConfigNoteDefault = {
     'groupEnable' : True,
     'hostEnable' : True,
     'hostLocalEnable' : True,
-    'groupWithHostEnable' : False
+    'groupWithHostEnable' : False,
+    'groupTemplate' : None,
+    'groupTemplateRule' : None
 }
 
 def setUserConfigByKey(userId, userType, platform, userConfigKey, userConfigValue, botHash):
