@@ -55,6 +55,20 @@
                 "svn": 2,
                 "version": "3.0.1"
             }
+        },
+        "OlivaDiceOdyssey": {
+            "main": {
+                "command": "OlivaDiceOdyssey",
+                "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceOdyssey.opk",
+                "svn": 1,
+                "version": "3.0.0"
+            },
+            "github": {
+                "command": "OlivaDiceOdyssey",
+                "opk_path": "https://github.com/OlivOS-Team/OlivaDiceOdyssey/releases/latest/download/OlivaDiceOdyssey.opk",
+                "svn": 1,
+                "version": "3.0.0"
+            }
         }
     }
 }
