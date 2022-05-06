@@ -10,3 +10,4 @@ Together, we will built a brighter future.
 - [OlivaDiceJoy](https://github.com/OlivOS-Team/OlivaDiceJoy)
 - [OlivaDiceLogger](https://github.com/OlivOS-Team/OlivaDiceLogger)
 - [OlivaDiceMaster](https://github.com/OlivOS-Team/OlivaDiceMaster)
+- [OlivaDiceOdyssey](https://github.com/OlivOS-Team/OlivaDiceOdyssey)
