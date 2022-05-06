@@ -55,6 +55,11 @@ jobs:
         with:
           repository: OlivOS-Team/OlivaDiceMaster
           path: ./download/OlivaDiceMaster/
+      - name: Checkout OlivaDiceOdyssey
+        uses: actions/checkout@v2.4.0
+        with:
+          repository: OlivOS-Team/OlivaDiceOdyssey
+          path: ./download/OlivaDiceOdyssey/
       - name: Pack & Setup OlivaDice
         run: |
           cd ./download/
@@ -74,6 +79,10 @@ jobs:
           zip -r ../../../unpack/OlivaDiceMaster.opk ./
           cd ../../
           echo "Pack OlivaDiceMaster Done"
+          cd ./OlivaDiceOdyssey/OlivaDiceOdyssey
+          zip -r ../../../unpack/OlivaDiceOdyssey.opk ./
+          cd ../../
+          echo "Pack OlivaDiceOdyssey Done"
           cd ../
           cp ./unpack/*.opk ./release/OlivOS/plugin/app
           cp ./unpack/*.opk ./release/OlivOS-Win-32/plugin/app
