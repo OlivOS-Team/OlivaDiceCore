@@ -858,7 +858,9 @@ dictPcCardTemplateDefault = {
                 'CON',
                 'INT',
                 'WIS',
-                'CHA'
+                'CHA',
+                '速度',
+                '先攻'
             ],
             '技能': [
                 '运动',
@@ -900,6 +902,8 @@ dictPcCardTemplateDefault = {
             'CHA': '4d6k3'
         },
         'synonyms':{
+            'Initiative':['先攻','Initiative'],
+            'Speed':['速度','Speed'],
             'STR': ['力量', 'STR','Strength'],
             'DEX': ['敏捷', 'DEX','Dexterity'],
             'CON': ['体质', 'CON','Constitution'],
