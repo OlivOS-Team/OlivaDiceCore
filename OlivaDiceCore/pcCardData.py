@@ -888,10 +888,10 @@ dictPcCardTemplateDefault = {
                 '表演'
             ],
             '物品': [
-                '金币'
-                '银币'
-                '铜币'
-                '铂金币'
+                '金币',
+                '银币',
+                '铜币',
+                '铂金币',
                 '白金币'
             ]
         },
@@ -990,7 +990,7 @@ dictPcCardTemplateDefault = {
             'CON': '体质',
             'INT': '智力',
             'WIS': '感知',
-            'APP': '魅力',
+            'CHA': '魅力',
         },
         'checkRules': {
             'default': {
