@@ -670,10 +670,16 @@ def unity_reply(plugin_event, Proc):
             plugin_event.set_block()
             return
         if isMatchWordStart(tmp_reast_str, 'bot'):
+            tmp_end_list = ['', tmp_at_str]
+            if tmp_at_str_sub != None:
+                tmp_end_list.append(tmp_at_str_sub)
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'bot')
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             if isMatchWordStart(tmp_reast_str, 'on'):
-                if flag_is_from_group:
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'on')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_reast_str = tmp_reast_str.rstrip(' ')
+                if flag_is_from_group and tmp_reast_str in tmp_end_list:
                     if (flag_is_from_group_have_admin and flag_is_from_group_admin or not flag_is_from_group_have_admin) or flag_is_from_master:
                         if flag_groupEnable != True:
                             if flag_is_from_host:
@@ -722,7 +728,10 @@ def unity_reply(plugin_event, Proc):
                             tmp_reply_str = dictStrCustom['strBotAlreadyOn'].format(**dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'off'):
-                if flag_is_from_group:
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'off')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_reast_str = tmp_reast_str.rstrip(' ')
+                if flag_is_from_group and tmp_reast_str in tmp_end_list:
                     if (flag_is_from_group_have_admin and flag_is_from_group_admin or not flag_is_from_group_have_admin) or flag_is_from_master:
                         if flag_groupEnable != False:
                             if flag_is_from_host:
@@ -774,7 +783,10 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'host')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 if isMatchWordStart(tmp_reast_str, 'on'):
-                    if flag_is_from_group:
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'on')
+                    tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                    tmp_reast_str = tmp_reast_str.rstrip(' ')
+                    if flag_is_from_group and tmp_reast_str in tmp_end_list:
                         if ((flag_is_from_group_have_admin and flag_is_from_group_admin and not flag_is_from_group_sub_admin) or not flag_is_from_group_have_admin) or flag_is_from_master:
                             if flag_is_from_host:
                                 if flag_hostLocalEnable != True:
@@ -802,7 +814,10 @@ def unity_reply(plugin_event, Proc):
                                 tmp_reply_str = dictStrCustom['strBotNotUnderHost'].format(**dictTValue)
                                 replyMsg(plugin_event, tmp_reply_str)
                 elif isMatchWordStart(tmp_reast_str, 'off'):
-                    if flag_is_from_group:
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'off')
+                    tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                    tmp_reast_str = tmp_reast_str.rstrip(' ')
+                    if flag_is_from_group and tmp_reast_str in tmp_end_list:
                         if ((flag_is_from_group_have_admin and flag_is_from_group_admin and not flag_is_from_group_sub_admin) or not flag_is_from_group_have_admin) or flag_is_from_master:
                             if flag_is_from_host:
                                 if flag_hostLocalEnable != False:
