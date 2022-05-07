@@ -851,28 +851,145 @@ dictPcCardTemplateDefault = {
                 }
             }
         },
+        'skill': {
+            '属性': [
+                'STR',
+                'DEX',
+                'CON',
+                'INT',
+                'WIS',
+                'CHA',
+                '速度',
+                '先攻'
+            ],
+            '状态': [
+                '载重',
+                '负重',
+                '护甲等级'
+            ],
+            '技能': [
+                '运动',
+                '体操',
+                '巧手',
+                '隐匿',
+                '调查',
+                '奥秘',
+                '历史',
+                '自然',
+                '宗教',
+                '察觉',
+                '洞悉',
+                '驯兽',
+                '医药',
+                '生存',
+                '游说',
+                '欺瞒',
+                '威吓',
+                '表演'
+            ],
+            '物品': [
+                '金币'
+                '银币'
+                '铜币'
+                '铂金币'
+                '白金币'
+            ]
+        },
+        'skillConfig': {
+            'skipEnhance': [
+                'STR',
+                'DEX',
+                'CON',
+                'INT',
+                'WIS',
+                'CHA'
+            ]
+        },
         'init': {
             'STR': '4d6k3',
             'DEX': '4d6k3',
             'CON': '4d6k3',
             'INT': '4d6k3',
-            'POW': '4d6k3',
-            'APP': '4d6k3'
+            'WIS': '4d6k3',
+            'CHA': '4d6k3'
         },
         'synonyms':{
-            'STR': ['力量', 'STR'],
-            'DEX': ['敏捷', 'DEX'],
-            'CON': ['体质', 'CON'],
-            'INT': ['智力', 'INT'],
-            'POW': ['感知', 'POW'],
-            'APP': ['魅力', 'APP']
+            'STR': ['力量', 'STR', 'Strength'],
+            'DEX': ['敏捷', 'DEX', 'Dexterity'],
+            'CON': ['体质', 'CON', 'Constitution'],
+            'INT': ['智力', 'INT', 'Intelligence'],
+            'WIS': ['感知', 'WIS', 'Wisdom'],
+            'CHA': ['魅力', 'CHA', 'Charisma'],
+            '运动': ['运动', 'Athletics'],
+            '先攻': ['先攻', 'Initiative'],
+            '速度': ['速度', 'Speed'],
+
+            '体操': ['体操', 'Acrobatics'],
+            '巧手': ['Sleight_of_Hand', '巧手', '手上功夫'],
+            '隐匿': ['Stealth', '隐匿'],
+            '奥秘': ['Arcana', '奥秘'],
+            '历史': ['History', '历史'],
+            '调查': ['Investigate', '调查'],
+            '自然': ['Nature', '自然'],
+            '宗教': ['Religion', '宗教'],
+            '驯兽': ['Animal_Handling', '动物驯养', '驯兽'],
+            '洞悉': ['Insight', '洞悉'],
+            '医药': ['Medicine', '医药'],
+            '观察': ['Perception', '察觉', '观察'],
+            '生存': ['Survival', '生存', '求生'],
+            '欺瞒': ['Deception', '欺瞒'],
+            '威吓': ['Intimidation', '威吓'],
+            '表演': ['Performance', '表演'],
+            '游说': ['Persuasion', '游说'],
+
+            '载重': ['载重', 'Carring_Capacity'],
+            '负重': ['负重', 'Encumbrance'],
+            '护甲等级': ['AC', 'Armor_Class', '护甲等级'],
+
+            '金币': ['Gold_Piece', '金币', 'GP'],
+            '银币': ['Silver_Piece', '银币', 'SP'],
+            '铜币': ['Copper_Piece', 'CP', '铜币'],
+            '铂金币': ['Electrum_Piece', '铂金币', 'EP'],
+            '白金币': ['Platium_Piece', '白金币', 'PP'],
+
+            '亚比达奇凋死术': ['亚比达奇凋死术', 'ABI_DALZIM_S_HORRID_WILTING'],
+            '吸收元素': ['吸收元素', 'ABSORB_ELEMENTS'],
+            '强酸箭': ['强酸箭', 'ACID_ARROW'],
+            '酸液飞溅': ['酸液飞溅', 'ACID_SPLASH'],
+            '阿迦纳萨喷火术': ['阿迦纳萨喷火术', 'AGANAZZAR_S_SCORCHER'],
+            '援助术': ['援助术', 'AID'],
+            '警报术': ['警报术', 'ALARM'],
+            '变身术': ['变身术', 'ALTER_SELF'],
+            '化兽为友': ['化兽为友', 'ANIMAL_FRIENDSHIP'],
+            '动物信使': ['动物信使', 'ANIMAL_MESSENGER'],
+            '动物形态': ['动物形态', 'ANIMAL_SHAPES'],
+            '操纵死尸': ['操纵死尸', 'ANIMATE_DEAD'],
+            '活化物体': ['活化物体', 'ANIMATE_OBJECTS'],
+            '防生物护罩': ['防生物护罩', 'ANTILIFE_SHELL'],
+            '反魔场': ['反魔场', 'ANTIMAGIC_FIELD'],
+            '关怀术': ['关怀术', 'ANTIPATHY'],
+            '嫌恶': ['嫌恶', 'SYMPATHY'],
+            '秘法眼': ['秘法眼', 'ARCANE_EYE'],
+            '秘法门': ['秘法门', 'ARCANE_GATE'],
+            '秘法魔掌': ['秘法魔掌', 'ARCANE_HAND'],
+            '秘法锁': ['秘法锁', 'ARCANE_LOCK'],
+            '秘法武器': ['秘法武器', 'ARCANE_WEAPON'],
+            '秘法师魔法灵光': ['秘法师魔法灵光', 'ARCANIST_S_MAGIC_AURA'],
+            '艾嘉西斯之铠': ['艾嘉西斯之铠', 'ARMOR_OF_AGATHYS'],
+            '哈达之臂': ['哈达之臂', 'ARMS_OF_HADAR'],
+            '星界投影': ['星界投影', 'ASTRAL_PROJECTION'],
+            '卜筮术': ['卜筮术', 'AUGURY'],
+            '生命灵光': ['生命灵光', 'AURA_OF_LIFE'],
+            '净化灵光': ['净化灵光', 'AURA_OF_PURITY'],
+            '活力灵光': ['活力灵光', 'AURA_OF_VITALITY'],
+            '启蒙术': ['启蒙术', 'AWAKEN']
         },
         'showName': {
             'STR': '力量',
             'DEX': '敏捷',
             'CON': '体质',
             'INT': '智力',
-            'POW': '感知',
+            'WIS': '感知',
             'APP': '魅力',
         },
         'checkRules': {
