@@ -845,17 +845,20 @@ def unity_reply(plugin_event, Proc):
                                 tmp_reply_str = dictStrCustom['strBotNotUnderHost'].format(**dictTValue)
                                 replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'exit'):
-                if flag_is_from_group:
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'exit')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_reast_str = tmp_reast_str.rstrip(' ')
+                if flag_is_from_group and tmp_reast_str in tmp_end_list:
                     if (flag_is_from_group_have_admin and flag_is_from_group_admin) or flag_is_from_master:
                         tmp_reply_str = dictStrCustom['strBotExit'].format(**dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                         time.sleep(1)
                         plugin_event.set_group_leave(plugin_event.data.group_id)
-            elif isMatchWordStart(tmp_reast_str, 'summary') and flag_is_from_master:
+            elif isMatchWordStart(tmp_reast_str, 'summary', fullMatch = True) and flag_is_from_master:
                 tmp_reply_str = ''
                 tmp_reply_str += OlivaDiceCore.data.bot_summary
                 replyMsg(plugin_event, tmp_reply_str)
-            elif isMatchWordStart(tmp_reast_str, 'model'):
+            elif isMatchWordStart(tmp_reast_str, 'model', fullMatch = True):
                 tmp_reply_str = ''
                 tmp_reply_str_list = []
                 for sub_model_this in OlivaDiceCore.crossHook.dictHookList['model']:
@@ -1021,7 +1024,7 @@ def unity_reply(plugin_event, Proc):
             tmp_skill_name_find = None
             tmp_skill_value_find = 0
             tmp_skill_pair_list = []
-            if isMatchWordStart(tmp_reast_str, 'show'):
+            if isMatchWordStart(tmp_reast_str, 'show', fullMatch = True):
                 tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
                     tmp_pc_id,
                     tmp_pc_platform
@@ -1103,7 +1106,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = dictStrCustom['strPcShow'].format(**dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
-            elif isMatchWordStart(tmp_reast_str, 'list'):
+            elif isMatchWordStart(tmp_reast_str, 'list', fullMatch = True):
                 tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
                     OlivaDiceCore.pcCard.getPcHash(
                         tmp_pc_id,
@@ -1152,7 +1155,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'init')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 flag_force_init = False
-                if isMatchWordStart(tmp_reast_str, 'force'):
+                if isMatchWordStart(tmp_reast_str, 'force', fullMatch = True):
                     flag_force_init = True
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'force')
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -1248,7 +1251,7 @@ def unity_reply(plugin_event, Proc):
                     tmp_reply_str = dictStrCustom['strPcDelNone'].format(**dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
-            elif isMatchWordStart(tmp_reast_str, 'clear'):
+            elif isMatchWordStart(tmp_reast_str, 'clear', fullMatch = True):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'clear')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
