@@ -1299,7 +1299,7 @@ def unity_reply(plugin_event, Proc):
                     tmp_pcSkillName = None
                 if tmp_pc_name != None and tmp_pcSkillName != None:
                     tmp_enhanceList_new = []
-                    tmp_enhanceList = OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
+                    tmp_enhanceList = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
                         tmp_pcHash,
                         tmp_pc_name,
                         'enhanceList',
