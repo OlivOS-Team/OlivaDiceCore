@@ -22,6 +22,8 @@ import json
 
 dictHelpDoc = {}
 
+dictHelpDocDefault = {}
+
 dictHelpDocTemp = {
     'default': '''若需要使本机器人退群,请使用[.bot exit]
 输入[.bot on]/[.bot off]可以开关骰子功能

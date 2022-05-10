@@ -23,6 +23,7 @@ import json
 def initHelpDoc(bot_info_dict):
     for bot_info_dict_this in bot_info_dict:
         OlivaDiceCore.helpDocData.dictHelpDoc[bot_info_dict_this] = OlivaDiceCore.helpDocData.dictHelpDocTemp.copy()
+        OlivaDiceCore.helpDocData.dictHelpDocDefault[bot_info_dict_this] = {}
     releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity')
     releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity/extend')
     releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity/extend/helpdoc')
@@ -45,6 +46,7 @@ def initHelpDoc(bot_info_dict):
         releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash)
         releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/extend')
         releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/extend/helpdoc')
+        releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/console')
         customHelpDocDir = OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/extend/helpdoc'
         fileHelpDocList = os.listdir(customHelpDocDir)
         for fileHelpDocList_this in fileHelpDocList:
@@ -57,6 +59,59 @@ def initHelpDoc(bot_info_dict):
                         OlivaDiceCore.helpDocData.dictHelpDoc[botHash].update(obj_HelpDoc_this['helpdoc'])
             except:
                 continue
+        customHelpDocDir = OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/console'
+        customHelpDocFile = 'helpdocDefault.json'
+        customHelpDocPath = customHelpDocDir + '/' + customHelpDocFile
+        try:
+            with open(customHelpDocPath, 'r', encoding = 'utf-8') as customHelpDocPath_f:
+                obj_HelpDoc_this = json.loads(customHelpDocPath_f.read())
+                if type(obj_HelpDoc_this) == dict:
+                    OlivaDiceCore.helpDocData.dictHelpDocDefault[botHash].update(obj_HelpDoc_this)
+                    OlivaDiceCore.helpDocData.dictHelpDoc[botHash].update(
+                        OlivaDiceCore.helpDocData.dictHelpDocDefault[botHash]
+                    )
+        except:
+            pass
+
+def setHelpDocByBotHash(botHash, helpdocKey, helpdocVal):
+    if botHash not in OlivaDiceCore.helpDocData.dictHelpDocDefault:
+        OlivaDiceCore.helpDocData.dictHelpDocDefault[botHash] = {}
+    if botHash not in OlivaDiceCore.helpDocData.dictHelpDoc:
+        OlivaDiceCore.helpDocData.dictHelpDoc[botHash] = {}
+    OlivaDiceCore.helpDocData.dictHelpDocDefault[botHash][helpdocKey] = helpdocVal
+    OlivaDiceCore.helpDocData.dictHelpDoc[botHash].update(
+        OlivaDiceCore.helpDocData.dictHelpDocDefault[botHash]
+    )
+    saveHelpDocByBotHash(botHash)
+
+def delHelpDocByBotHash(botHash, helpdocKey):
+    if botHash not in OlivaDiceCore.helpDocData.dictHelpDocDefault:
+        OlivaDiceCore.helpDocData.dictHelpDocDefault[botHash] = {}
+    if botHash not in OlivaDiceCore.helpDocData.dictHelpDoc:
+        OlivaDiceCore.helpDocData.dictHelpDoc[botHash] = {}
+    if helpdocKey in OlivaDiceCore.helpDocData.dictHelpDocDefault[botHash]:
+        OlivaDiceCore.helpDocData.dictHelpDocDefault[botHash].pop(helpdocKey)
+    if helpdocKey in OlivaDiceCore.helpDocData.dictHelpDoc[botHash]:
+        OlivaDiceCore.helpDocData.dictHelpDoc[botHash].pop(helpdocKey)
+    saveHelpDocByBotHash(botHash)
+
+def saveHelpDocByBotHash(botHash):
+    if botHash in OlivaDiceCore.helpDocData.dictHelpDocDefault:
+        releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/console')
+        try:
+            customHelpDocDir = OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/console'
+            customHelpDocFile = 'helpdocDefault.json'
+            customHelpDocPath = customHelpDocDir + '/' + customHelpDocFile
+            with open(customHelpDocPath, 'w', encoding = 'utf-8') as customHelpDocPath_f:
+                customHelpDocPath_f.write(
+                    json.dumps(
+                        OlivaDiceCore.helpDocData.dictHelpDocDefault[botHash],
+                        ensure_ascii = False,
+                        indent = 4
+                    )
+                )
+        except:
+            pass
 
 def getHelp(key_str, bot_hash):
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()

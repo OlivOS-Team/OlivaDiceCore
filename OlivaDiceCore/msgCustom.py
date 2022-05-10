@@ -148,7 +148,9 @@ dictStrCustom = {
     'strPcSkillCheckFate10' : '[+7 史诗]',
     'strPcSkillCheckFate11' : '[+8 传奇]',
     'strPcSkillCheckNope' : '需要解释',
-    'strPcSkillCheckError' : '发生错误'
+    'strPcSkillCheckError' : '发生错误',
+    'strHelpdocSet' : '自定义帮助文档已设置',
+    'strHelpdocDel' : '自定义帮助文档已删除'
 }
 
 dictStrConst = {

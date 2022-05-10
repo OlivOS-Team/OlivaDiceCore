@@ -639,6 +639,32 @@ def unity_reply(plugin_event, Proc):
                     tmp_reply_str = dictStrCustom['strSetStr'].format(**dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
+            elif isMatchWordStart(tmp_reast_str, 'helpdoc'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'helpdoc')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_reast_str = tmp_reast_str.strip(' ')
+                tmp_reast_list = tmp_reast_str.split(' ')
+                tmp_reast_list_len = len(tmp_reast_list)
+                if tmp_reast_list_len == 1:
+                    tmp_helpdoc_key = tmp_reast_list[0]
+                    tmp_reply_str = dictStrCustom['strHelpdocDel'].format(**dictTValue)
+                    OlivaDiceCore.helpDoc.delHelpDocByBotHash(
+                        botHash = plugin_event.bot_info.hash,
+                        helpdocKey = tmp_helpdoc_key
+                    )
+                    tmp_reply_str = dictStrCustom['strHelpdocDel'].format(**dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                elif tmp_reast_list_len >= 2:
+                    tmp_helpdoc_key = tmp_reast_list[0]
+                    tmp_helpdoc_val = ' '.join(tmp_reast_list[1:])
+                    OlivaDiceCore.helpDoc.setHelpDocByBotHash(
+                        botHash = plugin_event.bot_info.hash,
+                        helpdocKey = tmp_helpdoc_key,
+                        helpdocVal = tmp_helpdoc_val
+                    )
+                    tmp_reply_str = dictStrCustom['strHelpdocSet'].format(**dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                return
         else:
             if flag_messageFliterModeDisabled:
                 plugin_event.set_block()
