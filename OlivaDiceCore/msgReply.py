@@ -647,7 +647,6 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_list_len = len(tmp_reast_list)
                 if tmp_reast_list_len == 1:
                     tmp_helpdoc_key = tmp_reast_list[0]
-                    tmp_reply_str = dictStrCustom['strHelpdocDel'].format(**dictTValue)
                     OlivaDiceCore.helpDoc.delHelpDocByBotHash(
                         botHash = plugin_event.bot_info.hash,
                         helpdocKey = tmp_helpdoc_key

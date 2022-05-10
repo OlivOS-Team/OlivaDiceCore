@@ -172,6 +172,10 @@ https://github.com/OlivOS-Team/onedice
 .dnd [数量]    DND5E人物作成
 推荐使用[.st init]指令进行人物卡作成，详情请使用[.help st]查看''',
 
+    'helpdoc': '''自定义帮助文档:
+.helpdoc [帮助名称] [帮助内容]  设置帮助文档
+.helpdoc [帮助名称]  删除帮助文档''',
+
     'draw': '''抽牌:
 .draw [牌堆名称]  抽牌堆
 .drawh [牌堆名称]  暗抽牌堆''',
