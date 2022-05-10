@@ -201,3 +201,35 @@ def getUserHash(userId, userType, platform, subId = None):
 def releaseDir(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
+
+def initDelUTF8WithBom(bot_info_dict):
+    for bot_info_dict_this in bot_info_dict:
+        botHash = bot_info_dict_this
+        setDelUTF8WithBom(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/console/customReply.json')
+        setDelUTF8WithBom(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/console/helpdocDefault.json')
+        setDelUTF8WithBom(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/console/switch.json')
+    setDelUTF8WithBom(OlivaDiceCore.data.dataDirRoot + '/unity/console/customReply.json')
+    setDelUTF8WithBom(OlivaDiceCore.data.dataDirRoot + '/unity/console/helpdocDefault.json')
+    setDelUTF8WithBom(OlivaDiceCore.data.dataDirRoot + '/unity/console/switch.json')
+    pass
+
+def setDelUTF8WithBom(filePath):
+    flag_is_bom = False
+    free_len = 0
+    bom_len = 0
+    free_data = 0
+    bom_data = 0
+    try:
+        with open(filePath, 'r', encoding = 'utf-8') as filePath_f:
+            free_data = str(filePath_f.read())
+            free_len = len(free_data)
+        with open(filePath, 'r', encoding = 'utf-8-sig') as filePath_f:
+            bom_data = str(filePath_f.read())
+            bom_len = len(bom_data)
+        if free_len > bom_len:
+            flag_is_bom = True
+        if flag_is_bom:
+            with open(filePath, 'w', encoding = 'utf-8') as filePath_f:
+                filePath_f.write(bom_data)
+    except:
+        pass

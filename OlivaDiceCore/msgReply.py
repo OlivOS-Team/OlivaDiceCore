@@ -29,6 +29,7 @@ def logProc(Proc, level, message, segment):
     )
 
 def unity_init(plugin_event, Proc):
+    OlivaDiceCore.userConfig.initDelUTF8WithBom(Proc.Proc_data['bot_info_dict'])
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
     dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
     dictGValue = OlivaDiceCore.msgCustom.dictGValue
