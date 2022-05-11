@@ -187,6 +187,7 @@ def unity_reply(plugin_event, Proc):
     )
     if flag_is_command:
         tmp_hagID = None
+        tmp_userID = plugin_event.data.user_id
         tmp_list_hit = []
         flag_is_from_master = OlivaDiceCore.ordinaryInviteManager.isInMasterList(
             plugin_event.bot_info.hash,
@@ -215,6 +216,19 @@ def unity_reply(plugin_event, Proc):
                 [plugin_event.data.user_id,  'user',  plugin_event.platform['platform']]
             ]
             flag_is_from_group = False
+        tmp_user_name = None
+        if 'name' in plugin_event.data.sender:
+            tmp_user_name = plugin_event.data.sender['name']
+        if tmp_user_name == None:
+            tmp_user_name = '用户'
+        OlivaDiceCore.userConfig.setUserConfigByKey(
+            userConfigKey = 'userName',
+            userConfigValue = tmp_user_name,
+            botHash = plugin_event.bot_info.hash,
+            userId = plugin_event.data.user_id,
+            userType = 'user',
+            platform = plugin_event.platform['platform']
+        )
         if flag_is_from_group:
             if 'role' in plugin_event.data.sender:
                 flag_is_from_group_have_admin = True
@@ -966,6 +980,232 @@ def unity_reply(plugin_event, Proc):
             if tmp_reply_str != None:
                 replyMsg(plugin_event, tmp_reply_str)
             return
+        elif isMatchWordStart(tmp_reast_str, 'ob'):
+            tmp_user_platform = plugin_event.platform['platform']
+            flag_solo = False
+            if isMatchWordStart(tmp_reast_str, 'ob', fullMatch = True):
+                flag_solo = True
+            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'ob')
+            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            if isMatchWordStart(tmp_reast_str, 'clear', fullMatch = True):
+                if flag_is_from_group:
+                    if (flag_is_from_group_have_admin and flag_is_from_group_admin or not flag_is_from_group_have_admin) or flag_is_from_master:
+                        tmp_reply_str = None
+                        tmp_groupHash = OlivaDiceCore.userConfig.getUserHash(
+                            userId = tmp_hagID,
+                            userType = 'group',
+                            platform = tmp_user_platform
+                        )
+                        tmp_groupObList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
+                            userId = tmp_hagID,
+                            userType = 'group',
+                            platform = plugin_event.platform['platform'],
+                            userConfigKey = 'groupObList',
+                            botHash = plugin_event.bot_info.hash
+                        )
+                        if tmp_groupObList_list == None:
+                            tmp_groupObList_list = []
+                        for tmp_groupObList_list_this in tmp_groupObList_list:
+                            tmp_userId_this = OlivaDiceCore.userConfig.getUserDataByKeyWithHash(
+                                userHash = tmp_groupObList_list_this,
+                                userDataKey = 'userId',
+                                botHash = plugin_event.bot_info.hash
+                            )
+                            if tmp_userId_this != None:
+                                tmp_userObList_this_new = []
+                                tmp_userObList_this = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
+                                    userHash = tmp_groupObList_list_this,
+                                    userConfigKey = 'userObList',
+                                    botHash = plugin_event.bot_info.hash
+                                )
+                                if tmp_userObList_this == None:
+                                    tmp_userObList_this = []
+                                if tmp_groupHash in tmp_userObList_this:
+                                    for tmp_userObList_this_this in tmp_userObList_this:
+                                        if tmp_groupHash != tmp_userObList_this_this:
+                                            tmp_userObList_this_new.append(tmp_userObList_this_this)
+                                OlivaDiceCore.userConfig.setUserConfigByKey(
+                                    userConfigKey = 'userObList',
+                                    userConfigValue = tmp_userObList_this_new,
+                                    botHash = plugin_event.bot_info.hash,
+                                    userId = tmp_userId_this,
+                                    userType = 'user',
+                                    platform = tmp_user_platform
+                                )
+                                OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                                    userHash = tmp_groupObList_list_this
+                                )
+                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                            userConfigKey = 'groupObList',
+                            userConfigValue = [],
+                            botHash = plugin_event.bot_info.hash,
+                            userId = tmp_hagID,
+                            userType = 'group',
+                            platform = tmp_user_platform
+                        )
+                        OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                            userHash = tmp_groupHash
+                        )
+                        tmp_reply_str = dictStrCustom['strObClear'].format(**dictTValue)
+                        if tmp_reply_str != None:
+                            replyMsg(plugin_event, tmp_reply_str)
+            if isMatchWordStart(tmp_reast_str, 'list', fullMatch = True):
+                if flag_is_from_group:
+                    tmp_reply_str = None
+                    tmp_reply_str_list = []
+                    tmp_groupHash = OlivaDiceCore.userConfig.getUserHash(
+                        userId = tmp_hagID,
+                        userType = 'group',
+                        platform = tmp_user_platform
+                    )
+                    tmp_userHash = OlivaDiceCore.userConfig.getUserHash(
+                        userId = tmp_userID,
+                        userType = 'user',
+                        platform = tmp_user_platform
+                    )
+                    tmp_groupObList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
+                        userId = tmp_hagID,
+                        userType = 'group',
+                        platform = plugin_event.platform['platform'],
+                        userConfigKey = 'groupObList',
+                        botHash = plugin_event.bot_info.hash
+                    )
+                    if tmp_groupObList_list == None:
+                        tmp_groupObList_list = []
+                    for tmp_groupObList_list_this in tmp_groupObList_list:
+                        tmp_userName_this = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
+                            userHash = tmp_groupObList_list_this,
+                            userConfigKey = 'userName',
+                            botHash = plugin_event.bot_info.hash
+                        )
+                        tmp_userId_this = OlivaDiceCore.userConfig.getUserDataByKeyWithHash(
+                            userHash = tmp_groupObList_list_this,
+                            userDataKey = 'userId',
+                            botHash = plugin_event.bot_info.hash
+                        )
+                        if tmp_userId_this == None:
+                            tmp_userId_this = 'N/A'
+                        tmp_reply_str_list.append(
+                            '[%s](%s)' % (
+                                str(tmp_userName_this),
+                                str(tmp_userId_this)
+                            )
+                        )
+                    if len(tmp_reply_str_list) > 0:
+                        dictTValue['tResult'] = '\n'.join(tmp_reply_str_list)
+                        tmp_reply_str = dictStrCustom['strObList'].format(**dictTValue)
+                    else:
+                        tmp_reply_str = dictStrCustom['strObListNone'].format(**dictTValue)
+                    if tmp_reply_str != None:
+                        replyMsg(plugin_event, tmp_reply_str)
+            elif flag_solo or isMatchWordStart(tmp_reast_str, 'exit', fullMatch = True) or isMatchWordStart(tmp_reast_str, 'join', fullMatch = True):
+                if flag_is_from_group:
+                    flag_ob_will_enable = None
+                    if isMatchWordStart(tmp_reast_str, 'exit', fullMatch = True):
+                        flag_ob_will_enable = False
+                    elif isMatchWordStart(tmp_reast_str, 'join', fullMatch = True):
+                        flag_ob_will_enable = True
+                    tmp_reply_str = None
+                    flag_ob_is_enable = False
+                    tmp_groupHash = OlivaDiceCore.userConfig.getUserHash(
+                        userId = tmp_hagID,
+                        userType = 'group',
+                        platform = tmp_user_platform
+                    )
+                    tmp_userHash = OlivaDiceCore.userConfig.getUserHash(
+                        userId = tmp_userID,
+                        userType = 'user',
+                        platform = tmp_user_platform
+                    )
+                    tmp_groupObList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
+                        userId = tmp_hagID,
+                        userType = 'group',
+                        platform = plugin_event.platform['platform'],
+                        userConfigKey = 'groupObList',
+                        botHash = plugin_event.bot_info.hash
+                    )
+                    tmp_userObList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
+                        userId = tmp_userID,
+                        userType = 'user',
+                        platform = plugin_event.platform['platform'],
+                        userConfigKey = 'userObList',
+                        botHash = plugin_event.bot_info.hash
+                    )
+                    tmp_userName = OlivaDiceCore.userConfig.getUserConfigByKey(
+                        userId = tmp_userID,
+                        userType = 'user',
+                        platform = plugin_event.platform['platform'],
+                        userConfigKey = 'userName',
+                        botHash = plugin_event.bot_info.hash
+                    )
+                    dictTValue['tUserName'] = tmp_userName
+                    if tmp_groupObList_list == None:
+                        tmp_groupObList_list = []
+                    if type(tmp_groupObList_list) != list:
+                        tmp_groupObList_list = []
+                    if tmp_userObList_list == None:
+                        tmp_userObList_list = []
+                    if type(tmp_userObList_list) != list:
+                        tmp_userObList_list = []
+                    if tmp_userHash in tmp_groupObList_list:
+                        flag_ob_is_enable = True
+                    if flag_ob_will_enable == None:
+                        flag_ob_will_enable = not flag_ob_is_enable
+                    if not flag_ob_is_enable and flag_ob_will_enable:
+                        if tmp_userHash not in tmp_groupObList_list:
+                            tmp_groupObList_list.append(tmp_userHash)
+                        if tmp_groupHash not in tmp_userObList_list:
+                            tmp_userObList_list.append(tmp_groupHash)
+                        tmp_reply_str = dictStrCustom['strObJoin'].format(**dictTValue)
+                    elif flag_ob_is_enable and not flag_ob_will_enable:
+                        tmp_groupObList_list_new = []
+                        tmp_userObList_list_new = []
+                        for tmp_groupObList_list_this in tmp_groupObList_list:
+                            if tmp_userHash != tmp_groupObList_list_this:
+                                tmp_groupObList_list_new.append(tmp_groupObList_list_this)
+                        tmp_groupObList_list = tmp_groupObList_list_new
+                        for tmp_userObList_list_this in tmp_userObList_list:
+                            if tmp_groupHash != tmp_userObList_list_this:
+                                tmp_userObList_list_new.append(tmp_userObList_list_this)
+                        tmp_userObList_list = tmp_userObList_list_new
+                        tmp_reply_str = dictStrCustom['strObExit'].format(**dictTValue)
+                    elif flag_ob_is_enable and flag_ob_will_enable:
+                        tmp_reply_str = dictStrCustom['strObJoinAlready'].format(**dictTValue)
+                    elif not flag_ob_is_enable and not flag_ob_will_enable:
+                        tmp_reply_str = dictStrCustom['strObExitAlready'].format(**dictTValue)
+                    if flag_ob_is_enable != flag_ob_will_enable:
+                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                            userConfigKey = 'groupObList',
+                            userConfigValue = tmp_groupObList_list,
+                            botHash = plugin_event.bot_info.hash,
+                            userId = tmp_hagID,
+                            userType = 'group',
+                            platform = tmp_user_platform
+                        )
+                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                            userConfigKey = 'userObList',
+                            userConfigValue = tmp_userObList_list,
+                            botHash = plugin_event.bot_info.hash,
+                            userId = tmp_userID,
+                            userType = 'user',
+                            platform = tmp_user_platform
+                        )
+                        OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                            userHash = OlivaDiceCore.userConfig.getUserHash(
+                                userId = tmp_hagID,
+                                userType = 'group',
+                                platform = tmp_user_platform
+                            )
+                        )
+                        OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                            userHash = OlivaDiceCore.userConfig.getUserHash(
+                                userId = tmp_userID,
+                                userType = 'user',
+                                platform = tmp_user_platform
+                            )
+                        )
+                    if tmp_reply_str != None:
+                        replyMsg(plugin_event, tmp_reply_str)
         elif isMatchWordStart(tmp_reast_str, 'ti', fullMatch = True):
             dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck('即时症状', plugin_event.bot_info.hash)
             tmp_reply_str = dictStrCustom['strDrawTi'].format(**dictTValue)
@@ -2550,6 +2790,7 @@ def unity_reply(plugin_event, Proc):
                             tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resDetail) + '=' + str(rd_para.resInt)
                 else:
                     dictTValue['tResult'] = str(rd_para.resError)
+                    dictTValue['tRollPara'] = str(rd_para_str)
                     if rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_GENERATE_FATAL:
                         tmp_reply_str_1 = dictStrCustom['strRollError01'].format(**dictTValue)
                     elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_COMPLETE_FATAL:
@@ -2695,6 +2936,44 @@ def replyMsgPrivateByEvent(plugin_event, message):
         plugin_event.send('private', plugin_event.data.user_id, message, host_id = plugin_event.data.host_id)
     else:
         plugin_event.send('private', plugin_event.data.user_id, message)
+    replyMsgPrivateForObByEvent(plugin_event, message)
+    return
+
+def replyMsgPrivateForObByEvent(plugin_event, message):
+    host_id = None
+    group_id = None
+    user_id = None
+    tmp_hagID = None
+    if 'host_id' in plugin_event.data.__dict__:
+        host_id = plugin_event.data.host_id
+    if 'group_id' in plugin_event.data.__dict__:
+        group_id = plugin_event.data.group_id
+    if 'user_id' in plugin_event.data.__dict__:
+        user_id = plugin_event.data.user_id
+    if host_id != None:
+        tmp_hagID = '%s|%s' % (str(host_id), str(group_id))
+    else:
+        tmp_hagID = str(group_id)
+    tmp_groupObList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId = tmp_hagID,
+        userType = 'group',
+        platform = plugin_event.platform['platform'],
+        userConfigKey = 'groupObList',
+        botHash = plugin_event.bot_info.hash
+    )
+    if tmp_groupObList_list == None:
+        tmp_groupObList_list = []
+    for tmp_groupObList_list_this in tmp_groupObList_list:
+        tmp_userId_this = OlivaDiceCore.userConfig.getUserDataByKeyWithHash(
+            userHash = tmp_groupObList_list_this,
+            userDataKey = 'userId',
+            botHash = plugin_event.bot_info.hash
+        )
+        if tmp_userId_this != None and tmp_userId_this != user_id:
+            if 'host_id' in plugin_event.data.__dict__:
+                plugin_event.send('private', tmp_userId_this, message, host_id = plugin_event.data.host_id)
+            else:
+                plugin_event.send('private', tmp_userId_this, message)
     return
 
 def replyMsgLazyHelpByEvent(plugin_event, help_key):

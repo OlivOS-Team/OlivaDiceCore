@@ -43,6 +43,7 @@ OlivaDice核心模块
 注: 本模块为必需模块。''',
 
     '更新': '''[OlivaDiceCore]
+3.1.15: 旁观功能
 3.1.13: 人物卡模板功能扩充
 3.1.11: 消息过滤选项
 3.1.10: 指令解析优化
@@ -78,7 +79,8 @@ OlivaDice核心模块
 .sc 理智检定
 .en 成长检定
 .ti/li 临时/总结症状
-.name 随机名称''',
+.name 随机名称
+.ob 旁观''',
 
     '管理': '''管理指令
 在插件启动时将会显示有关骰子认主指令的具体提示，每完成一次认主，口令将会刷新
@@ -88,11 +90,16 @@ OlivaDice核心模块
 .master pulse [TOKEN]  添加心跳TOKEN
 .master pulse del [URL/TOKEN]  删除心跳配置
 .master pulse [URL] [TOKEN]  添加第三方心跳TOKEN
-.master [配置项] [配置值]  修改配置项''',
+.master [配置项] [配置值]  修改配置项
+.str[配置项] [配置值]  修改对应的自定义配置
+.str[配置项]  查看对应的自定义配置
+.helpdoc [帮助名称] [帮助内容]  设置帮助文档
+.helpdoc [帮助名称]  删除帮助文档''',
 
     '链接': '''查看源码: https://github.com/OlivOS-Team/OlivaDiceCore
 OneDice标准: https://github.com/OlivOS-Team/onedice
-OlivOS项目: https://github.com/OlivOS-Team/OlivOS''',
+OlivOS项目: https://github.com/OlivOS-Team/OlivOS
+青果核论坛: https://forum.olivos.run''',
 
     'dismiss': '''dismiss [dɪsˈmɪs]
 vt.	不予考虑; 摒弃; 对…不屑一提; 去除，消除，摒除(思想、感情等); 解雇; 免职; 开除;
@@ -176,9 +183,26 @@ https://github.com/OlivOS-Team/onedice
 .helpdoc [帮助名称] [帮助内容]  设置帮助文档
 .helpdoc [帮助名称]  删除帮助文档''',
 
+    'str': '''自定义回复词:
+.str[配置项] [配置值]  修改对应的自定义配置
+.str[配置项]  查看对应的自定义配置
+本核心内置了一套str回复词配置工具，可以通过以上指令进行骰子回复词的配置，例如：
+使用
+[.strPcSkillCheckFailed 哈哈，失败，哈哈]
+即可将检定失败回复词进行设置。
+
+更多可以设置的回复词请看文档：
+https://wiki.dice.center/OlivOS_Login.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9B%9E%E5%A4%8D%E8%AF%8D--customreplyjson''',
+
     'draw': '''抽牌:
 .draw [牌堆名称]  抽牌堆
 .drawh [牌堆名称]  暗抽牌堆''',
+
+    'ob': '''旁观模式：
+.ob  切换旁观模式
+.ob join 加入旁观模式
+.ob exit 退出旁观模式
+.ob clear 清空本群旁观列表''',
 
     '人物卡模板': '''1、为自己的人物卡指定COC模版（目前可选为COC7，DND5E，FATE）
 指令: [.st temp COC7]
@@ -275,5 +299,8 @@ https://github.com/OlivOS-Team/onedice
     '车卡dnd': '&dnd',
     '随机数': '&random',
     '随机数算法': '&random',
-    '村规': '&setcoc'
+    '村规': '&setcoc',
+    '自定义回复词': '&str',
+    '旁观': '&ob',
+    '旁观模式': '&ob'
 }

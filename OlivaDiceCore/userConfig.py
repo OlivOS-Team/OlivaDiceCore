@@ -31,13 +31,20 @@ gMsgCount = 0
 gMsgCountLock = threading.Lock()
 gUserConfigLock = threading.Lock()
 
+dictUserConfigDefault = {
+    'userId' : None
+}
+
 dictUserConfigNoteDefault = {
     'groupEnable' : True,
     'hostEnable' : True,
     'hostLocalEnable' : True,
     'groupWithHostEnable' : False,
     'groupTemplate' : None,
-    'groupTemplateRule' : None
+    'groupTemplateRule' : None,
+    'groupObList' : None,
+    'userObList' : None,
+    'userName' : '用户'
 }
 
 def setUserConfigByKey(userId, userType, platform, userConfigKey, userConfigValue, botHash):
@@ -83,6 +90,32 @@ def getUserConfigByKey(userId, userType, platform, userConfigKey, botHash):
                 if userConfigKey in dictUserConfigData[userHash][botHash][userConfigNoteKey]:
                     userConfigValue = dictUserConfigData[userHash][botHash][userConfigNoteKey][userConfigKey]
     return userConfigValue
+
+def getUserConfigByKeyWithHash(userHash, userConfigKey, botHash):
+    global dictUserConfigData
+    global dictUserConfigNoteDefault
+    userConfigNoteKey = 'configNote'
+    userConfigValue = False
+    if userConfigKey in dictUserConfigNoteDefault:
+        userConfigValue = dictUserConfigNoteDefault[userConfigKey]
+    if userHash in dictUserConfigData:
+        if botHash in dictUserConfigData[userHash]:
+            if userConfigNoteKey in dictUserConfigData[userHash][botHash]:
+                if userConfigKey in dictUserConfigData[userHash][botHash][userConfigNoteKey]:
+                    userConfigValue = dictUserConfigData[userHash][botHash][userConfigNoteKey][userConfigKey]
+    return userConfigValue
+
+def getUserDataByKeyWithHash(userHash, userDataKey, botHash):
+    global dictUserConfigData
+    global dictUserConfigDefault
+    userDataValue = None
+    if userDataKey in dictUserConfigDefault:
+        userDataValue = dictUserConfigDefault[userDataKey]
+    if userHash in dictUserConfigData:
+        if botHash in dictUserConfigData[userHash]:
+            if userDataKey in dictUserConfigData[userHash][botHash]:
+                userDataValue = dictUserConfigData[userHash][botHash][userDataKey]
+    return userDataValue
 
 #basic
 def setMsgCount():
