@@ -153,10 +153,13 @@ dictStrCustom = {
     'strHelpdocDel' : '自定义帮助文档已删除',
     'strObList' : '当前旁观列表:\n{tResult}',
     'strObListNone' : '当前旁观列表为空',
+    'strObUserObList' : '当前旁观列表:\n{tResult}',
+    'strObUserObListNone' : '当前旁观列表为空',
     'strObJoin' : '[{tUserName}]现已加入旁观',
     'strObJoinAlready' : '[{tUserName}]已在旁观中',
     'strObExit' : '[{tUserName}]现已退出旁观',
     'strObExitAlready' : '[{tUserName}]不在旁观中',
+    'strObExitAll' : '[{tUserName}]现已退出所有旁观',
     'strObClear' : '已清空旁观列表'
 }
 

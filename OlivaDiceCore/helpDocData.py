@@ -202,6 +202,7 @@ https://wiki.dice.center/OlivOS_Login.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9B%9E%
 .ob  切换旁观模式
 .ob join 加入旁观模式
 .ob exit 退出旁观模式
+.ob exit all 退出所有已旁观
 .ob clear 清空本群旁观列表''',
 
     '人物卡模板': '''1、为自己的人物卡指定COC模版（目前可选为COC7，DND5E，FATE）
