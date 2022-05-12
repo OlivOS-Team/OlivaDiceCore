@@ -47,6 +47,21 @@ dictUserConfigNoteDefault = {
     'userName' : '用户'
 }
 
+dictUserConfigNoteMapping = {
+    'groupEnable' : '群启用',
+    'hostEnable' : '频道全局启用',
+    'hostLocalEnable' : '频道启用',
+    'groupWithHostEnable' : '群特例启用'
+}
+
+dictUserConfigNoteType = {
+    'user': [],
+    'group': [
+        'groupEnable',
+        'groupWithHostEnable'
+    ]
+}
+
 def setUserConfigByKey(userId, userType, platform, userConfigKey, userConfigValue, botHash):
     global dictUserConfigData
     global dictUserConfigNoteDefault

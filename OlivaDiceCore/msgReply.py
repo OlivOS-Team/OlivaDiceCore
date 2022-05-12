@@ -1086,7 +1086,7 @@ def unity_reply(plugin_event, Proc):
                         if tmp_userId_this == None:
                             tmp_userId_this = 'N/A'
                         tmp_reply_str_list.append(
-                            '[%s](%s)' % (
+                            '[%s]-(%s)' % (
                                 str(tmp_userName_this),
                                 str(tmp_userId_this)
                             )
@@ -1288,6 +1288,119 @@ def unity_reply(plugin_event, Proc):
             tmp_reply_str = dictStrCustom['strDrawLi'].format(**dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
             return
+        elif isMatchWordStart(tmp_reast_str, 'uinfo'):
+            tmp_user_platform = plugin_event.platform['platform']
+            flag_solo = False
+            flag_onHit = False
+            if isMatchWordStart(tmp_reast_str, 'uinfo', fullMatch = True):
+                flag_solo = True
+            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'uinfo')
+            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            tmp_userId_in = None
+            flag_userInfoType = 'user'
+            if isMatchWordStart(tmp_reast_str, 'group', fullMatch = True):
+                flag_userInfoType = 'group'
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'group')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_userId_in = tmp_hagID
+                flag_onHit = True
+            elif flag_is_from_master and isMatchWordStart(tmp_reast_str, 'group'):
+                flag_userInfoType = 'group'
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'group')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_userId_in = tmp_reast_str
+                flag_onHit = True
+            elif isMatchWordStart(tmp_reast_str, 'user', fullMatch = True):
+                flag_userInfoType = 'user'
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'user')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_userId_in = tmp_userID
+                flag_onHit = True
+            elif flag_is_from_master and isMatchWordStart(tmp_reast_str, 'user'):
+                flag_userInfoType = 'user'
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'user')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_userId_in = tmp_reast_str
+                flag_onHit = True
+            elif flag_solo:
+                flag_userInfoType = 'user'
+                tmp_userId_in = tmp_userID
+                flag_onHit = True
+            if flag_onHit:
+                tmp_userHash = OlivaDiceCore.userConfig.getUserHash(
+                    userId = tmp_userId_in,
+                    userType = flag_userInfoType,
+                    platform = tmp_user_platform
+                )
+                tmp_userId = OlivaDiceCore.userConfig.getUserDataByKeyWithHash(
+                    userHash = tmp_userHash,
+                    userDataKey = 'userId',
+                    botHash = plugin_event.bot_info.hash
+                )
+                if tmp_userId != None:
+                    tmp_reply_str = None
+                    tmp_dictTValue = {
+                        'tUserName': 'N/A',
+                        'tUserId': 'N/A',
+                        'tUserHash': 'N/A',
+                        'tUserPlatform': 'N/A',
+                        'tUserLastHit': 'N/A',
+                        'tUserConfig': ''
+                    }
+                    tmp_reply_str_temp = '[{tUserName}]-({tUserId})\n记录哈希: {tUserHash}\n平台: {tUserPlatform}\n最后触发: {tUserLastHit}{tUserConfig}'
+                    if flag_userInfoType == 'user':
+                        tmp_dictTValue['tUserName'] = '用户'
+                        tmp_userName = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
+                            userHash = tmp_userHash,
+                            userConfigKey = 'userName',
+                            botHash = plugin_event.bot_info.hash
+                        )
+                        tmp_dictTValue['tUserName'] = tmp_userName
+                    elif flag_userInfoType == 'group':
+                        tmp_dictTValue['tUserName'] = '群'
+                    tmp_userPlatform = OlivaDiceCore.userConfig.getUserDataByKeyWithHash(
+                        userHash = tmp_userHash,
+                        userDataKey = 'platform',
+                        botHash = plugin_event.bot_info.hash
+                    )
+                    tmp_userLastHit = OlivaDiceCore.userConfig.getUserDataByKeyWithHash(
+                        userHash = tmp_userHash,
+                        userDataKey = 'lastHit',
+                        botHash = plugin_event.bot_info.hash
+                    )
+                    tmp_userConfigNote = OlivaDiceCore.userConfig.getUserDataByKeyWithHash(
+                        userHash = tmp_userHash,
+                        userDataKey = 'configNote',
+                        botHash = plugin_event.bot_info.hash
+                    )
+                    tmp_userConfigNote_list = []
+                    if flag_userInfoType in OlivaDiceCore.userConfig.dictUserConfigNoteType:
+                        for dictUserConfigNoteMapping_this in OlivaDiceCore.userConfig.dictUserConfigNoteType[flag_userInfoType]:
+                            if dictUserConfigNoteMapping_this in tmp_userConfigNote:
+                                if type(tmp_userConfigNote[dictUserConfigNoteMapping_this]) == bool:
+                                    if tmp_userConfigNote[dictUserConfigNoteMapping_this]:
+                                        if dictUserConfigNoteMapping_this in OlivaDiceCore.userConfig.dictUserConfigNoteMapping:
+                                            tmp_userConfigNote_list.append(
+                                                OlivaDiceCore.userConfig.dictUserConfigNoteMapping[
+                                                    dictUserConfigNoteMapping_this
+                                                ]
+                                            )
+                    if len(tmp_userConfigNote_list) > 0:
+                        tmp_dictTValue['tUserConfig'] = '\n%s' % ' - '.join(tmp_userConfigNote_list)
+                    tmp_dictTValue['tUserId'] = tmp_userId
+                    tmp_dictTValue['tUserHash'] = tmp_userHash
+                    tmp_dictTValue['tUserPlatform'] = tmp_userPlatform
+                    tmp_dictTValue['tUserLastHit'] = time.strftime(
+                        "%Y-%m-%d %H:%M:%S",
+                        time.localtime(
+                            tmp_userLastHit
+                        )
+                    )
+                    tmp_reply_str = tmp_reply_str_temp.format(**tmp_dictTValue)
+                else:
+                    tmp_reply_str = '未找到相关记录'
+                if tmp_reply_str != None:
+                    replyMsg(plugin_event, tmp_reply_str)
         elif isMatchWordStart(tmp_reast_str, 'name'):
             tmp_card_count = 1
             tmp_card_count_str = None
