@@ -91,6 +91,9 @@ OlivaDice核心模块
 .master pulse del [URL/TOKEN]  删除心跳配置
 .master pulse [URL] [TOKEN]  添加第三方心跳TOKEN
 .master [配置项] [配置值]  修改配置项
+.master remote [on/off] [群组ID]  远程在群中停用
+.master remote host [on/off] [频道ID]  远程在频道中停用
+.master remote host default [on/off] [频道ID]  远程在频道中默认关闭
 .str[配置项] [配置值]  修改对应的自定义配置
 .str[配置项]  查看对应的自定义配置
 .helpdoc [帮助名称] [帮助内容]  设置帮助文档

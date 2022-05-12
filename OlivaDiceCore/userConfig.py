@@ -48,10 +48,10 @@ dictUserConfigNoteDefault = {
 }
 
 dictUserConfigNoteMapping = {
-    'groupEnable' : '群启用',
-    'hostEnable' : '频道全局启用',
-    'hostLocalEnable' : '频道启用',
-    'groupWithHostEnable' : '群特例启用'
+    'groupEnable' : ['群启用', '群禁用'],
+    'hostEnable' : ['子频道默认启用', '子频道默认禁用'],
+    'hostLocalEnable' : ['频道启用', '频道禁用'],
+    'groupWithHostEnable' : ['子频道特例启用', '子频道特例禁用']
 }
 
 dictUserConfigNoteType = {
@@ -59,6 +59,10 @@ dictUserConfigNoteType = {
     'group': [
         'groupEnable',
         'groupWithHostEnable'
+    ],
+    'host': [
+        'hostEnable',
+        'hostLocalEnable'
     ]
 }
 

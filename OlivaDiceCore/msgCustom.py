@@ -34,6 +34,15 @@ dictStrCustom = {
     'strMasterConsoleAppend': '[{tName}]已修改[{tConsoleKey}]条目',
     'strMasterConsoleSetInvalid': '非法的配置值',
     'strMasterConsoleNotFound': '无法访问的配置项',
+    'strMasterRemoteOn': '已在[{tId}]远程开启',
+    'strMasterRemoteOff': '已在[{tId}]远程关闭',
+    'strMasterRemoteOnAlready': '[{tId}]已处于开启状态',
+    'strMasterRemoteOffAlready': '[{tId}]已处于关闭状态',
+    'strMasterRemoteDefaultOn': '已在[{tId}]远程默认开启',
+    'strMasterRemoteDefaultOff': '已在[{tId}]远程默认关闭',
+    'strMasterRemoteDefaultOnAlready': '[{tId}]已处于默认开启状态',
+    'strMasterRemoteDefaultOffAlready': '[{tId}]已处于默认关闭状态',
+    'strMasterRemoteNone': '设置失败，未找到[{tId}]的相关记录',
     'strNeedMaster': '需要Master权限',
     'strHello': '欢迎使用本机器人! 请使用[.help]查看帮助',
     'strBot': '欢迎使用本机器人! 请使用[.help]查看帮助',
@@ -177,6 +186,7 @@ dictGValue = {
 
 dictTValue = {
     'tVersion' : 'N/A',
+    'tId' : 'N/A',
     'tName' : 'N/A',
     'tStrName' : 'N/A',
     'tUserId' : 'N/A',
