@@ -1614,17 +1614,23 @@ def unity_reply(plugin_event, Proc):
                                                 ]
                                             ) == 2:
                                                 if tmp_userConfigNote[dictUserConfigNoteMapping_this]:
-                                                    tmp_userConfigNote_list.append(
-                                                        OlivaDiceCore.userConfig.dictUserConfigNoteMapping[
-                                                            dictUserConfigNoteMapping_this
-                                                        ][0]
-                                                    )
+                                                    if OlivaDiceCore.userConfig.dictUserConfigNoteMapping[
+                                                        dictUserConfigNoteMapping_this
+                                                    ][0] != None:
+                                                        tmp_userConfigNote_list.append(
+                                                            OlivaDiceCore.userConfig.dictUserConfigNoteMapping[
+                                                                dictUserConfigNoteMapping_this
+                                                            ][0]
+                                                        )
                                                 else:
-                                                    tmp_userConfigNote_list.append(
-                                                        OlivaDiceCore.userConfig.dictUserConfigNoteMapping[
-                                                            dictUserConfigNoteMapping_this
-                                                        ][1]
-                                                    )
+                                                    if OlivaDiceCore.userConfig.dictUserConfigNoteMapping[
+                                                        dictUserConfigNoteMapping_this
+                                                    ][1] != None:
+                                                        tmp_userConfigNote_list.append(
+                                                            OlivaDiceCore.userConfig.dictUserConfigNoteMapping[
+                                                                dictUserConfigNoteMapping_this
+                                                            ][1]
+                                                        )
                     if len(tmp_userConfigNote_list) > 0:
                         tmp_dictTValue['tUserConfig'] = '\n%s' % ' - '.join(tmp_userConfigNote_list)
                     tmp_dictTValue['tUserId'] = tmp_userId
