@@ -54,16 +54,16 @@ def setConsoleSwitchByHash(switchKey, switchValue, botHash = 'unity'):
 def initConsoleSwitch(botHash, templateName = 'default'):
     global dictConsoleSwitch
     global dictConsoleSwitchTemplate
-    if botHash not in dictConsoleSwitch:
-        if templateName in dictConsoleSwitchTemplate:
+    if templateName in dictConsoleSwitchTemplate:
+        if botHash not in dictConsoleSwitch:
             dictConsoleSwitch[botHash] = {}
-            for template_key_this in dictConsoleSwitchTemplate[templateName]:
-                if type(dictConsoleSwitchTemplate[templateName][template_key_this]) in [
-                    list
-                ]:
-                    dictConsoleSwitch[botHash][template_key_this] = dictConsoleSwitchTemplate[templateName][template_key_this].copy()
-                else:
-                    dictConsoleSwitch[botHash][template_key_this] = dictConsoleSwitchTemplate[templateName][template_key_this]
+        for template_key_this in dictConsoleSwitchTemplate[templateName]:
+            if type(dictConsoleSwitchTemplate[templateName][template_key_this]) in [
+                list
+            ] and template_key_this not in dictConsoleSwitch[botHash]:
+                dictConsoleSwitch[botHash][template_key_this] = dictConsoleSwitchTemplate[templateName][template_key_this].copy()
+            else:
+                dictConsoleSwitch[botHash][template_key_this] = dictConsoleSwitchTemplate[templateName][template_key_this]
 
 def initConsoleSwitchByBotDict(botDict):
     global dictConsoleSwitch

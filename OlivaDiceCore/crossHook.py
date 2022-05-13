@@ -36,7 +36,7 @@ def msgHook(event, funcType, sender, dectData, message):
         tmp_id = sender['id']
     return None
 
-def pokeHook(type = 'group'):
+def pokeHook(plugin_event, type = 'group'):
     if type == 'group':
         return OlivaDiceCore.data.bot_info
     elif type == 'private':
