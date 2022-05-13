@@ -36,6 +36,14 @@ def msgHook(event, funcType, sender, dectData, message):
         tmp_id = sender['id']
     return None
 
+def pokeHook(type = 'group'):
+    if type == 'group':
+        return OlivaDiceCore.data.bot_info
+    elif type == 'private':
+        return OlivaDiceCore.data.bot_info
+    else:
+        return OlivaDiceCore.data.bot_info
+
 #跨模块注入点
 dictHookList = {
     'model': listModel,
@@ -43,5 +51,6 @@ dictHookList = {
 }
 
 dictHookFunc = {
-    'msgHook': msgHook
+    'msgHook': msgHook,
+    'pokeHook': pokeHook
 }

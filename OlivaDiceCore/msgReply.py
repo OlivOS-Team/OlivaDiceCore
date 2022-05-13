@@ -116,9 +116,11 @@ def unity_save(plugin_event, Proc):
 
 def poke_reply(plugin_event, Proc):
     if plugin_event.data.target_id == plugin_event.base_info['self_id']:
-        replyMsg(plugin_event, OlivaDiceCore.data.bot_info)
+        replyMsg(plugin_event, OlivaDiceCore.crossHook.dictHookFunc['pokeHook'](type = 'group'))
     elif plugin_event.data.group_id == -1:
-        replyMsg(plugin_event, OlivaDiceCore.data.bot_info)
+        replyMsg(plugin_event, OlivaDiceCore.crossHook.dictHookFunc['pokeHook'](type = 'private'))
+    elif plugin_event.data.group_id == None:
+        replyMsg(plugin_event, OlivaDiceCore.crossHook.dictHookFunc['pokeHook'](type = 'private'))
 
 def unity_reply(plugin_event, Proc):
     OlivaDiceCore.userConfig.setMsgCount()

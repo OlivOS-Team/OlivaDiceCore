@@ -419,11 +419,21 @@ def pcCardDataSetTemplateKey(pcHash, pcCardName, templateName = 'default', ruleN
     selection_key = 'template'
     selection_key_2 = 'checkRules'
     tmp_pc_card_name_key = pcCardName
-    if templateName not in dictPcCardTemplateDefault['unity']:
+    templateName_core = None
+    ruleName_core = None
+    templateName_core = getKeyWithUpper(
+        data = dictPcCardTemplateDefault['unity'],
+        key = templateName
+    )
+    if templateName_core == None:
         return False
-    if selection_key_2 not in dictPcCardTemplateDefault['unity'][templateName]:
+    if selection_key_2 not in dictPcCardTemplateDefault['unity'][templateName_core]:
         return False
-    if ruleName not in dictPcCardTemplateDefault['unity'][templateName][selection_key_2]:
+    ruleName_core = getKeyWithUpper(
+        data = dictPcCardTemplateDefault['unity'][templateName_core][selection_key_2],
+        key = ruleName
+    )
+    if ruleName_core == None:
         return False
     tmp_card_dict = {}
     if pcHash in dictPcCardData['unity']:
@@ -433,8 +443,8 @@ def pcCardDataSetTemplateKey(pcHash, pcCardName, templateName = 'default', ruleN
             dictPcCardTemplate['unity'][pcHash] = {}
         if tmp_pc_card_name_key not in dictPcCardTemplate['unity'][pcHash]:
             dictPcCardTemplate['unity'][pcHash][tmp_pc_card_name_key] = {}
-        dictPcCardTemplate['unity'][pcHash][tmp_pc_card_name_key][selection_key] = templateName
-        dictPcCardTemplate['unity'][pcHash][tmp_pc_card_name_key][selection_key_2] = ruleName
+        dictPcCardTemplate['unity'][pcHash][tmp_pc_card_name_key][selection_key] = templateName_core
+        dictPcCardTemplate['unity'][pcHash][tmp_pc_card_name_key][selection_key_2] = ruleName_core
         dataPcCardSave('unity', pcHash)
         return True
     else:
@@ -509,3 +519,11 @@ def getPcHash(pcId, platform):
     hash_tmp.update(str(pcId).encode(encoding='UTF-8'))
     hash_tmp.update(str(platform).encode(encoding='UTF-8'))
     return hash_tmp.hexdigest()
+
+def getKeyWithUpper(data, key):
+    res = None
+    for key_this in data:
+        if key.upper() == key_this.upper():
+            res = key_this
+            break
+    return res
