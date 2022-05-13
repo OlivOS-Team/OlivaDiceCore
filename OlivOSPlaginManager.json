@@ -4,28 +4,28 @@
             "main": {
                 "command": "OlivaDiceCore",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceCore.opk",
-                "svn": 1024,
-                "version": "3.1.14"
+                "svn": 1026,
+                "version": "3.1.16"
             },
             "github": {
                 "command": "OlivaDiceCore",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceCore/releases/latest/download/OlivaDiceCore.opk",
-                "svn": 1024,
-                "version": "3.1.14"
+                "svn": 1026,
+                "version": "3.1.16"
             }
         },
         "OlivaDiceJoy": {
             "main": {
                 "command": "OlivaDiceJoy",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceJoy.opk",
-                "svn": 10,
-                "version": "3.0.2"
+                "svn": 11,
+                "version": "3.0.3"
             },
             "github": {
                 "command": "OlivaDiceJoy",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceJoy/releases/latest/download/OlivaDiceJoy.opk",
-                "svn": 10,
-                "version": "3.0.2"
+                "svn": 11,
+                "version": "3.0.3"
             }
         },
         "OlivaDiceLogger": {
@@ -46,28 +46,28 @@
             "main": {
                 "command": "OlivaDiceMaster",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceMaster.opk",
-                "svn": 2,
-                "version": "3.0.1"
+                "svn": 3,
+                "version": "3.0.2"
             },
             "github": {
                 "command": "OlivaDiceMaster",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceMaster/releases/latest/download/OlivaDiceMaster.opk",
-                "svn": 2,
-                "version": "3.0.1"
+                "svn": 3,
+                "version": "3.0.2"
             }
         },
         "OlivaDiceOdyssey": {
             "main": {
                 "command": "OlivaDiceOdyssey",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceOdyssey.opk",
-                "svn": 1,
-                "version": "3.0.0"
+                "svn": 2,
+                "version": "3.0.1"
             },
             "github": {
                 "command": "OlivaDiceOdyssey",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceOdyssey/releases/latest/download/OlivaDiceOdyssey.opk",
-                "svn": 1,
-                "version": "3.0.0"
+                "svn": 2,
+                "version": "3.0.1"
             }
         }
     }
