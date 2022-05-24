@@ -3314,7 +3314,7 @@ def replyMsg(plugin_event, message):
         [host_id, group_id, user_id],
         str(message)
     )
-    return plugin_event.reply(str(message))
+    return pluginReply(plugin_event, str(message))
 
 def sendMsgByEvent(plugin_event, message, target_id, target_type, host_id = None):
     group_id = None
@@ -3335,7 +3335,7 @@ def sendMsgByEvent(plugin_event, message, target_id, target_type, host_id = None
         [host_id, group_id, user_id],
         str(message)
     )
-    return plugin_event.send(target_type, target_id, message, host_id = host_id)
+    return pluginSend(plugin_event, target_type, target_id, message, host_id = host_id)
 
 def replyMsgPrivateByEvent(plugin_event, message):
     if OlivaDiceCore.console.getConsoleSwitchByHash(
@@ -3366,9 +3366,9 @@ def replyMsgPrivateByEvent(plugin_event, message):
         str(message)
     )
     if 'host_id' in plugin_event.data.__dict__:
-        plugin_event.send('private', plugin_event.data.user_id, message, host_id = plugin_event.data.host_id)
+        pluginSend(plugin_event, 'private', plugin_event.data.user_id, message, host_id = plugin_event.data.host_id)
     else:
-        plugin_event.send('private', plugin_event.data.user_id, message)
+        pluginSend(plugin_event, 'private', plugin_event.data.user_id, message)
     replyMsgPrivateForObByEvent(plugin_event, message)
     return
 
@@ -3404,14 +3404,104 @@ def replyMsgPrivateForObByEvent(plugin_event, message):
         )
         if tmp_userId_this != None and tmp_userId_this != user_id:
             if 'host_id' in plugin_event.data.__dict__:
-                plugin_event.send('private', tmp_userId_this, message, host_id = plugin_event.data.host_id)
+                pluginSend(plugin_event, 'private', tmp_userId_this, message, host_id = plugin_event.data.host_id)
             else:
-                plugin_event.send('private', tmp_userId_this, message)
+                pluginSend(plugin_event, 'private', tmp_userId_this, message)
     return
 
 def replyMsgLazyHelpByEvent(plugin_event, help_key):
     tmp_reply_str = OlivaDiceCore.helpDoc.getHelp(str(help_key), plugin_event.bot_info.hash)
     return replyMsg(plugin_event, str(tmp_reply_str))
+
+
+#原始接口调用
+
+def pluginReply(plugin_event, message):
+    botHash = plugin_event.bot_info.hash
+    messageSplitGate = OlivaDiceCore.console.getConsoleSwitchByHash(
+        'messageSplitGate',
+        botHash
+    )
+    messageSplitPageLimit = OlivaDiceCore.console.getConsoleSwitchByHash(
+        'messageSplitPageLimit',
+        botHash
+    )
+    messageSplitDelay = OlivaDiceCore.console.getConsoleSwitchByHash(
+        'messageSplitDelay',
+        botHash
+    )
+    messageSplitDelay = messageSplitDelay / 1000
+    message = message.replace('{SPLIT}', '\f')
+    message_list = message.split('\f')
+    message_list_new = []
+    for message_list_this in message_list:
+        tmp_message = message_list_this
+        while len(tmp_message) > messageSplitGate:
+            message_list_new.append(tmp_message[:messageSplitGate])
+            tmp_message = tmp_message[messageSplitGate:]
+        message_list_new.append(tmp_message)
+    message_list = message_list_new
+    count = 1
+    flag_need_split = len(message_list) > 1
+    for message_list_this in message_list:
+        if len(message_list_this) > 0:
+            tmp_message = message_list_this
+            if flag_need_split:
+                tmp_message = '[第%s页]\n%s' % (
+                    str(count),
+                    message_list_this
+                )
+            plugin_event.reply(tmp_message)
+            if flag_need_split:
+                count += 1
+                time.sleep(messageSplitDelay)
+        if not flag_need_split or count > messageSplitPageLimit:
+            break
+
+def pluginSend(plugin_event, send_type, target_id, message, host_id = None):
+    botHash = plugin_event.bot_info.hash
+    messageSplitGate = OlivaDiceCore.console.getConsoleSwitchByHash(
+        'messageSplitGate',
+        botHash
+    )
+    messageSplitPageLimit = OlivaDiceCore.console.getConsoleSwitchByHash(
+        'messageSplitPageLimit',
+        botHash
+    )
+    messageSplitDelay = OlivaDiceCore.console.getConsoleSwitchByHash(
+        'messageSplitDelay',
+        botHash
+    )
+    messageSplitDelay = messageSplitDelay / 1000
+    message = message.replace('{SPLIT}', '\f')
+    message_list = message.split('\f')
+    message_list_new = []
+    for message_list_this in message_list:
+        tmp_message = message_list_this
+        while len(tmp_message) > messageSplitGate:
+            message_list_new.append(tmp_message[:messageSplitGate])
+            tmp_message = tmp_message[messageSplitGate:]
+        message_list_new.append(tmp_message)
+    message_list = message_list_new
+    count = 1
+    flag_need_split = len(message_list) > 1
+    for message_list_this in message_list:
+        if len(message_list_this) > 0:
+            tmp_message = message_list_this
+            if flag_need_split:
+                tmp_message = '[第%s页]\n%s' % (
+                    str(count),
+                    message_list_this
+                )
+            plugin_event.send(send_type, target_id, tmp_message, host_id = host_id)
+            if flag_need_split:
+                count += 1
+                time.sleep(messageSplitDelay)
+        if not flag_need_split or count > messageSplitPageLimit:
+            break
+
+
+#其他
 
 def htmlUnescape(input):
     return html.unescape(input)
