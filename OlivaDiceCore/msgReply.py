@@ -1591,6 +1591,8 @@ def unity_reply(plugin_event, Proc):
                     tmp_userConfigNote_list = []
                     if flag_userInfoType in OlivaDiceCore.userConfig.dictUserConfigNoteType:
                         for dictUserConfigNoteMapping_this in OlivaDiceCore.userConfig.dictUserConfigNoteType[flag_userInfoType]:
+                            if type(tmp_userConfigNote) != list:
+                                continue
                             if dictUserConfigNoteMapping_this in tmp_userConfigNote:
                                 if type(tmp_userConfigNote[dictUserConfigNoteMapping_this]) == bool:
                                     if dictUserConfigNoteMapping_this in OlivaDiceCore.userConfig.dictUserConfigNoteMapping:
