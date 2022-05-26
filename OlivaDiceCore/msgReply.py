@@ -1134,8 +1134,33 @@ def unity_reply(plugin_event, Proc):
                     )
                     for tmp_dataList_this in tmp_dataList:
                         if len(tmp_dataList_this) == 2:
-                            tmp_dataList_new.append(str(tmp_dataList_this[0]))
-                    dictTValue['tHelpDocResult'] = ', '.join(tmp_dataList_new)
+                            tmp_userName = '骰主'
+                            tmp_userRawId = tmp_dataList_this[0]
+                            tmp_userPlatform = tmp_dataList_this[1]
+                            tmp_botHash = plugin_event.bot_info.hash
+                            tmp_userHash = OlivaDiceCore.userConfig.getUserHash(
+                                userId = tmp_userRawId,
+                                userType = 'user',
+                                platform = tmp_userPlatform
+                            )
+                            tmp_userId = OlivaDiceCore.userConfig.getUserDataByKeyWithHash(
+                                userHash = tmp_userHash,
+                                userDataKey = 'userId',
+                                botHash = tmp_botHash
+                            )
+                            if tmp_userId != None:
+                                tmp_userName = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
+                                    userHash = tmp_userHash,
+                                    userConfigKey = 'userName',
+                                    botHash = tmp_botHash
+                                )
+                            tmp_dataList_new.append(
+                                '[%s] - (%s)' % (
+                                    str(tmp_userName),
+                                    str(tmp_dataList_this[0])
+                                )
+                            )
+                    dictTValue['tHelpDocResult'] = '\n'.join(tmp_dataList_new)
                     tmp_reply_str = dictStrCustom['strHelpDoc'].format(**dictTValue)
                 else:
                     tmp_reply_str = OlivaDiceCore.helpDoc.getHelp(tmp_reast_str, plugin_event.bot_info.hash)
@@ -1287,7 +1312,7 @@ def unity_reply(plugin_event, Proc):
                         if tmp_userId_this == None:
                             tmp_userId_this = 'N/A'
                         tmp_reply_str_list.append(
-                            '[%s]-(%s)' % (
+                            '[%s] - (%s)' % (
                                 str(tmp_userName_this),
                                 str(tmp_userId_this)
                             )
@@ -1560,7 +1585,7 @@ def unity_reply(plugin_event, Proc):
                         'tUserLastHit': 'N/A',
                         'tUserConfig': ''
                     }
-                    tmp_reply_str_temp = '[{tUserName}]-({tUserId})\n记录哈希: {tUserHash}\n平台: {tUserPlatform}\n最后触发: {tUserLastHit}{tUserConfig}'
+                    tmp_reply_str_temp = '[{tUserName}] - ({tUserId})\n记录哈希: {tUserHash}\n平台: {tUserPlatform}\n最后触发: {tUserLastHit}{tUserConfig}'
                     if flag_userInfoType == 'user':
                         tmp_dictTValue['tUserName'] = '用户'
                         tmp_userName = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
