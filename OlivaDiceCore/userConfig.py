@@ -32,7 +32,8 @@ gMsgCountLock = threading.Lock()
 gUserConfigLock = threading.Lock()
 
 dictUserConfigDefault = {
-    'userId' : None
+    'userId' : None,
+    'lastHit' : None
 }
 
 dictUserConfigNoteDefault = {
@@ -44,7 +45,9 @@ dictUserConfigNoteDefault = {
     'groupTemplateRule' : None,
     'groupObList' : None,
     'userObList' : None,
-    'userName' : '用户'
+    'userName' : '用户',
+    'trustLevel' : 0,
+    'trustRank' : 1000
 }
 
 dictUserConfigNoteMapping = {
@@ -89,6 +92,8 @@ def setUserConfigByKey(userId, userType, platform, userConfigKey, userConfigValu
     dictUserConfigData[userHash][botHash]['userId'] = userId
     dictUserConfigData[userHash][botHash]['userType'] = userType
     dictUserConfigData[userHash][botHash]['platform'] = platform
+    if 'lastHit' not in dictUserConfigData[userHash][botHash]:
+        dictUserConfigData[userHash][botHash]['lastHit'] = dictUserConfigDefault['lastHit']
     dictUserConfigData[userHash][botHash][userConfigNoteKey][userConfigKey] = userConfigValue
 
 def getUserConfigByKey(userId, userType, platform, userConfigKey, botHash):
