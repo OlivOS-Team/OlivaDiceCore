@@ -2508,6 +2508,7 @@ def unity_reply(plugin_event, Proc):
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'sc')
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             if len(tmp_reast_str) <= 0:
+                replyMsgLazyHelpByEvent(plugin_event, 'sc')
                 return
             tmp_reast_str_list = tmp_reast_str.split(' ')
             tmp_sancheck_para = None
@@ -2519,8 +2520,10 @@ def unity_reply(plugin_event, Proc):
             elif len(tmp_reast_str_list) == 1:
                 tmp_sancheck_para = tmp_reast_str
             else:
+                replyMsgLazyHelpByEvent(plugin_event, 'sc')
                 return
             if tmp_sancheck_para == None:
+                replyMsgLazyHelpByEvent(plugin_event, 'sc')
                 return
             tmp_sancheck_para_list = tmp_sancheck_para.split('/')
             tmp_sancheck_para_s = None
@@ -2534,6 +2537,7 @@ def unity_reply(plugin_event, Proc):
                         tmp_sancheck_para_f += '/'
                     tmp_sancheck_para_f += tmp_sancheck_para_list_this
             else:
+                replyMsgLazyHelpByEvent(plugin_event, 'sc')
                 return
             tmp_pc_name = None
             tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
@@ -2648,6 +2652,8 @@ def unity_reply(plugin_event, Proc):
                         else:
                             tmp_reply_str = dictStrCustom['strSanCheck'].format(**dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
+            else:
+                replyMsgLazyHelpByEvent(plugin_event, 'sc')
         elif isMatchWordStart(tmp_reast_str, 'ra') or isMatchWordStart(tmp_reast_str, 'rc'):
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
