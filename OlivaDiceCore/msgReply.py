@@ -3654,6 +3654,8 @@ def getExpression(data, reverse = False, valueTable = None):
                         tmp_offset_len = idx - tmp_total_offset + 1
                         flag_not_hit = False
                         flag_value = True
+                if (not flag_not_hit) and (data[tmp_total_offset:tmp_total_offset + tmp_offset_len] in OlivaDiceCore.onedice.dictOperationPriority or data[tmp_total_offset:tmp_total_offset + tmp_offset_len] in OlivaDiceCore.onedice.listOperationSub):
+                    flag_value = False
             if flag_not_hit and data[tmp_total_offset] in OlivaDiceCore.onedice.dictOperationPriority:
                 flag_not_hit = False
             if flag_not_hit and data[tmp_total_offset] in OlivaDiceCore.onedice.listOperationSub:
