@@ -150,7 +150,7 @@ def pcCardRebase(pcHash, pcCardName, hagId = None):
         dictPcCardSelection['unity'][pcHash] = {}
     pcCardNameOld = pcCardDataGetSelectionKey(pcHash, hagId)
     if None == pcCardDataGetSelectionKeyLock(pcHash, hagId):
-        pcCardDataSetSelectionKey(pcHash, pcCardName)
+        pcCardDataSetSelectionKey(pcHash, pcCardName, forceSwitch = True)
     if lockList_key in dictPcCardSelection['unity'][pcHash]:
         for hagId_this in dictPcCardSelection['unity'][pcHash][lockList_key]:
             if pcCardNameOld == dictPcCardSelection['unity'][pcHash][lockList_key][hagId_this]:
