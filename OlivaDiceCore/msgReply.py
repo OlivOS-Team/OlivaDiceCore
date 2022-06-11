@@ -2065,6 +2065,11 @@ def unity_reply(plugin_event, Proc):
                         tmp_pcHash,
                         tmp_pc_name
                     )
+                    OlivaDiceCore.pcCard.pcCardDataSetSelectionKey(
+                        tmp_pcHash,
+                        tmp_pc_name,
+                        forceSwitch = True
+                    )
                     OlivaDiceCore.pcCard.pcCardRebase(
                         tmp_pcHash,
                         tmp_pc_name,
