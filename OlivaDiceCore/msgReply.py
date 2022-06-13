@@ -146,7 +146,7 @@ def unity_reply(plugin_event, Proc):
         {
             'name': dictTValue['tName'],
             'id': tmp_hook_user_id
-        }, 
+        },
         [tmp_hook_host_id, tmp_hook_group_id, tmp_hook_user_id],
         str(plugin_event.data.message)
     )
@@ -356,17 +356,76 @@ def unity_reply(plugin_event, Proc):
                             dictTValue['tId'] = str(tmp_userId_in)
                             if tmp_groupUserId != None:
                                 dictTValue['tId'] = str(tmp_groupUserId)
-                                tmp_groupUserId_list = tmp_groupUserId.split('|')
-                                if len(tmp_groupUserId_list) == 1:
+                            else:
+                                tmp_groupUserId = tmp_userId_in
+                            tmp_groupUserId_list = tmp_groupUserId.split('|')
+                            tmp_groupUserId_list_new = []
+                            for tmp_groupUserId_list_this in tmp_groupUserId_list:
+                                if tmp_groupUserId_list_this != '':
+                                    tmp_groupUserId_list_new.append(tmp_groupUserId_list_this)
+                            tmp_groupUserId_list = tmp_groupUserId_list_new
+                            if len(tmp_groupUserId_list) == 0:
+                                return
+                            elif len(tmp_groupUserId_list) == 1:
+                                tmp_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
+                                    userHash = tmp_groupUserHash,
+                                    userConfigKey = 'groupEnable',
+                                    botHash = plugin_event.bot_info.hash
+                                )
+                                flag_now_enable = tmp_groupEnable
+                                if flag_now_enable != flag_will_enable:
+                                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                                        userConfigKey = 'groupEnable',
+                                        userConfigValue = flag_will_enable,
+                                        botHash = plugin_event.bot_info.hash,
+                                        userId = tmp_groupUserId,
+                                        userType = 'group',
+                                        platform = tmp_user_platform
+                                    )
+                                    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                                        userHash = tmp_groupUserHash
+                                    )
+                                    if flag_will_enable:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteOn'].format(**dictTValue)
+                                    else:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteOff'].format(**dictTValue)
+                                elif flag_now_enable == flag_will_enable:
+                                    if flag_will_enable:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteOnAlready'].format(**dictTValue)
+                                    else:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteOffAlready'].format(**dictTValue)
+                            elif len(tmp_groupUserId_list) == 2:
+                                tmp_hostUserId_in = tmp_groupUserId_list[0]
+                                tmp_hostUserHash = OlivaDiceCore.userConfig.getUserHash(
+                                    userId = tmp_hostUserId_in,
+                                    userType = 'host',
+                                    platform = tmp_user_platform
+                                )
+                                tmp_hostUserId = OlivaDiceCore.userConfig.getUserDataByKeyWithHash(
+                                    userHash = tmp_hostUserHash,
+                                    userDataKey = 'userId',
+                                    botHash = plugin_event.bot_info.hash
+                                )
+                                if tmp_hostUserId != None:
+                                    tmp_hostEnable = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
+                                        userHash = tmp_hostUserHash,
+                                        userConfigKey = 'hostEnable',
+                                        botHash = plugin_event.bot_info.hash
+                                    )
+                                    flag_userConfigKey = 'groupEnable'
+                                    if tmp_hostEnable:
+                                        flag_userConfigKey = 'groupEnable'
+                                    else:
+                                        flag_userConfigKey = 'groupWithHostEnable'
                                     tmp_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
                                         userHash = tmp_groupUserHash,
-                                        userConfigKey = 'groupEnable',
+                                        userConfigKey = flag_userConfigKey,
                                         botHash = plugin_event.bot_info.hash
                                     )
                                     flag_now_enable = tmp_groupEnable
                                     if flag_now_enable != flag_will_enable:
                                         OlivaDiceCore.userConfig.setUserConfigByKey(
-                                            userConfigKey = 'groupEnable',
+                                            userConfigKey = flag_userConfigKey,
                                             userConfigValue = flag_will_enable,
                                             botHash = plugin_event.bot_info.hash,
                                             userId = tmp_groupUserId,
@@ -385,58 +444,6 @@ def unity_reply(plugin_event, Proc):
                                             tmp_reply_str = dictStrCustom['strMasterRemoteOnAlready'].format(**dictTValue)
                                         else:
                                             tmp_reply_str = dictStrCustom['strMasterRemoteOffAlready'].format(**dictTValue)
-                                elif len(tmp_groupUserId_list) == 2:
-                                    tmp_hostUserId_in = tmp_groupUserId_list[0]
-                                    tmp_hostUserHash = OlivaDiceCore.userConfig.getUserHash(
-                                        userId = tmp_hostUserId_in,
-                                        userType = 'host',
-                                        platform = tmp_user_platform
-                                    )
-                                    tmp_hostUserId = OlivaDiceCore.userConfig.getUserDataByKeyWithHash(
-                                        userHash = tmp_hostUserHash,
-                                        userDataKey = 'userId',
-                                        botHash = plugin_event.bot_info.hash
-                                    )
-                                    if tmp_hostUserId != None:
-                                        tmp_hostEnable = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
-                                            userHash = tmp_hostUserHash,
-                                            userConfigKey = 'hostEnable',
-                                            botHash = plugin_event.bot_info.hash
-                                        )
-                                        flag_userConfigKey = 'groupEnable'
-                                        if tmp_hostEnable:
-                                            flag_userConfigKey = 'groupEnable'
-                                        else:
-                                            flag_userConfigKey = 'groupWithHostEnable'
-                                        tmp_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
-                                            userHash = tmp_groupUserHash,
-                                            userConfigKey = flag_userConfigKey,
-                                            botHash = plugin_event.bot_info.hash
-                                        )
-                                        flag_now_enable = tmp_groupEnable
-                                        if flag_now_enable != flag_will_enable:
-                                            OlivaDiceCore.userConfig.setUserConfigByKey(
-                                                userConfigKey = flag_userConfigKey,
-                                                userConfigValue = flag_will_enable,
-                                                botHash = plugin_event.bot_info.hash,
-                                                userId = tmp_groupUserId,
-                                                userType = 'group',
-                                                platform = tmp_user_platform
-                                            )
-                                            OlivaDiceCore.userConfig.writeUserConfigByUserHash(
-                                                userHash = tmp_groupUserHash
-                                            )
-                                            if flag_will_enable:
-                                                tmp_reply_str = dictStrCustom['strMasterRemoteOn'].format(**dictTValue)
-                                            else:
-                                                tmp_reply_str = dictStrCustom['strMasterRemoteOff'].format(**dictTValue)
-                                        elif flag_now_enable == flag_will_enable:
-                                            if flag_will_enable:
-                                                tmp_reply_str = dictStrCustom['strMasterRemoteOnAlready'].format(**dictTValue)
-                                            else:
-                                                tmp_reply_str = dictStrCustom['strMasterRemoteOffAlready'].format(**dictTValue)
-                                    else:
-                                        tmp_reply_str = dictStrCustom['strMasterRemoteNone'].format(**dictTValue)
                                 else:
                                     tmp_reply_str = dictStrCustom['strMasterRemoteNone'].format(**dictTValue)
                             else:
@@ -463,6 +470,8 @@ def unity_reply(plugin_event, Proc):
                             tmp_reast_str = skipSpaceStart(tmp_reast_str)
                             tmp_userId_in = tmp_reast_str
                             flag_will_enable = False
+                        if len(tmp_userId_in) == 0:
+                            return
                         if flag_will_enable != None:
                             tmp_hostUserHash = OlivaDiceCore.userConfig.getUserHash(
                                 userId = tmp_userId_in,
@@ -474,49 +483,50 @@ def unity_reply(plugin_event, Proc):
                                 userDataKey = 'userId',
                                 botHash = plugin_event.bot_info.hash
                             )
+                            dictTValue['tId'] = str(tmp_userId_in)
                             if tmp_hostUserId != None:
                                 dictTValue['tId'] = str(tmp_hostUserId)
-                                tmp_hostLocalEnable = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
-                                    userHash = tmp_hostUserHash,
-                                    userConfigKey = flag_userConfigKey,
-                                    botHash = plugin_event.bot_info.hash
-                                )
-                                flag_now_enable = tmp_hostLocalEnable
-                                if flag_now_enable != flag_will_enable:
-                                    OlivaDiceCore.userConfig.setUserConfigByKey(
-                                        userConfigKey = flag_userConfigKey,
-                                        userConfigValue = flag_will_enable,
-                                        botHash = plugin_event.bot_info.hash,
-                                        userId = tmp_hostUserId,
-                                        userType = 'host',
-                                        platform = tmp_user_platform
-                                    )
-                                    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
-                                        userHash = tmp_hostUserHash
-                                    )
-                                    if flag_userConfigKey == 'hostEnable':
-                                        if flag_will_enable:
-                                            tmp_reply_str = dictStrCustom['strMasterRemoteDefaultOn'].format(**dictTValue)
-                                        else:
-                                            tmp_reply_str = dictStrCustom['strMasterRemoteDefaultOff'].format(**dictTValue)
-                                    else:
-                                        if flag_will_enable:
-                                            tmp_reply_str = dictStrCustom['strMasterRemoteOn'].format(**dictTValue)
-                                        else:
-                                            tmp_reply_str = dictStrCustom['strMasterRemoteOff'].format(**dictTValue)
-                                elif flag_now_enable == flag_will_enable:
-                                    if flag_userConfigKey == 'hostEnable':
-                                        if flag_will_enable:
-                                            tmp_reply_str = dictStrCustom['strMasterRemoteDefaultOnAlready'].format(**dictTValue)
-                                        else:
-                                            tmp_reply_str = dictStrCustom['strMasterRemoteDefaultOffAlready'].format(**dictTValue)
-                                    else:
-                                        if flag_will_enable:
-                                            tmp_reply_str = dictStrCustom['strMasterRemoteOnAlready'].format(**dictTValue)
-                                        else:
-                                            tmp_reply_str = dictStrCustom['strMasterRemoteOffAlready'].format(**dictTValue)
                             else:
-                                tmp_reply_str = dictStrCustom['strMasterRemoteNone'].format(**dictTValue)
+                                tmp_hostUserId = tmp_userId_in
+                            tmp_hostLocalEnable = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
+                                userHash = tmp_hostUserHash,
+                                userConfigKey = flag_userConfigKey,
+                                botHash = plugin_event.bot_info.hash
+                            )
+                            flag_now_enable = tmp_hostLocalEnable
+                            if flag_now_enable != flag_will_enable:
+                                OlivaDiceCore.userConfig.setUserConfigByKey(
+                                    userConfigKey = flag_userConfigKey,
+                                    userConfigValue = flag_will_enable,
+                                    botHash = plugin_event.bot_info.hash,
+                                    userId = tmp_hostUserId,
+                                    userType = 'host',
+                                    platform = tmp_user_platform
+                                )
+                                OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                                    userHash = tmp_hostUserHash
+                                )
+                                if flag_userConfigKey == 'hostEnable':
+                                    if flag_will_enable:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteDefaultOn'].format(**dictTValue)
+                                    else:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteDefaultOff'].format(**dictTValue)
+                                else:
+                                    if flag_will_enable:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteOn'].format(**dictTValue)
+                                    else:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteOff'].format(**dictTValue)
+                            elif flag_now_enable == flag_will_enable:
+                                if flag_userConfigKey == 'hostEnable':
+                                    if flag_will_enable:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteDefaultOnAlready'].format(**dictTValue)
+                                    else:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteDefaultOffAlready'].format(**dictTValue)
+                                else:
+                                    if flag_will_enable:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteOnAlready'].format(**dictTValue)
+                                    else:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteOffAlready'].format(**dictTValue)
                         if tmp_reply_str != None:
                             replyMsg(plugin_event, tmp_reply_str)
                     return
@@ -1733,14 +1743,16 @@ def unity_reply(plugin_event, Proc):
                     OlivaDiceCore.pcCard.getPcHash(
                         tmp_pc_id,
                         tmp_pc_platform
-                    )
+                    ),
+                    tmp_hagID
                 )
                 if OlivaDiceCore.pcCard.pcCardRebase(
                     OlivaDiceCore.pcCard.getPcHash(
                         tmp_pc_id,
                         tmp_pc_platform
                     ),
-                    tmp_pc_name
+                    tmp_pc_name,
+                    tmp_hagID
                 ):
                     dictTValue['tPcSelectionNew'] = tmp_pc_name
                     if tmp_pc_name_1 != None:
@@ -1771,12 +1783,14 @@ def unity_reply(plugin_event, Proc):
                     tmp_pc_platform
                 )
                 tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
-                    tmp_pcHash
+                    tmp_pcHash,
+                    tmp_hagID
                 )
                 if tmp_pc_name_1 != None:
                     dictTValue['tName'] = tmp_pc_name_1
                 tmp_dict_pc_card = OlivaDiceCore.pcCard.pcCardDataGetByPcName(
-                    tmp_pcHash
+                    tmp_pcHash,
+                    hagId = tmp_hagID
                 )
                 flag_begin = True
                 tmp_dict_pc_card_dump = {}
@@ -1785,7 +1799,8 @@ def unity_reply(plugin_event, Proc):
                         OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
                             tmp_pcHash,
                             tmp_dict_pc_card_key,
-                            flagShow = True
+                            flagShow = True,
+                            hagId = tmp_hagID
                         )
                     ] = tmp_dict_pc_card[tmp_dict_pc_card_key]
                 tmp_reply_str_1_list = []
@@ -1811,7 +1826,8 @@ def unity_reply(plugin_event, Proc):
                     flag_hit_skill_list_name = flag_hit_skill_list_name_default
                     tmp_dict_pc_card_key_core = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
                         tmp_pcHash,
-                        tmp_dict_pc_card_key
+                        tmp_dict_pc_card_key,
+                        hagId = tmp_hagID
                     )
                     tmp_reply_str_1_list_this = '%s:%s' % (
                         tmp_dict_pc_card_key,
@@ -1852,7 +1868,8 @@ def unity_reply(plugin_event, Proc):
                     OlivaDiceCore.pcCard.getPcHash(
                         tmp_pc_id,
                         tmp_pc_platform
-                    )
+                    ),
+                    tmp_hagID
                 )
                 tmp_dict_pc_card = OlivaDiceCore.pcCard.pcCardDataGetUserAll(
                     OlivaDiceCore.pcCard.getPcHash(
@@ -1873,19 +1890,79 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = dictStrCustom['strPcList'].format(**dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
+            elif isMatchWordStart(tmp_reast_str, 'lock', fullMatch = True):
+                if flag_is_from_group:
+                    tmp_pc_hash = OlivaDiceCore.pcCard.getPcHash(
+                        tmp_pc_id,
+                        tmp_pc_platform
+                    )
+                    tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pc_hash, tmp_hagID)
+                    if tmp_pc_name_1 != None:
+                        if OlivaDiceCore.pcCard.pcCardDataSetSelectionKeyLock(
+                            tmp_pc_hash,
+                            tmp_pc_name_1,
+                            tmp_hagID
+                        ):
+                            dictTValue['tName'] = tmp_pc_name_1
+                            tmp_reply_str = dictStrCustom['strPcLock'].format(**dictTValue)
+                            replyMsg(plugin_event, tmp_reply_str)
+                        else:
+                            dictTValue['tName'] = tmp_pc_name_1
+                            tmp_reply_str = dictStrCustom['strPcLockError'].format(**dictTValue)
+                            replyMsg(plugin_event, tmp_reply_str)
+                    else:
+                        tmp_reply_str = dictStrCustom['strPcLockNone'].format(**dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
+                else:
+                    tmp_reply_str = dictStrCustom['strForGroupOnly'].format(**dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                return
+            elif isMatchWordStart(tmp_reast_str, 'unlock', fullMatch = True):
+                if flag_is_from_group:
+                    tmp_pc_hash = OlivaDiceCore.pcCard.getPcHash(
+                        tmp_pc_id,
+                        tmp_pc_platform
+                    )
+                    tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKeyLock(tmp_pc_hash, tmp_hagID)
+                    print(tmp_pc_hash)
+                    if tmp_pc_name_1 != None:
+                        OlivaDiceCore.pcCard.pcCardDataDelSelectionKeyLock(tmp_pc_hash, tmp_hagID)
+                        dictTValue['tName'] = tmp_pc_name_1
+                        tmp_reply_str = dictStrCustom['strPcUnLock'].format(**dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
+                    else:
+                        tmp_reply_str = dictStrCustom['strPcUnLockNone'].format(**dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
+                else:
+                    tmp_reply_str = dictStrCustom['strForGroupOnly'].format(**dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                return
             elif isMatchWordStart(tmp_reast_str, 'set'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'set')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 if len(tmp_reast_str) > 0:
                     tmp_pc_name = tmp_reast_str
                     tmp_pc_name = tmp_pc_name.strip()
-                    if OlivaDiceCore.pcCard.pcCardDataSetSelectionKey(
-                        OlivaDiceCore.pcCard.getPcHash(
-                            tmp_pc_id,
-                            tmp_pc_platform
-                        ),
-                        tmp_pc_name
-                    ):
+                    tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
+                        tmp_pc_id,
+                        tmp_pc_platform
+                    )
+                    tmp_flag_done = False
+                    if OlivaDiceCore.pcCard.pcCardDataGetSelectionKeyLock(
+                        tmp_pcHash,
+                        tmp_hagID
+                    ) == None:
+                        tmp_flag_done = OlivaDiceCore.pcCard.pcCardDataSetSelectionKey(
+                            tmp_pcHash,
+                            tmp_pc_name
+                        )
+                    else:
+                        tmp_flag_done = OlivaDiceCore.pcCard.pcCardDataSetSelectionKeyLock(
+                            tmp_pcHash,
+                            tmp_pc_name,
+                            tmp_hagID
+                        )
+                    if tmp_flag_done:
                         dictTValue['tPcSelection'] = tmp_pc_name
                         tmp_reply_str = dictStrCustom['strPcSet'].format(**dictTValue)
                     else:
@@ -1905,10 +1982,12 @@ def unity_reply(plugin_event, Proc):
                     tmp_pc_platform
                 )
                 tmp_dict_pc_card = OlivaDiceCore.pcCard.pcCardDataGetByPcName(
-                    tmp_pcHash
+                    tmp_pcHash,
+                    hagId = tmp_hagID
                 )
                 tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
-                    tmp_pcHash
+                    tmp_pcHash,
+                    tmp_hagID
                 )
                 tmp_template_name = 'default'
                 if tmp_pc_name != None:
@@ -1944,14 +2023,16 @@ def unity_reply(plugin_event, Proc):
                                 tmp_skill_rd.resInt,
                                 dictTValue['tName'],
                                 hitList = None,
-                                forceMapping = flag_force_init
+                                forceMapping = flag_force_init,
+                                hagId = tmp_hagID
                             )
                             tmp_pcCard_list.append(
                                 '%s:%s' % (
                                     OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
                                         tmp_pcHash,
                                         tmp_init_dict_this,
-                                        flagShow = True
+                                        flagShow = True,
+                                        hagId = tmp_hagID
                                     ),
                                     str(tmp_skill_rd.resInt)
                                 )
@@ -1971,7 +2052,8 @@ def unity_reply(plugin_event, Proc):
                 tmp_pc_name = tmp_pc_name.strip()
                 if len(tmp_pc_name) == 0:
                     tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
-                        tmp_pcHash
+                        tmp_pcHash,
+                        tmp_hagID
                     )
                 if tmp_pc_name != None:
                     OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
@@ -2000,7 +2082,8 @@ def unity_reply(plugin_event, Proc):
                     tmp_pc_platform
                 )
                 tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
-                    tmp_pcHash
+                    tmp_pcHash,
+                    tmp_hagID
                 )
                 if tmp_pc_name != None:
                     OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
@@ -2011,11 +2094,13 @@ def unity_reply(plugin_event, Proc):
                     )
                     OlivaDiceCore.pcCard.pcCardDataDelSelectionKey(
                         tmp_pcHash,
-                        tmp_pc_name
+                        tmp_pc_name,
+                        skipDel = True
                     )
                     OlivaDiceCore.pcCard.pcCardRebase(
                         tmp_pcHash,
-                        tmp_pc_name
+                        tmp_pc_name,
+                        tmp_hagID
                     )
                     dictTValue['tPcSelection'] = tmp_pc_name
                     tmp_reply_str = dictStrCustom['strPcClear'].format(**dictTValue)
@@ -2031,7 +2116,8 @@ def unity_reply(plugin_event, Proc):
                     tmp_pc_platform
                 )
                 tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
-                    tmp_pcHash
+                    tmp_pcHash,
+                    tmp_hagID
                 )
                 tmp_pcSkillName = tmp_reast_str
                 tmp_pcSkillName = tmp_pcSkillName.strip()
@@ -2048,7 +2134,8 @@ def unity_reply(plugin_event, Proc):
                     )
                     tmp_skill_name_core = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
                         tmp_pcHash,
-                        tmp_pcSkillName
+                        tmp_pcSkillName,
+                        hagId = tmp_hagID
                     )
                     for tmp_enhanceList_this in tmp_enhanceList:
                         if tmp_skill_name_core != tmp_enhanceList_this:
@@ -2081,7 +2168,8 @@ def unity_reply(plugin_event, Proc):
                     OlivaDiceCore.pcCard.getPcHash(
                         tmp_pc_id,
                         tmp_pc_platform
-                    )
+                    ),
+                    tmp_hagID
                 )
                 if len(tmp_reast_str) > 0:
                     tmp_template_name = tmp_reast_str
@@ -2131,7 +2219,8 @@ def unity_reply(plugin_event, Proc):
                     OlivaDiceCore.pcCard.getPcHash(
                         tmp_pc_id,
                         tmp_pc_platform
-                    )
+                    ),
+                    tmp_hagID
                 )
                 if len(tmp_reast_str) > 0:
                     tmp_template_rule_name = tmp_reast_str
@@ -2225,7 +2314,8 @@ def unity_reply(plugin_event, Proc):
                             tmp_pc_id,
                             tmp_pc_platform
                         ),
-                        tmp_skill_name
+                        tmp_skill_name,
+                        hagId = tmp_hagID
                     )
                     rd_para_str = str(tmp_skill_value_old) + tmp_skill_value
 
@@ -2233,7 +2323,8 @@ def unity_reply(plugin_event, Proc):
                         OlivaDiceCore.pcCard.getPcHash(
                             tmp_pc_id,
                             tmp_pc_platform
-                        )
+                        ),
+                        tmp_hagID
                     )
                     if tmp_pc_name_1 != None:
                         dictTValue['tName'] = tmp_pc_name_1
@@ -2260,7 +2351,8 @@ def unity_reply(plugin_event, Proc):
                             ),
                             tmp_skill_name,
                             tmp_skill_value_new,
-                            dictTValue['tName']
+                            dictTValue['tName'],
+                            hagId = tmp_hagID
                         )
                         dictTValue['tSkillName'] = tmp_skill_name
                         if tmp_skill_value_update.isdigit() or len(rd_para.resDetail) > 100:
@@ -2337,7 +2429,8 @@ def unity_reply(plugin_event, Proc):
                         OlivaDiceCore.pcCard.getPcHash(
                             tmp_pc_id,
                             tmp_pc_platform
-                        )
+                        ),
+                        tmp_hagID
                     )
                     if tmp_pc_name_1 != None:
                         dictTValue['tName'] = tmp_pc_name_1
@@ -2351,7 +2444,8 @@ def unity_reply(plugin_event, Proc):
                             ),
                             tmp_skill_pair_this[0],
                             tmp_skill_pair_this[1],
-                            dictTValue['tName']
+                            dictTValue['tName'],
+                            hagId = tmp_hagID
                         )
                     tmp_reply_str = dictStrCustom['strPcSetSkillValue'].format(**dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
@@ -2360,14 +2454,16 @@ def unity_reply(plugin_event, Proc):
                     OlivaDiceCore.pcCard.getPcHash(
                         tmp_pc_id,
                         tmp_pc_platform
-                    )
+                    ),
+                    tmp_hagID
                 )
                 tmp_skill_value_find = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
                     OlivaDiceCore.pcCard.getPcHash(
                         tmp_pc_id,
                         tmp_pc_platform
                     ),
-                    tmp_skill_name_find
+                    tmp_skill_name_find,
+                    hagId = tmp_hagID
                 )
                 if tmp_pc_name_1 != None:
                     dictTValue['tName'] = tmp_pc_name_1
@@ -2544,7 +2640,8 @@ def unity_reply(plugin_event, Proc):
                 OlivaDiceCore.pcCard.getPcHash(
                     tmp_pc_id,
                     tmp_pc_platform
-                )
+                ),
+                tmp_hagID
             )
             if tmp_pc_name_1 == None:
                 tmp_pc_name = dictTValue['tName']
@@ -2553,7 +2650,8 @@ def unity_reply(plugin_event, Proc):
                         tmp_pc_id,
                         tmp_pc_platform
                     ),
-                    tmp_pc_name
+                    tmp_pc_name,
+                    tmp_hagID
                 ):
                     pass
                 else:
@@ -2571,7 +2669,8 @@ def unity_reply(plugin_event, Proc):
                             tmp_pc_id,
                             tmp_pc_platform
                         ),
-                        'SAN'
+                        'SAN',
+                        hagId = tmp_hagID
                     )
                 tmp_skill_value_old = tmp_skill_value
                 rd_para = OlivaDiceCore.onedice.RD('1D100')
@@ -2641,7 +2740,8 @@ def unity_reply(plugin_event, Proc):
                             ),
                             'SAN',
                             tmp_skill_value,
-                            tmp_pc_name
+                            tmp_pc_name,
+                            hagId = tmp_hagID
                         )
                         dictTValue['tName'] = tmp_pc_name
                         dictTValue['tSkillValue'] = str(tmp_skill_value_old)
@@ -2740,7 +2840,8 @@ def unity_reply(plugin_event, Proc):
                             tmp_pc_id,
                             tmp_pc_platform
                         ),
-                        tmp_skill_name
+                        tmp_skill_name,
+                        hagId = tmp_hagID
                     )
             elif tmp_skill_value != None:
                 pass
@@ -2748,7 +2849,8 @@ def unity_reply(plugin_event, Proc):
                 OlivaDiceCore.pcCard.getPcHash(
                     tmp_pc_id,
                     tmp_pc_platform
-                )
+                ),
+                tmp_hagID
             )
             if tmp_pc_name_1 != None:
                 dictTValue['tName'] = tmp_pc_name_1
@@ -2943,7 +3045,8 @@ def unity_reply(plugin_event, Proc):
                         )
                         tmp_skill_name_core = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
                             tmp_pcHash,
-                            tmp_skill_name
+                            tmp_skill_name,
+                            hagId = tmp_hagID
                         )
                         tmp_skipEnhance_list = []
                         tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
@@ -2992,7 +3095,8 @@ def unity_reply(plugin_event, Proc):
                 tmp_pc_platform
             )
             tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
-                tmp_pcHash
+                tmp_pcHash,
+                tmp_hagID
             )
             if tmp_pc_name_1 != None:
                 dictTValue['tName'] = tmp_pc_name_1
@@ -3014,7 +3118,8 @@ def unity_reply(plugin_event, Proc):
                 if tmp_skill_value == None:
                     tmp_skill_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
                         tmp_pcHash,
-                        tmp_skill_name
+                        tmp_skill_name,
+                        hagId = tmp_hagID
                     )
                 if tmp_skill_value != None:
                     rd_para_1 = OlivaDiceCore.onedice.RD('1D100')
@@ -3032,7 +3137,8 @@ def unity_reply(plugin_event, Proc):
                                     tmp_pcHash,
                                     tmp_skill_name,
                                     rd_para_2.resInt,
-                                    dictTValue['tName']
+                                    dictTValue['tName'],
+                                    hagId = tmp_hagID
                                 )
                                 dictTValue['tRollSubResult'] = '%s=%s=%s' % (rd_para_str_2, rd_para_2.resDetail, (rd_para_2.resInt))
                                 dictTValue['tSkillCheckReasult'] = '%s%s' % (
@@ -3056,7 +3162,8 @@ def unity_reply(plugin_event, Proc):
                             for tmp_enhanceList_this in tmp_enhanceList:
                                 if tmp_enhanceList_this != OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
                                     tmp_pcHash,
-                                    tmp_skill_name
+                                    tmp_skill_name,
+                                    hagId = tmp_hagID
                                 ):
                                     tmp_enhanceList_new.append(tmp_enhanceList_this)
                             OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
@@ -3081,7 +3188,8 @@ def unity_reply(plugin_event, Proc):
                         tmp_skill_name = tmp_enhanceList_this
                         tmp_skill_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
                             tmp_pcHash,
-                            tmp_skill_name
+                            tmp_skill_name,
+                            hagId = tmp_hagID
                         )
                         rd_para_1 = OlivaDiceCore.onedice.RD('1D100')
                         rd_para_1.roll()
@@ -3094,7 +3202,8 @@ def unity_reply(plugin_event, Proc):
                                     tmp_pcHash,
                                     tmp_skill_name,
                                     rd_para_2.resInt,
-                                    tmp_pc_name_1
+                                    tmp_pc_name_1,
+                                    hagId = tmp_hagID
                                 )
                             tmp_enhance_succeed_count += 1
                             tmp_enhance_succeed_list.append([
@@ -3117,7 +3226,8 @@ def unity_reply(plugin_event, Proc):
                                 OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
                                     tmp_pcHash,
                                     tmp_enhance_succeed_list_this[0],
-                                    flagShow = True
+                                    flagShow = True,
+                                    hagId = tmp_hagID
                                 ),
                                 str(tmp_enhance_succeed_list_this[1]),
                                 str(tmp_enhance_succeed_list_this[2] - tmp_enhance_succeed_list_this[1])
@@ -3205,7 +3315,8 @@ def unity_reply(plugin_event, Proc):
                 tmp_pc_platform
             )
             skill_valueTable = OlivaDiceCore.pcCard.pcCardDataGetByPcName(
-                tmp_pcHash
+                tmp_pcHash,
+                hagId = tmp_hagID
             )
             if len(tmp_reast_str) > 0:
                 if isMatchWordStart(tmp_reast_str, 'h'):
@@ -3233,7 +3344,8 @@ def unity_reply(plugin_event, Proc):
                 OlivaDiceCore.pcCard.getPcHash(
                     tmp_pc_id,
                     tmp_pc_platform
-                )
+                ),
+                tmp_hagID
             )
             if tmp_pc_name_1 != None:
                 dictTValue['tName'] = tmp_pc_name_1
