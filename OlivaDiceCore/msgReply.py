@@ -1943,13 +1943,26 @@ def unity_reply(plugin_event, Proc):
                 if len(tmp_reast_str) > 0:
                     tmp_pc_name = tmp_reast_str
                     tmp_pc_name = tmp_pc_name.strip()
-                    if OlivaDiceCore.pcCard.pcCardDataSetSelectionKey(
-                        OlivaDiceCore.pcCard.getPcHash(
-                            tmp_pc_id,
-                            tmp_pc_platform
-                        ),
-                        tmp_pc_name
-                    ):
+                    tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
+                        tmp_pc_id,
+                        tmp_pc_platform
+                    )
+                    tmp_flag_done = False
+                    if OlivaDiceCore.pcCard.pcCardDataGetSelectionKeyLock(
+                        tmp_pcHash,
+                        tmp_hagID
+                    ) == None:
+                        tmp_flag_done = OlivaDiceCore.pcCard.pcCardDataSetSelectionKey(
+                            tmp_pcHash,
+                            tmp_pc_name
+                        )
+                    else:
+                        tmp_flag_done = OlivaDiceCore.pcCard.pcCardDataSetSelectionKeyLock(
+                            tmp_pcHash,
+                            tmp_pc_name,
+                            tmp_hagID
+                        )
+                    if tmp_flag_done:
                         dictTValue['tPcSelection'] = tmp_pc_name
                         tmp_reply_str = dictStrCustom['strPcSet'].format(**dictTValue)
                     else:

@@ -43,6 +43,8 @@ OlivaDice核心模块
 注: 本模块为必需模块。''',
 
     '更新': '''[OlivaDiceCore]
+3.1.18: 人物卡锁定
+3.1.17: 自动分段
 3.1.16: 用户记录指令
 3.1.15: 旁观功能
 3.1.13: 人物卡模板功能扩充
@@ -128,6 +130,7 @@ He dismissed the dismiss as worthless.
 .nn [人物卡名]    重命名人物卡
 .st list    显示人物卡列表
 .st set [人物卡名]    切换人物卡
+.st lock/unlock    锁定/解锁人物卡
 .st show    显示人物卡
 .st temp [人物卡模版名]    切换人物卡模版
     默认可选：COC7，DND5E，FATE
