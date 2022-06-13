@@ -356,17 +356,76 @@ def unity_reply(plugin_event, Proc):
                             dictTValue['tId'] = str(tmp_userId_in)
                             if tmp_groupUserId != None:
                                 dictTValue['tId'] = str(tmp_groupUserId)
-                                tmp_groupUserId_list = tmp_groupUserId.split('|')
-                                if len(tmp_groupUserId_list) == 1:
+                            else:
+                                tmp_groupUserId = tmp_userId_in
+                            tmp_groupUserId_list = tmp_groupUserId.split('|')
+                            tmp_groupUserId_list_new = []
+                            for tmp_groupUserId_list_this in tmp_groupUserId_list:
+                                if tmp_groupUserId_list_this != '':
+                                    tmp_groupUserId_list_new.append(tmp_groupUserId_list_this)
+                            tmp_groupUserId_list = tmp_groupUserId_list_new
+                            if len(tmp_groupUserId_list) == 0:
+                                return
+                            elif len(tmp_groupUserId_list) == 1:
+                                tmp_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
+                                    userHash = tmp_groupUserHash,
+                                    userConfigKey = 'groupEnable',
+                                    botHash = plugin_event.bot_info.hash
+                                )
+                                flag_now_enable = tmp_groupEnable
+                                if flag_now_enable != flag_will_enable:
+                                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                                        userConfigKey = 'groupEnable',
+                                        userConfigValue = flag_will_enable,
+                                        botHash = plugin_event.bot_info.hash,
+                                        userId = tmp_groupUserId,
+                                        userType = 'group',
+                                        platform = tmp_user_platform
+                                    )
+                                    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                                        userHash = tmp_groupUserHash
+                                    )
+                                    if flag_will_enable:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteOn'].format(**dictTValue)
+                                    else:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteOff'].format(**dictTValue)
+                                elif flag_now_enable == flag_will_enable:
+                                    if flag_will_enable:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteOnAlready'].format(**dictTValue)
+                                    else:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteOffAlready'].format(**dictTValue)
+                            elif len(tmp_groupUserId_list) == 2:
+                                tmp_hostUserId_in = tmp_groupUserId_list[0]
+                                tmp_hostUserHash = OlivaDiceCore.userConfig.getUserHash(
+                                    userId = tmp_hostUserId_in,
+                                    userType = 'host',
+                                    platform = tmp_user_platform
+                                )
+                                tmp_hostUserId = OlivaDiceCore.userConfig.getUserDataByKeyWithHash(
+                                    userHash = tmp_hostUserHash,
+                                    userDataKey = 'userId',
+                                    botHash = plugin_event.bot_info.hash
+                                )
+                                if tmp_hostUserId != None:
+                                    tmp_hostEnable = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
+                                        userHash = tmp_hostUserHash,
+                                        userConfigKey = 'hostEnable',
+                                        botHash = plugin_event.bot_info.hash
+                                    )
+                                    flag_userConfigKey = 'groupEnable'
+                                    if tmp_hostEnable:
+                                        flag_userConfigKey = 'groupEnable'
+                                    else:
+                                        flag_userConfigKey = 'groupWithHostEnable'
                                     tmp_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
                                         userHash = tmp_groupUserHash,
-                                        userConfigKey = 'groupEnable',
+                                        userConfigKey = flag_userConfigKey,
                                         botHash = plugin_event.bot_info.hash
                                     )
                                     flag_now_enable = tmp_groupEnable
                                     if flag_now_enable != flag_will_enable:
                                         OlivaDiceCore.userConfig.setUserConfigByKey(
-                                            userConfigKey = 'groupEnable',
+                                            userConfigKey = flag_userConfigKey,
                                             userConfigValue = flag_will_enable,
                                             botHash = plugin_event.bot_info.hash,
                                             userId = tmp_groupUserId,
@@ -385,58 +444,6 @@ def unity_reply(plugin_event, Proc):
                                             tmp_reply_str = dictStrCustom['strMasterRemoteOnAlready'].format(**dictTValue)
                                         else:
                                             tmp_reply_str = dictStrCustom['strMasterRemoteOffAlready'].format(**dictTValue)
-                                elif len(tmp_groupUserId_list) == 2:
-                                    tmp_hostUserId_in = tmp_groupUserId_list[0]
-                                    tmp_hostUserHash = OlivaDiceCore.userConfig.getUserHash(
-                                        userId = tmp_hostUserId_in,
-                                        userType = 'host',
-                                        platform = tmp_user_platform
-                                    )
-                                    tmp_hostUserId = OlivaDiceCore.userConfig.getUserDataByKeyWithHash(
-                                        userHash = tmp_hostUserHash,
-                                        userDataKey = 'userId',
-                                        botHash = plugin_event.bot_info.hash
-                                    )
-                                    if tmp_hostUserId != None:
-                                        tmp_hostEnable = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
-                                            userHash = tmp_hostUserHash,
-                                            userConfigKey = 'hostEnable',
-                                            botHash = plugin_event.bot_info.hash
-                                        )
-                                        flag_userConfigKey = 'groupEnable'
-                                        if tmp_hostEnable:
-                                            flag_userConfigKey = 'groupEnable'
-                                        else:
-                                            flag_userConfigKey = 'groupWithHostEnable'
-                                        tmp_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
-                                            userHash = tmp_groupUserHash,
-                                            userConfigKey = flag_userConfigKey,
-                                            botHash = plugin_event.bot_info.hash
-                                        )
-                                        flag_now_enable = tmp_groupEnable
-                                        if flag_now_enable != flag_will_enable:
-                                            OlivaDiceCore.userConfig.setUserConfigByKey(
-                                                userConfigKey = flag_userConfigKey,
-                                                userConfigValue = flag_will_enable,
-                                                botHash = plugin_event.bot_info.hash,
-                                                userId = tmp_groupUserId,
-                                                userType = 'group',
-                                                platform = tmp_user_platform
-                                            )
-                                            OlivaDiceCore.userConfig.writeUserConfigByUserHash(
-                                                userHash = tmp_groupUserHash
-                                            )
-                                            if flag_will_enable:
-                                                tmp_reply_str = dictStrCustom['strMasterRemoteOn'].format(**dictTValue)
-                                            else:
-                                                tmp_reply_str = dictStrCustom['strMasterRemoteOff'].format(**dictTValue)
-                                        elif flag_now_enable == flag_will_enable:
-                                            if flag_will_enable:
-                                                tmp_reply_str = dictStrCustom['strMasterRemoteOnAlready'].format(**dictTValue)
-                                            else:
-                                                tmp_reply_str = dictStrCustom['strMasterRemoteOffAlready'].format(**dictTValue)
-                                    else:
-                                        tmp_reply_str = dictStrCustom['strMasterRemoteNone'].format(**dictTValue)
                                 else:
                                     tmp_reply_str = dictStrCustom['strMasterRemoteNone'].format(**dictTValue)
                             else:
@@ -463,6 +470,8 @@ def unity_reply(plugin_event, Proc):
                             tmp_reast_str = skipSpaceStart(tmp_reast_str)
                             tmp_userId_in = tmp_reast_str
                             flag_will_enable = False
+                        if len(tmp_userId_in) == 0:
+                            return
                         if flag_will_enable != None:
                             tmp_hostUserHash = OlivaDiceCore.userConfig.getUserHash(
                                 userId = tmp_userId_in,
@@ -474,49 +483,50 @@ def unity_reply(plugin_event, Proc):
                                 userDataKey = 'userId',
                                 botHash = plugin_event.bot_info.hash
                             )
+                            dictTValue['tId'] = str(tmp_userId_in)
                             if tmp_hostUserId != None:
                                 dictTValue['tId'] = str(tmp_hostUserId)
-                                tmp_hostLocalEnable = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
-                                    userHash = tmp_hostUserHash,
-                                    userConfigKey = flag_userConfigKey,
-                                    botHash = plugin_event.bot_info.hash
-                                )
-                                flag_now_enable = tmp_hostLocalEnable
-                                if flag_now_enable != flag_will_enable:
-                                    OlivaDiceCore.userConfig.setUserConfigByKey(
-                                        userConfigKey = flag_userConfigKey,
-                                        userConfigValue = flag_will_enable,
-                                        botHash = plugin_event.bot_info.hash,
-                                        userId = tmp_hostUserId,
-                                        userType = 'host',
-                                        platform = tmp_user_platform
-                                    )
-                                    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
-                                        userHash = tmp_hostUserHash
-                                    )
-                                    if flag_userConfigKey == 'hostEnable':
-                                        if flag_will_enable:
-                                            tmp_reply_str = dictStrCustom['strMasterRemoteDefaultOn'].format(**dictTValue)
-                                        else:
-                                            tmp_reply_str = dictStrCustom['strMasterRemoteDefaultOff'].format(**dictTValue)
-                                    else:
-                                        if flag_will_enable:
-                                            tmp_reply_str = dictStrCustom['strMasterRemoteOn'].format(**dictTValue)
-                                        else:
-                                            tmp_reply_str = dictStrCustom['strMasterRemoteOff'].format(**dictTValue)
-                                elif flag_now_enable == flag_will_enable:
-                                    if flag_userConfigKey == 'hostEnable':
-                                        if flag_will_enable:
-                                            tmp_reply_str = dictStrCustom['strMasterRemoteDefaultOnAlready'].format(**dictTValue)
-                                        else:
-                                            tmp_reply_str = dictStrCustom['strMasterRemoteDefaultOffAlready'].format(**dictTValue)
-                                    else:
-                                        if flag_will_enable:
-                                            tmp_reply_str = dictStrCustom['strMasterRemoteOnAlready'].format(**dictTValue)
-                                        else:
-                                            tmp_reply_str = dictStrCustom['strMasterRemoteOffAlready'].format(**dictTValue)
                             else:
-                                tmp_reply_str = dictStrCustom['strMasterRemoteNone'].format(**dictTValue)
+                                tmp_hostUserId = tmp_userId_in
+                            tmp_hostLocalEnable = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
+                                userHash = tmp_hostUserHash,
+                                userConfigKey = flag_userConfigKey,
+                                botHash = plugin_event.bot_info.hash
+                            )
+                            flag_now_enable = tmp_hostLocalEnable
+                            if flag_now_enable != flag_will_enable:
+                                OlivaDiceCore.userConfig.setUserConfigByKey(
+                                    userConfigKey = flag_userConfigKey,
+                                    userConfigValue = flag_will_enable,
+                                    botHash = plugin_event.bot_info.hash,
+                                    userId = tmp_hostUserId,
+                                    userType = 'host',
+                                    platform = tmp_user_platform
+                                )
+                                OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                                    userHash = tmp_hostUserHash
+                                )
+                                if flag_userConfigKey == 'hostEnable':
+                                    if flag_will_enable:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteDefaultOn'].format(**dictTValue)
+                                    else:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteDefaultOff'].format(**dictTValue)
+                                else:
+                                    if flag_will_enable:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteOn'].format(**dictTValue)
+                                    else:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteOff'].format(**dictTValue)
+                            elif flag_now_enable == flag_will_enable:
+                                if flag_userConfigKey == 'hostEnable':
+                                    if flag_will_enable:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteDefaultOnAlready'].format(**dictTValue)
+                                    else:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteDefaultOffAlready'].format(**dictTValue)
+                                else:
+                                    if flag_will_enable:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteOnAlready'].format(**dictTValue)
+                                    else:
+                                        tmp_reply_str = dictStrCustom['strMasterRemoteOffAlready'].format(**dictTValue)
                         if tmp_reply_str != None:
                             replyMsg(plugin_event, tmp_reply_str)
                     return
@@ -1881,42 +1891,50 @@ def unity_reply(plugin_event, Proc):
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'lock', fullMatch = True):
-                tmp_pc_hash = OlivaDiceCore.pcCard.getPcHash(
-                    tmp_pc_id,
-                    tmp_pc_platform
-                )
-                tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pc_hash, tmp_hagID)
-                if tmp_pc_name_1 != None:
-                    if OlivaDiceCore.pcCard.pcCardDataSetSelectionKeyLock(
-                        tmp_pc_hash,
-                        tmp_pc_name_1,
-                        tmp_hagID
-                    ):
-                        dictTValue['tName'] = tmp_pc_name_1
-                        tmp_reply_str = dictStrCustom['strPcLock'].format(**dictTValue)
-                        replyMsg(plugin_event, tmp_reply_str)
+                if flag_is_from_group:
+                    tmp_pc_hash = OlivaDiceCore.pcCard.getPcHash(
+                        tmp_pc_id,
+                        tmp_pc_platform
+                    )
+                    tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pc_hash, tmp_hagID)
+                    if tmp_pc_name_1 != None:
+                        if OlivaDiceCore.pcCard.pcCardDataSetSelectionKeyLock(
+                            tmp_pc_hash,
+                            tmp_pc_name_1,
+                            tmp_hagID
+                        ):
+                            dictTValue['tName'] = tmp_pc_name_1
+                            tmp_reply_str = dictStrCustom['strPcLock'].format(**dictTValue)
+                            replyMsg(plugin_event, tmp_reply_str)
+                        else:
+                            dictTValue['tName'] = tmp_pc_name_1
+                            tmp_reply_str = dictStrCustom['strPcLockError'].format(**dictTValue)
+                            replyMsg(plugin_event, tmp_reply_str)
                     else:
-                        dictTValue['tName'] = tmp_pc_name_1
-                        tmp_reply_str = dictStrCustom['strPcLockError'].format(**dictTValue)
+                        tmp_reply_str = dictStrCustom['strPcLockNone'].format(**dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                 else:
-                    tmp_reply_str = dictStrCustom['strPcLockNone'].format(**dictTValue)
+                    tmp_reply_str = dictStrCustom['strForGroupOnly'].format(**dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'unlock', fullMatch = True):
-                tmp_pc_hash = OlivaDiceCore.pcCard.getPcHash(
-                    tmp_pc_id,
-                    tmp_pc_platform
-                )
-                tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKeyLock(tmp_pc_hash, tmp_hagID)
-                print(tmp_pc_hash)
-                if tmp_pc_name_1 != None:
-                    OlivaDiceCore.pcCard.pcCardDataDelSelectionKeyLock(tmp_pc_hash, tmp_hagID)
-                    dictTValue['tName'] = tmp_pc_name_1
-                    tmp_reply_str = dictStrCustom['strPcUnLock'].format(**dictTValue)
-                    replyMsg(plugin_event, tmp_reply_str)
+                if flag_is_from_group:
+                    tmp_pc_hash = OlivaDiceCore.pcCard.getPcHash(
+                        tmp_pc_id,
+                        tmp_pc_platform
+                    )
+                    tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKeyLock(tmp_pc_hash, tmp_hagID)
+                    print(tmp_pc_hash)
+                    if tmp_pc_name_1 != None:
+                        OlivaDiceCore.pcCard.pcCardDataDelSelectionKeyLock(tmp_pc_hash, tmp_hagID)
+                        dictTValue['tName'] = tmp_pc_name_1
+                        tmp_reply_str = dictStrCustom['strPcUnLock'].format(**dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
+                    else:
+                        tmp_reply_str = dictStrCustom['strPcUnLockNone'].format(**dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
                 else:
-                    tmp_reply_str = dictStrCustom['strPcUnLockNone'].format(**dictTValue)
+                    tmp_reply_str = dictStrCustom['strForGroupOnly'].format(**dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'set'):
