@@ -328,7 +328,7 @@ def pcCardDataSetSelectionKey(pcHash, pcCardName, forceSwitch = False):
     else:
         return False
 
-def pcCardDataDelSelectionKey(pcHash, pcCardName, skipDelLock = False):
+def pcCardDataDelSelectionKey(pcHash, pcCardName, skipDel = False):
     selection_key = 'selection'
     lockList_key = 'lockList'
     tmp_pc_card_name_key = pcCardName
@@ -349,14 +349,15 @@ def pcCardDataDelSelectionKey(pcHash, pcCardName, skipDelLock = False):
         if pcHash not in dictPcCardSelection['unity']:
             dictPcCardSelection['unity'][pcHash] = {}
             return False
-        if selection_key in dictPcCardSelection['unity'][pcHash]:
-            if tmp_pc_card_name_key == dictPcCardSelection['unity'][pcHash][selection_key]:
-                dictPcCardSelection['unity'][pcHash].pop(selection_key)
-                if len(dictPcCardData['unity'][pcHash].keys()) > 0:
-                    tmp_card_dict_keys = list(dictPcCardData['unity'][pcHash].keys())
-                    dictPcCardSelection['unity'][pcHash][selection_key] = tmp_card_dict_keys[0]
-        lockList_dict_new = {}
-        if not skipDelLock:
+        if not skipDel:
+            if selection_key in dictPcCardSelection['unity'][pcHash]:
+                if tmp_pc_card_name_key == dictPcCardSelection['unity'][pcHash][selection_key]:
+                    dictPcCardSelection['unity'][pcHash].pop(selection_key)
+                    if len(dictPcCardData['unity'][pcHash].keys()) > 0:
+                        tmp_card_dict_keys = list(dictPcCardData['unity'][pcHash].keys())
+                        dictPcCardSelection['unity'][pcHash][selection_key] = tmp_card_dict_keys[0]
+        if not skipDel:
+            lockList_dict_new = {}
             if lockList_key in dictPcCardSelection['unity'][pcHash]:
                 for hagId_this in dictPcCardSelection['unity'][pcHash][lockList_key]:
                     if pcCardName != dictPcCardSelection['unity'][pcHash][lockList_key][hagId_this]:

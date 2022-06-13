@@ -2082,17 +2082,8 @@ def unity_reply(plugin_event, Proc):
                     OlivaDiceCore.pcCard.pcCardDataDelSelectionKey(
                         tmp_pcHash,
                         tmp_pc_name,
-                        skipDelLock = True
+                        skipDel = True
                     )
-                    if OlivaDiceCore.pcCard.pcCardDataGetSelectionKeyLock(
-                        tmp_pcHash,
-                        tmp_hagID
-                    ) == None:
-                        OlivaDiceCore.pcCard.pcCardDataSetSelectionKey(
-                            tmp_pcHash,
-                            tmp_pc_name,
-                            forceSwitch = True
-                        )
                     OlivaDiceCore.pcCard.pcCardRebase(
                         tmp_pcHash,
                         tmp_pc_name,
