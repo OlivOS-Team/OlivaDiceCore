@@ -199,14 +199,15 @@ def pcCardDataSkillNameMapper(pcHash, skillName, flagShow = False, hagId = None)
                     res = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[pcCardTemplateName]['showName'][pcCardSynonyms_hit]
     return res
 
-def pcCardDataSetBySkillName(pcHash, skillName, skillValue, pcCardName = 'default', hitList = None, forceMapping = False):
+def pcCardDataSetBySkillName(pcHash, skillName, skillValue, pcCardName = 'default', hitList = None, forceMapping = False, hagId = None):
     if skillName == '':
         return
     tmp_hitList = hitList
     if tmp_hitList == None:
         tmp_hitList = []
     tmp_pc_card_name_key = pcCardName
-    pcCardDataSetSelectionKey(pcHash, tmp_pc_card_name_key, forceSwitch = True)
+    if pcCardName != pcCardDataGetSelectionKeyLock(pcHash, hagId):
+        pcCardDataSetSelectionKey(pcHash, tmp_pc_card_name_key, forceSwitch = True)
     if pcHash in dictPcCardData['unity']:
         pass
     else:
@@ -252,7 +253,8 @@ def pcCardDataSetBySkillName(pcHash, skillName, skillValue, pcCardName = 'defaul
                             tmp_skill_rd.resInt,
                             tmp_pc_card_name_key,
                             hitList = tmp_hitList,
-                            forceMapping = forceMapping
+                            forceMapping = forceMapping,
+                            hagId = hagId
                         )
     if hitList == None:
         dataPcCardSave('unity', pcHash)
@@ -326,7 +328,7 @@ def pcCardDataSetSelectionKey(pcHash, pcCardName, forceSwitch = False):
     else:
         return False
 
-def pcCardDataDelSelectionKey(pcHash, pcCardName):
+def pcCardDataDelSelectionKey(pcHash, pcCardName, skipDelLock = False):
     selection_key = 'selection'
     lockList_key = 'lockList'
     tmp_pc_card_name_key = pcCardName
@@ -354,11 +356,12 @@ def pcCardDataDelSelectionKey(pcHash, pcCardName):
                     tmp_card_dict_keys = list(dictPcCardData['unity'][pcHash].keys())
                     dictPcCardSelection['unity'][pcHash][selection_key] = tmp_card_dict_keys[0]
         lockList_dict_new = {}
-        if lockList_key in dictPcCardSelection['unity'][pcHash]:
-            for hagId_this in dictPcCardSelection['unity'][pcHash][lockList_key]:
-                if pcCardName != dictPcCardSelection['unity'][pcHash][lockList_key][hagId_this]:
-                    lockList_dict_new[hagId_this] = dictPcCardSelection['unity'][pcHash][lockList_key][hagId_this]
-            dictPcCardSelection['unity'][pcHash][lockList_key] = lockList_dict_new
+        if not skipDelLock:
+            if lockList_key in dictPcCardSelection['unity'][pcHash]:
+                for hagId_this in dictPcCardSelection['unity'][pcHash][lockList_key]:
+                    if pcCardName != dictPcCardSelection['unity'][pcHash][lockList_key][hagId_this]:
+                        lockList_dict_new[hagId_this] = dictPcCardSelection['unity'][pcHash][lockList_key][hagId_this]
+                dictPcCardSelection['unity'][pcHash][lockList_key] = lockList_dict_new
         dataPcCardSave('unity', pcHash)
         return True
     else:

@@ -1886,7 +1886,6 @@ def unity_reply(plugin_event, Proc):
                     tmp_pc_platform
                 )
                 tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pc_hash, tmp_hagID)
-                print(tmp_pc_hash)
                 if tmp_pc_name_1 != None:
                     if OlivaDiceCore.pcCard.pcCardDataSetSelectionKeyLock(
                         tmp_pc_hash,
@@ -1993,7 +1992,8 @@ def unity_reply(plugin_event, Proc):
                                 tmp_skill_rd.resInt,
                                 dictTValue['tName'],
                                 hitList = None,
-                                forceMapping = flag_force_init
+                                forceMapping = flag_force_init,
+                                hagId = tmp_hagID
                             )
                             tmp_pcCard_list.append(
                                 '%s:%s' % (
@@ -2063,13 +2063,18 @@ def unity_reply(plugin_event, Proc):
                     )
                     OlivaDiceCore.pcCard.pcCardDataDelSelectionKey(
                         tmp_pcHash,
-                        tmp_pc_name
-                    )
-                    OlivaDiceCore.pcCard.pcCardDataSetSelectionKey(
-                        tmp_pcHash,
                         tmp_pc_name,
-                        forceSwitch = True
+                        skipDelLock = True
                     )
+                    if OlivaDiceCore.pcCard.pcCardDataGetSelectionKeyLock(
+                        tmp_pcHash,
+                        tmp_hagID
+                    ) == None:
+                        OlivaDiceCore.pcCard.pcCardDataSetSelectionKey(
+                            tmp_pcHash,
+                            tmp_pc_name,
+                            forceSwitch = True
+                        )
                     OlivaDiceCore.pcCard.pcCardRebase(
                         tmp_pcHash,
                         tmp_pc_name,
@@ -2324,7 +2329,8 @@ def unity_reply(plugin_event, Proc):
                             ),
                             tmp_skill_name,
                             tmp_skill_value_new,
-                            dictTValue['tName']
+                            dictTValue['tName'],
+                            hagId = tmp_hagID
                         )
                         dictTValue['tSkillName'] = tmp_skill_name
                         if tmp_skill_value_update.isdigit() or len(rd_para.resDetail) > 100:
@@ -2416,7 +2422,8 @@ def unity_reply(plugin_event, Proc):
                             ),
                             tmp_skill_pair_this[0],
                             tmp_skill_pair_this[1],
-                            dictTValue['tName']
+                            dictTValue['tName'],
+                            hagId = tmp_hagID
                         )
                     tmp_reply_str = dictStrCustom['strPcSetSkillValue'].format(**dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
@@ -2711,7 +2718,8 @@ def unity_reply(plugin_event, Proc):
                             ),
                             'SAN',
                             tmp_skill_value,
-                            tmp_pc_name
+                            tmp_pc_name,
+                            hagId = tmp_hagID
                         )
                         dictTValue['tName'] = tmp_pc_name
                         dictTValue['tSkillValue'] = str(tmp_skill_value_old)
@@ -3107,7 +3115,8 @@ def unity_reply(plugin_event, Proc):
                                     tmp_pcHash,
                                     tmp_skill_name,
                                     rd_para_2.resInt,
-                                    dictTValue['tName']
+                                    dictTValue['tName'],
+                                    hagId = tmp_hagID
                                 )
                                 dictTValue['tRollSubResult'] = '%s=%s=%s' % (rd_para_str_2, rd_para_2.resDetail, (rd_para_2.resInt))
                                 dictTValue['tSkillCheckReasult'] = '%s%s' % (
@@ -3171,7 +3180,8 @@ def unity_reply(plugin_event, Proc):
                                     tmp_pcHash,
                                     tmp_skill_name,
                                     rd_para_2.resInt,
-                                    tmp_pc_name_1
+                                    tmp_pc_name_1,
+                                    hagId = tmp_hagID
                                 )
                             tmp_enhance_succeed_count += 1
                             tmp_enhance_succeed_list.append([
