@@ -3451,6 +3451,9 @@ def unity_reply(plugin_event, Proc):
                 replyMsgPrivateByEvent(plugin_event, tmp_reply_str)
             else:
                 replyMsg(plugin_event, tmp_reply_str)
+    nativeMsgBlocker(plugin_event, Proc)
+    return
+
 
 def replyMsg(plugin_event, message):
     host_id = None
@@ -3659,6 +3662,103 @@ def pluginSend(plugin_event, send_type, target_id, message, host_id = None):
                 time.sleep(messageSplitDelay)
         if not flag_need_split or count > messageSplitPageLimit:
             break
+
+#阻塞普通消息
+def nativeMsgBlocker(plugin_event, Proc):
+    flag_is_from_host = False
+    flag_is_from_group = False
+    flag_hostEnable = True
+    flag_hostLocalEnable = True
+    flag_groupEnable = True
+    flag_messageFliterModeDisabled = False
+    tmp_hagID = None
+    if plugin_event.plugin_info['func_type'] == 'group_message':
+        if plugin_event.data.host_id != None:
+            flag_is_from_host = True
+        flag_is_from_group = True
+    elif plugin_event.plugin_info['func_type'] == 'private_message':
+        flag_is_from_group = False
+    tmp_hagID = getHagIDFromMsg(plugin_event, Proc)
+    if flag_is_from_host:
+        flag_hostEnable = OlivaDiceCore.userConfig.getUserConfigByKey(
+            userId = plugin_event.data.host_id,
+            userType = 'host',
+            platform = plugin_event.platform['platform'],
+            userConfigKey = 'hostEnable',
+            botHash = plugin_event.bot_info.hash
+        )
+    if flag_is_from_host:
+        flag_hostLocalEnable = OlivaDiceCore.userConfig.getUserConfigByKey(
+            userId = plugin_event.data.host_id,
+            userType = 'host',
+            platform = plugin_event.platform['platform'],
+            userConfigKey = 'hostLocalEnable',
+            botHash = plugin_event.bot_info.hash
+        )
+    if flag_is_from_group:
+        if flag_is_from_host:
+            if flag_hostEnable:
+                flag_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = plugin_event.platform['platform'],
+                    userConfigKey = 'groupEnable',
+                    botHash = plugin_event.bot_info.hash
+                )
+            else:
+                flag_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = plugin_event.platform['platform'],
+                    userConfigKey = 'groupWithHostEnable',
+                    botHash = plugin_event.bot_info.hash
+                )
+        else:
+            flag_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKey(
+                userId = tmp_hagID,
+                userType = 'group',
+                platform = plugin_event.platform['platform'],
+                userConfigKey = 'groupEnable',
+                botHash = plugin_event.bot_info.hash
+            )
+    flag_messageFliterMode = OlivaDiceCore.console.getConsoleSwitchByHash(
+        'messageFliterMode',
+        plugin_event.bot_info.hash
+    )
+    if flag_messageFliterMode == 1 and flag_is_from_group and not flag_is_from_host:
+        flag_messageFliterModeDisabled = True
+    elif flag_messageFliterMode == 2 and flag_is_from_host:
+        flag_messageFliterModeDisabled = True
+    elif flag_messageFliterMode == 3 and flag_is_from_group:
+        flag_messageFliterModeDisabled = True
+    #消息过滤器
+    if flag_messageFliterModeDisabled:
+        plugin_event.set_block()
+        return
+    #此频道关闭时中断处理
+    if not flag_hostLocalEnable:
+        plugin_event.set_block()
+        return
+    #此群关闭时中断处理
+    if not flag_groupEnable:
+        plugin_event.set_block()
+        return
+
+def getHagIDFromMsg(plugin_event, Proc):
+    tmp_hagID = None
+    flag_is_from_host = False
+    flag_is_from_group = False
+    if plugin_event.plugin_info['func_type'] == 'group_message':
+        if plugin_event.data.host_id != None:
+            flag_is_from_host = True
+        flag_is_from_group = True
+    elif plugin_event.plugin_info['func_type'] == 'private_message':
+        flag_is_from_group = False
+    if flag_is_from_host and flag_is_from_group:
+        tmp_hagID = '%s|%s' % (str(plugin_event.data.host_id), str(plugin_event.data.group_id))
+    elif flag_is_from_group:
+        tmp_hagID = str(plugin_event.data.group_id)
+    return tmp_hagID
 
 
 #其他
