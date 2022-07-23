@@ -96,7 +96,7 @@ dictStrCustom = {
     'strRollError09' : '表达式[{tRollPara}]掷骰错误！错误的右值！',
     'strRollError10' : '表达式[{tRollPara}]掷骰错误！错误的子参数！',
     'strRollError11' : '表达式[{tRollPara}]掷骰错误！计算极值时出错！',
-    'strRollError11' : '表达式[{tRollPara}]掷骰错误！解析技能变量时出错！',
+    'strRollError12' : '表达式[{tRollPara}]掷骰错误！解析技能变量时出错！',
     'strRollErrorUnknown' : '表达式[{tRollPara}]掷骰错误！未知的错误: {tResult}',
     'strRollErrorHelp' : '\n请使用[.help r]查看掷骰帮助，或使用[.help onedice]查看先进的OneDice标准。',
     'strSetGroupTempRule' : '已设置本群套用模板[{tPcTempName}]的规则[{tPcTempRuleName}]{tLazyResult}',
