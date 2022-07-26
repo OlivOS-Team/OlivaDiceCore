@@ -231,6 +231,7 @@ class calOperationNode(calNode):
             self.valsDefault['b'] = 1
         elif self.data == 'a':
             self.vals['k'] = 8
+            self.vals['q'] = None
             self.vals['m'] = 10
         elif self.data == 'c':
             self.vals['m'] = 10
@@ -2118,33 +2119,55 @@ class RD(object):
                     if tmp_main_val_left[0] <= 0 or tmp_main_val_left[0] >= 1000:
                         self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
                         return resNoneTemplate
-                    if tmp_node_this.vals['m'] <= 0 or tmp_node_this.vals['m'] >= 1000:
+                    if tmp_node_this.vals['m'] != None and (tmp_node_this.vals['m'] <= 0 or tmp_node_this.vals['m'] >= 1000):
                         self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
                         return resNoneTemplate
-                    if tmp_node_this.vals['k'] <= 0 or tmp_node_this.vals['k'] >= 1000:
+                    if tmp_node_this.vals['k'] != None and (tmp_node_this.vals['k'] <= 0 or tmp_node_this.vals['k'] >= 1000):
                         self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
                         return resNoneTemplate
-                    if tmp_node_this.vals['m'] >= tmp_node_this.vals['k']:
+                    if tmp_node_this.vals['q'] != None and (tmp_node_this.vals['q'] <= 0 or tmp_node_this.vals['q'] >= 1000):
+                        self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
+                        return resNoneTemplate
+                    flag_if_k_work = tmp_node_this.vals['k'] != None and tmp_node_this.vals['m'] >= tmp_node_this.vals['k']
+                    flag_if_q_work = tmp_node_this.vals['q'] != None and 1 <= tmp_node_this.vals['q']
+                    if flag_if_k_work or flag_if_q_work:
                         if tmp_node_this.vals['m'] >= tmp_main_val_right_obj.resIntMin or tmp_main_val_right_obj.resIntMinType == self.resExtremeType.INT_NEGATIVE_INFINITE:
                             tmp_node_this_output_MaxType = self.resExtremeType.INT_POSITIVE_INFINITE
                         else:
                             if tmp_main_val_left_obj.resIntMaxType == self.resExtremeType.INT_LIMITED:
                                 tmp_node_this_output_MaxType = self.resExtremeType.INT_LIMITED
-                                tmp_node_this_output_Max = tmp_main_val_left_obj.resIntMax
+                                tmp_node_this_output_Max = 0
+                                tmp_node_this_output_MinType = self.resExtremeType.INT_LIMITED
+                                tmp_node_this_output_Min = 0
+                                if flag_if_k_work and flag_if_q_work:
+                                    if tmp_node_this.vals['k'] - tmp_node_this.vals['q'] == 1:
+                                        tmp_node_this_output_Max = tmp_main_val_left_obj.resIntMax
+                                        tmp_node_this_output_Min = tmp_main_val_left_obj.resIntMin
+                                    elif tmp_node_this.vals['k'] - tmp_node_this.vals['q'] < 1:
+                                        tmp_node_this_output_Max = tmp_main_val_left_obj.resIntMax * 2
+                                        tmp_node_this_output_Min = tmp_main_val_left_obj.resIntMin
+                                    else:
+                                        tmp_node_this_output_Max = tmp_main_val_left_obj.resIntMax
+                                        tmp_node_this_output_Min = 0
+                                elif flag_if_k_work:
+                                    tmp_node_this_output_Max = tmp_main_val_left_obj.resIntMax
+                                elif flag_if_q_work:
+                                    tmp_node_this_output_Max = tmp_main_val_left_obj.resIntMax
                             else:
                                 tmp_node_this_output_MaxType = self.resExtremeType.INT_POSITIVE_INFINITE
                                 tmp_node_this_output_Max = 0
                     else:
                         tmp_node_this_output_MaxType = self.resExtremeType.INT_LIMITED
                         tmp_node_this_output_Max = 0
-                    tmp_node_this_output_MinType = self.resExtremeType.INT_LIMITED
-                    tmp_node_this_output_Min = 0
+                        tmp_node_this_output_MinType = self.resExtremeType.INT_LIMITED
+                        tmp_node_this_output_Min = 0
                     flag_add_roll_not_empty = True
                     tmp_add_roll_first = tmp_main_val_left[0]
                     tmp_add_roll_threshold = tmp_main_val_right[0]
                     tmp_add_roll_count = tmp_add_roll_first
                     tmp_add_roll_m = tmp_node_this.vals['m']
                     tmp_add_roll_k = tmp_node_this.vals['k']
+                    tmp_add_roll_q = tmp_node_this.vals['q']
                     tmp_node_this_output_this = 0
                     tmp_node_this_output_list = []
                     tmp_node_this_output_list_list = []
@@ -2160,7 +2183,10 @@ class RD(object):
                         for tmp_it_this in tmp_range_list:
                             tmp_node_this_output_this = self.random(1, tmp_add_roll_m)
                             tmp_node_this_output_list.append(tmp_node_this_output_this)
-                            if tmp_node_this_output_this >= tmp_add_roll_k:
+                            if tmp_add_roll_k != None and tmp_node_this_output_this >= tmp_add_roll_k:
+                                tmp_node_this_output += 1
+                                tmp_node_this_output_1_this += 1
+                            if tmp_add_roll_q != None and tmp_node_this_output_this <= tmp_add_roll_q:
                                 tmp_node_this_output += 1
                                 tmp_node_this_output_1_this += 1
                             if tmp_node_this_output_this >= tmp_add_roll_threshold:
@@ -2183,7 +2209,9 @@ class RD(object):
                             else:
                                 tmp_node_this_output_str += ','
                             tmp_node_this_output_str_this = str(tmp_node_this_output_this)
-                            if tmp_node_this_output_this >= tmp_add_roll_k:
+                            if tmp_add_roll_k != None and tmp_node_this_output_this >= tmp_add_roll_k:
+                                tmp_node_this_output_str_this = '[' + tmp_node_this_output_str_this + ']'
+                            if tmp_add_roll_q != None and tmp_node_this_output_this <= tmp_add_roll_q:
                                 tmp_node_this_output_str_this = '[' + tmp_node_this_output_str_this + ']'
                             if tmp_node_this_output_this >= tmp_add_roll_threshold:
                                 tmp_node_this_output_str_this = '<' + tmp_node_this_output_str_this + '>'
@@ -2504,7 +2532,11 @@ if __name__ == '__main__':
         '{力量}+1*{魔法}',
         '{力量}+2',
         '1*{力量}+2{{STR}',
-        '1*{力量}+2{{STR'
+        '1*{力量}+2{{STR',
+        '7a8k10q5m9',
+        '7a10k10q5m9',
+        '7a10k6q5m9',
+        '7a10k5q5m9'
     ]
     val_table = {
         '力量': 60,
