@@ -2788,7 +2788,6 @@ def unity_reply(plugin_event, Proc):
                 if isMatchWordStart(tmp_reast_str, 'h'):
                     flag_hide_roll = True
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'h')
-            tmp_reast_str = skipSpaceStart(tmp_reast_str)
             if len(tmp_reast_str) > 2:
                 tmp_reast_str_list_1 = tmp_reast_str.split('#')
                 if len(tmp_reast_str_list_1) > 1:
@@ -2819,7 +2818,7 @@ def unity_reply(plugin_event, Proc):
                     if tmp_reast_str[0].isdigit():
                         flag_bp_count = tmp_reast_str[0]
                         tmp_reast_str = tmp_reast_str[1:]
-                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            tmp_reast_str = skipSpaceStart(tmp_reast_str)
             if len(tmp_reast_str) > 0:
                 [tmp_skill_name, tmp_reast_str] = getToNumberPara(tmp_reast_str)
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
