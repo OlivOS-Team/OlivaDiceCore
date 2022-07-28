@@ -3289,22 +3289,52 @@ def unity_reply(plugin_event, Proc):
             tmp_reply_str = dictStrCustom['strRollRange'].format(**dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
         #基于OneDice标准，这些指令不再需要，指引用户看HelpDoc
-        elif isMatchWordStart(tmp_reast_str, 'ww'):
-            replyMsgLazyHelpByEvent(plugin_event, 'r')
-            return
-        elif isMatchWordStart(tmp_reast_str, 'dx'):
-            replyMsgLazyHelpByEvent(plugin_event, 'r')
-            return
-        elif isMatchWordStart(tmp_reast_str, 'r'):
+        #elif isMatchWordStart(tmp_reast_str, 'ww'):
+        #    replyMsgLazyHelpByEvent(plugin_event, 'r')
+        #    return
+        #elif isMatchWordStart(tmp_reast_str, 'dx'):
+        #    replyMsgLazyHelpByEvent(plugin_event, 'r')
+        #    return
+        elif (
+            isMatchWordStart(tmp_reast_str, 'r')
+        ) or (
+            isMatchWordStart(tmp_reast_str, 'ww')
+        ) or (
+            isMatchWordStart(tmp_reast_str, 'w')
+        ) or (
+            isMatchWordStart(tmp_reast_str, 'dxx')
+        ) or (
+            isMatchWordStart(tmp_reast_str, 'dx')
+        ):
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
             tmp_reply_str_show = ''
-            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'r')
+            flag_roll_mode = 'r'
+            if isMatchWordStart(tmp_reast_str, 'r'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'r')
+                flag_roll_mode = 'r'
+            elif isMatchWordStart(tmp_reast_str, 'ww'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'ww')
+                flag_roll_mode = 'ww'
+            elif isMatchWordStart(tmp_reast_str, 'w'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'w')
+                flag_roll_mode = 'w'
+            elif isMatchWordStart(tmp_reast_str, 'dxx'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'dxx')
+                flag_roll_mode = 'dxx'
+            elif isMatchWordStart(tmp_reast_str, 'dx'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'dx')
+                flag_roll_mode = 'dx'
             #此处只对实体化后的&做处理，因为这是运算符，其余保持原样
             #如果以后有全面反实体化的需求则需直接调整这里
             #tmp_reast_str = tmp_reast_str.replace('&amp;', '&')
-            rd_para_str = '1D100'
+            if 'r' == flag_roll_mode:
+                rd_para_str = '1D100'
+            elif flag_roll_mode in ['ww', 'w']:
+                rd_para_str = '10A10'
+            elif flag_roll_mode in ['dx', 'dxx']:
+                rd_para_str = '10C10'
             rd_reason_str = None
             roll_times_count = 1
             flag_hide_roll = False
@@ -3335,6 +3365,12 @@ def unity_reply(plugin_event, Proc):
                 [tmp_rd_para_str, tmp_reast_str] = getExpression(tmp_reast_str, valueTable = skill_valueTable)
                 if tmp_rd_para_str != None and tmp_rd_para_str != '':
                     rd_para_str = tmp_rd_para_str
+                    if flag_roll_mode in ['ww', 'w']:
+                        if rd_para_str.isdigit():
+                            rd_para_str = '%sA10' % rd_para_str
+                    elif flag_roll_mode in ['dx', 'dxx']:
+                        if rd_para_str.isdigit():
+                            rd_para_str = '%sC10' % rd_para_str
                     flag_have_para = True
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 if len(tmp_reast_str) > 0:
@@ -3364,22 +3400,40 @@ def unity_reply(plugin_event, Proc):
                 if 'customDefault' in tmp_template:
                     tmp_template_customDefault = tmp_template['customDefault']
                 if 'mainDice' in tmp_template and not flag_have_para:
-                    rd_para_str = tmp_template['mainDice']
+                    if flag_roll_mode in ['r']:
+                        rd_para_str = tmp_template['mainDice']
             if roll_times_count == 1:
                 rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_template_customDefault, valueTable = skill_valueTable)
                 rd_para.roll()
                 tmp_reply_str_1 = ''
                 if rd_para.resError == None:
-                    if len(rd_para.resDetail) == 0 or len(rd_para.resDetail) > 150:
+                    if flag_roll_mode in ['r']:
+                        if len(rd_para.resDetail) == 0 or len(rd_para.resDetail) > 150:
+                            if len(str(rd_para.resInt)) > 100:
+                                tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
+                            else:
+                                tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)
+                        else:
+                            if len(str(rd_para.resInt)) > 50:
+                                tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resDetail) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
+                            else:
+                                tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resDetail) + '=' + str(rd_para.resInt)
+                    elif flag_roll_mode in ['w', 'dxx']:
                         if len(str(rd_para.resInt)) > 100:
                             tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
                         else:
                             tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)
                     else:
-                        if len(str(rd_para.resInt)) > 50:
-                            tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resDetail) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
+                        if len(rd_para.resDetail) == 0 or len(rd_para.resDetail) > 300:
+                            if len(str(rd_para.resInt)) > 100:
+                                tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
+                            else:
+                                tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)
                         else:
-                            tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resDetail) + '=' + str(rd_para.resInt)
+                            if len(str(rd_para.resInt)) > 50:
+                                tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resDetail) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
+                            else:
+                                tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resDetail) + '=' + str(rd_para.resInt)
                 else:
                     dictTValue['tResult'] = str(rd_para.resError)
                     dictTValue['tRollPara'] = str(rd_para_str)

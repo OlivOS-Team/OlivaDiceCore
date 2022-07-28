@@ -146,10 +146,7 @@ He dismissed the dismiss as worthless.
     'r': '''通用掷骰指令
 表达式支持OneDice标准:
 https://github.com/OlivOS-Team/onedice
-基于先进的OneDice标准，你不再需要除[.r]指令以外的其他掷骰指令（哪怕规则书告诉你应该那么做）。
-例如：
-[.r20a10]等同于[.ww20a10]
-[.r10c7]等同于[.dx10a7]
+基于先进的OneDice标准。
 指令用法：
 .r [掷骰表达式] [理由]    掷骰子
 .rh [掷骰表达式] [理由]    掷暗骰
@@ -289,11 +286,7 @@ https://wiki.dice.center/OlivOS_Login.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9B%9E%
     'onedice': '''OneDice 意为 通用掷骰串标准 ，是一个面向计算机行业的数学表达式标准，旨在统一不同用户级随机数描述时所涉及的应用交互界面设计，使开发者们无需在这类细枝末节的设计中浪费精力或相互争吵，乃至产生过多不合理设计；亦可使用户在使用不同开发者所开发的产品时，能够拥有一个更便捷直接、符合直觉且功能强大的统一表达方式。
 表达式支持OneDice标准:
 https://github.com/OlivOS-Team/onedice
-基于先进的OneDice标准，你不再需要除[.r]指令以外的其他掷骰指令（哪怕规则书告诉你应该那么做）。
-例如：
-[.r20a10]等同于[.ww20a10]
-[.r10c7]等同于[.dx10a7]
-[.r5f]等同于[.r5d3-5*2]''',
+基于先进的OneDice标准。''',
 
 
     'OlivaDiceCore更新': '&更新',
