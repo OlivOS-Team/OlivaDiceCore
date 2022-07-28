@@ -1737,6 +1737,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_pc_name = tmp_reast_str
                 tmp_pc_name = tmp_pc_name.strip()
                 if tmp_pc_name != None:
+                    tmp_pc_name = OlivaDiceCore.pcCard.fixName(tmp_pc_name)
                     if not OlivaDiceCore.pcCard.checkPcName(tmp_pc_name):
                         return
                 tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
@@ -2291,6 +2292,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_skill_update_flag = None
                 tmp_skill_value_update = None
                 [tmp_skill_name, tmp_skill_value] = getExpression(tmp_reast_str_new, reverse = True)
+                tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode = 'skillName')
                 if tmp_skill_name == '':
                     tmp_skill_name = None
                 if tmp_skill_value == '':
@@ -2391,12 +2393,14 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 tmp_reast_str = tmp_reast_str.rstrip()
             if tmp_pc_name != None:
+                tmp_pc_name = OlivaDiceCore.pcCard.fixName(tmp_pc_name)
                 if not OlivaDiceCore.pcCard.checkPcName(tmp_pc_name):
                     return
             while len(tmp_reast_str) > 0 and tmp_skill_name_find == None:
                 tmp_skill_name = None
                 tmp_skill_value = None
                 [tmp_skill_name, tmp_reast_str] = getToNumberPara(tmp_reast_str)
+                tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode = 'skillName')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 if len(tmp_reast_str) > 0:
                     [tmp_skill_value, tmp_reast_str] = getNumberPara(tmp_reast_str)

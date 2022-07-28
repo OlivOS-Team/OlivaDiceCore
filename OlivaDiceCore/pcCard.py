@@ -525,6 +525,27 @@ def pcCardDataGetByPcName(pcHash, hagId = None):
             tmp_skill_list = dictPcCardData['unity'][pcHash][tmp_pc_card_name_key]
     return tmp_skill_list
 
+def fixName(data:str, flagMode = 'default'):
+    res = data
+    list_origin = [
+        '!', '@', '#', '$', '%', '^', '&', '*',
+        '(', ')', '{', '}', '[', ']', '-', '=',
+        '+', '/', '\\', '*', ':', ';', '\'', '\"',
+        ',', '.', '?', '~', '`', '|',
+        '\r\n', '\r', '\n'
+    ]
+    if flagMode == 'skillName':
+        list_origin = [
+            '!', '@', '#', '$', '%', '^', '&', '*',
+            '(', ')', '{', '}', '[', ']', '-',
+            '+', '/', '\\', '*', ';', '\'', '\"',
+            ',', '.', '?', '~', '`', '|',
+            '\r\n', '\r', '\n'
+        ]
+    for list_origin_this in list_origin:
+        res = res.replace(list_origin_this, '_')
+    return res
+
 def checkPcName(data):
     res = True
     if len(data) > 50:
