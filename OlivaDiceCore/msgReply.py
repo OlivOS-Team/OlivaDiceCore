@@ -3352,6 +3352,8 @@ def unity_reply(plugin_event, Proc):
         #    replyMsgLazyHelpByEvent(plugin_event, 'r')
         #    return
         elif (
+            isMatchWordStart(tmp_reast_str, 'rx')
+        ) or (
             isMatchWordStart(tmp_reast_str, 'r')
         ) or (
             isMatchWordStart(tmp_reast_str, 'ww')
@@ -3367,7 +3369,10 @@ def unity_reply(plugin_event, Proc):
             tmp_reply_str = ''
             tmp_reply_str_show = ''
             flag_roll_mode = 'r'
-            if isMatchWordStart(tmp_reast_str, 'r'):
+            if isMatchWordStart(tmp_reast_str, 'rx'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rx')
+                flag_roll_mode = 'rx'
+            elif isMatchWordStart(tmp_reast_str, 'r'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'r')
                 flag_roll_mode = 'r'
             elif isMatchWordStart(tmp_reast_str, 'ww'):
@@ -3418,7 +3423,10 @@ def unity_reply(plugin_event, Proc):
                         tmp_reast_str = tmp_reast_str_list_1[1]
             if len(tmp_reast_str) > 0:
                 tmp_rd_para_str = None
-                [tmp_rd_para_str, tmp_reast_str] = getExpression(tmp_reast_str, valueTable = skill_valueTable)
+                if flag_roll_mode in ['rx']:
+                    [tmp_rd_para_str, tmp_reast_str] = getExpression(tmp_reast_str, valueTable = None)
+                else:
+                    [tmp_rd_para_str, tmp_reast_str] = getExpression(tmp_reast_str, valueTable = skill_valueTable)
                 if tmp_rd_para_str != None and tmp_rd_para_str != '':
                     rd_para_str = tmp_rd_para_str
                     if flag_roll_mode in ['ww', 'w']:
@@ -3456,14 +3464,14 @@ def unity_reply(plugin_event, Proc):
                 if 'customDefault' in tmp_template:
                     tmp_template_customDefault = tmp_template['customDefault']
                 if 'mainDice' in tmp_template and not flag_have_para:
-                    if flag_roll_mode in ['r']:
+                    if flag_roll_mode in ['r', 'rx']:
                         rd_para_str = tmp_template['mainDice']
             if roll_times_count == 1:
                 rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_template_customDefault, valueTable = skill_valueTable)
                 rd_para.roll()
                 tmp_reply_str_1 = ''
                 if rd_para.resError == None:
-                    if flag_roll_mode in ['r']:
+                    if flag_roll_mode in ['r', 'rx']:
                         if len(rd_para.resDetail) == 0 or len(rd_para.resDetail) > 150:
                             if len(str(rd_para.resInt)) > 100:
                                 tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
@@ -3479,7 +3487,7 @@ def unity_reply(plugin_event, Proc):
                             tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
                         else:
                             tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)
-                    else:
+                    elif flag_roll_mode in ['ww', 'dx'] or True:
                         if len(rd_para.resDetail) == 0 or len(rd_para.resDetail) > OlivaDiceCore.console.getConsoleSwitchByHash(
                             'largeRollLimit',
                             plugin_event.bot_info.hash
