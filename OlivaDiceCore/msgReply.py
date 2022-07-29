@@ -2555,13 +2555,22 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = dictStrCustom['strForGroupOnly'].format(**dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
             return
-        elif isMatchWordStart(tmp_reast_str, 'coc') or isMatchWordStart(tmp_reast_str, 'dnd'):
+        elif (
+            isMatchWordStart(tmp_reast_str, 'coc6')
+        ) or (
+            isMatchWordStart(tmp_reast_str, 'coc')
+        ) or (
+            isMatchWordStart(tmp_reast_str, 'dnd')
+        ):
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
             tmp_reply_str_1 = ''
             tmp_pcCardTemplateName = 'default'
-            if isMatchWordStart(tmp_reast_str, 'coc'):
+            if isMatchWordStart(tmp_reast_str, 'coc6'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'coc6')
+                tmp_pcCardTemplateName = 'COC6'
+            elif isMatchWordStart(tmp_reast_str, 'coc'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'coc')
                 tmp_pcCardTemplateName = 'COC7'
             elif isMatchWordStart(tmp_reast_str, 'dnd'):
@@ -2604,9 +2613,9 @@ def unity_reply(plugin_event, Proc):
                         tmp_total_count_2 += tmp_res_list_this[tmp_res_list_this_this]
                         if tmp_res_list_this_this != 'LUC':
                             tmp_total_count_1 += tmp_res_list_this[tmp_res_list_this_this]
-                    if tmp_pcCardTemplateName == 'COC7':
+                    if tmp_pcCardTemplateName in ['COC7']:
                         tmp_reply_str_1 += '共计:%d/%d %.2f%%' % (tmp_total_count_1, tmp_total_count_2, 100 * tmp_total_count_1 / tmp_total_count_2)
-                    elif tmp_pcCardTemplateName == 'DND5E':
+                    elif tmp_pcCardTemplateName in ['COC6', 'DND5E']:
                         tmp_reply_str_1 += '共计:%d' % tmp_total_count_1
                 dictTValue['tPcInitResult'] = tmp_reply_str_1
                 tmp_reply_str = dictStrCustom['strPcInit'].format(**dictTValue)
