@@ -153,7 +153,7 @@ def getHelp(key_str, bot_hash):
     tmp_reply_str = dictStrCustom['strHelpDocNotFound'].format(**dictTValue)
     return tmp_reply_str
 
-def getHelpRecommend(key_str, bot_hash):
+def getHelpRecommend(key_str:str, bot_hash:str):
     res = []
     tmp_RecommendRank_list = []
     if bot_hash in OlivaDiceCore.helpDocData.dictHelpDoc:
@@ -173,11 +173,11 @@ def getHelpRecommend(key_str, bot_hash):
                 res.append(tmp_RecommendRank_list[tmp_for_list_this][1])
     return res
 
-def getRecommendRank(word1_in, word2_in):
+def getRecommendRank(word1_in:str, word2_in:str):
     iRank = 1
     find_flag = 1
-    word1 = word1_in
-    word2 = word2_in
+    word1 = word1_in.lower()
+    word2 = word2_in.lower()
     if len(word1) > len(word2):
         [word1, word2] = [word2, word1]
     word1_len = len(word1)

@@ -28,7 +28,12 @@ def logProc(Proc, level, message, segment):
         log_segment = segment
     )
 
+def globalLog(level, message, segment):
+    if OlivaDiceCore.data.global_Proc != None:
+        logProc(OlivaDiceCore.data.global_Proc, level, message, segment)
+
 def unity_init(plugin_event, Proc):
+    OlivaDiceCore.data.global_Proc = Proc
     OlivaDiceCore.userConfig.initDelUTF8WithBom(Proc.Proc_data['bot_info_dict'])
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
     dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
@@ -2292,7 +2297,6 @@ def unity_reply(plugin_event, Proc):
                 tmp_skill_update_flag = None
                 tmp_skill_value_update = None
                 [tmp_skill_name, tmp_skill_value] = getExpression(tmp_reast_str_new, reverse = True)
-                tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode = 'skillName')
                 if tmp_skill_name == '':
                     tmp_skill_name = None
                 if tmp_skill_value == '':
@@ -2304,8 +2308,15 @@ def unity_reply(plugin_event, Proc):
                     elif len(tmp_skill_value) > 1 and tmp_skill_value[0] == '-':
                         tmp_skill_update_flag = '-'
                         tmp_skill_value_update = tmp_skill_value[1:]
+                    elif len(tmp_skill_value) > 1 and tmp_skill_value[0] in ['*', 'x', 'X']:
+                        tmp_skill_update_flag = '*'
+                        tmp_skill_value_update = tmp_skill_value[1:]
+                    elif len(tmp_skill_value) > 1 and tmp_skill_value[0] in ['/']:
+                        tmp_skill_update_flag = '/'
+                        tmp_skill_value_update = tmp_skill_value[1:]
                     else:
                         tmp_skill_value = None
+                tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode = 'skillName')
                 if tmp_skill_name != None and tmp_skill_value != None:
                     tmp_skill_name = tmp_skill_name.strip()
                     tmp_skill_name = tmp_skill_name.upper()
@@ -2400,7 +2411,6 @@ def unity_reply(plugin_event, Proc):
                 tmp_skill_name = None
                 tmp_skill_value = None
                 [tmp_skill_name, tmp_reast_str] = getToNumberPara(tmp_reast_str)
-                tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode = 'skillName')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 if len(tmp_reast_str) > 0:
                     [tmp_skill_value, tmp_reast_str] = getNumberPara(tmp_reast_str)
@@ -2414,6 +2424,7 @@ def unity_reply(plugin_event, Proc):
                 if tmp_skill_name != None:
                     if tmp_skill_name[-1] in ['=', ':']:
                         tmp_skill_name = tmp_skill_name[:-1]
+                    tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name)
                     tmp_skill_name = tmp_skill_name.upper()
                     if len(tmp_skill_pair_list) == 0:
                         if tmp_skill_value != None:
@@ -2833,7 +2844,23 @@ def unity_reply(plugin_event, Proc):
                 tmp_skill_value = int(tmp_skill_value)
             if tmp_skill_name == '':
                 tmp_skill_name = None
+            flag_op = None
+            tmp_op_value = None
+            tmp_skill_value_str = None
             if tmp_skill_name != None:
+                if len(tmp_skill_name) >= 1 and tmp_skill_name[-1] in [
+                    '+', '-', '*', '/'
+                ]:
+                    flag_op = tmp_skill_name[-1]
+                    tmp_skill_name = tmp_skill_name[:-1]
+                    tmp_skill_name = tmp_skill_name.rstrip(' ')
+                    tmp_op_value = tmp_skill_value
+                    tmp_skill_value = None
+                    if len(tmp_reast_str) > 0:
+                        [tmp_skill_value, tmp_reast_str] = getNumberPara(tmp_reast_str)
+                        tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                    if tmp_skill_value != None:
+                        tmp_skill_value = int(tmp_skill_value)
                 tmp_skill_name = tmp_skill_name.upper()
                 if tmp_skill_value != None:
                     pass
@@ -2846,8 +2873,17 @@ def unity_reply(plugin_event, Proc):
                         tmp_skill_name,
                         hagId = tmp_hagID
                     )
+                if flag_op != None and tmp_op_value != None and tmp_skill_value != None:
+                    tmp_skill_value_rd_str = str(tmp_skill_value) + str(flag_op) + str(tmp_op_value)
+                    tmp_skill_value_rd = OlivaDiceCore.onedice.RD(tmp_skill_value_rd_str)
+                    tmp_skill_value_rd.roll()
+                    if tmp_skill_value_rd.resError == None:
+                        tmp_skill_value = tmp_skill_value_rd.resInt
+                        tmp_skill_value_str = '%s=%s' % (tmp_skill_value_rd_str, str(tmp_skill_value))
             elif tmp_skill_value != None:
                 pass
+            if tmp_skill_value_str == None and tmp_skill_value != None:
+                tmp_skill_value_str = str(tmp_skill_value)
             tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
                 OlivaDiceCore.pcCard.getPcHash(
                     tmp_pc_id,
@@ -2905,7 +2941,7 @@ def unity_reply(plugin_event, Proc):
                             dictTValue['tRollResult'] = '%s=%d' % (rd_para_str, rd_para.resInt)
                         else:
                             dictTValue['tRollResult'] = '%s=%s=%d' % (rd_para_str, rd_para.resDetail, rd_para.resInt)
-                        dictTValue['tSkillValue'] = str(tmp_skill_value)
+                        dictTValue['tSkillValue'] = tmp_skill_value_str
                         dictRuleTempData = {
                             'roll': rd_para.resInt,
                             'skill': tmp_skill_value
@@ -2970,7 +3006,7 @@ def unity_reply(plugin_event, Proc):
                                 tmp_tSkillCheckReasult += '%s=%d ' % (rd_para_str, rd_para.resInt)
                             else:
                                 tmp_tSkillCheckReasult += '%s=%s=%d ' % (rd_para_str, rd_para.resDetail, rd_para.resInt)
-                            dictTValue['tSkillValue'] = str(tmp_skill_value)
+                            dictTValue['tSkillValue'] = tmp_skill_value_str
                             dictRuleTempData = {
                                 'roll': rd_para.resInt,
                                 'skill': tmp_skill_value

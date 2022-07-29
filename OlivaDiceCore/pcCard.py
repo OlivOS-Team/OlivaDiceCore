@@ -534,14 +534,6 @@ def fixName(data:str, flagMode = 'default'):
         ',', '.', '?', '~', '`', '|',
         '\r\n', '\r', '\n'
     ]
-    if flagMode == 'skillName':
-        list_origin = [
-            '!', '@', '#', '$', '%', '^', '&', '*',
-            '(', ')', '{', '}', '[', ']', '-',
-            '+', '/', '\\', '*', ';', '\'', '\"',
-            ',', '.', '?', '~', '`', '|',
-            '\r\n', '\r', '\n'
-        ]
     for list_origin_this in list_origin:
         res = res.replace(list_origin_this, '_')
     return res

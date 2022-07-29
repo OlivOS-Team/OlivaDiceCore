@@ -28,6 +28,8 @@ OlivaDiceCore_ver_short = '%s(%s)' % (str(OlivaDiceCore_ver), str(OlivaDiceCore_
 
 exce_path = os.getcwd()
 
+global_Proc = None
+
 bot_info_basic = 'OlivaDice By lunzhiPenxil Ver.%s(%s)' % (str(OlivaDiceCore_ver), str(OlivaDiceCore_svn))
 
 bot_info_basic_short = 'OlivaDice Ver.%s(%s)' % (str(OlivaDiceCore_ver), str(OlivaDiceCore_svn))

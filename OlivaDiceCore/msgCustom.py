@@ -77,6 +77,7 @@ dictStrCustom = {
     'strDrawName' : '[{tName}]的随机名称:\n{tResult}',
     'strDrawDeck' : '你抽到了:\n{tDrawDeckResult}',
     'strDrawDeckHideShow' : '[{tName}]进行了暗抽牌',
+    'strDrawDeckRecommend' : '已为你找到以下以下相似牌堆:\n{tDrawDeckResult}',
     'strDrawDeckNotFound' : '牌堆未找到',
     'strRoll' : '[{tName}]掷骰: {tRollResult}',
     'strRollWithReason' : '[{tName}]由于[{tRollReason}]掷骰: {tRollResult}',
@@ -180,6 +181,8 @@ dictStrCustom = {
 dictStrConst = {
     'strToBeMaster' : '请使用[{tInitMasterKey}]指令以获取Master权限',
     'strInitData' : '[{tInitDataCount}]条[{tInitDataType}]数据已加载',
+    'strInitDeckData' : '[{tInitDataCount}]个牌堆已加载至[{tName}]，共[{tInitDataCount01}]个牌堆',
+    'strInitDeckDataError' : '加载牌堆文件[{tInitDataName}]至[{tName}]时出错，请检查文件格式！',
     'strInitBakData' : '[{tInitDataCount}]条[{tInitDataType}]数据已备份',
     'strSaveData' : '[{tInitDataCount}]条[{tInitDataType}]数据已写入',
     'strShowVersionOnLog' : '当前版本为[{tVersion}]'
@@ -229,8 +232,10 @@ dictTValue = {
     'tSkillEnhanceSucceedCount' : 'N/A',
     'tSkillEnhanceSucceedList' : 'N/A',
     'tInitDataCount' : '0',
+    'tInitDataCount01' : '0',
     'tInitMasterKey': '不可用',
     'tInitDataType': '未知',
+    'tInitDataName': 'N/A',
     'tHelpDocResult': 'N/A',
     'tDrawDeckResult': 'N/A',
     'tConsoleKey': 'N/A',

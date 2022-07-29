@@ -21,13 +21,23 @@ import os
 import json
 
 def initDeck(bot_info_dict):
+    dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
+    dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
+    dictGValue = OlivaDiceCore.msgCustom.dictGValue
+    dictTValue.update(dictGValue)
+    obj_Deck_this_count_total_init = 0
     for bot_info_dict_this in bot_info_dict:
         OlivaDiceCore.drawCardData.dictDeck[bot_info_dict_this] = OlivaDiceCore.drawCardData.dictDeckTemp.copy()
+        obj_Deck_this_count_total_init = len(OlivaDiceCore.drawCardData.dictDeck[bot_info_dict_this])
     releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity')
     releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity/extend')
     releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity/extend/deckclassic')
     customDeckDir = OlivaDiceCore.data.dataDirRoot + '/unity/extend/deckclassic'
     fileDeckList = os.listdir(customDeckDir)
+    obj_Deck_this = None
+    obj_Deck_this_count = 0
+    obj_Deck_this_count_total = 0
+    dictTValue['tName'] = '全局'
     for fileDeckList_this in fileDeckList:
         customDeckFile = fileDeckList_this
         customDeckPath = customDeckDir + '/' + customDeckFile
@@ -40,17 +50,42 @@ def initDeck(bot_info_dict):
                 with open(customDeckPath, 'r', encoding = 'utf_8_sig') as customDeckPath_f:
                     obj_Deck_this = json.loads(customDeckPath_f.read())
             except:
-                pass
+                dictTValue['tInitDataName'] = customDeckFile
+                OlivaDiceCore.msgReply.globalLog(
+                    3,
+                    dictStrConst['strInitDeckDataError'].format(**dictTValue),
+                    [
+                        ('OlivaDice', 'default'),
+                        ('Init', 'default')
+                    ]
+                )
         if obj_Deck_this != None:
             for bot_info_dict_this in OlivaDiceCore.drawCardData.dictDeck:
                 botHash = bot_info_dict_this
                 OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this)
+        obj_Deck_this_count_total = len(OlivaDiceCore.drawCardData.dictDeck[botHash])
+    dictTValue['tInitDataCount'] = str(obj_Deck_this_count_total - obj_Deck_this_count_total_init)
+    dictTValue['tInitDataCount01'] = str(obj_Deck_this_count_total)
+    OlivaDiceCore.msgReply.globalLog(
+        2,
+        dictStrConst['strInitDeckData'].format(**dictTValue),
+        [
+            ('OlivaDice', 'default'),
+            ('Init', 'default')
+        ]
+    )
     for bot_info_dict_this in OlivaDiceCore.drawCardData.dictDeck:
         botHash = bot_info_dict_this
         releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash)
         releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/extend')
         releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/extend/deckclassic')
         customDeckDir = OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/extend/deckclassic'
+        dictTValue['tName'] = botHash
+        if botHash in bot_info_dict:
+            dictTValue['tName'] = '%s|%s' % (
+                bot_info_dict[botHash].platform['platform'],
+                str(bot_info_dict[botHash].id)
+            )
         fileDeckList = os.listdir(customDeckDir)
         for fileDeckList_this in fileDeckList:
             customDeckFile = fileDeckList_this
@@ -64,9 +99,28 @@ def initDeck(bot_info_dict):
                     with open(customDeckPath, 'r', encoding = 'utf_8_sig') as customDeckPath_f:
                         obj_Deck_this = json.loads(customDeckPath_f.read())
                 except:
-                    pass
+                    dictTValue['tInitDataName'] = customDeckFile
+                    OlivaDiceCore.msgReply.globalLog(
+                        3,
+                        dictStrConst['strInitDeckDataError'].format(**dictTValue),
+                        [
+                            ('OlivaDice', 'default'),
+                            ('Init', 'default')
+                        ]
+                    )
             if obj_Deck_this != None:
                 OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this)
+        obj_Deck_this_count = len(OlivaDiceCore.drawCardData.dictDeck[botHash])
+        dictTValue['tInitDataCount'] = str(obj_Deck_this_count - obj_Deck_this_count_total)
+        dictTValue['tInitDataCount01'] = str(obj_Deck_this_count)
+        OlivaDiceCore.msgReply.globalLog(
+            2,
+            dictStrConst['strInitDeckData'].format(**dictTValue),
+            [
+                ('OlivaDice', 'default'),
+                ('Init', 'default')
+            ]
+        )
 
 def getDrawDeck(key_str, bot_hash, count = 1):
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
@@ -86,8 +140,40 @@ def getDrawDeck(key_str, bot_hash, count = 1):
                 dictTValue['tDrawDeckResult'] = '\n'.join(tmp_card_list)
                 tmp_reply_str = dictStrCustom['strDrawDeck'].format(**dictTValue)
                 return tmp_reply_str
-    tmp_reply_str = dictStrCustom['strDrawDeckNotFound'].format(**dictTValue)
+    tmp_recommend_list = getDeckRecommend(key_str, bot_hash)
+    if type(tmp_recommend_list) == list:
+        if len(tmp_recommend_list) > 0:
+            tmp_recommend_str = '\n'.join(
+                ['[.draw %s]' % tmp_recommend_list_this for tmp_recommend_list_this in tmp_recommend_list]
+            )
+            dictTValue['tDrawDeckResult'] = tmp_recommend_str
+            tmp_reply_str = dictStrCustom['strDrawDeckRecommend'].format(**dictTValue)
+        else:
+            tmp_reply_str = dictStrCustom['strDrawDeckNotFound'].format(**dictTValue)
     return tmp_reply_str
+
+def getDeckRecommend(key_str:str, bot_hash:str):
+    res = []
+    tmp_RecommendRank_list = []
+    if bot_hash in OlivaDiceCore.drawCardData.dictDeck:
+        for dictDeck_this in OlivaDiceCore.drawCardData.dictDeck[bot_hash]:
+            tmp_RecommendRank_list.append([
+                OlivaDiceCore.helpDoc.getRecommendRank(
+                    key_str,
+                    dictDeck_this
+                ),
+                dictDeck_this
+            ])
+        tmp_RecommendRank_list.sort(key = lambda x : x[0])
+    tmp_count_max = min(8, len(tmp_RecommendRank_list))
+    count = 0
+    while count < tmp_count_max:
+        if tmp_RecommendRank_list[count][0] < 1000:
+            if len(tmp_RecommendRank_list[count][1]) < 25:
+                if len(tmp_RecommendRank_list[count][1]) > 0 and tmp_RecommendRank_list[count][1][0] != '_':
+                    res.append(tmp_RecommendRank_list[count][1])
+        count += 1
+    return res
 
 def draw(key_str, bot_hash, flag_need_give_back = True, mark_dict = None):
     tmp_reply_str = None
