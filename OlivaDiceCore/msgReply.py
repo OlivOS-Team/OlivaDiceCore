@@ -3464,7 +3464,10 @@ def unity_reply(plugin_event, Proc):
                         else:
                             tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)
                     else:
-                        if len(rd_para.resDetail) == 0 or len(rd_para.resDetail) > 300:
+                        if len(rd_para.resDetail) == 0 or len(rd_para.resDetail) > OlivaDiceCore.console.getConsoleSwitchByHash(
+                            'largeRollLimit',
+                            plugin_event.bot_info.hash
+                        ):
                             if len(str(rd_para.resInt)) > 100:
                                 tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
                             else:
