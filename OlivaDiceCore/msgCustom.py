@@ -143,6 +143,7 @@ dictStrCustom = {
     'strPcSkillEnhanceError' : '未设置人物卡，无法进行自动成长检定',
     'strSanCheck' : '[{tName}]进行理智检定[{tSkillValue}]:\n{tRollResult} {tSkillCheckReasult}\n理智减少{tRollSubResult}点,当前剩余[{tSkillValueNew}]点',
     'strSanCheckGreatFailed' : '[{tName}]进行理智检定[{tSkillValue}]:\n{tRollResult} {tSkillCheckReasult}\n理智减少{tRollSubResult}的最大值[{tRollSubResultIntMax}]点,当前剩余[{tSkillValueNew}]点',
+    'strSanCheckError' : '[{tName}]进行理智检定[{tSkillValue}]:\n{tRollResult} {tSkillCheckReasult}\n掷骰表达式[{tRollSubResult}]存在错误',
     'strIntPositiveInfinite' : '正无穷大',
     'strIntNegativeInfinite' : '负无穷大',
     'strPcSkillCheckSucceed' : '成功',

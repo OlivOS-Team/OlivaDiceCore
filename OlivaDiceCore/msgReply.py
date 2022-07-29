@@ -2776,6 +2776,13 @@ def unity_reply(plugin_event, Proc):
                         else:
                             tmp_reply_str = dictStrCustom['strSanCheck'].format(**dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
+                    else:
+                        dictTValue['tName'] = tmp_pc_name
+                        dictTValue['tSkillValue'] = str(tmp_skill_value_old)
+                        dictTValue['tRollResult'] = '1D100=' + str(tmp_rd_int)
+                        dictTValue['tRollSubResult'] = tmp_sancheck_para_final
+                        tmp_reply_str = dictStrCustom['strSanCheckError'].format(**dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
             else:
                 replyMsgLazyHelpByEvent(plugin_event, 'sc')
         elif isMatchWordStart(tmp_reast_str, 'ra') or isMatchWordStart(tmp_reast_str, 'rc'):
