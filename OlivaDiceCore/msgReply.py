@@ -2211,6 +2211,28 @@ def unity_reply(plugin_event, Proc):
                         )
                         if tmp_template_name == None:
                             tmp_template_name = 'default'
+                        #显示群内规则设定
+                        tmp_hag_id = tmp_hagID
+                        tmp_user_platform = plugin_event.platform['platform']
+                        tmp_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
+                            userConfigKey = 'groupTemplate',
+                            botHash = plugin_event.bot_info.hash,
+                            userId = tmp_hag_id,
+                            userType = 'group',
+                            platform = tmp_user_platform,
+                        )
+                        tmp_groupTemplateRule = OlivaDiceCore.userConfig.getUserConfigByKey(
+                            userConfigKey = 'groupTemplateRule',
+                            botHash = plugin_event.bot_info.hash,
+                            userId = tmp_hag_id,
+                            userType = 'group',
+                            platform = tmp_user_platform
+                        )
+                        dictTValue['tResult'] = ''
+                        if tmp_groupTemplate != None and tmp_groupTemplateRule != None:
+                            dictTValue['tPcTempName'] = tmp_groupTemplate
+                            dictTValue['tPcTempRuleName'] = tmp_groupTemplateRule
+                            dictTValue['tResult'] = dictStrCustom['strPcGroupTempRuleShow'].format(**dictTValue)
                         dictTValue['tPcSelection'] = tmp_pc_name
                         dictTValue['tPcTempName'] = tmp_template_name
                         tmp_reply_str = dictStrCustom['strPcTempShow'].format(**dictTValue)
@@ -2283,6 +2305,28 @@ def unity_reply(plugin_event, Proc):
                             tmp_template_name = 'default'
                         if tmp_template_rule_name == None:
                             tmp_template_rule_name = 'default'
+                        #显示群内规则设定
+                        tmp_hag_id = tmp_hagID
+                        tmp_user_platform = plugin_event.platform['platform']
+                        tmp_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
+                            userConfigKey = 'groupTemplate',
+                            botHash = plugin_event.bot_info.hash,
+                            userId = tmp_hag_id,
+                            userType = 'group',
+                            platform = tmp_user_platform,
+                        )
+                        tmp_groupTemplateRule = OlivaDiceCore.userConfig.getUserConfigByKey(
+                            userConfigKey = 'groupTemplateRule',
+                            botHash = plugin_event.bot_info.hash,
+                            userId = tmp_hag_id,
+                            userType = 'group',
+                            platform = tmp_user_platform
+                        )
+                        dictTValue['tResult'] = ''
+                        if tmp_groupTemplate != None and tmp_groupTemplateRule != None:
+                            dictTValue['tPcTempName'] = tmp_groupTemplate
+                            dictTValue['tPcTempRuleName'] = tmp_groupTemplateRule
+                            dictTValue['tResult'] = dictStrCustom['strPcGroupTempRuleShow'].format(**dictTValue)
                         dictTValue['tPcSelection'] = tmp_pc_name
                         dictTValue['tPcTempName'] = tmp_template_name
                         dictTValue['tPcTempRuleName'] = tmp_template_rule_name
