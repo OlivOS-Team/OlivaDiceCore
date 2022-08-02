@@ -79,7 +79,7 @@
             },
             "github": {
                 "command": "OlivaDiceNativeGUI",
-                "opk_path": "https://github.com/OlivOS-Team/OlivaDiceOdyssey/releases/latest/download/OlivaDiceNativeGUI.opk",
+                "opk_path": "https://github.com/OlivOS-Team/OlivaDiceNativeGUI/releases/latest/download/OlivaDiceNativeGUI.opk",
                 "svn": 1,
                 "version": "3.0.0"
             }
