@@ -38,6 +38,7 @@ def initDeck(bot_info_dict):
     obj_Deck_this_count = 0
     obj_Deck_this_count_total = 0
     dictTValue['tName'] = '全局'
+    botHash = None
     for fileDeckList_this in fileDeckList:
         customDeckFile = fileDeckList_this
         customDeckPath = customDeckDir + '/' + customDeckFile
@@ -63,17 +64,18 @@ def initDeck(bot_info_dict):
             for bot_info_dict_this in OlivaDiceCore.drawCardData.dictDeck:
                 botHash = bot_info_dict_this
                 OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this)
+    if botHash != None:
         obj_Deck_this_count_total = len(OlivaDiceCore.drawCardData.dictDeck[botHash])
-    dictTValue['tInitDataCount'] = str(obj_Deck_this_count_total - obj_Deck_this_count_total_init)
-    dictTValue['tInitDataCount01'] = str(obj_Deck_this_count_total)
-    OlivaDiceCore.msgReply.globalLog(
-        2,
-        dictStrConst['strInitDeckData'].format(**dictTValue),
-        [
-            ('OlivaDice', 'default'),
-            ('Init', 'default')
-        ]
-    )
+        dictTValue['tInitDataCount'] = str(obj_Deck_this_count_total - obj_Deck_this_count_total_init)
+        dictTValue['tInitDataCount01'] = str(obj_Deck_this_count_total)
+        OlivaDiceCore.msgReply.globalLog(
+            2,
+            dictStrConst['strInitDeckData'].format(**dictTValue),
+            [
+                ('OlivaDice', 'default'),
+                ('Init', 'default')
+            ]
+        )
     for bot_info_dict_this in OlivaDiceCore.drawCardData.dictDeck:
         botHash = bot_info_dict_this
         releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash)
