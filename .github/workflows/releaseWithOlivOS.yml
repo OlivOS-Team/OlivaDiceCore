@@ -60,6 +60,11 @@ jobs:
         with:
           repository: OlivOS-Team/OlivaDiceOdyssey
           path: ./download/OlivaDiceOdyssey/
+      - name: Checkout OlivaDiceNativeGUI
+        uses: actions/checkout@v2.4.0
+        with:
+          repository: OlivOS-Team/OlivaDiceNativeGUI
+          path: ./download/OlivaDiceNativeGUI/
       - name: Pack & Setup OlivaDice
         run: |
           cd ./download/
@@ -83,6 +88,10 @@ jobs:
           zip -r ../../../unpack/OlivaDiceOdyssey.opk ./
           cd ../../
           echo "Pack OlivaDiceOdyssey Done"
+          cd ./OlivaDiceNativeGUI/OlivaDiceNativeGUI
+          zip -r ../../../unpack/OlivaDiceNativeGUI.opk ./
+          cd ../../
+          echo "Pack OlivaDiceNativeGUI Done"
           cd ../
           cp ./unpack/*.opk ./release/OlivOS/plugin/app
           cp ./unpack/*.opk ./release/OlivOS-Win-32/plugin/app
