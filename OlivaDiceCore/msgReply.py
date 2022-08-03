@@ -2382,7 +2382,8 @@ def unity_reply(plugin_event, Proc):
                         tmp_skill_value_update = tmp_skill_value[1:]
                     else:
                         tmp_skill_value = None
-                tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode = 'skillName')
+                if tmp_skill_name != None:
+                    tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode = 'skillName')
                 if tmp_skill_name != None and tmp_skill_value != None:
                     tmp_skill_name = tmp_skill_name.strip()
                     tmp_skill_name = tmp_skill_name.upper()
