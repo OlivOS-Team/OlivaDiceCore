@@ -1930,7 +1930,6 @@ def unity_reply(plugin_event, Proc):
                         tmp_pc_platform
                     )
                     tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKeyLock(tmp_pc_hash, tmp_hagID)
-                    print(tmp_pc_hash)
                     if tmp_pc_name_1 != None:
                         OlivaDiceCore.pcCard.pcCardDataDelSelectionKeyLock(tmp_pc_hash, tmp_hagID)
                         dictTValue['tName'] = tmp_pc_name_1
@@ -2340,11 +2339,34 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str_list = tmp_reast_str_new.split(' ')
                 tmp_skill_update_flag = None
                 tmp_skill_value_update = None
+                op_list = ['+', '-', '*', '/']
                 [tmp_skill_name, tmp_skill_value] = getExpression(tmp_reast_str_new, reverse = True)
                 if tmp_skill_name == '':
                     tmp_skill_name = None
                 if tmp_skill_value == '':
                     tmp_skill_value = None
+                if tmp_skill_value != None:
+                    if tmp_skill_value[0] not in op_list:
+                        tmp_split_list_all = [[tmp_reast_str_new.split(op_this), op_this] for op_this in op_list]
+                        tmp_split_list_match = None
+                        for tmp_split_list_this in tmp_split_list_all:
+                            if (
+                                len(tmp_split_list_this[0]) > 1
+                            ) and ((
+                                    tmp_split_list_match == None
+                                ) or (
+                                    len(tmp_split_list_this[0][0]) < tmp_split_list_match[0][0]
+                            )):
+                                tmp_split_list_match = tmp_split_list_this
+                        if tmp_split_list_match != None:
+                            tmp_skill_name_new = tmp_split_list_match[0][0]
+                            tmp_skill_value_new = tmp_split_list_match[1] + tmp_split_list_match[1].join(tmp_split_list_match[0][1:])
+                            tmp_roll_para_new = '0%s' % tmp_skill_value_new
+                            rd_para_new = OlivaDiceCore.onedice.RD(tmp_roll_para_new)
+                            rd_para_new.roll()
+                            if rd_para_new.resError == None:
+                                tmp_skill_name = tmp_skill_name_new
+                                tmp_skill_value = tmp_skill_value_new
                 if tmp_skill_value != None:
                     if len(tmp_skill_value) > 1 and tmp_skill_value[0] == '+':
                         tmp_skill_update_flag = '+'
@@ -2352,10 +2374,10 @@ def unity_reply(plugin_event, Proc):
                     elif len(tmp_skill_value) > 1 and tmp_skill_value[0] == '-':
                         tmp_skill_update_flag = '-'
                         tmp_skill_value_update = tmp_skill_value[1:]
-                    elif len(tmp_skill_value) > 1 and tmp_skill_value[0] in ['*', 'x', 'X']:
+                    elif len(tmp_skill_value) > 1 and tmp_skill_value[0] == '*':
                         tmp_skill_update_flag = '*'
                         tmp_skill_value_update = tmp_skill_value[1:]
-                    elif len(tmp_skill_value) > 1 and tmp_skill_value[0] in ['/']:
+                    elif len(tmp_skill_value) > 1 and tmp_skill_value[0] == '/':
                         tmp_skill_update_flag = '/'
                         tmp_skill_value_update = tmp_skill_value[1:]
                     else:
@@ -4019,7 +4041,8 @@ def getExpression(data, reverse = False, valueTable = None):
             if not reverse and tmp_total_offset >= len(data):
                 flag_have_para = True
                 break
-            if reverse and tmp_total_offset <= 0:
+            if reverse and tmp_total_offset < 0:
+                tmp_total_offset = 0
                 flag_have_para = True
                 break
             if flag_not_hit and data[tmp_total_offset].isdigit():
