@@ -19,6 +19,9 @@ jobs:
           curl -L https://github.com/OlivOS-Team/OlivOS/releases/latest/download/OlivOS-Win-32.zip -o ./download/OlivOS-Win-32.zip
           curl -L https://github.com/OlivOS-Team/OlivOS/releases/latest/download/OlivOS-Linux.zip -o ./download/OlivOS-Linux.zip
           echo "Download OlivOS Done"
+          curl -L https://github.com/OlivOS-Team/ChanceCustom/releases/latest/download/ChanceCustom.opk -o ./download/ChanceCustom.opk
+          cp ./download/ChanceCustom.opk ./unpack
+          echo "Download ChanceCustom Done"
           mkdir ./unpack/OlivOS
           mkdir ./unpack/OlivOS-Win-32
           mkdir ./unpack/OlivOS-Linux
