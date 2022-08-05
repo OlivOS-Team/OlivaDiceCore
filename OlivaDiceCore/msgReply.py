@@ -20,6 +20,7 @@ import OlivaDiceCore
 import html
 import time
 import uuid
+import re
 
 def logProc(Proc, level, message, segment):
     Proc.log(
@@ -3497,11 +3498,15 @@ def unity_reply(plugin_event, Proc):
                 if tmp_rd_para_str != None and tmp_rd_para_str != '':
                     rd_para_str = tmp_rd_para_str
                     if flag_roll_mode in ['ww', 'w']:
-                        if rd_para_str.isdigit():
-                            rd_para_str = '%sA10' % rd_para_str
+                        rd_para_str = re.sub(r'^(\d+)$', r'\1a10', rd_para_str)
+                        rd_para_str = re.sub(r'^(\{.+\})$', r'\1a10', rd_para_str)
+                        rd_para_str = re.sub(r'^(\d+)([+\-*xX/].+)$', r'\1a10\2', rd_para_str)
+                        rd_para_str = re.sub(r'^(\{.+\})([+\-*xX/].+)$', r'\1a10\2', rd_para_str)
                     elif flag_roll_mode in ['dx', 'dxx']:
-                        if rd_para_str.isdigit():
-                            rd_para_str = '%sC10' % rd_para_str
+                        rd_para_str = re.sub(r'^(\d+)$', r'\1c10', rd_para_str)
+                        rd_para_str = re.sub(r'^(\{.+\})$', r'\1c10', rd_para_str)
+                        rd_para_str = re.sub(r'^(\d+)([+\-*xX/].+)$', r'\1c10\2', rd_para_str)
+                        rd_para_str = re.sub(r'^(\{.+\})([+\-*xX/].+)$', r'\1c10\2', rd_para_str)
                     flag_have_para = True
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 if len(tmp_reast_str) > 0:
