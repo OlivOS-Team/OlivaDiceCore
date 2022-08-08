@@ -20,8 +20,8 @@ import requests as req
 
 import OlivaDiceCore
 
-#random_default_mode = 'default'
-random_default_mode = 'random_org'
+random_default_mode = 'default'
+#random_default_mode = 'random_org'
 
 dictRandomInt = {
     'default': []
@@ -386,6 +386,7 @@ class RD(object):
                         res = random.randint(nMin, nMax)
                         return res
                 except:
+                    random_default_mode = 'default'
                     res = random.randint(nMin, nMax)
                     return res
             tmp_random_int_this = dictRandomInt['default'].pop()
