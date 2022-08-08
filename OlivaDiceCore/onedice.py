@@ -6,7 +6,7 @@
 / /_/ / /|  / /___/ /_/ // // /___/ /___   
 \____/_/ |_/_____/_____/___/\____/_____/   
 
-@File      :   onedice.py
+@File      :   main.py
 @Author    :   lunzhiPenxil仑质
 @Contact   :   lunzhipenxil@gmail.com
 @License   :   AGPL
@@ -16,32 +16,8 @@
 
 from enum import Enum
 import random
-import requests as req
 
-import OlivaDiceCore
-
-random_default_mode = 'default'
-#random_default_mode = 'random_org'
-
-dictRandomInt = {
-    'default': []
-}
-
-def get_data_from_random_org():
-    res = []
-    send_url = 'https://www.random.org/integers/?num=1000&min=-1000000000&max=1000000000&col=1&base=10&format=plain&rnd=new'
-    headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': OlivaDiceCore.data.bot_version_short_header
-    }
-    msg_res = req.request("POST", send_url, headers = headers)
-    res_text = str(msg_res.text)
-    res_text = res_text.lstrip('\n')
-    res_text = res_text.rstrip('\n')
-    res = res_text.split('\n')
-    if len(res) < 1000:
-        res = None
-    return res
+pypi_version = '1.0.1'
 
 dictOperationPriority = {
     '(' : None,
@@ -363,41 +339,8 @@ class RD(object):
     '''
     该方法实现自定义随机数生成函数，可通过继承后重写来完成随机数算法的修改
     '''
-    def random(self, nMin, nMax, mode = None):
-        global dictRandomInt
-        global random_default_mode
-        if mode == None:
-            mode = random_default_mode
-        res = None
-        if mode == 'default':
-            res = random.randint(nMin, nMax)
-        elif mode == 'random_org':
-            res = random.randint(nMin, nMax)
-            if len(dictRandomInt['default']) <= 0:
-                try:
-                    tmp_random_int_list = get_data_from_random_org()
-                    if tmp_random_int_list == None:
-                        random_default_mode = 'default'
-                        res = random.randint(nMin, nMax)
-                        return res
-                    if len(tmp_random_int_list) > 0:
-                        dictRandomInt['default'] = tmp_random_int_list
-                    else:
-                        res = random.randint(nMin, nMax)
-                        return res
-                except:
-                    random_default_mode = 'default'
-                    res = random.randint(nMin, nMax)
-                    return res
-            tmp_random_int_this = dictRandomInt['default'].pop()
-            tmp_random_int_data = None
-            if type(tmp_random_int_this) == str:
-                if tmp_random_int_this.isdigit() or (len(tmp_random_int_this) > 2 and tmp_random_int_this[0] == '-' and tmp_random_int_this[1:].isdigit()):
-                    tmp_random_int_data = int((int(tmp_random_int_this) + 1000000000) % (nMax - nMin + 1)) + nMin
-                    res = tmp_random_int_data
-                    return res
-            res = random.randint(nMin, nMax)
-        return res
+    def random(self, nMin, nMax):
+        return random.randint(nMin, nMax)
 
     '''
     该方法用状态机实现高宽容度的变量引用

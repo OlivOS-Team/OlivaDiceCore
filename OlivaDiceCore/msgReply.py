@@ -44,6 +44,7 @@ def unity_init(plugin_event, Proc):
     OlivaDiceCore.console.initConsoleSwitchByBotDict(Proc.Proc_data['bot_info_dict'])
     OlivaDiceCore.console.readConsoleSwitch()
     OlivaDiceCore.console.saveConsoleSwitch()
+    OlivaDiceCore.onediceOverride.initOnedice()
     OlivaDiceCore.msgCustomManager.initMsgCustom(Proc.Proc_data['bot_info_dict'])
     OlivaDiceCore.msgCustomManager.saveMsgCustom(Proc.Proc_data['bot_info_dict'])
     OlivaDiceCore.helpDoc.initHelpDoc(Proc.Proc_data['bot_info_dict'])

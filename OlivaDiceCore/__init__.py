@@ -14,21 +14,22 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @Desc      :   None
 '''
 
-import OlivaDiceCore.main
-import OlivaDiceCore.data
-import OlivaDiceCore.msgCustom
-import OlivaDiceCore.msgCustomManager
-import OlivaDiceCore.console
-import OlivaDiceCore.pcCardData
-import OlivaDiceCore.pcCard
-import OlivaDiceCore.userConfig
-import OlivaDiceCore.msgReply
-import OlivaDiceCore.onedice
-import OlivaDiceCore.skillCheck
-import OlivaDiceCore.ordinaryInviteManager
-import OlivaDiceCore.helpDoc
-import OlivaDiceCore.helpDocData
-import OlivaDiceCore.drawCard
-import OlivaDiceCore.drawCardData
-import OlivaDiceCore.pulse
-import OlivaDiceCore.crossHook
+from . import main
+from . import data
+from . import msgCustom
+from . import msgCustomManager
+from . import console
+from . import pcCardData
+from . import pcCard
+from . import userConfig
+from . import msgReply
+from . import onedice
+from . import onediceOverride
+from . import skillCheck
+from . import ordinaryInviteManager
+from . import helpDoc
+from . import helpDocData
+from . import drawCard
+from . import drawCardData
+from . import pulse
+from . import crossHook

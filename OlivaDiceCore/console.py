@@ -33,6 +33,7 @@ dictConsoleSwitchTemplate = {
         'messageSplitPageLimit' : 10,
         'messageSplitDelay' : 1000,
         'largeRollLimit' : 300,
+        'randomMode' : 0,
         'masterList' : [],
         'noticeGroupList' : [],
         'pulseUrlList' : []
