@@ -16,7 +16,7 @@
 
 from enum import Enum
 import random
-#import traceback
+import traceback
 
 pypi_version = '1.0.1'
 
@@ -34,6 +34,8 @@ dictOperationPriority = {
     'X' : 4,
     '/' : 4,
     '^' : 5,
+    'df' : 6,
+    'DF' : 6,
     'd' : 6,
     'D' : 6,
     'a' : 6,
@@ -49,6 +51,10 @@ dictOperationPriority = {
     '?' : 7
 }
 
+dictOperationMapping = {
+    'df' : 'f'
+}
+
 listOperationSub = [
     'm',
     'M',
@@ -62,6 +68,8 @@ listOperationSub = [
     'P',
     ':'
 ]
+
+lenOperationMax = 2
 
 '''
 朴素栈实现
@@ -272,7 +280,7 @@ class RD(object):
             if type(self.valueTable) == dict:
                 self.__replace()
         except Exception as e:
-            #traceback.print_exc()
+            traceback.print_exc()
             if self.resError == None:
                 self.resError = self.resErrorType.UNKNOWN_REPLACE_FATAL
         if self.resError != None:
@@ -280,7 +288,7 @@ class RD(object):
         try:
             self.__getCalTree()
         except Exception as e:
-            #traceback.print_exc()
+            traceback.print_exc()
             if self.resError == None:
                 self.resError = self.resErrorType.UNKNOWN_GENERATE_FATAL
         if self.resError != None:
@@ -288,7 +296,7 @@ class RD(object):
         try:
             resRecursiveObj = self.__calculate()
         except Exception as e:
-            #traceback.print_exc()
+            traceback.print_exc()
             if self.resError == None:
                 self.resError = self.resErrorType.UNKNOWN_COMPLETE_FATAL
         if self.resError != None:
@@ -412,185 +420,193 @@ class RD(object):
         while it_offset < len_data:
             flag_is_op_val = False
             tmp_offset = 1
-            tmp_data_this = tmp_data[it_offset]
-            tmp_op_peek_this = op_stack.peek()
-            if tmp_op_peek_this != None:
-                if tmp_op_peek_this.getPriority() != None:
-                    if tmp_data_this in tmp_op_peek_this.vals:
-                        flag_is_op_val = True
-            if tmp_data_this.isdigit():
-                tmp2_data_this = calNumberNode(tmp_data_this)
-                if flag_old_number:
-                    tmp2_data_this = tmp_res.pop().appendInt(tmp_data_this)
-                tmp_res.push(tmp2_data_this)
-                flag_old_number = True
-                flag_left_as_number = True
-                tmp_offset = 1
-            elif flag_is_op_val and op_stack.size() > 0:
+            for lenOperation_this in reversed(range(1, 1 + lenOperationMax)):
+                if it_offset + lenOperation_this > len(tmp_data):
+                    continue
+                tmp_data_this = tmp_data[it_offset:it_offset + lenOperation_this]
                 tmp_op_peek_this = op_stack.peek()
-                if tmp_op_peek_this != None:
-                    if not flag_left_as_number:
-                        if tmp_op_peek_this.valRightDefault != None:
-                            tmp_res.push(calNumberNode(str(tmp_op_peek_this.valRightDefault)))
-                            flag_left_as_number = True
-                        else:
-                            self.resError = self.resErrorType.INPUT_RAW_INVALID
-                            return
-                    if tmp_data_this in tmp_op_peek_this.vals:
-                        if it_offset < len(tmp_data) - 1:
-                            if tmp_data[it_offset + 1].isdigit():
-                                tmp_number_offset = 0
-                                tmp_number = None
-                                while True:
-                                    tmp_number_offset += 1
-                                    tmp_total_offset = it_offset + tmp_number_offset + 1
-                                    if tmp_total_offset <= len(tmp_data):
-                                        tmp_val_data_this = tmp_data[it_offset + 1 : tmp_total_offset]
+                if lenOperation_this == 1 and tmp_op_peek_this != None:
+                    if tmp_op_peek_this.getPriority() != None:
+                        if tmp_data_this in tmp_op_peek_this.vals:
+                            flag_is_op_val = True
+                if lenOperation_this == 1 and tmp_data_this.isdigit():
+                    tmp2_data_this = calNumberNode(tmp_data_this)
+                    if flag_old_number:
+                        tmp2_data_this = tmp_res.pop().appendInt(tmp_data_this)
+                    tmp_res.push(tmp2_data_this)
+                    flag_old_number = True
+                    flag_left_as_number = True
+                    tmp_offset = 1
+                elif lenOperation_this == 1 and flag_is_op_val and op_stack.size() > 0:
+                    tmp_op_peek_this = op_stack.peek()
+                    if tmp_op_peek_this != None:
+                        if not flag_left_as_number:
+                            if tmp_op_peek_this.valRightDefault != None:
+                                tmp_res.push(calNumberNode(str(tmp_op_peek_this.valRightDefault)))
+                                flag_left_as_number = True
+                            else:
+                                self.resError = self.resErrorType.INPUT_RAW_INVALID
+                                break
+                        if tmp_data_this in tmp_op_peek_this.vals:
+                            if it_offset < len(tmp_data) - 1:
+                                if tmp_data[it_offset + 1].isdigit():
+                                    tmp_number_offset = 0
+                                    tmp_number = None
+                                    while True:
+                                        tmp_number_offset += 1
+                                        tmp_total_offset = it_offset + tmp_number_offset + 1
+                                        if tmp_total_offset <= len(tmp_data):
+                                            tmp_val_data_this = tmp_data[it_offset + 1 : tmp_total_offset]
+                                        else:
+                                            tmp_number_offset -= 1
+                                            break
+                                        if tmp_val_data_this.isdigit():
+                                            tmp_number = int(tmp_val_data_this)
+                                        else:
+                                            tmp_number_offset -= 1
+                                            break
+                                    if tmp_number != None:
+                                        op_stack.pop()
+                                        tmp_op_peek_this.vals[tmp_data_this] = tmp_number
+                                        op_stack.push(tmp_op_peek_this)
                                     else:
-                                        tmp_number_offset -= 1
+                                        self.resError = self.resErrorType.INPUT_RAW_INVALID
                                         break
-                                    if tmp_val_data_this.isdigit():
-                                        tmp_number = int(tmp_val_data_this)
+                                    tmp_offset = 1 + tmp_number_offset
+                                elif tmp_data[it_offset + 1] == '(':
+                                    count_child_para_2 = 1
+                                    tmp_number_offset = 0
+                                    while count_child_para_2 > 0:
+                                        tmp_number_offset += 1
+                                        tmp_total_offset = it_offset + tmp_number_offset + 1
+                                        if tmp_total_offset >= len(tmp_data):
+                                            tmp_number_offset -= 1
+                                            break
+                                        if tmp_data[tmp_total_offset] == '(':
+                                            count_child_para_2 += 1
+                                        elif tmp_data[tmp_total_offset] == ')':
+                                            count_child_para_2 -= 1
+                                    if count_child_para_2 == 0:
+                                        tmp_rd_child_para = RD(tmp_data[it_offset + 1 : it_offset + 1 + tmp_number_offset + 1], self.customDefault)
+                                        tmp_rd_child_para.roll()
+                                        if tmp_rd_child_para.resError == None:
+                                            op_stack.pop()
+                                            tmp_op_peek_this.vals[tmp_data_this] = tmp_rd_child_para.resInt
+                                            op_stack.push(tmp_op_peek_this)
+                                        else:
+                                            self.resError = tmp_rd_child_para.resError
+                                            break
                                     else:
-                                        tmp_number_offset -= 1
+                                        self.resError = self.resErrorType.INPUT_RAW_INVALID
                                         break
-                                if tmp_number != None:
+                                    tmp_offset = 1 + tmp_number_offset + 1
+                                elif tmp_data_this in tmp_op_peek_this.valsDefault:
                                     op_stack.pop()
-                                    tmp_op_peek_this.vals[tmp_data_this] = tmp_number
+                                    tmp_op_peek_this.vals[tmp_data_this] = tmp_op_peek_this.valsDefault[tmp_data_this]
                                     op_stack.push(tmp_op_peek_this)
                                 else:
                                     self.resError = self.resErrorType.INPUT_RAW_INVALID
-                                    return
-                                tmp_offset = 1 + tmp_number_offset
-                            elif tmp_data[it_offset + 1] == '(':
-                                count_child_para_2 = 1
-                                tmp_number_offset = 0
-                                while count_child_para_2 > 0:
-                                    tmp_number_offset += 1
-                                    tmp_total_offset = it_offset + tmp_number_offset + 1
-                                    if tmp_total_offset >= len(tmp_data):
-                                        tmp_number_offset -= 1
-                                        break
-                                    if tmp_data[tmp_total_offset] == '(':
-                                        count_child_para_2 += 1
-                                    elif tmp_data[tmp_total_offset] == ')':
-                                        count_child_para_2 -= 1
-                                if count_child_para_2 == 0:
-                                    tmp_rd_child_para = RD(tmp_data[it_offset + 1 : it_offset + 1 + tmp_number_offset + 1], self.customDefault)
-                                    tmp_rd_child_para.roll()
-                                    if tmp_rd_child_para.resError == None:
-                                        op_stack.pop()
-                                        tmp_op_peek_this.vals[tmp_data_this] = tmp_rd_child_para.resInt
-                                        op_stack.push(tmp_op_peek_this)
-                                    else:
-                                        self.resError = tmp_rd_child_para.resError
-                                        return
-                                else:
-                                    self.resError = self.resErrorType.INPUT_RAW_INVALID
-                                    return
-                                tmp_offset = 1 + tmp_number_offset + 1
+                                    break
                             elif tmp_data_this in tmp_op_peek_this.valsDefault:
                                 op_stack.pop()
                                 tmp_op_peek_this.vals[tmp_data_this] = tmp_op_peek_this.valsDefault[tmp_data_this]
                                 op_stack.push(tmp_op_peek_this)
                             else:
                                 self.resError = self.resErrorType.INPUT_RAW_INVALID
-                                return
-                        elif tmp_data_this in tmp_op_peek_this.valsDefault:
-                            op_stack.pop()
-                            tmp_op_peek_this.vals[tmp_data_this] = tmp_op_peek_this.valsDefault[tmp_data_this]
-                            op_stack.push(tmp_op_peek_this)
+                                break
                         else:
                             self.resError = self.resErrorType.INPUT_RAW_INVALID
-                            return
+                            break
                     else:
                         self.resError = self.resErrorType.INPUT_RAW_INVALID
-                        return
-                else:
-                    self.resError = self.resErrorType.INPUT_RAW_INVALID
-                    return
-            elif self.inOperation(tmp_data_this):
-                if self.getPriority(tmp_data_this) != None:
-                    tmp_op_peek_this = op_stack.peek()
-                    tmp_calOperationNode_this = calOperationNode(tmp_data_this, self.customDefault)
-                    if not flag_left_as_number:
-                        if tmp_op_peek_this == None:
-                            if tmp_calOperationNode_this.valStarterLeftDefault != None:
-                                tmp_res.push(calNumberNode(str(tmp_calOperationNode_this.valStarterLeftDefault)))
-                                flag_left_as_number = True
-                            elif tmp_calOperationNode_this.valLeftDefault != None:
-                                tmp_res.push(calNumberNode(str(tmp_calOperationNode_this.valLeftDefault)))
-                                flag_left_as_number = True
-                            else:
-                                self.resError = self.resErrorType.INPUT_RAW_INVALID
-                                return
-                        elif tmp_op_peek_this.data == '(':
-                            if tmp_calOperationNode_this.valStarterLeftDefault != None:
-                                tmp_res.push(calNumberNode(str(tmp_calOperationNode_this.valStarterLeftDefault)))
-                                flag_left_as_number = True
-                            elif tmp_calOperationNode_this.valLeftDefault != None:
-                                tmp_res.push(calNumberNode(str(tmp_calOperationNode_this.valLeftDefault)))
-                                flag_left_as_number = True
-                            else:
-                                self.resError = self.resErrorType.INPUT_RAW_INVALID
-                                return
-                        elif tmp_op_peek_this.getPriority() == None:
-                            if tmp_calOperationNode_this.valLeftDefault != None:
-                                tmp_res.push(calNumberNode(str(tmp_calOperationNode_this.valLeftDefault)))
-                                flag_left_as_number = True
-                            else:
-                                self.resError = self.resErrorType.INPUT_RAW_INVALID
-                                return
-                        elif tmp_op_peek_this.valRightDefault != None:
-                            tmp_res.push(calNumberNode(str(tmp_op_peek_this.valRightDefault)))
-                            flag_left_as_number = True
-                        elif tmp_calOperationNode_this.valLeftDefault != None:
-                            tmp_res.push(calNumberNode(str(tmp_calOperationNode_this.valLeftDefault)))
-                            flag_left_as_number = True
-                        else:
-                            self.resError = self.resErrorType.INPUT_RAW_INVALID
-                            return
-                    if tmp_op_peek_this != None:
-                        if tmp_op_peek_this.getPriority() == None:
-                            pass
-                        elif self.getPriority(tmp_data_this) <= tmp_op_peek_this.getPriority():
-                            tmp_res.pushList(op_stack.popTo('(', self.getPriority(tmp_data_this), True))
-                    op_stack.push(calOperationNode(tmp_data_this, self.customDefault))
-                    flag_old_number = False
-                    flag_left_as_number = False
-                    tmp_offset = 1
-                elif tmp_data_this == '(':
-                    op_stack.push(calOperationNode(tmp_data_this, self.customDefault))
-                    count_child_para += 1
-                    flag_old_number = False
-                    flag_left_as_number = False
-                    tmp_offset = 1
-                elif tmp_data_this == ')':
-                    if not flag_left_as_number:
+                        break
+                elif self.inOperation(tmp_data_this):
+                    if self.getPriority(tmp_data_this) != None:
                         tmp_op_peek_this = op_stack.peek()
-                        if tmp_op_peek_this != None:
-                            if tmp_op_peek_this.valRightDefault != None:
+                        tmp_data_this_real = tmp_data_this
+                        if tmp_data_this.lower() in dictOperationMapping:
+                            tmp_data_this_real = dictOperationMapping[tmp_data_this.lower()]
+                        tmp_calOperationNode_this = calOperationNode(tmp_data_this_real, self.customDefault)
+                        if not flag_left_as_number:
+                            if tmp_op_peek_this == None:
+                                if tmp_calOperationNode_this.valStarterLeftDefault != None:
+                                    tmp_res.push(calNumberNode(str(tmp_calOperationNode_this.valStarterLeftDefault)))
+                                    flag_left_as_number = True
+                                elif tmp_calOperationNode_this.valLeftDefault != None:
+                                    tmp_res.push(calNumberNode(str(tmp_calOperationNode_this.valLeftDefault)))
+                                    flag_left_as_number = True
+                                else:
+                                    self.resError = self.resErrorType.INPUT_RAW_INVALID
+                                    break
+                            elif tmp_op_peek_this.data == '(':
+                                if tmp_calOperationNode_this.valStarterLeftDefault != None:
+                                    tmp_res.push(calNumberNode(str(tmp_calOperationNode_this.valStarterLeftDefault)))
+                                    flag_left_as_number = True
+                                elif tmp_calOperationNode_this.valLeftDefault != None:
+                                    tmp_res.push(calNumberNode(str(tmp_calOperationNode_this.valLeftDefault)))
+                                    flag_left_as_number = True
+                                else:
+                                    self.resError = self.resErrorType.INPUT_RAW_INVALID
+                                    break
+                            elif tmp_op_peek_this.getPriority() == None:
+                                if tmp_calOperationNode_this.valLeftDefault != None:
+                                    tmp_res.push(calNumberNode(str(tmp_calOperationNode_this.valLeftDefault)))
+                                    flag_left_as_number = True
+                                else:
+                                    self.resError = self.resErrorType.INPUT_RAW_INVALID
+                                    break
+                            elif tmp_op_peek_this.valRightDefault != None:
                                 tmp_res.push(calNumberNode(str(tmp_op_peek_this.valRightDefault)))
                                 flag_left_as_number = True
+                            elif tmp_calOperationNode_this.valLeftDefault != None:
+                                tmp_res.push(calNumberNode(str(tmp_calOperationNode_this.valLeftDefault)))
+                                flag_left_as_number = True
                             else:
                                 self.resError = self.resErrorType.INPUT_RAW_INVALID
-                                return
-                        else:
-                            self.resError = self.resErrorType.INPUT_RAW_INVALID
-                            return
-                    tmp_res.pushList(op_stack.popTo('('))
-                    count_child_para -= 1
-                    flag_old_number = False
-                    flag_left_as_number = True
-                    tmp_offset = 1
-                else:
-                    self.resError = self.resErrorType.INPUT_NODE_OPERATION_INVALID
-                    return
-            else:
-                self.resError = self.resErrorType.INPUT_RAW_INVALID
-                return
-            if count_child_para < 0:
-                self.resError = self.resErrorType.INPUT_CHILD_PARA_INVALID
+                                break
+                        if tmp_op_peek_this != None:
+                            if tmp_op_peek_this.getPriority() == None:
+                                pass
+                            elif self.getPriority(tmp_data_this_real) <= tmp_op_peek_this.getPriority():
+                                tmp_res.pushList(op_stack.popTo('(', self.getPriority(tmp_data_this_real), True))
+                        op_stack.push(calOperationNode(tmp_data_this_real, self.customDefault))
+                        flag_old_number = False
+                        flag_left_as_number = False
+                        tmp_offset = lenOperation_this
+                    elif tmp_data_this == '(':
+                        op_stack.push(calOperationNode(tmp_data_this, self.customDefault))
+                        count_child_para += 1
+                        flag_old_number = False
+                        flag_left_as_number = False
+                        tmp_offset = 1
+                    elif tmp_data_this == ')':
+                        if not flag_left_as_number:
+                            tmp_op_peek_this = op_stack.peek()
+                            if tmp_op_peek_this != None:
+                                if tmp_op_peek_this.valRightDefault != None:
+                                    tmp_res.push(calNumberNode(str(tmp_op_peek_this.valRightDefault)))
+                                    flag_left_as_number = True
+                                else:
+                                    self.resError = self.resErrorType.INPUT_RAW_INVALID
+                                    break
+                            else:
+                                self.resError = self.resErrorType.INPUT_RAW_INVALID
+                                break
+                        tmp_res.pushList(op_stack.popTo('('))
+                        count_child_para -= 1
+                        flag_old_number = False
+                        flag_left_as_number = True
+                        tmp_offset = 1
+                    else:
+                        self.resError = self.resErrorType.INPUT_NODE_OPERATION_INVALID
+                    break
+                elif lenOperation_this == 1:
+                    self.resError = self.resErrorType.INPUT_RAW_INVALID
+                    break
+                if lenOperation_this == 1 and count_child_para < 0:
+                    self.resError = self.resErrorType.INPUT_CHILD_PARA_INVALID
+                    break
+            if self.resError != None:
                 return
             it_offset += tmp_offset
         if not flag_left_as_number:
@@ -2740,7 +2756,8 @@ if __name__ == '__main__':
         '7a8k10q5m9',
         '7a10k10q5m9',
         '7a10k6q5m9',
-        '7a10k5q5m9'
+        '7a10k5q5m9',
+        '7df'
     ]
     val_table = {
         '力量': 60,
