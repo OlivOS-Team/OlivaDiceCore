@@ -106,6 +106,14 @@ def saveRDDataUser(data:OlivaDiceCore.onedice.RD, botHash:str, userId:str, platf
             platform = platform
         )
         OlivaDiceCore.userConfig.setUserConfigByKey(
+            userConfigKey = 'RDRecordRaw',
+            userConfigValue = data.originDataRaw,
+            botHash = botHash,
+            userId = userId,
+            userType = 'user',
+            platform = platform
+        )
+        OlivaDiceCore.userConfig.setUserConfigByKey(
             userConfigKey = 'RDRecordInt',
             userConfigValue = data.resInt,
             botHash = botHash,
@@ -141,6 +149,26 @@ def getRDDataUserByHash(botHash:str, userHash:str):
     )
     return res
 
+# getRDDataRawUser
+def getRDDataRawUser(botHash:str, userId:str, platform:str):
+    res = getRDDataRawUserByHash(
+        botHash = botHash,
+        userHash = OlivaDiceCore.userConfig.getUserHash(
+            userId = userId,
+            userType = 'user',
+            platform = platform
+        )
+    )
+    return res
+
+def getRDDataRawUserByHash(botHash:str, userHash:str):
+    res = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
+        userConfigKey = 'RDRecordRaw',
+        botHash = botHash,
+        userHash = userHash
+    )
+    return res
+
 # getRDDataIntUser
 def getRDDataIntUser(botHash:str, userId:str, platform:str):
     res = getRDDataIntUserByHash(
@@ -171,6 +199,10 @@ def RDDataFormat(data:'list|None', mode:str = 'default'):
             res = RDDataFormat_default(data)
         elif mode == 'pretty':
             res = RDDataFormat_default(data, 'pretty')
+        elif mode == 'dx':
+            res = RDDataFormat_default(data, 'dx')
+        elif mode == 'ww':
+            res = RDDataFormat_default(data, 'ww')
     return res
 
 def RDDataFormat_debug(data:list):
@@ -222,18 +254,41 @@ def RDDataFormat_default(data:list, mode = 'default'):
                             res += '(%s)' % (', '.join(getRDdataNodeResultListStr(data_this, 2)))
                 elif checkRDdataNodeKeyOP(data_this, 'a'):
                     if checkRDdataNodeResult(data_this, 0):
-                        tmp_data_this_list_0 = [
-                            '{%s}' % (', '.join([
-                                RDDataFormat_default_getMark(data_this_this_0_this)
-                                for data_this_this_0_this in data_this_this_0
-                            ])) for data_this_this_0 in data_this['result'][0]
-                        ]
-                        if mode == 'pretty':
+                        if mode in ['dx', 'ww']:
+                            count = 0
+                            tmp_data_this_list_0 = []
+                            for data_this_this_0 in data_this['result'][0]:
+                                tmp_data_this_list_0.append(
+                                    '{%s}(%s)' % (
+                                        ', '.join([
+                                            RDDataFormat_default_getMark(data_this_this_0_this)
+                                            for data_this_this_0_this in data_this_this_0
+                                        ]),
+                                        str(data_this['result'][1][count]) if len(data_this['result'][1]) >= count else str(0)
+                                    )
+                                )
+                                count += 1
+                        else:
+                            tmp_data_this_list_0 = [
+                                '{%s}' % (', '.join([
+                                    RDDataFormat_default_getMark(data_this_this_0_this)
+                                    for data_this_this_0_this in data_this_this_0
+                                ])) for data_this_this_0 in data_this['result'][0]
+                            ]
+                        if mode in ['dx', 'ww']:
+                            res += '{\n%s\n轮数: %s\n}' % (
+                                '+\n'.join(tmp_data_this_list_0),
+                                str(len(data_this['result'][0]))
+                            )
+                        elif mode == 'pretty':
                             res += '{\n%s\n}' % (',\n'.join(tmp_data_this_list_0))
                         else:
                             res += '{%s}' % (', '.join(tmp_data_this_list_0))
                     if checkRDdataNodeResult(data_this, 1):
-                        res += '[%s]' % ('+'.join(getRDdataNodeResultListStr(data_this, 1)))
+                        if mode in ['dx', 'ww']:
+                            pass
+                        else:
+                            res += '[%s]' % ('+'.join(getRDdataNodeResultListStr(data_this, 1)))
                     if checkRDdataNodeResult(data_this, 2):
                         res += '(%s)' % (', '.join(getRDdataNodeResultListStr(data_this, 2)))
                 elif checkRDdataNodeKeyOP(data_this, 'c'):

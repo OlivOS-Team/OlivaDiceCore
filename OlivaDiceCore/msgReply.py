@@ -3427,7 +3427,10 @@ def unity_reply(plugin_event, Proc):
             flag_mode = 'default'
             tmp_user_platform = plugin_event.platform['platform']
             if len(tmp_reast_str) > 0:
-                flag_mode = tmp_reast_str
+                if not flag_is_from_master and tmp_reast_str in ['debug']:
+                    flag_mode = 'default'
+                else:
+                    flag_mode = tmp_reast_str
             tmp_RDData_str = OlivaDiceCore.onediceOverride.RDDataFormat(
                 data = OlivaDiceCore.onediceOverride.getRDDataUser(
                     botHash = plugin_event.bot_info.hash,
@@ -3436,8 +3439,15 @@ def unity_reply(plugin_event, Proc):
                 ),
                 mode = flag_mode
             )
+            tmp_reply_str = None
             if tmp_RDData_str != None:
-                tmp_reply_str = '%s=%d' % (
+                dictTValue['tRollFormatType'] = flag_mode
+                dictTValue['tRollResult'] = '%s=%s=%d' % (
+                    OlivaDiceCore.onediceOverride.getRDDataRawUser(
+                        botHash = plugin_event.bot_info.hash,
+                        userId = tmp_userID,
+                        platform = tmp_user_platform
+                    ),
                     tmp_RDData_str,
                     OlivaDiceCore.onediceOverride.getRDDataIntUser(
                         botHash = plugin_event.bot_info.hash,
@@ -3445,6 +3455,7 @@ def unity_reply(plugin_event, Proc):
                         platform = tmp_user_platform
                     )
                 )
+                tmp_reply_str = dictStrCustom['strRollRecord'].format(**dictTValue)
             if tmp_reply_str != None:
                 replyMsg(plugin_event, tmp_reply_str)
         elif (
@@ -3578,24 +3589,26 @@ def unity_reply(plugin_event, Proc):
                 )
                 tmp_reply_str_1 = ''
                 if rd_para.resError == None:
-                    if flag_roll_mode in ['r', 'rx']:
-                        if len(rd_para.resDetail) == 0 or len(rd_para.resDetail) > 150:
-                            if len(str(rd_para.resInt)) > 100:
-                                tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
-                            else:
-                                tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)
-                        else:
-                            if len(str(rd_para.resInt)) > 50:
-                                tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resDetail) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
-                            else:
-                                tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resDetail) + '=' + str(rd_para.resInt)
-                    elif flag_roll_mode in ['w', 'dxx']:
+                    tmp_resDetail_str = ''
+                    if flag_roll_mode in ['w', 'dxx']:
                         if len(str(rd_para.resInt)) > 100:
                             tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
                         else:
                             tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)
-                    elif flag_roll_mode in ['ww', 'dx'] or True:
-                        if len(rd_para.resDetail) == 0 or len(rd_para.resDetail) > OlivaDiceCore.console.getConsoleSwitchByHash(
+                    elif flag_roll_mode in ['ww', 'dx']:
+                        if flag_roll_mode in ['ww']:
+                            tmp_resDetail_str = OlivaDiceCore.onediceOverride.RDDataFormat(
+                                data = rd_para.resDetailData,
+                                mode = 'ww'
+                            )
+                        elif flag_roll_mode in ['dx']:
+                            tmp_resDetail_str = OlivaDiceCore.onediceOverride.RDDataFormat(
+                                data = rd_para.resDetailData,
+                                mode = 'dx'
+                            )
+                        if tmp_resDetail_str == None:
+                            tmp_resDetail_str = ''
+                        if len(tmp_resDetail_str) == 0 or len(tmp_resDetail_str) > OlivaDiceCore.console.getConsoleSwitchByHash(
                             'largeRollLimit',
                             plugin_event.bot_info.hash
                         ):
@@ -3605,9 +3618,26 @@ def unity_reply(plugin_event, Proc):
                                 tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)
                         else:
                             if len(str(rd_para.resInt)) > 50:
-                                tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resDetail) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
+                                tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_str) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
                             else:
-                                tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resDetail) + '=' + str(rd_para.resInt)
+                                tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_str) + '=' + str(rd_para.resInt)
+                    elif flag_roll_mode in ['r', 'rx'] or True:
+                        tmp_resDetail_str = OlivaDiceCore.onediceOverride.RDDataFormat(
+                            data = rd_para.resDetailData,
+                            mode = 'default'
+                        )
+                        if tmp_resDetail_str == None:
+                            tmp_resDetail_str = ''
+                        if len(tmp_resDetail_str) == 0 or len(tmp_resDetail_str) > 150:
+                            if len(str(rd_para.resInt)) > 100:
+                                tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
+                            else:
+                                tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)
+                        else:
+                            if len(str(rd_para.resInt)) > 50:
+                                tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_str) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
+                            else:
+                                tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_str) + '=' + str(rd_para.resInt)
                 else:
                     dictTValue['tResult'] = str(rd_para.resError)
                     dictTValue['tRollPara'] = str(rd_para_str)

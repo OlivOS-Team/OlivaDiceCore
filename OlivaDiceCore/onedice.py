@@ -252,6 +252,7 @@ class calOperationNode(calNode):
 
 class RD(object):
     def __init__(self, initData, customDefault = None, valueTable = None):
+        self.originDataRaw = initData
         self.originData = initData.lower()
         self.calTree = calNodeStack([])
         self.resInt = None
