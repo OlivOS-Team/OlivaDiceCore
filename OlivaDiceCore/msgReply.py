@@ -3420,6 +3420,33 @@ def unity_reply(plugin_event, Proc):
         #elif isMatchWordStart(tmp_reast_str, 'dx'):
         #    replyMsgLazyHelpByEvent(plugin_event, 'r')
         #    return
+        elif isMatchWordStart(tmp_reast_str, 'rr'):
+            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rr')
+            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            tmp_reast_str = tmp_reast_str.rstrip(' ')
+            flag_mode = 'default'
+            tmp_user_platform = plugin_event.platform['platform']
+            if len(tmp_reast_str) > 0:
+                flag_mode = tmp_reast_str
+            tmp_RDData_str = OlivaDiceCore.onediceOverride.RDDataFormat(
+                data = OlivaDiceCore.onediceOverride.getRDDataUser(
+                    botHash = plugin_event.bot_info.hash,
+                    userId = tmp_userID,
+                    platform = tmp_user_platform
+                ),
+                mode = flag_mode
+            )
+            if tmp_RDData_str != None:
+                tmp_reply_str = '%s=%d' % (
+                    tmp_RDData_str,
+                    OlivaDiceCore.onediceOverride.getRDDataIntUser(
+                        botHash = plugin_event.bot_info.hash,
+                        userId = tmp_userID,
+                        platform = tmp_user_platform
+                    )
+                )
+            if tmp_reply_str != None:
+                replyMsg(plugin_event, tmp_reply_str)
         elif (
             isMatchWordStart(tmp_reast_str, 'rx')
         ) or (
@@ -3465,6 +3492,7 @@ def unity_reply(plugin_event, Proc):
                 rd_para_str = '10A10'
             elif flag_roll_mode in ['dx', 'dxx']:
                 rd_para_str = '10C10'
+            tmp_user_platform = plugin_event.platform['platform']
             rd_reason_str = None
             roll_times_count = 1
             flag_hide_roll = False
@@ -3542,6 +3570,12 @@ def unity_reply(plugin_event, Proc):
             if roll_times_count == 1:
                 rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_template_customDefault, valueTable = skill_valueTable)
                 rd_para.roll()
+                OlivaDiceCore.onediceOverride.saveRDDataUser(
+                    data = rd_para,
+                    botHash = plugin_event.bot_info.hash,
+                    userId = tmp_userID,
+                    platform = tmp_user_platform
+                )
                 tmp_reply_str_1 = ''
                 if rd_para.resError == None:
                     if flag_roll_mode in ['r', 'rx']:

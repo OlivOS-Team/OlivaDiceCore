@@ -16,6 +16,7 @@
 
 from enum import Enum
 import random
+#import traceback
 
 pypi_version = '1.0.1'
 
@@ -259,6 +260,7 @@ class RD(object):
         self.resIntMinType = None
         self.resIntMaxType = None
         self.resDetail = None
+        self.resDetailData = []
         self.resError = None
         self.dictOperationPriority = dictOperationPriority
         self.customDefault = customDefault
@@ -268,21 +270,24 @@ class RD(object):
         try:
             if type(self.valueTable) == dict:
                 self.__replace()
-        except:
+        except Exception as e:
+            #traceback.print_exc()
             if self.resError == None:
                 self.resError = self.resErrorType.UNKNOWN_REPLACE_FATAL
         if self.resError != None:
             return
         try:
             self.__getCalTree()
-        except:
+        except Exception as e:
+            #traceback.print_exc()
             if self.resError == None:
                 self.resError = self.resErrorType.UNKNOWN_GENERATE_FATAL
         if self.resError != None:
             return
         try:
             resRecursiveObj = self.__calculate()
-        except:
+        except Exception as e:
+            #traceback.print_exc()
             if self.resError == None:
                 self.resError = self.resErrorType.UNKNOWN_COMPLETE_FATAL
         if self.resError != None:
@@ -294,6 +299,7 @@ class RD(object):
             self.resIntMinType = resRecursiveObj.resIntMinType
             self.resIntMaxType = resRecursiveObj.resIntMaxType
             self.resDetail = resRecursiveObj.resDetail
+            self.resDetailData = resRecursiveObj.resDetailData
         return
 
     class resErrorType(Enum):
@@ -323,6 +329,7 @@ class RD(object):
             self.resIntMinType = RD.resExtremeType.INT_LIMITED
             self.resIntMaxType = RD.resExtremeType.INT_LIMITED
             self.resDetail = resDetail
+            self.resDetailData = []
 
     def getPriority(self, data):
         res = None
@@ -616,12 +623,15 @@ class RD(object):
             tmp_node_this_output_MaxType = self.resExtremeType.INT_LIMITED
             tmp_node_this_output_MinType = self.resExtremeType.INT_LIMITED
             tmp_node_this_output_str = ''
+            tmp_node_this_output_data = {}
+            tmp_node_this_output_data_final = []
             if self.calTree.peek().isNumber():
                 tmp_node_this = self.calTree.pop()
                 tmp_node_this_output = tmp_node_this.getInt()
                 tmp_node_this_output_Max = tmp_node_this.getInt()
                 tmp_node_this_output_Min = tmp_node_this.getInt()
                 tmp_node_this_output_str = str(tmp_node_this_output)
+                tmp_node_this_output_data_final = [tmp_node_this_output]
             elif self.calTree.peek().isOperation():
                 tmp_node_this = self.calTree.pop()
                 tmp_priority_this = tmp_node_this.getPriority()
@@ -634,7 +644,9 @@ class RD(object):
                 if self.resError != None:
                     return resNoneTemplate
                 tmp_main_val_right = [tmp_main_val_right_obj.resInt, tmp_main_val_right_obj.resDetail]
+                tmp_main_val_right_data = tmp_main_val_right_obj.resDetailData
                 tmp_main_val_left = [tmp_main_val_left_obj.resInt, tmp_main_val_left_obj.resDetail]
+                tmp_main_val_left_data = tmp_main_val_left_obj.resDetailData
                 if tmp_node_this.data == '>':
                     if tmp_main_val_left[0] > tmp_main_val_right[0]:
                         tmp_node_this_output = 1
@@ -646,8 +658,10 @@ class RD(object):
                         str(tmp_main_val_left[1]),
                         str(tmp_main_val_right[1])
                     )
+                    tmp_node_this_output_data_final = tmp_main_val_left_data + [{'op': '>'}] + tmp_main_val_right_data
                     if tmp_priority_this < rootPriority:
                         tmp_node_this_output_str = '(' + tmp_node_this_output_str + ')'
+                        tmp_node_this_output_data_final = [{'op': '('}] + tmp_node_this_output_data_final + [{'op': ')'}]
                 elif tmp_node_this.data == '<':
                     if tmp_main_val_left[0] < tmp_main_val_right[0]:
                         tmp_node_this_output = 1
@@ -659,8 +673,10 @@ class RD(object):
                         str(tmp_main_val_left[1]),
                         str(tmp_main_val_right[1])
                     )
+                    tmp_node_this_output_data_final = tmp_main_val_left_data + [{'op': '<'}] + tmp_main_val_right_data
                     if tmp_priority_this < rootPriority:
                         tmp_node_this_output_str = '(' + tmp_node_this_output_str + ')'
+                        tmp_node_this_output_data_final = [{'op': '('}] + tmp_node_this_output_data_final + [{'op': ')'}]
                 elif tmp_node_this.data == '&':
                     tmp_node_this_output = tmp_main_val_left[0] & tmp_main_val_right[0]
                     tmp_node_this_output_Min = str(tmp_node_this_output)
@@ -672,6 +688,19 @@ class RD(object):
                         tmp_main_val_right[0],
                         str(tmp_node_this_output)
                     )
+                    tmp_node_this_output_data_final = [{
+                        'key': {
+                            'op': '&',
+                            'l': tmp_main_val_left[0],
+                            'r': tmp_main_val_right[0],
+                            'v': tmp_node_this.vals
+                        },
+                        'result': [
+                            [tmp_main_val_left_data, tmp_main_val_right_data],
+                            [tmp_main_val_left[0], tmp_main_val_right[0]],
+                            [tmp_node_this_output]
+                        ]
+                    }]
                 elif tmp_node_this.data == '|':
                     tmp_node_this_output = tmp_main_val_left[0] | tmp_main_val_right[0]
                     tmp_node_this_output_Min = str(tmp_node_this_output)
@@ -683,6 +712,19 @@ class RD(object):
                         tmp_main_val_right[0],
                         str(tmp_node_this_output)
                     )
+                    tmp_node_this_output_data_final = [{
+                        'key': {
+                            'op': '|',
+                            'l': tmp_main_val_left[0],
+                            'r': tmp_main_val_right[0],
+                            'v': tmp_node_this.vals
+                        },
+                        'result': [
+                            [tmp_main_val_left_data, tmp_main_val_right_data],
+                            [tmp_main_val_left[0], tmp_main_val_right[0]],
+                            [tmp_node_this_output]
+                        ]
+                    }]
                 elif tmp_node_this.data == '+':
                     tmp_node_this_output = tmp_main_val_left[0] + tmp_main_val_right[0]
                     if boolByListAnd([
@@ -712,8 +754,10 @@ class RD(object):
                         self.resError = self.resErrorType.NODE_EXTREME_VAL_INVALID
                         return resNoneTemplate
                     tmp_node_this_output_str = tmp_main_val_left[1] + '+' + tmp_main_val_right[1]
+                    tmp_node_this_output_data_final = tmp_main_val_left_data + [{'op': '+'}] + tmp_main_val_right_data
                     if tmp_priority_this < rootPriority:
                         tmp_node_this_output_str = '(' + tmp_node_this_output_str + ')'
+                        tmp_node_this_output_data_final = [{'op': '('}] + tmp_node_this_output_data_final + [{'op': ')'}]
                 elif tmp_node_this.data == '-':
                     tmp_node_this_output = tmp_main_val_left[0] - tmp_main_val_right[0]
                     if boolByListAnd([
@@ -743,8 +787,10 @@ class RD(object):
                         self.resError = self.resErrorType.NODE_EXTREME_VAL_INVALID
                         return resNoneTemplate
                     tmp_node_this_output_str = tmp_main_val_left[1] + '-' + tmp_main_val_right[1]
+                    tmp_node_this_output_data_final = tmp_main_val_left_data + [{'op': '-'}] + tmp_main_val_right_data
                     if tmp_priority_this < rootPriority:
                         tmp_node_this_output_str = '(' + tmp_node_this_output_str + ')'
+                        tmp_node_this_output_data_final = [{'op': '('}] + tmp_node_this_output_data_final + [{'op': ')'}]
                 elif tmp_node_this.data == '*' or tmp_node_this.data == 'x':
                     tmp_node_this_output = tmp_main_val_left[0] * tmp_main_val_right[0]
                     tmp_node_this_output_ExtremumType_1 = self.resExtremeType.INT_LIMITED
@@ -941,10 +987,13 @@ class RD(object):
                         if flag_is_INT_LIMITED:
                             tmp_node_this_output_Min = tmp_Extremum
                     tmp_node_this_output_str = tmp_main_val_left[1] + '*' + tmp_main_val_right[1]
+                    tmp_node_this_output_data_final = tmp_main_val_left_data + [{'op': '*'}] + tmp_main_val_right_data
                     if tmp_priority_this < rootPriority:
                         tmp_node_this_output_str = '(' + tmp_node_this_output_str + ')'
+                        tmp_node_this_output_data_final = [{'op': '('}] + tmp_node_this_output_data_final + [{'op': ')'}]
                     elif forkSideRight and tmp_priority_this == rootPriority:
                         tmp_node_this_output_str = '(' + tmp_node_this_output_str + ')'
+                        tmp_node_this_output_data_final = [{'op': '('}] + tmp_node_this_output_data_final + [{'op': ')'}]
                 elif tmp_node_this.data == '/':
                     if tmp_main_val_right[0] == 0:
                         self.resError = self.resErrorType.NODE_RIGHT_VAL_INVALID
@@ -1189,10 +1238,13 @@ class RD(object):
                         return resNoneTemplate
                     ##############################################
                     tmp_node_this_output_str = tmp_main_val_left[1] + '/' + tmp_main_val_right[1]
+                    tmp_node_this_output_data_final = tmp_main_val_left_data + [{'op': '/'}] + tmp_main_val_right_data
                     if tmp_priority_this < rootPriority:
                         tmp_node_this_output_str = '(' + tmp_node_this_output_str + ')'
+                        tmp_node_this_output_data_final = [{'op': '('}] + tmp_node_this_output_data_final + [{'op': ')'}]
                     elif forkSideRight and tmp_priority_this == rootPriority:
                         tmp_node_this_output_str = '(' + tmp_node_this_output_str + ')'
+                        tmp_node_this_output_data_final = [{'op': '('}] + tmp_node_this_output_data_final + [{'op': ')'}]
                 elif tmp_node_this.data == '^':
                     if tmp_main_val_left[0] == 0 and tmp_main_val_right[0] == 0:
                         self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
@@ -1886,10 +1938,13 @@ class RD(object):
                         tmp_node_this_output_Max = max(tmp_max_val_list_1)
                         tmp_node_this_output_Min = min(tmp_min_val_list_1)
                     tmp_node_this_output_str = tmp_main_val_left[1] + '^' + tmp_main_val_right[1]
+                    tmp_node_this_output_data_final = tmp_main_val_left_data + [{'op': '^'}] + tmp_main_val_right_data
                     if tmp_priority_this < rootPriority:
                         tmp_node_this_output_str = '(' + tmp_node_this_output_str + ')'
+                        tmp_node_this_output_data_final = [{'op': '('}] + tmp_node_this_output_data_final + [{'op': ')'}]
                     elif forkSideRight and tmp_priority_this == rootPriority:
                         tmp_node_this_output_str = '(' + tmp_node_this_output_str + ')'
+                        tmp_node_this_output_data_final = [{'op': '('}] + tmp_node_this_output_data_final + [{'op': ')'}]
                 elif tmp_node_this.data == 'd':
                     if tmp_main_val_right[0] <= 0 or tmp_main_val_right[0] >= 10000:
                         self.resError = self.resErrorType.NODE_RIGHT_VAL_INVALID
@@ -1906,6 +1961,11 @@ class RD(object):
                     tmp_node_this_output_str_1 = ''
                     tmp_node_this_output_str_2 = ''
                     tmp_node_this_output_str_3 = ''
+                    tmp_node_this_output_data = {}
+                    tmp_node_this_output_data_1 = []
+                    tmp_node_this_output_data_2 = []
+                    tmp_node_this_output_data_3 = []
+                    tmp_node_this_output_data_final = []
                     if tmp_node_this.vals['a'] != None:
                         tmp_RD = RD('%sa(%s+1)k%sm%s' % (
                                 str(tmp_main_val_left[0]),
@@ -1941,26 +2001,31 @@ class RD(object):
                         for tmp_it_this in tmp_range_list:
                             tmp_node_this_output_this = self.random(1, tmp_main_val_right[0])
                             tmp_node_this_output_list.append(tmp_node_this_output_this)
+                            tmp_node_this_output_data_1.append(tmp_node_this_output_this)
                         if tmp_node_this.vals['k'] != None:
                             if tmp_node_this.vals['k'] > len(tmp_node_this_output_list):
                                 self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
                                 return resNoneTemplate
                             tmp_node_this_output_list.sort(reverse = True)
+                            tmp_node_this_output_data_1 = tmp_node_this_output_list
                             tmp_range_list = range(0, tmp_node_this.vals['k'])
                             for tmp_it_this in tmp_range_list:
                                 tmp_it_this_2 = tmp_it_this
                                 tmp_node_this_output += tmp_node_this_output_list[tmp_it_this_2]
                                 tmp_node_this_output_list_2.append(tmp_node_this_output_list[tmp_it_this_2])
+                                tmp_node_this_output_data_2.append(tmp_node_this_output_list[tmp_it_this_2])
                         elif tmp_node_this.vals['q'] != None:
                             if tmp_node_this.vals['q'] > len(tmp_node_this_output_list):
                                 self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
                                 return resNoneTemplate
                             tmp_node_this_output_list.sort(reverse = False)
+                            tmp_node_this_output_data_1 = tmp_node_this_output_list
                             tmp_range_list = range(0, tmp_node_this.vals['q'])
                             for tmp_it_this in tmp_range_list:
                                 tmp_it_this_2 = tmp_it_this
                                 tmp_node_this_output += tmp_node_this_output_list[tmp_it_this_2]
                                 tmp_node_this_output_list_2.append(tmp_node_this_output_list[tmp_it_this_2])
+                                tmp_node_this_output_data_2.append(tmp_node_this_output_list[tmp_it_this_2])
                     elif tmp_node_this.vals['b'] != None or tmp_node_this.vals['p'] != None:
                         if tmp_node_this.vals['b'] != None:
                             if tmp_node_this.vals['b'] <= 0 or tmp_node_this.vals['b'] * tmp_main_val_left[0] >= 10000:
@@ -1984,6 +2049,8 @@ class RD(object):
                                         tmp_node_this_output_str_2 += '+'
                                     tmp_node_this_output_str_1 += str(tmp_rd_this.resDetail)
                                     tmp_node_this_output_str_2 += str(tmp_node_this_output_this)
+                                    tmp_node_this_output_data_1.append(tmp_rd_this.resDetailData)
+                                    tmp_node_this_output_data_2.append(tmp_node_this_output_this)
                         elif tmp_node_this.vals['p'] != None:
                             if tmp_node_this.vals['p'] <= 0 or tmp_node_this.vals['p'] * tmp_main_val_left[0] >= 10000:
                                 self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
@@ -2006,13 +2073,31 @@ class RD(object):
                                         tmp_node_this_output_str_2 += '+'
                                     tmp_node_this_output_str_1 += str(tmp_rd_this.resDetail)
                                     tmp_node_this_output_str_2 += str(tmp_node_this_output_this)
+                                    tmp_node_this_output_data_1.append(tmp_rd_this.resDetailData)
+                                    tmp_node_this_output_data_2.append(tmp_node_this_output_this)
                     else:
                         for tmp_it_this in tmp_range_list:
                             tmp_node_this_output_this = self.random(1, tmp_main_val_right[0])
                             tmp_node_this_output_list.append(tmp_node_this_output_this)
+                            tmp_node_this_output_data_1.append(tmp_node_this_output_this)
                         for tmp_node_this_output_this in tmp_node_this_output_list:
                             tmp_node_this_output += tmp_node_this_output_this
                             tmp_node_this_output_list_2.append(tmp_node_this_output_this)
+                    tmp_node_this_output_data_3.append(tmp_node_this_output)
+                    # data主要处理流程
+                    tmp_node_this_output_data['result'] = [
+                        tmp_node_this_output_data_1,
+                        tmp_node_this_output_data_2,
+                        tmp_node_this_output_data_3
+                    ]
+                    tmp_node_this_output_data['key'] = {
+                        'op': 'd',
+                        'l': tmp_main_val_left[0],
+                        'r': tmp_main_val_right[0],
+                        'v': tmp_node_this.vals
+                    }
+                    tmp_node_this_output_data_final = [tmp_node_this_output_data]
+                    # str主要处理流程
                     if tmp_node_this.vals['b'] == None and tmp_node_this.vals['p'] == None:
                         flag_begin = True
                         for tmp_node_this_output_list_this in tmp_node_this_output_list:
@@ -2116,6 +2201,11 @@ class RD(object):
                     tmp_node_this_output_list = []
                     tmp_node_this_output_list_list = []
                     tmp_node_this_output = 0
+                    tmp_node_this_output_data = {}
+                    tmp_node_this_output_data_1 = []
+                    tmp_node_this_output_data_2 = []
+                    tmp_node_this_output_data_3 = []
+                    tmp_node_this_output_data_final = []
                     tmp_node_this_output_1_this = 0
                     tmp_node_this_output_1_list = []
                     tmp_node_this_output_str = ''
@@ -2141,6 +2231,7 @@ class RD(object):
                             flag_add_roll_not_empty = False
                     flag_begin = True
                     for tmp_node_this_output_list_this in tmp_node_this_output_list_list:
+                        tmp_node_this_output_data_1_1 = []
                         if flag_begin:
                             flag_begin = False
                         else:
@@ -2148,6 +2239,7 @@ class RD(object):
                         tmp_node_this_output_str += '{'
                         flag_begin_2 = True
                         for tmp_node_this_output_this in tmp_node_this_output_list_this:
+                            tmp_node_this_output_data_1_1_1 = tmp_node_this_output_this
                             if flag_begin_2:
                                 flag_begin_2 = False
                             else:
@@ -2155,12 +2247,26 @@ class RD(object):
                             tmp_node_this_output_str_this = str(tmp_node_this_output_this)
                             if tmp_add_roll_k != None and tmp_node_this_output_this >= tmp_add_roll_k:
                                 tmp_node_this_output_str_this = '[' + tmp_node_this_output_str_this + ']'
+                                tmp_node_this_output_data_1_1_1 = {
+                                    'op': 'mark01',
+                                    'v': tmp_node_this_output_data_1_1_1
+                                }
                             if tmp_add_roll_q != None and tmp_node_this_output_this <= tmp_add_roll_q:
                                 tmp_node_this_output_str_this = '[' + tmp_node_this_output_str_this + ']'
+                                tmp_node_this_output_data_1_1_1 = {
+                                    'op': 'mark01',
+                                    'v': tmp_node_this_output_data_1_1_1
+                                }
                             if tmp_node_this_output_this >= tmp_add_roll_threshold:
                                 tmp_node_this_output_str_this = '<' + tmp_node_this_output_str_this + '>'
+                                tmp_node_this_output_data_1_1_1 = {
+                                    'op': 'mark02',
+                                    'v': tmp_node_this_output_data_1_1_1
+                                }
                             tmp_node_this_output_str += tmp_node_this_output_str_this
+                            tmp_node_this_output_data_1_1.append(tmp_node_this_output_data_1_1_1)
                         tmp_node_this_output_str += '}'
+                        tmp_node_this_output_data_1.append(tmp_node_this_output_data_1_1)
                     tmp_node_this_output_str_1 = tmp_node_this_output_str
                     tmp_node_this_output_str_2 = ''
                     flag_begin = True
@@ -2170,10 +2276,25 @@ class RD(object):
                         else:
                             tmp_node_this_output_str_2 += '+'
                         tmp_node_this_output_str_2 += str(tmp_node_this_output_1_this)
+                        tmp_node_this_output_data_2.append(tmp_node_this_output_1_this)
+                    tmp_node_this_output_data_3 = [tmp_node_this_output]
                     if len(tmp_node_this_output_1_list) == 1:
                         tmp_node_this_output_str = '%s(%d)' % (tmp_node_this_output_str_1, tmp_node_this_output)
                     else:
                         tmp_node_this_output_str = '{%s}[%s](%d)' % (tmp_node_this_output_str_1, tmp_node_this_output_str_2, tmp_node_this_output)
+                    # data主要处理流程
+                    tmp_node_this_output_data['result'] = [
+                        tmp_node_this_output_data_1,
+                        tmp_node_this_output_data_2,
+                        tmp_node_this_output_data_3
+                    ]
+                    tmp_node_this_output_data['key'] = {
+                        'op': 'a',
+                        'l': tmp_main_val_left[0],
+                        'r': tmp_main_val_right[0],
+                        'v': tmp_node_this.vals
+                    }
+                    tmp_node_this_output_data_final = [tmp_node_this_output_data]
                 elif tmp_node_this.data == 'c':
                     if tmp_main_val_right[0] <= 1 or tmp_main_val_right[0] >= 1000:
                         self.resError = self.resErrorType.NODE_RIGHT_VAL_INVALID
@@ -2202,6 +2323,11 @@ class RD(object):
                     tmp_node_this_output = 0
                     tmp_node_this_output_1 = 0
                     tmp_node_this_output_2 = 0
+                    tmp_node_this_output_data = {}
+                    tmp_node_this_output_data_1 = []
+                    tmp_node_this_output_data_2 = []
+                    tmp_node_this_output_data_3 = []
+                    tmp_node_this_output_data_final = []
                     tmp_node_this_output_str = ''
                     tmp_node_this_output_this_max = 0
                     while flag_add_roll_not_empty:
@@ -2229,6 +2355,7 @@ class RD(object):
                     tmp_it_count = 0
                     tmp_it_count_max = len(tmp_node_this_output_list_list) - 1
                     for tmp_node_this_output_list_this in tmp_node_this_output_list_list:
+                        tmp_node_this_output_data_1_1 = []
                         if flag_begin:
                             flag_begin = False
                         else:
@@ -2236,6 +2363,7 @@ class RD(object):
                         tmp_node_this_output_str += '{'
                         flag_begin_2 = True
                         for tmp_node_this_output_this in tmp_node_this_output_list_this:
+                            tmp_node_this_output_data_1_1_1 = tmp_node_this_output_this
                             if flag_begin_2:
                                 flag_begin_2 = False
                             else:
@@ -2243,14 +2371,39 @@ class RD(object):
                             tmp_node_this_output_str_this = str(tmp_node_this_output_this)
                             if tmp_node_this_output_this >= tmp_add_roll_threshold:
                                 tmp_node_this_output_str_this = '<' + tmp_node_this_output_str_this + '>'
+                                tmp_node_this_output_data_1_1_1 = {
+                                    'op': 'mark02',
+                                    'v': tmp_node_this_output_data_1_1_1
+                                }
                             if tmp_it_count == tmp_it_count_max and tmp_node_this_output_this_max == tmp_node_this_output_this:
                                 tmp_node_this_output_str_this = '[' + tmp_node_this_output_str_this + ']'
+                                tmp_node_this_output_data_1_1_1 = {
+                                    'op': 'mark01',
+                                    'v': tmp_node_this_output_data_1_1_1
+                                }
                             tmp_node_this_output_str += tmp_node_this_output_str_this
+                            tmp_node_this_output_data_1_1.append(tmp_node_this_output_data_1_1_1)
                         tmp_node_this_output_str += '}'
+                        tmp_node_this_output_data_1.append(tmp_node_this_output_data_1_1)
                         tmp_it_count += 1
                     tmp_node_this_output_str_1 = tmp_node_this_output_str
                     tmp_node_this_output_str_2 = '%d*%d+%d' % (tmp_add_roll_m, tmp_node_this_output_1, tmp_node_this_output_2)
+                    tmp_node_this_output_data_2 = [tmp_add_roll_m, tmp_node_this_output_1, tmp_node_this_output_2]
+                    tmp_node_this_output_data_3 = [tmp_node_this_output]
                     tmp_node_this_output_str = '{%s}[%s](%d)' % (tmp_node_this_output_str_1, tmp_node_this_output_str_2, tmp_node_this_output)
+                    # data主要处理流程
+                    tmp_node_this_output_data['result'] = [
+                        tmp_node_this_output_data_1,
+                        tmp_node_this_output_data_2,
+                        tmp_node_this_output_data_3
+                    ]
+                    tmp_node_this_output_data['key'] = {
+                        'op': 'c',
+                        'l': tmp_main_val_left[0],
+                        'r': tmp_main_val_right[0],
+                        'v': tmp_node_this.vals
+                    }
+                    tmp_node_this_output_data_final = [tmp_node_this_output_data]
                 elif tmp_node_this.data == 'b':
                     if tmp_main_val_right[0] >= 10000:
                         self.resError = self.resErrorType.NODE_RIGHT_VAL_INVALID
@@ -2272,6 +2425,11 @@ class RD(object):
                     tmp_node_this_output_str = ''
                     tmp_node_this_output_str_1 = ''
                     tmp_node_this_output_str_2 = ''
+                    tmp_node_this_output_data = {}
+                    tmp_node_this_output_data_1 = []
+                    tmp_node_this_output_data_2 = []
+                    tmp_node_this_output_data_3 = []
+                    tmp_node_this_output_data_final = []
                     tmp_node_this_output_this = self.random(1, 100)
                     tmp_node_this_output_1 = tmp_node_this_output_this
                     tmp_range_list = range(0, tmp_main_val_right[0])
@@ -2289,6 +2447,30 @@ class RD(object):
                         tmp_node_this_output = tmp_node_this_output_1_2 + tmp_node_this_output_2_mark * 10
                     else:
                         tmp_node_this_output = tmp_node_this_output_1
+                    # data主要处理流程
+                    tmp_node_this_output_data_1 = [tmp_node_this_output_1]
+                    for tmp_node_this_output_list_2_this in tmp_node_this_output_list_2:
+                        tmp_node_this_output_list_2_this_res = tmp_node_this_output_list_2_this
+                        if len(tmp_node_this_output_list_2) > 1 and tmp_node_this_output_2_mark == tmp_node_this_output_list_2_this:
+                            tmp_node_this_output_list_2_this_res = {
+                                'op': 'mark01',
+                                'v': tmp_node_this_output_list_2_this_res
+                            }
+                        tmp_node_this_output_data_2.append(tmp_node_this_output_list_2_this_res)
+                    tmp_node_this_output_data_3 = [tmp_node_this_output]
+                    tmp_node_this_output_data['result'] = [
+                        tmp_node_this_output_data_1,
+                        tmp_node_this_output_data_2,
+                        tmp_node_this_output_data_3
+                    ]
+                    tmp_node_this_output_data['key'] = {
+                        'op': 'b',
+                        'l': tmp_main_val_left[0],
+                        'r': tmp_main_val_right[0],
+                        'v': tmp_node_this.vals
+                    }
+                    tmp_node_this_output_data_final = [tmp_node_this_output_data]
+                    # str主要处理流程
                     tmp_node_this_output_str_1 = '1D100=' + str(tmp_node_this_output_1)
                     tmp_node_this_output_str_2 = 'bonus:['
                     flag_begin = True
@@ -2324,6 +2506,11 @@ class RD(object):
                     tmp_node_this_output_str = ''
                     tmp_node_this_output_str_1 = ''
                     tmp_node_this_output_str_2 = ''
+                    tmp_node_this_output_data = {}
+                    tmp_node_this_output_data_1 = []
+                    tmp_node_this_output_data_2 = []
+                    tmp_node_this_output_data_3 = []
+                    tmp_node_this_output_data_final = []
                     tmp_node_this_output_this = self.random(1, 100)
                     tmp_node_this_output_1 = tmp_node_this_output_this
                     tmp_range_list = range(0, tmp_main_val_right[0])
@@ -2341,6 +2528,30 @@ class RD(object):
                         tmp_node_this_output = tmp_node_this_output_1_2 + tmp_node_this_output_2_mark * 10
                     else:
                         tmp_node_this_output = tmp_node_this_output_1
+                    # data主要处理流程
+                    tmp_node_this_output_data_1 = [tmp_node_this_output_1]
+                    for tmp_node_this_output_list_2_this in tmp_node_this_output_list_2:
+                        tmp_node_this_output_list_2_this_res = tmp_node_this_output_list_2_this
+                        if len(tmp_node_this_output_list_2) > 1 and tmp_node_this_output_2_mark == tmp_node_this_output_list_2_this:
+                            tmp_node_this_output_list_2_this_res = {
+                                'op': 'mark01',
+                                'v': tmp_node_this_output_list_2_this_res
+                            }
+                        tmp_node_this_output_data_2.append(tmp_node_this_output_list_2_this_res)
+                    tmp_node_this_output_data_3 = [tmp_node_this_output]
+                    tmp_node_this_output_data['result'] = [
+                        tmp_node_this_output_data_1,
+                        tmp_node_this_output_data_2,
+                        tmp_node_this_output_data_3
+                    ]
+                    tmp_node_this_output_data['key'] = {
+                        'op': 'p',
+                        'l': tmp_main_val_left[0],
+                        'r': tmp_main_val_right[0],
+                        'v': tmp_node_this.vals
+                    }
+                    tmp_node_this_output_data_final = [tmp_node_this_output_data]
+                    # str主要处理流程
                     tmp_node_this_output_str_1 = '1D100=' + str(tmp_node_this_output_1)
                     tmp_node_this_output_str_2 = 'punish:['
                     flag_begin = True
@@ -2379,6 +2590,11 @@ class RD(object):
                     tmp_node_this_output_str_1 = ''
                     tmp_node_this_output_str_2 = ''
                     tmp_node_this_output_str_3 = ''
+                    tmp_node_this_output_data = {}
+                    tmp_node_this_output_data_1 = []
+                    tmp_node_this_output_data_2 = []
+                    tmp_node_this_output_data_3 = []
+                    tmp_node_this_output_data_final = []
                     for tmp_it_this in tmp_range_list:
                         tmp_node_this_output_this = self.random(-1, 1)
                         tmp_node_this_output += tmp_node_this_output_this
@@ -2397,8 +2613,24 @@ class RD(object):
                             tmp_node_this_output_str_1 += '0'
                         elif tmp_node_this_output_list_this > 0:
                             tmp_node_this_output_str_1 += '+'
+                        tmp_node_this_output_data_1.append(tmp_node_this_output_list_this)
                         tmp_node_this_output_str_2 += str(tmp_node_this_output_list_this)
+                    tmp_node_this_output_data_2 = tmp_node_this_output_data_1
+                    tmp_node_this_output_data_3 = [tmp_node_this_output]
                     tmp_node_this_output_str = '{%s}[%s](%d)' % (tmp_node_this_output_str_1, tmp_node_this_output_str_2, tmp_node_this_output)
+                    # data主要处理流程
+                    tmp_node_this_output_data['result'] = [
+                        tmp_node_this_output_data_1,
+                        tmp_node_this_output_data_2,
+                        tmp_node_this_output_data_3
+                    ]
+                    tmp_node_this_output_data['key'] = {
+                        'op': 'f',
+                        'l': tmp_main_val_left[0],
+                        'r': tmp_main_val_right[0],
+                        'v': tmp_node_this.vals
+                    }
+                    tmp_node_this_output_data_final = [tmp_node_this_output_data]
                 elif tmp_node_this.data == '?':
                     if tmp_node_this.vals[':'] != None:
                         tmp_flag_True = True
@@ -2416,6 +2648,19 @@ class RD(object):
                             str(tmp_node_this.vals[':']),
                             tmp_node_this_output
                         )
+                        tmp_node_this_output_data_final = [{
+                            'key': {
+                                'op': '?',
+                                'l': tmp_main_val_left[0],
+                                'r': tmp_main_val_right[0],
+                                'v': tmp_node_this.vals
+                            },
+                            'result': [
+                                [tmp_main_val_left_data, tmp_main_val_right[0], tmp_node_this.vals[':']],
+                                [],
+                                [tmp_node_this_output]
+                            ]
+                        }]
                     else:
                         if tmp_main_val_left[0] < 0:
                             self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
@@ -2429,6 +2674,19 @@ class RD(object):
                             tmp_main_val_left[0],
                             str(tmp_node_this_output)
                         )
+                        tmp_node_this_output_data_final = [{
+                            'key': {
+                                'op': '?',
+                                'l': tmp_main_val_left[0],
+                                'r': tmp_main_val_right[0],
+                                'v': tmp_node_this.vals
+                            },
+                            'result': [
+                                [tmp_main_val_left_data],
+                                [tmp_main_val_left[0]],
+                                [tmp_node_this_output]
+                            ]
+                        }]
                 else:
                     self.resError = self.resErrorType.NODE_OPERATION_INVALID
                     return resNoneTemplate
@@ -2442,6 +2700,7 @@ class RD(object):
             resRecursiveObj.resIntMaxType = tmp_node_this_output_MaxType
             resRecursiveObj.resIntMinType = tmp_node_this_output_MinType
             resRecursiveObj.resDetail = tmp_node_this_output_str
+            resRecursiveObj.resDetailData = tmp_node_this_output_data_final
             return resRecursiveObj
 
 def boolByListAnd(data):
@@ -2500,4 +2759,5 @@ if __name__ == '__main__':
             print(rd_para.resIntMaxType)
             print(rd_para.resIntMinType)
             print(rd_para.resDetail)
+            print(rd_para.resDetailData)
         print('================')

@@ -45,6 +45,8 @@ dictUserConfigNoteDefault = {
     'groupTemplateRule' : None,
     'groupObList' : None,
     'userObList' : None,
+    'RDRecord' : None,
+    'RDRecordInt' : 0,
     'userName' : '用户',
     'trustLevel' : 0,
     'trustRank' : 1000
