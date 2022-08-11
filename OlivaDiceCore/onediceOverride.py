@@ -190,18 +190,28 @@ def getRDDataIntUserByHash(botHash:str, userHash:str):
     return res
 
 # format
+dictFormatMappingMode = {
+    '默认': 'default',
+    '美化': 'pretty',
+    '无限': 'ww',
+    '双重十字': 'dx'
+}
+
 def RDDataFormat(data:'list|None', mode:str = 'default'):
     res = None
+    mode_real = mode
+    if mode in dictFormatMappingMode:
+        mode_real = dictFormatMappingMode[mode]
     if data != None and type(data) == list:
-        if mode == 'debug':
+        if mode_real == 'debug':
             res = RDDataFormat_debug(data)
-        elif mode == 'default':
+        elif mode_real == 'default':
             res = RDDataFormat_default(data)
-        elif mode == 'pretty':
+        elif mode_real == 'pretty':
             res = RDDataFormat_default(data, 'pretty')
-        elif mode == 'dx':
+        elif mode_real == 'dx':
             res = RDDataFormat_default(data, 'dx')
-        elif mode == 'ww':
+        elif mode_real == 'ww':
             res = RDDataFormat_default(data, 'ww')
     return res
 
@@ -276,9 +286,9 @@ def RDDataFormat_default(data:list, mode = 'default'):
                                 ])) for data_this_this_0 in data_this['result'][0]
                             ]
                         if mode in ['dx', 'ww']:
-                            res += '{\n%s\n轮数: %s\n}' % (
-                                '+\n'.join(tmp_data_this_list_0),
-                                str(len(data_this['result'][0]))
+                            res += '{轮数: %s\n%s\n}' % (
+                                str(len(data_this['result'][0])),
+                                '+\n'.join(tmp_data_this_list_0)
                             )
                         elif mode == 'pretty':
                             res += '{\n%s\n}' % (',\n'.join(tmp_data_this_list_0))
@@ -299,7 +309,12 @@ def RDDataFormat_default(data:list, mode = 'default'):
                                 for data_this_this_0_this in data_this_this_0
                             ])) for data_this_this_0 in data_this['result'][0]
                         ]
-                        if mode == 'pretty':
+                        if mode in ['dx', 'ww']:
+                            res += '{轮数: %s\n%s\n}' % (
+                                str(len(data_this['result'][0])),
+                                ',\n'.join(tmp_data_this_list_0)
+                            )
+                        elif mode == 'pretty':
                             res += '{\n%s\n}' % (',\n'.join(tmp_data_this_list_0))
                         else:
                             res += '{%s}' % (', '.join(tmp_data_this_list_0))

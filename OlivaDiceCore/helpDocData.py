@@ -169,6 +169,12 @@ https://github.com/OlivOS-Team/onedice
 .dxx [掷骰表达式] [理由]    掷双重十字骰，但不显示细节
 .dx[数字]    快速掷骰 [数字]c10''',
 
+
+    'rr': '''重放掷骰指令
+.rr [重放模式] 本指令可以以不同模式重放最后一次掷骰
+支持的重放模式有: 默认/default/美化/preety/无限/ww/双重十字/dx
+''',
+
     'ra': '''检定指令
 .ra [技能名] [技能值]    技能检定
 .rah [技能名] [技能值]    暗技能检定
@@ -317,6 +323,8 @@ https://github.com/OlivOS-Team/onedice
     'help': '&default',
     '帮助': '&default',
     '掷骰': '&r',
+    '重放掷骰': '&rr',
+    '重放': '&rr',
     '检定': '&ra',
     '理智检定': '&sc',
     '成长检定': '&en',

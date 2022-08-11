@@ -3424,11 +3424,11 @@ def unity_reply(plugin_event, Proc):
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rr')
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             tmp_reast_str = tmp_reast_str.rstrip(' ')
-            flag_mode = 'default'
+            flag_mode = '默认'
             tmp_user_platform = plugin_event.platform['platform']
             if len(tmp_reast_str) > 0:
                 if not flag_is_from_master and tmp_reast_str in ['debug']:
-                    flag_mode = 'default'
+                    pass
                 else:
                     flag_mode = tmp_reast_str
             tmp_RDData_str = OlivaDiceCore.onediceOverride.RDDataFormat(
