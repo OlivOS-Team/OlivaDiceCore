@@ -11,3 +11,5 @@ Together, we will built a brighter future.
 - [OlivaDiceLogger](https://github.com/OlivOS-Team/OlivaDiceLogger)
 - [OlivaDiceMaster](https://github.com/OlivOS-Team/OlivaDiceMaster)
 - [OlivaDiceOdyssey](https://github.com/OlivOS-Team/OlivaDiceOdyssey)
+- [OlivaDiceNativeGUI](https://github.com/OlivOS-Team/OlivaDiceNativeGUI)
+- [ChanceCustom](https://github.com/OlivOS-Team/ChanceCustom) - 可独立使用

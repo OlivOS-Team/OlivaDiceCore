@@ -83,6 +83,20 @@
                 "svn": 2,
                 "version": "3.0.1"
             }
+        },
+        "ChanceCustom": {
+            "main": {
+                "command": "ChanceCustom",
+                "opk_path": "https://api.dice.center/OlivaDiceVer/main/ChanceCustom.opk",
+                "svn": 6,
+                "version": "0.1.1"
+            },
+            "github": {
+                "command": "ChanceCustom",
+                "opk_path": "https://github.com/OlivOS-Team/ChanceCustom/releases/latest/download/ChanceCustom.opk",
+                "svn": 6,
+                "version": "0.1.1"
+            }
         }
     }
 }
