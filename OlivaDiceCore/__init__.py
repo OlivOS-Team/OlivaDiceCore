@@ -23,6 +23,7 @@ from . import pcCardData
 from . import pcCard
 from . import userConfig
 from . import msgReply
+from . import msgReplyModel
 from . import onedice
 from . import onediceOverride
 from . import skillCheck

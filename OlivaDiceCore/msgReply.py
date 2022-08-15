@@ -138,6 +138,10 @@ def unity_reply(plugin_event, Proc):
     dictGValue = OlivaDiceCore.msgCustom.dictGValue
     dictTValue.update(dictGValue)
 
+    valDict = {}
+    valDict['dictTValue'] = dictTValue
+    valDict['dictStrCustom'] = dictStrCustom
+
     tmp_hook_host_id = None
     tmp_hook_group_id = None
     tmp_hook_user_id = None
@@ -198,6 +202,7 @@ def unity_reply(plugin_event, Proc):
         tmp_hostID = None
         tmp_hagID = None
         tmp_userID = plugin_event.data.user_id
+        valDict['tmp_userID'] = tmp_userID
         tmp_list_hit = []
         flag_is_from_master = OlivaDiceCore.ordinaryInviteManager.isInMasterList(
             plugin_event.bot_info.hash,
@@ -207,6 +212,7 @@ def unity_reply(plugin_event, Proc):
                 plugin_event.platform['platform']
             )
         )
+        valDict['flag_is_from_master'] = flag_is_from_master
         if plugin_event.plugin_info['func_type'] == 'group_message':
             if plugin_event.data.host_id != None:
                 tmp_list_hit = [
@@ -309,6 +315,7 @@ def unity_reply(plugin_event, Proc):
             flag_messageFliterModeDisabled = True
         elif flag_messageFliterMode == 3 and flag_is_from_group:
             flag_messageFliterModeDisabled = True
+        valDict['tmp_reast_str'] = tmp_reast_str
         if flag_is_from_master:
             if isMatchWordStart(tmp_reast_str, 'master'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'master')
@@ -3420,44 +3427,8 @@ def unity_reply(plugin_event, Proc):
         #elif isMatchWordStart(tmp_reast_str, 'dx'):
         #    replyMsgLazyHelpByEvent(plugin_event, 'r')
         #    return
-        elif isMatchWordStart(tmp_reast_str, 'rr'):
-            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rr')
-            tmp_reast_str = skipSpaceStart(tmp_reast_str)
-            tmp_reast_str = tmp_reast_str.rstrip(' ')
-            flag_mode = '默认'
-            tmp_user_platform = plugin_event.platform['platform']
-            if len(tmp_reast_str) > 0:
-                if not flag_is_from_master and tmp_reast_str in ['debug']:
-                    pass
-                else:
-                    flag_mode = tmp_reast_str
-            tmp_RDData_str = OlivaDiceCore.onediceOverride.RDDataFormat(
-                data = OlivaDiceCore.onediceOverride.getRDDataUser(
-                    botHash = plugin_event.bot_info.hash,
-                    userId = tmp_userID,
-                    platform = tmp_user_platform
-                ),
-                mode = flag_mode
-            )
-            tmp_reply_str = None
-            if tmp_RDData_str != None:
-                dictTValue['tRollFormatType'] = flag_mode
-                dictTValue['tRollResult'] = '%s=%s=%d' % (
-                    OlivaDiceCore.onediceOverride.getRDDataRawUser(
-                        botHash = plugin_event.bot_info.hash,
-                        userId = tmp_userID,
-                        platform = tmp_user_platform
-                    ),
-                    tmp_RDData_str,
-                    OlivaDiceCore.onediceOverride.getRDDataIntUser(
-                        botHash = plugin_event.bot_info.hash,
-                        userId = tmp_userID,
-                        platform = tmp_user_platform
-                    )
-                )
-                tmp_reply_str = dictStrCustom['strRollRecord'].format(**dictTValue)
-            if tmp_reply_str != None:
-                replyMsg(plugin_event, tmp_reply_str)
+        elif OlivaDiceCore.msgReplyModel.replyRR_command(plugin_event, Proc, valDict):
+            pass
         elif (
             isMatchWordStart(tmp_reast_str, 'rx')
         ) or (
@@ -3622,22 +3593,30 @@ def unity_reply(plugin_event, Proc):
                             else:
                                 tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_str) + '=' + str(rd_para.resInt)
                     elif flag_roll_mode in ['r', 'rx'] or True:
-                        tmp_resDetail_str = OlivaDiceCore.onediceOverride.RDDataFormat(
-                            data = rd_para.resDetailData,
-                            mode = 'default'
-                        )
+                        rd_para_str_new = None
+                        tmp_resDetail_str = None
+                        if OlivaDiceCore.onediceOverride.RDDataFormat_default_is1D(rd_para.resDetailData):
+                            tmp_resDetail_str = None
+                            rd_para_str_new = OlivaDiceCore.onediceOverride.RDDataFormat_default_when1D(rd_para.resDetailData)
+                        else:
+                            tmp_resDetail_str = OlivaDiceCore.onediceOverride.RDDataFormat(
+                                data = rd_para.resDetailData,
+                                mode = 'default'
+                            )
                         if tmp_resDetail_str == None:
                             tmp_resDetail_str = ''
+                        if rd_para_str_new == None:
+                            rd_para_str_new = rd_para_str
                         if len(tmp_resDetail_str) == 0 or len(tmp_resDetail_str) > 150:
                             if len(str(rd_para.resInt)) > 100:
-                                tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
+                                tmp_reply_str_1 = rd_para_str_new + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
                             else:
-                                tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)
+                                tmp_reply_str_1 = rd_para_str_new + '=' + str(rd_para.resInt)
                         else:
                             if len(str(rd_para.resInt)) > 50:
-                                tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_str) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
+                                tmp_reply_str_1 = rd_para_str_new + '=' + str(tmp_resDetail_str) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
                             else:
-                                tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_str) + '=' + str(rd_para.resInt)
+                                tmp_reply_str_1 = rd_para_str_new + '=' + str(tmp_resDetail_str) + '=' + str(rd_para.resInt)
                 else:
                     dictTValue['tResult'] = str(rd_para.resError)
                     dictTValue['tRollPara'] = str(rd_para_str)

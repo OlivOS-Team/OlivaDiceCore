@@ -223,6 +223,32 @@ def RDDataFormat_debug(data:list):
         pass
     return res
 
+def RDDataFormat_default_is1D(data:list):
+    res = False
+    if len(data) == 1 and type(data[0]) == dict:
+        if 'key' in data[0] and type(data[0]['key']):
+            if (
+                'op' in data[0]['key'] and type(data[0]['key']['op']) == str and data[0]['key']['op'] == 'd'
+            ) and (
+                'l' in data[0]['key'] and type(data[0]['key']['l']) == int and data[0]['key']['l'] == 1
+            ) and (
+                'v' in data[0]['key'] and type(data[0]['key']['v']) == dict
+            ):
+                res = True
+                for v_this in data[0]['key']['v']:
+                    if data[0]['key']['v'][v_this] != None:
+                        res = False
+    return res
+
+def RDDataFormat_default_when1D(data:list):
+    res = None
+    if RDDataFormat_default_is1D(data):
+        res = '%dD%d' % (
+            data[0]['key']['l'],
+            data[0]['key']['r']
+        )
+    return res
+
 def RDDataFormat_default(data:list, mode = 'default'):
     res = ''
     for data_this in data:
