@@ -3427,8 +3427,8 @@ def unity_reply(plugin_event, Proc):
         #elif isMatchWordStart(tmp_reast_str, 'dx'):
         #    replyMsgLazyHelpByEvent(plugin_event, 'r')
         #    return
-        elif OlivaDiceCore.msgReplyModel.replyRR_command(plugin_event, Proc, valDict):
-            pass
+        elif isMatchWordStart(tmp_reast_str, 'rr'):
+            OlivaDiceCore.msgReplyModel.replyRR_command(plugin_event, Proc, valDict)
         elif (
             isMatchWordStart(tmp_reast_str, 'rx')
         ) or (
