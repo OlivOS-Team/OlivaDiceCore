@@ -234,6 +234,9 @@ https://wiki.dice.center/OlivOS_Login.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9B%9E%
 .ob exit all 退出所有已旁观
 .ob clear 清空本群旁观列表''',
 
+    'rav': '''对抗检定：
+.rav [技能名] [@对方] 与指定用户进行对抗检定''',
+
     'uinfo': '''用户记录/群记录：
 .uinfo 查询自己的用户记录
 .uinfo user 查询自己的用户记录
@@ -337,6 +340,8 @@ https://github.com/OlivOS-Team/onedice
     '村规': '&setcoc',
     '自定义回复词': '&str',
     '旁观': '&ob',
+    '对抗': '&rav',
+    '对抗检定': '&rav',
     '旁观模式': '&ob',
     '用户记录': '&uinfo',
     '群记录': '&uinfo'

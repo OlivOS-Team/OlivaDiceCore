@@ -23,10 +23,10 @@ from . import pcCardData
 from . import pcCard
 from . import userConfig
 from . import msgReply
-from . import msgReplyModel
 from . import onedice
 from . import onediceOverride
 from . import skillCheck
+from . import msgReplyModel
 from . import ordinaryInviteManager
 from . import helpDoc
 from . import helpDocData

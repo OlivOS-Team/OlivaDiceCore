@@ -167,6 +167,10 @@ dictStrCustom = {
     'strPcSkillCheckFate11' : '[+8 传奇]',
     'strPcSkillCheckNope' : '需要解释',
     'strPcSkillCheckError' : '发生错误',
+    'strRAVShow' : '[{tName}]与[{tName01}]进行技能[{tSkillName}]对抗:\n[{tSkillValue} - {tSkillValue01}]\n[{tName}]: {tRollResult} {tSkillCheckReasult}\n[{tName01}]: {tRollResult01} {tSkillCheckReasult01}\n{tRAVResult}',
+    'strRAVResult01' : '前者，[{tName}]获胜',
+    'strRAVResult02' : '后者，[{tName01}]获胜',
+    'strRAVResult03' : '平手',
     'strHelpdocSet' : '自定义帮助文档已设置',
     'strHelpdocDel' : '自定义帮助文档已删除',
     'strObList' : '当前旁观列表:\n{tResult}',
@@ -199,6 +203,7 @@ dictTValue = {
     'tVersion' : 'N/A',
     'tId' : 'N/A',
     'tName' : 'N/A',
+    'tName01' : 'N/A',
     'tStrName' : 'N/A',
     'tUserId' : 'N/A',
     'tUserName' : '用户',
@@ -213,6 +218,7 @@ dictTValue = {
     'tAcceptCommand' : 'N/A',
     'tRollFormatType' : 'N/A',
     'tRollResult' : '',
+    'tRollResult01' : '',
     'tRollSubResult' : '',
     'tRollSubResultIntMax' : 'N/A',
     'tRollReason' : '',
@@ -222,8 +228,10 @@ dictTValue = {
     'tRollResultIntRange' : 'N/A',
     'tSkillName' : '',
     'tSkillValue' : '',
+    'tSkillValue01' : '',
     'tSkillValueNew' : '',
     'tSkillCheckReasult' : '',
+    'tSkillCheckReasult01' : '',
     'tSkillUpdate' : 'N/A',
     'tPcInitResult' : 'N/A',
     'tPcShow' : '',
@@ -243,7 +251,8 @@ dictTValue = {
     'tHelpDocResult': 'N/A',
     'tDrawDeckResult': 'N/A',
     'tConsoleKey': 'N/A',
-    'tConsoleValue': 'N/A'
+    'tConsoleValue': 'N/A',
+    'tRAVResult': '未定义结果'
 }
 
 dictSetCOCDetail = {

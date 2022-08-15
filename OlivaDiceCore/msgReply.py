@@ -141,6 +141,7 @@ def unity_reply(plugin_event, Proc):
     valDict = {}
     valDict['dictTValue'] = dictTValue
     valDict['dictStrCustom'] = dictStrCustom
+    valDict['tmp_platform'] = plugin_event.platform['platform']
 
     tmp_hook_host_id = None
     tmp_hook_group_id = None
@@ -258,6 +259,7 @@ def unity_reply(plugin_event, Proc):
             tmp_hostID = str(plugin_event.data.host_id)
         elif flag_is_from_group:
             tmp_hagID = str(plugin_event.data.group_id)
+        valDict['tmp_hagID'] = tmp_hagID
         OlivaDiceCore.userConfig.releaseUnityMsgCount(tmp_list_hit, plugin_event.bot_info.hash)
         flag_hostEnable = True
         if flag_is_from_host:
@@ -2861,6 +2863,8 @@ def unity_reply(plugin_event, Proc):
                         replyMsg(plugin_event, tmp_reply_str)
             else:
                 replyMsgLazyHelpByEvent(plugin_event, 'sc')
+        elif isMatchWordStart(tmp_reast_str, 'rav'):
+            OlivaDiceCore.msgReplyModel.replyRAV_command(plugin_event, Proc, valDict)
         elif isMatchWordStart(tmp_reast_str, 'ra') or isMatchWordStart(tmp_reast_str, 'rc'):
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
