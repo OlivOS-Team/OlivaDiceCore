@@ -4,14 +4,14 @@
             "main": {
                 "command": "OlivaDiceCore",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceCore.opk",
-                "svn": 1033,
-                "version": "3.2.3"
+                "svn": 1034,
+                "version": "3.2.4"
             },
             "github": {
                 "command": "OlivaDiceCore",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceCore/releases/latest/download/OlivaDiceCore.opk",
-                "svn": 1033,
-                "version": "3.2.3"
+                "svn": 1034,
+                "version": "3.2.4"
             }
         },
         "OlivaDiceJoy": {
@@ -74,28 +74,28 @@
             "main": {
                 "command": "OlivaDiceNativeGUI",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceNativeGUI.opk",
-                "svn": 2,
-                "version": "3.0.1"
+                "svn": 3,
+                "version": "3.0.2"
             },
             "github": {
                 "command": "OlivaDiceNativeGUI",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceNativeGUI/releases/latest/download/OlivaDiceNativeGUI.opk",
-                "svn": 2,
-                "version": "3.0.1"
+                "svn": 3,
+                "version": "3.0.2"
             }
         },
         "ChanceCustom": {
             "main": {
                 "command": "ChanceCustom",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/ChanceCustom.opk",
-                "svn": 6,
-                "version": "0.1.1"
+                "svn": 11,
+                "version": "0.1.6"
             },
             "github": {
                 "command": "ChanceCustom",
                 "opk_path": "https://github.com/OlivOS-Team/ChanceCustom/releases/latest/download/ChanceCustom.opk",
-                "svn": 6,
-                "version": "0.1.1"
+                "svn": 11,
+                "version": "0.1.6"
             }
         }
     }
