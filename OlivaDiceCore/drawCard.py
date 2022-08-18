@@ -19,6 +19,9 @@ import OlivaDiceCore
 
 import os
 import json
+import yaml
+import re
+import traceback
 
 def initDeck(bot_info_dict):
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
@@ -39,6 +42,7 @@ def initDeck(bot_info_dict):
     obj_Deck_this_count_total = 0
     dictTValue['tName'] = '全局'
     botHash = None
+    # 全局 json 牌堆
     for fileDeckList_this in fileDeckList:
         customDeckFile = fileDeckList_this
         customDeckPath = customDeckDir + '/' + customDeckFile
@@ -64,6 +68,38 @@ def initDeck(bot_info_dict):
             for bot_info_dict_this in OlivaDiceCore.drawCardData.dictDeck:
                 botHash = bot_info_dict_this
                 OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this)
+    # 全局 yaml 牌堆
+    obj_Deck_this = None
+    releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity/extend/deckyaml')
+    customDeckDir = OlivaDiceCore.data.dataDirRoot + '/unity/extend/deckyaml'
+    fileDeckList = os.listdir(customDeckDir)
+    for fileDeckList_this in fileDeckList:
+        customDeckFile = fileDeckList_this
+        customDeckPath = customDeckDir + '/' + customDeckFile
+        obj_Deck_this = None
+        try:
+            with open(customDeckPath, 'r', encoding = 'utf-8') as customDeckPath_f:
+                obj_Deck_this = yaml.load(customDeckPath_f.read(), Loader = yaml.FullLoader)
+        except:
+            try:
+                with open(customDeckPath, 'r', encoding = 'utf_8_sig') as customDeckPath_f:
+                    obj_Deck_this = yaml.load(customDeckPath_f.read(), Loader = yaml.FullLoader)
+            except:
+                OlivaDiceCore.msgReply.globalLog(
+                    3,
+                    dictStrConst['strInitDeckDataError'].format(**dictTValue),
+                    [
+                        ('OlivaDice', 'default'),
+                        ('Init', 'default')
+                    ]
+                )
+        if obj_Deck_this != None:
+            obj_Deck_this_new = initYamlDeckData(obj_Deck_this)
+            if obj_Deck_this_new != None:
+                for bot_info_dict_this in OlivaDiceCore.drawCardData.dictDeck:
+                    botHash = bot_info_dict_this
+                    OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this_new)
+    # 全局 牌堆 日志
     if botHash != None:
         obj_Deck_this_count_total = len(OlivaDiceCore.drawCardData.dictDeck[botHash])
         dictTValue['tInitDataCount'] = str(obj_Deck_this_count_total - obj_Deck_this_count_total_init)
@@ -76,7 +112,9 @@ def initDeck(bot_info_dict):
                 ('Init', 'default')
             ]
         )
+
     for bot_info_dict_this in OlivaDiceCore.drawCardData.dictDeck:
+        # json 牌堆
         botHash = bot_info_dict_this
         releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash)
         releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/extend')
@@ -112,6 +150,35 @@ def initDeck(bot_info_dict):
                     )
             if obj_Deck_this != None:
                 OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this)
+        # yaml 牌堆
+        releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/extend/deckyaml')
+        customDeckDir = OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/extend/deckyaml'
+        fileDeckList = os.listdir(customDeckDir)
+        for fileDeckList_this in fileDeckList:
+            customDeckFile = fileDeckList_this
+            customDeckPath = customDeckDir + '/' + customDeckFile
+            obj_Deck_this = None
+            try:
+                with open(customDeckPath, 'r', encoding = 'utf-8') as customDeckPath_f:
+                    obj_Deck_this = yaml.load(customDeckPath_f.read(), Loader = yaml.FullLoader)
+            except:
+                try:
+                    with open(customDeckPath, 'r', encoding = 'utf_8_sig') as customDeckPath_f:
+                        obj_Deck_this = yaml.load(customDeckPath_f.read(), Loader = yaml.FullLoader)
+                except:
+                    dictTValue['tInitDataName'] = customDeckFile
+                    OlivaDiceCore.msgReply.globalLog(
+                        3,
+                        dictStrConst['strInitDeckDataError'].format(**dictTValue),
+                        [
+                            ('OlivaDice', 'default'),
+                            ('Init', 'default')
+                        ]
+                    )
+            if obj_Deck_this != None:
+                obj_Deck_this_new = initYamlDeckData(obj_Deck_this)
+                OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this_new)
+        # 日志
         obj_Deck_this_count = len(OlivaDiceCore.drawCardData.dictDeck[botHash])
         dictTValue['tInitDataCount'] = str(obj_Deck_this_count - obj_Deck_this_count_total)
         dictTValue['tInitDataCount01'] = str(obj_Deck_this_count)
@@ -123,6 +190,42 @@ def initDeck(bot_info_dict):
                 ('Init', 'default')
             ]
         )
+
+def initYamlDeckData(data:dict):
+    name = None
+    includes = ['default']
+    default = None
+    keyList = ['name', 'author', 'version', 'command', 'desc', 'includes']
+    res = {}
+    if 'name' in data:
+        name = data['name']
+    if 'includes' in data:
+        includes = data['includes']
+    if 'default' in data:
+        default = data['default']
+    if 'default' not in includes:
+        includes.append('default')
+    if None not in [name, includes, default]:
+        for key in data:
+            keyNew = '%s:%s' % (name, key)
+            dataNew = []
+            if key not in keyList:
+                for dataThis in data[key]:
+                    dataThisNew = dataThis
+                    dataThisNew = re.sub(r'\{%(.+)\}', r'{_' + name + r':\1}', dataThisNew)
+                    dataThisNew = re.sub(r'\{\$(.+)\}', r'{%_' + name + r':\1}', dataThisNew)
+                    for keyIncThis in includes:
+                        keyIncThisNew = '%s:%s' % (name, keyIncThis)
+                        dataThisNew = dataThisNew.replace('{_%s}' % keyIncThisNew, '{%s}' % keyIncThisNew)
+                        dataThisNew = dataThisNew.replace('{%%_%s}' % keyIncThisNew, '{%%%s}' % keyIncThisNew)
+                    dataNew.append(dataThisNew)
+                if key in includes:
+                    res[keyNew] = dataNew
+                else:
+                    res['_%s' % keyNew] = dataNew
+                if 'default' == key:
+                    res[name] = dataNew
+    return res
 
 def getDrawDeck(key_str, bot_hash, count = 1):
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
