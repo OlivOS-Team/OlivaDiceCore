@@ -22,21 +22,23 @@ import uuid
 import OlivOS
 
 OlivaDiceCore_name = 'OlivaDice核心模块'
-OlivaDiceCore_ver = '3.2.4'
-OlivaDiceCore_svn = 1034
+OlivaDiceCore_ver = '3.2.5'
+OlivaDiceCore_svn = 1035
 OlivaDiceCore_ver_short = '%s(%s)' % (str(OlivaDiceCore_ver), str(OlivaDiceCore_svn))
 
 exce_path = os.getcwd()
 
 global_Proc = None
 
-bot_info_basic = 'OlivaDice By lunzhiPenxil Ver.%s(%s)' % (str(OlivaDiceCore_ver), str(OlivaDiceCore_svn))
+bot_info_Ver = '%s(%s)' % (str(OlivaDiceCore_ver), str(OlivaDiceCore_svn))
 
-bot_info_basic_short = 'OlivaDice Ver.%s(%s)' % (str(OlivaDiceCore_ver), str(OlivaDiceCore_svn))
+bot_info_basic = 'OlivaDice By lunzhiPenxil Ver.%s' % bot_info_Ver
 
-bot_info = bot_info_basic + ' [Python %s For OlivOS %s]' % (str(platform.python_version()), OlivOS.infoAPI.OlivOS_Version)
+bot_info_basic_short = 'OlivaDice Ver.%s' % bot_info_Ver
 
-bot_version_short = 'OlivaDice %s(%s)' % (str(OlivaDiceCore_ver), str(OlivaDiceCore_svn))
+bot_info = '%s [Python %s For OlivOS %s]' % (bot_info_basic, str(platform.python_version()), OlivOS.infoAPI.OlivOS_Version)
+
+bot_version_short = 'OlivaDice %s' % bot_info_Ver
 
 bot_version_short_header = 'OlivaDice/%s' % str(OlivaDiceCore_ver)
 

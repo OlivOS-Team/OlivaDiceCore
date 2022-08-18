@@ -1214,11 +1214,12 @@ def unity_reply(plugin_event, Proc):
             tmp_reast_str = tmp_reast_str.lstrip('_')
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             tmp_reply_str = None
-            if tmp_reast_str == '':
-                tmp_reast_str = None
-            if tmp_reast_str != None:
+            tmp_deck_name = re.sub(r'\s+', r':', tmp_reast_str)
+            if tmp_deck_name == '':
+                tmp_deck_name = None
+            if tmp_deck_name != None:
                 tmp_reply_str = OlivaDiceCore.drawCard.getDrawDeck(
-                    tmp_reast_str,
+                    tmp_deck_name,
                     plugin_event.bot_info.hash,
                     count = tmp_card_count
                 )
@@ -4146,7 +4147,8 @@ def getNumberPara(data, reverse = False):
             if not reverse and tmp_total_offset >= len(data):
                 flag_have_para = True
                 break
-            if reverse and tmp_total_offset <= 0:
+            if reverse and tmp_total_offset < 0:
+                tmp_total_offset = 0
                 flag_have_para = True
                 break
             if data[tmp_total_offset].isdigit():
