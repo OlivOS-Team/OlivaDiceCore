@@ -44,6 +44,8 @@ dictUserConfigNoteDefault = {
     'groupTemplate' : None,
     'groupTemplateRule' : None,
     'groupObList' : None,
+    'groupInitList' : None,
+    'groupInitParaList' : None,
     'userObList' : None,
     'RDRecord' : None,
     'RDRecordInt' : 0,

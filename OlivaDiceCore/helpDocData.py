@@ -149,7 +149,9 @@ He dismissed the dismiss as worthless.
 .st del [人物卡名]    删除人物卡
     默认删除当前人物卡
 .st clear    清空当前人物卡
-.st rm [技能名]    删除对应技能''',
+.st rm [技能名]    删除对应技能
+.st note [记录名] [内容]    添加人物卡记录
+.st rec [映射名] [表达式]    添加人物卡映射''',
 
     'r': '''通用掷骰指令
 表达式支持OneDice标准:
@@ -226,6 +228,19 @@ https://wiki.dice.center/OlivOS_Login.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9B%9E%
 .draw [牌堆名称]  抽牌堆
 .drawh [牌堆名称]  暗抽牌堆
 当没有对应牌堆时将进行模糊搜索''',
+
+    'init': '''先攻:
+.ri [表达式] [名称]  添加先攻
+表达式有如下格式:
+.ri +6  表示 1D20+6
+.ri =1D20+4  表示 1D20+4
+.ri 4  表示 4
+
+.init  显示先攻列表
+.init set [表达式] [名称]  添加先攻
+.init del [名称]  删除先攻
+.init clear  清空先攻列表
+.init reset  重新生成先攻列表''',
 
     'ob': '''旁观模式：
 .ob  切换旁观模式
@@ -323,6 +338,7 @@ https://github.com/OlivOS-Team/onedice
     'rc': '&ra',
     'ti': '&疯狂症状',
     'li': '&疯狂症状',
+    'ri': '&init',
     'help': '&default',
     '帮助': '&default',
     '掷骰': '&r',
@@ -338,6 +354,8 @@ https://github.com/OlivOS-Team/onedice
     '随机数': '&random',
     '随机数算法': '&random',
     '村规': '&setcoc',
+    '先攻': '&init',
+    '先攻列表': '&init',
     '自定义回复词': '&str',
     '旁观': '&ob',
     '对抗': '&rav',

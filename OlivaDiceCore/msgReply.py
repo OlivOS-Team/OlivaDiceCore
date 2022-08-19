@@ -1869,6 +1869,27 @@ def unity_reply(plugin_event, Proc):
                                 ' '.join(tmp_reply_str_1_dict[tmp_reply_str_1_dict_this])
                             )
                         )
+                if tmp_pc_name_1 != None:
+                    tmp_class_map = {
+                        '映射': 'mappingRecord',
+                        '记录': 'noteRecord'
+                    }
+                    for keyName_key in tmp_class_map:
+                        tmp_Record = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                            pcHash = tmp_pcHash,
+                            pcCardName = tmp_pc_name_1,
+                            dataKey = tmp_class_map[keyName_key],
+                            resDefault = {}
+                        )
+                        if len(tmp_Record) > 0:
+                            tmp_reply_str_1_list.append(
+                                '<%s>\n%s' % (
+                                    keyName_key,
+                                    '\n'.join(
+                                        ['%s:%s' % (tmp_Record_this, tmp_Record[tmp_Record_this]) for tmp_Record_this in tmp_Record]
+                                    )
+                                )
+                            )
                 if flag_hit_skill_list_name_default in tmp_reply_str_1_dict:
                     tmp_reply_str_1_list.append(
                         '<%s>\n%s' % (
@@ -2345,6 +2366,45 @@ def unity_reply(plugin_event, Proc):
                     else:
                         tmp_reply_str = dictStrCustom['strPcTempRuleError'].format(**dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
+                return
+            elif isMatchWordStart(tmp_reast_str, 'note') or isMatchWordStart(tmp_reast_str, 'rec'):
+                flag_mode = 'note'
+                keyName = 'noteRecord'
+                if isMatchWordStart(tmp_reast_str, 'note'):
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'note')
+                    flag_mode = 'note'
+                    keyName = 'noteRecord'
+                elif isMatchWordStart(tmp_reast_str, 'rec'):
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rec')
+                    flag_mode = 'rec'
+                    keyName = 'mappingRecord'
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_key = None
+                tmp_value = None
+                tmp_reast_str_list = tmp_reast_str.split(' ')
+                tmp_reast_str_list = [tmp_reast_str_list_this for tmp_reast_str_list_this in tmp_reast_str_list if tmp_reast_str_list_this != '']
+                if len(tmp_reast_str_list) > 0:
+                    tmp_key = tmp_reast_str_list[0]
+                    tmp_key = OlivaDiceCore.pcCard.fixName(tmp_key)
+                if flag_mode == 'note':
+                    if len(tmp_reast_str_list) > 1:
+                        tmp_value = ' '.join(tmp_reast_str_list[1:])
+                elif flag_mode == 'rec':
+                    if len(tmp_reast_str_list) > 1:
+                        tmp_value = tmp_reast_str_list[1]
+                OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
+                    plugin_event = plugin_event,
+                    tmp_pc_id = tmp_pc_id,
+                    tmp_pc_platform = tmp_pc_platform,
+                    tmp_hagID = tmp_hagID,
+                    dictTValue = dictTValue,
+                    dictStrCustom = dictStrCustom,
+                    keyName = keyName,
+                    tmp_key = tmp_key,
+                    tmp_value = tmp_value,
+                    flag_mode = flag_mode,
+                    enableFalse = True
+                )
                 return
             tmp_reast_str_new = tmp_reast_str
             if len(tmp_reast_str_new) > 0:
@@ -2864,6 +2924,239 @@ def unity_reply(plugin_event, Proc):
                         replyMsg(plugin_event, tmp_reply_str)
             else:
                 replyMsgLazyHelpByEvent(plugin_event, 'sc')
+        elif isMatchWordStart(tmp_reast_str, 'ri'):
+            tmp_pc_id = plugin_event.data.user_id
+            tmp_pc_platform = plugin_event.platform['platform']
+            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'ri')
+            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            if tmp_hagID == None:
+                tmp_reply_str = dictStrCustom['strForGroupOnly'].format(**dictTValue)
+                OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+                return
+            OlivaDiceCore.msgReplyModel.replyRI_command(
+                plugin_event = plugin_event,
+                tmp_reast_str = tmp_reast_str,
+                tmp_pc_id = tmp_pc_id,
+                tmp_pc_platform = tmp_pc_platform,
+                tmp_hagID = tmp_hagID,
+                dictTValue = dictTValue,
+                dictStrCustom = dictStrCustom,
+                flag_reply = True
+            )
+        elif isMatchWordStart(tmp_reast_str, 'init'):
+            tmp_pc_id = plugin_event.data.user_id
+            tmp_pc_platform = plugin_event.platform['platform']
+            bot_hash = plugin_event.bot_info.hash
+            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'init')
+            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            if tmp_hagID == None:
+                tmp_reply_str = dictStrCustom['strForGroupOnly'].format(**dictTValue)
+                OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+                return
+            if isMatchWordStart(tmp_reast_str, 'set'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'set')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                OlivaDiceCore.msgReplyModel.replyRI_command(
+                    plugin_event = plugin_event,
+                    tmp_reast_str = tmp_reast_str,
+                    tmp_pc_id = tmp_pc_id,
+                    tmp_pc_platform = tmp_pc_platform,
+                    tmp_hagID = tmp_hagID,
+                    dictTValue = dictTValue,
+                    dictStrCustom = dictStrCustom,
+                    flag_reply = True
+                )
+                return
+            elif isMatchWordStart(tmp_reast_str, 'del'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'del')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_reast_str = tmp_reast_str.strip(' ')
+                tmp_name = tmp_reast_str
+                tmp_groupHash = OlivaDiceCore.userConfig.getUserHash(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform
+                )
+                # groupInitParaList
+                tmp_groupInitList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitParaList',
+                    botHash = bot_hash
+                )
+                if tmp_groupInitList_list == None:
+                    tmp_groupInitList_list = {}
+                if tmp_name in tmp_groupInitList_list:
+                    tmp_groupInitList_list.pop(tmp_name)
+                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                        userId = tmp_hagID,
+                        userType = 'group',
+                        platform = tmp_pc_platform,
+                        userConfigKey = 'groupInitParaList',
+                        userConfigValue = tmp_groupInitList_list,
+                        botHash = bot_hash
+                    )
+                # groupInitList
+                tmp_groupInitList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitList',
+                    botHash = bot_hash
+                )
+                if tmp_groupInitList_list == None:
+                    tmp_groupInitList_list = {}
+                if tmp_name in tmp_groupInitList_list:
+                    tmp_groupInitList_list.pop(tmp_name)
+                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                        userId = tmp_hagID,
+                        userType = 'group',
+                        platform = tmp_pc_platform,
+                        userConfigKey = 'groupInitList',
+                        userConfigValue = tmp_groupInitList_list,
+                        botHash = bot_hash
+                    )
+                OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                    userHash = tmp_groupHash
+                )
+                dictTValue['tName'] = tmp_name
+                tmp_reply_str = dictStrCustom['strPcInitDel'].format(**dictTValue)
+                OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+                return
+            elif isMatchWordStart(tmp_reast_str, 'reset', fullMatch = True):
+                tmp_groupInitParaList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitParaList',
+                    botHash = bot_hash
+                )
+                tmp_groupInitList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitList',
+                    botHash = bot_hash
+                )
+                if tmp_groupInitList_list == None:
+                    tmp_groupInitList_list = {}
+                if tmp_groupInitParaList_list == None:
+                    tmp_groupInitParaList_list = {}
+                for tmp_groupInitParaList_list_this in tmp_groupInitParaList_list:
+                    tmp_value_final = None
+                    tmp_value = tmp_groupInitParaList_list[tmp_groupInitParaList_list_this]
+                    tmp_value_rd = OlivaDiceCore.onedice.RD(tmp_value)
+                    tmp_value_rd.roll()
+                    if tmp_value_rd.resError == None:
+                        tmp_value_final = tmp_value_rd.resInt
+                    if tmp_value_final != None:
+                        tmp_groupInitList_list[tmp_groupInitParaList_list_this] = tmp_value_final
+                OlivaDiceCore.userConfig.setUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitParaList',
+                    userConfigValue = tmp_groupInitParaList_list,
+                    botHash = bot_hash
+                )
+                OlivaDiceCore.userConfig.setUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitList',
+                    userConfigValue = tmp_groupInitList_list,
+                    botHash = bot_hash
+                )
+                tmp_groupHash = OlivaDiceCore.userConfig.getUserHash(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform
+                )
+                OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                    userHash = tmp_groupHash
+                )
+                tmp_groupInitList_list_sort = [
+                    [tmp_groupInitList_list_this, tmp_groupInitList_list[tmp_groupInitList_list_this]]
+                    for tmp_groupInitList_list_this in tmp_groupInitList_list
+                ]
+                tmp_groupInitList_list_sort.sort(key = lambda x : x[1], reverse = True)
+                count = 1
+                tmp_groupInitList_list_final = []
+                for tmp_groupInitList_list_sort_this in tmp_groupInitList_list_sort:
+                    dictTValue['tId'] = str(count)
+                    dictTValue['tSubName'] = str(tmp_groupInitList_list_sort_this[0])
+                    dictTValue['tSubResult'] = str(tmp_groupInitList_list_sort_this[1])
+                    if dictTValue['tSubName'] in tmp_groupInitParaList_list:
+                        dictTValue['tSubResult'] = '%s=%s' % (
+                            tmp_groupInitParaList_list[dictTValue['tSubName']],
+                            str(tmp_groupInitList_list_sort_this[1])
+                        )
+                    tmp_groupInitList_list_final.append(
+                        dictStrCustom['strPcInitShowNode'].format(**dictTValue)
+                    )
+                    count += 1
+                dictTValue['tResult'] = '\n'.join(tmp_groupInitList_list_final)
+                tmp_reply_str = dictStrCustom['strPcInitReset'].format(**dictTValue)
+                OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+                return
+            elif isMatchWordStart(tmp_reast_str, 'clear', fullMatch = True):
+                OlivaDiceCore.userConfig.setUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitParaList',
+                    userConfigValue = {},
+                    botHash = bot_hash
+                )
+                OlivaDiceCore.userConfig.setUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitList',
+                    userConfigValue = {},
+                    botHash = bot_hash
+                )
+                tmp_groupHash = OlivaDiceCore.userConfig.getUserHash(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform
+                )
+                OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                    userHash = tmp_groupHash
+                )
+                tmp_reply_str = dictStrCustom['strPcInitClear'].format(**dictTValue)
+                OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+                return
+            elif '' == tmp_reast_str:
+                tmp_groupInitList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitList',
+                    botHash = bot_hash
+                )
+                if tmp_groupInitList_list == None:
+                    tmp_groupInitList_list = {}
+                tmp_groupInitList_list_sort = [
+                    [tmp_groupInitList_list_this, tmp_groupInitList_list[tmp_groupInitList_list_this]]
+                    for tmp_groupInitList_list_this in tmp_groupInitList_list
+                ]
+                tmp_groupInitList_list_sort.sort(key = lambda x : x[1], reverse = True)
+                count = 1
+                tmp_groupInitList_list_final = []
+                for tmp_groupInitList_list_sort_this in tmp_groupInitList_list_sort:
+                    dictTValue['tId'] = str(count)
+                    dictTValue['tSubName'] = str(tmp_groupInitList_list_sort_this[0])
+                    dictTValue['tSubResult'] = str(tmp_groupInitList_list_sort_this[1])
+                    tmp_groupInitList_list_final.append(
+                        dictStrCustom['strPcInitShowNode'].format(**dictTValue)
+                    )
+                    count += 1
+                dictTValue['tResult'] = '\n'.join(tmp_groupInitList_list_final)
+                tmp_reply_str = dictStrCustom['strPcInitShow'].format(**dictTValue)
+                OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+                return
         elif isMatchWordStart(tmp_reast_str, 'rav'):
             OlivaDiceCore.msgReplyModel.replyRAV_command(plugin_event, Proc, valDict)
         elif isMatchWordStart(tmp_reast_str, 'ra') or isMatchWordStart(tmp_reast_str, 'rc'):

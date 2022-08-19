@@ -300,3 +300,225 @@ def replyRAV_command(plugin_event, Proc, valDict):
             replyMsg(plugin_event, tmp_reply_str)
     else:
         OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'rav')
+
+def setPcNoteOrRecData(
+    plugin_event,
+    tmp_pc_id,
+    tmp_pc_platform,
+    tmp_hagID,
+    dictTValue,
+    dictStrCustom,
+    keyName,
+    tmp_key,
+    tmp_value,
+    flag_mode,
+    enableFalse:bool = True
+):
+    tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
+        tmp_pc_id,
+        tmp_pc_platform
+    )
+    tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
+        tmp_pcHash,
+        tmp_hagID
+    )
+    if tmp_pc_name == None:
+        tmp_pc_name = dictTValue['tName']
+        tmp_pc_name = OlivaDiceCore.pcCard.fixName(tmp_pc_name)
+        if not OlivaDiceCore.pcCard.checkPcName(tmp_pc_name):
+            tmp_pc_name = '用户'
+        if not OlivaDiceCore.pcCard.pcCardRebase(
+            tmp_pcHash,
+            tmp_pc_name,
+            tmp_hagID
+        ):
+            return
+    dictTValue['tName'] = tmp_pc_name
+    tmp_mappingRecord = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+        pcHash = tmp_pcHash,
+        pcCardName = tmp_pc_name,
+        dataKey = keyName,
+        resDefault = {}
+    )
+    if tmp_key != None and tmp_value != None:
+        if flag_mode == 'rec':
+            tmp_rd = OlivaDiceCore.onedice.RD(tmp_value)
+            tmp_rd.roll()
+            if tmp_rd.resError != None:
+                if enableFalse:
+                    dictTValue['tResult'] = tmp_value
+                    tmp_reply_str = dictStrCustom['strPcSetMapValueError'].format(**dictTValue)
+                    OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+                return
+        tmp_mappingRecord[tmp_key] = tmp_value
+        OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
+            pcHash = tmp_pcHash,
+            pcCardName = tmp_pc_name,
+            dataKey = keyName,
+            dataContent = tmp_mappingRecord
+        )
+        if enableFalse:
+            tmp_reply_str = dictStrCustom['strPcSetSkillValue'].format(**dictTValue)
+            OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+    elif tmp_key != None and tmp_value == None:
+        if tmp_key in tmp_mappingRecord:
+            tmp_value = tmp_mappingRecord[tmp_key]
+            if enableFalse:
+                dictTValue['tSkillName'] = tmp_key
+                dictTValue['tSkillValue'] = tmp_value
+                tmp_reply_str = dictStrCustom['strPcGetSingleSkillValue'].format(**dictTValue)
+                OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+
+
+def replyRI_command(
+    plugin_event,
+    tmp_reast_str,
+    tmp_pc_id,
+    tmp_pc_platform,
+    tmp_hagID,
+    dictTValue,
+    dictStrCustom,
+    flag_reply = True
+):
+    tmp_reast_str_list = tmp_reast_str.split(',')
+    result_list = []
+    count = 1
+    for tmp_reast_str_list_this in tmp_reast_str_list:
+        tmp_value = '0'
+        tmp_name = None
+        flag_para_mode = '-'
+        if len(tmp_reast_str_list_this) > 0:
+            if len(tmp_reast_str_list_this) > 1 and tmp_reast_str_list_this[0] in ['+', '-', '*', '/', '^']:
+                flag_para_mode = '1'
+                tmp_value = '0'
+                tmp_op = tmp_reast_str_list_this[0]
+                [tmp_value, tmp_reast_str_list_this] = OlivaDiceCore.msgReply.getNumberPara(tmp_reast_str_list_this[1:])
+                tmp_value = '1D20%s%s' % (tmp_op, tmp_value)
+                tmp_reast_str_list_this = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str_list_this)
+            elif len(tmp_reast_str_list_this) > 1 and tmp_reast_str_list_this[0] in ['=']:
+                flag_para_mode = '2'
+                tmp_value = '1D20'
+                [tmp_value, tmp_reast_str_list_this] = OlivaDiceCore.msgReply.getExpression(tmp_reast_str_list_this[1:])
+                tmp_reast_str_list_this = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str_list_this)
+            elif tmp_reast_str_list_this[0].isdigit():
+                flag_para_mode = '3'
+                tmp_value = '0'
+                [tmp_value, tmp_reast_str_list_this] = OlivaDiceCore.msgReply.getNumberPara(tmp_reast_str_list_this)
+                tmp_reast_str_list_this = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str_list_this)
+            tmp_reast_str_list_this = tmp_reast_str_list_this.strip(' ')
+            if tmp_reast_str_list_this == '':
+                OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
+                    plugin_event = plugin_event,
+                    tmp_pc_id = tmp_pc_id,
+                    tmp_pc_platform = tmp_pc_platform,
+                    tmp_hagID = tmp_hagID,
+                    dictTValue = dictTValue,
+                    dictStrCustom = dictStrCustom,
+                    keyName = 'mappingRecord',
+                    tmp_key = '先攻',
+                    tmp_value = tmp_value,
+                    flag_mode = 'rec',
+                    enableFalse = False
+                )
+                tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
+                    tmp_pc_id,
+                    tmp_pc_platform
+                )
+                tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
+                    tmp_pcHash,
+                    tmp_hagID
+                )
+                tmp_name = tmp_pc_name
+            else:
+                tmp_name = tmp_reast_str_list_this
+                tmp_name = OlivaDiceCore.pcCard.fixName(tmp_name)
+                if not OlivaDiceCore.pcCard.checkPcName(tmp_name):
+                    tmp_name = None
+        else:
+            tmp_value = None
+            tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
+                tmp_pc_id,
+                tmp_pc_platform
+            )
+            tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
+                tmp_pcHash,
+                tmp_hagID
+            )
+            if tmp_pc_name != None:
+                tmp_value_dict = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                    pcHash = tmp_pcHash,
+                    pcCardName = tmp_pc_name,
+                    dataKey = 'mappingRecord',
+                    resDefault = {}
+                )
+                if '先攻' in tmp_value_dict:
+                    tmp_value = tmp_value_dict['先攻']
+            tmp_name = tmp_pc_name
+        tmp_value_final = None
+        tmp_value_rd = OlivaDiceCore.onedice.RD(tmp_value)
+        tmp_value_rd.roll()
+        if tmp_value_rd.resError == None:
+            tmp_value_final = tmp_value_rd.resInt
+        if tmp_value_final != None:
+            setUserConfigForInit(
+                tmp_hagID = tmp_hagID,
+                tmp_pc_platform = tmp_pc_platform,
+                bot_hash = plugin_event.bot_info.hash,
+                config_key = 'groupInitList',
+                init_name = tmp_name,
+                init_value = tmp_value_final
+            )
+            setUserConfigForInit(
+                tmp_hagID = tmp_hagID,
+                tmp_pc_platform = tmp_pc_platform,
+                bot_hash = plugin_event.bot_info.hash,
+                config_key = 'groupInitParaList',
+                init_name = tmp_name,
+                init_value = tmp_value
+            )
+            dictTValue['tId'] = str(count)
+            dictTValue['tSubName'] = tmp_name
+            dictTValue['tSubResult'] = '%s=%d' % (tmp_value, tmp_value_final)
+            result_list.append(
+                dictStrCustom['strPcInitShowNode'].format(**dictTValue)
+            )
+            count += 1
+    if flag_reply:
+        dictTValue['tResult'] = '\n'.join(result_list)
+        tmp_reply_str = dictStrCustom['strPcInitSet'].format(**dictTValue)
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+
+def setUserConfigForInit(
+    tmp_hagID,
+    tmp_pc_platform,
+    bot_hash,
+    config_key,
+    init_name,
+    init_value
+):
+    tmp_groupHash = OlivaDiceCore.userConfig.getUserHash(
+        userId = tmp_hagID,
+        userType = 'group',
+        platform = tmp_pc_platform
+    )
+    tmp_groupInitList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId = tmp_hagID,
+        userType = 'group',
+        platform = tmp_pc_platform,
+        userConfigKey = config_key,
+        botHash = bot_hash
+    )
+    if tmp_groupInitList_list == None:
+        tmp_groupInitList_list = {}
+    tmp_groupInitList_list[init_name] = init_value
+    OlivaDiceCore.userConfig.setUserConfigByKey(
+        userId = tmp_hagID,
+        userType = 'group',
+        platform = tmp_pc_platform,
+        userConfigKey = config_key,
+        userConfigValue = tmp_groupInitList_list,
+        botHash = bot_hash
+    )
+    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+        userHash = tmp_groupHash
+    )
