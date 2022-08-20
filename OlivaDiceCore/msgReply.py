@@ -2101,7 +2101,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'init')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 flag_force_init = False
-                if isMatchWordStart(tmp_reast_str, 'force', fullMatch = True):
+                if isMatchWordStart(tmp_reast_str, 'force'):
                     flag_force_init = True
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'force')
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -2169,6 +2169,7 @@ def unity_reply(plugin_event, Proc):
                 dictTValue['tPcTempName'] = tmp_template_name
                 tmp_reply_str = dictStrCustom['strPcInitSt'].format(**dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
+                return
             elif isMatchWordStart(tmp_reast_str, 'del'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'del')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -2545,7 +2546,10 @@ def unity_reply(plugin_event, Proc):
                     else:
                         tmp_skill_value = None
                 if tmp_skill_name != None:
+                    tmp_skill_name = tmp_skill_name.strip(' ')
                     tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode = 'skillName')
+                    if not OlivaDiceCore.pcCard.checkPcName(tmp_skill_name):
+                        tmp_skill_name = None
                 if tmp_skill_name != None and tmp_skill_value != None:
                     tmp_skill_name = tmp_skill_name.strip()
                     tmp_skill_name = tmp_skill_name.upper()
