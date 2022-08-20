@@ -4,14 +4,14 @@
             "main": {
                 "command": "OlivaDiceCore",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceCore.opk",
-                "svn": 1034,
-                "version": "3.2.4"
+                "svn": 1038,
+                "version": "3.2.8"
             },
             "github": {
                 "command": "OlivaDiceCore",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceCore/releases/latest/download/OlivaDiceCore.opk",
-                "svn": 1034,
-                "version": "3.2.4"
+                "svn": 1038,
+                "version": "3.2.8"
             }
         },
         "OlivaDiceJoy": {
@@ -60,28 +60,28 @@
             "main": {
                 "command": "OlivaDiceOdyssey",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceOdyssey.opk",
-                "svn": 3,
-                "version": "3.0.2"
+                "svn": 4,
+                "version": "3.0.3"
             },
             "github": {
                 "command": "OlivaDiceOdyssey",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceOdyssey/releases/latest/download/OlivaDiceOdyssey.opk",
-                "svn": 3,
-                "version": "3.0.2"
+                "svn": 4,
+                "version": "3.0.3"
             }
         },
         "OlivaDiceNativeGUI": {
             "main": {
                 "command": "OlivaDiceNativeGUI",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceNativeGUI.opk",
-                "svn": 3,
-                "version": "3.0.2"
+                "svn": 4,
+                "version": "3.0.3"
             },
             "github": {
                 "command": "OlivaDiceNativeGUI",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceNativeGUI/releases/latest/download/OlivaDiceNativeGUI.opk",
-                "svn": 3,
-                "version": "3.0.2"
+                "svn": 4,
+                "version": "3.0.3"
             }
         },
         "ChanceCustom": {
