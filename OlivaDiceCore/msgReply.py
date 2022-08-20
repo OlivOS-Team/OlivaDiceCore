@@ -2643,20 +2643,32 @@ def unity_reply(plugin_event, Proc):
             while len(tmp_reast_str) > 0 and tmp_skill_name_find == None:
                 tmp_skill_name = None
                 tmp_skill_value = None
-                [tmp_skill_name, tmp_reast_str] = getToNumberPara(tmp_reast_str)
-                tmp_reast_str = skipSpaceStart(tmp_reast_str)
-                if len(tmp_reast_str) > 0:
-                    [tmp_skill_value, tmp_reast_str] = getNumberPara(tmp_reast_str)
+                flag_is_mapping = False
+                if tmp_reast_str[0] in ['&']:
+                    flag_is_mapping = True
+                    tmp_reast_str_list_0 = tmp_reast_str.split('=')
+                    if len(tmp_reast_str_list_0) > 1:
+                        tmp_skill_name = tmp_reast_str_list_0[0][1:]
+                        tmp_reast_str = '='.join(tmp_reast_str_list_0[1:])
+                        if len(tmp_reast_str) > 0:
+                            [tmp_skill_value, tmp_reast_str] = getExpression(tmp_reast_str)
+                            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                else:
+                    [tmp_skill_name, tmp_reast_str] = getToNumberPara(tmp_reast_str)
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                    if len(tmp_reast_str) > 0:
+                        [tmp_skill_value, tmp_reast_str] = getNumberPara(tmp_reast_str)
+                        tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 if tmp_skill_name == '':
                     tmp_skill_name = None
                 if tmp_skill_value == '':
                     tmp_skill_value = None
-                if tmp_skill_value != None:
+                if not flag_is_mapping and tmp_skill_value != None:
                     tmp_skill_value = int(tmp_skill_value)
                 if tmp_skill_name != None:
                     if tmp_skill_name[-1] in ['=', ':']:
-                        tmp_skill_name = tmp_skill_name[:-1]
+                        if not flag_is_mapping:
+                            tmp_skill_name = tmp_skill_name[:-1]
                     tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name)
                     tmp_skill_name = tmp_skill_name.upper()
                     if len(tmp_skill_pair_list) == 0:
@@ -2685,16 +2697,31 @@ def unity_reply(plugin_event, Proc):
                     if tmp_pc_name != None:
                         dictTValue['tName'] = tmp_pc_name
                     for tmp_skill_pair_this in tmp_skill_pair_list:
-                        OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
-                            OlivaDiceCore.pcCard.getPcHash(
-                                tmp_pc_id,
-                                tmp_pc_platform
-                            ),
-                            tmp_skill_pair_this[0],
-                            tmp_skill_pair_this[1],
-                            dictTValue['tName'],
-                            hagId = tmp_hagID
-                        )
+                        if type(tmp_skill_pair_this[1]) == int:
+                            OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
+                                OlivaDiceCore.pcCard.getPcHash(
+                                    tmp_pc_id,
+                                    tmp_pc_platform
+                                ),
+                                tmp_skill_pair_this[0],
+                                tmp_skill_pair_this[1],
+                                dictTValue['tName'],
+                                hagId = tmp_hagID
+                            )
+                        elif type(tmp_skill_pair_this[1]) == str:
+                            OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
+                                plugin_event = plugin_event,
+                                tmp_pc_id = tmp_pc_id,
+                                tmp_pc_platform = tmp_pc_platform,
+                                tmp_hagID = tmp_hagID,
+                                dictTValue = dictTValue,
+                                dictStrCustom = dictStrCustom,
+                                keyName = 'mappingRecord',
+                                tmp_key = tmp_skill_pair_this[0],
+                                tmp_value = tmp_skill_pair_this[1],
+                                flag_mode = 'rec',
+                                enableFalse = False
+                            )
                     tmp_reply_str = dictStrCustom['strPcSetSkillValue'].format(**dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
             else:
@@ -3875,10 +3902,24 @@ def unity_reply(plugin_event, Proc):
                 tmp_pc_id,
                 tmp_pc_platform
             )
-            skill_valueTable = OlivaDiceCore.pcCard.pcCardDataGetByPcName(
+            tmp_pc_name_0 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
+                tmp_pcHash,
+                tmp_hagID
+            )
+            skill_valueTable_raw = OlivaDiceCore.pcCard.pcCardDataGetByPcName(
                 tmp_pcHash,
                 hagId = tmp_hagID
             )
+            skill_valueTable = skill_valueTable_raw.copy()
+            if tmp_pc_name_0 != None:
+                skill_valueTable.update(
+                    OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                        pcHash = tmp_pcHash,
+                        pcCardName = tmp_pc_name_0,
+                        dataKey = 'mappingRecord',
+                        resDefault = {}
+                    )
+                )
             if len(tmp_reast_str) > 0:
                 if isMatchWordStart(tmp_reast_str, 'h'):
                     flag_hide_roll = True
