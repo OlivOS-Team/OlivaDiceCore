@@ -103,6 +103,8 @@ dictStrCustom = {
     'strRollErrorHelp' : '\n请使用[.help r]查看掷骰帮助，或使用[.help onedice]查看先进的OneDice标准。',
     'strSetGroupTempRule' : '已设置本群套用模板[{tPcTempName}]的规则[{tPcTempRuleName}]{tLazyResult}',
     'strDelGroupTempRule' : '已清除本群套用模板与规则，将按照人物卡设置各自进行检定',
+    'strSnSet' : '已将群名片修改为[{tResult}]',
+    'strSnPcCardNone' : '未设置人物卡，无法进行名片设置',
     'strPcSetMapValueError' : '[{tResult}]不是合法的表达式',
     'strPcInitSet' : '先攻列表已设置:\n{tResult}',
     'strPcInitShow' : '当前先攻列表:\n{tResult}',
@@ -196,7 +198,7 @@ dictStrConst = {
     'strToBeMaster' : '请使用[{tInitMasterKey}]指令以获取Master权限',
     'strInitData' : '[{tInitDataCount}]条[{tInitDataType}]数据已加载',
     'strInitDeckData' : '[{tInitDataCount}]个牌堆已加载至[{tName}]，共[{tInitDataCount01}]个牌堆',
-    'strInitDeckDataError' : '加载牌堆文件[{tInitDataName}]至[{tName}]时出错，请检查文件格式！',
+    'strInitDeckDataError' : '加载牌堆文件[{tInitDataName}]至[{tName}]时出错，请检查文件格式或软件版本！',
     'strInitBakData' : '[{tInitDataCount}]条[{tInitDataType}]数据已备份',
     'strSaveData' : '[{tInitDataCount}]条[{tInitDataType}]数据已写入',
     'strShowVersionOnLog' : '当前版本为[{tVersion}]'

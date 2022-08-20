@@ -47,8 +47,11 @@ dictPcCardTemplateDefault = {
                 'EDU',
                 'LUC',
                 'SAN',
+                'SANMAX',
                 'HP',
-                'MP'
+                'HPMAX',
+                'MP',
+                'MPMAX'
             ],
             '技能': [
                 '会计',
@@ -110,8 +113,11 @@ dictPcCardTemplateDefault = {
                 'EDU',
                 'LUC',
                 'SAN',
+                'SANMAX',
                 'HP',
+                'HPMAX',
                 'MP',
+                'MPMAX',
                 '克苏鲁神话',
                 '信用'
             ]
@@ -130,7 +136,9 @@ dictPcCardTemplateDefault = {
         'mapping': {
             'SAN': '{POW}',
             'HP': '({CON}+{SIZ})/10',
-            'MP': '{POW}/5'
+            'HPMAX': '({CON}+{SIZ})/10',
+            'MP': '{POW}/5',
+            'MPMAX': '{POW}/5'
         },
         'synonyms':{
             'STR': ['力量', 'STR'],
@@ -143,8 +151,11 @@ dictPcCardTemplateDefault = {
             'EDU': ['教育', 'EDU'],
             'LUC': ['幸运', 'LUC'],
             'SAN': ['理智', 'SAN','Sanity'],
+            'SANMAX': ['理智上限', 'SANMAX','SanityMAX'],
             'HP': ['生命值','HP','HitPoints'],
+            'HPMAX': ['生命值上限','HPMAX','HitPointsMAX'],
             'MP': ['魔法','MP','MagicPoints'],
+            'MPMAX': ['魔法上限','MPMAX','MagicPointsMAX'],
             'MOV': ['移动力','MOV'],
             '会计': ['会计','Accounting'],
             '人类学': ['人类学','Anthropology'],
@@ -310,8 +321,11 @@ dictPcCardTemplateDefault = {
                 'EDU',
                 'LUC',
                 'SAN',
+                'SANMAX',
                 'HP',
-                'MP'
+                'HPMAX',
+                'MP',
+                'MPMAX'
             ],
             '技能': [
                 '会计',
@@ -373,8 +387,11 @@ dictPcCardTemplateDefault = {
                 'EDU',
                 'LUC',
                 'SAN',
+                'SANMAX',
                 'HP',
+                'HPMAX',
                 'MP',
+                'MPMAX',
                 '克苏鲁神话',
                 '信用'
             ]
@@ -393,7 +410,9 @@ dictPcCardTemplateDefault = {
         'mapping': {
             'SAN': '{POW}',
             'HP': '({CON}+{SIZ})/10',
-            'MP': '{POW}/5'
+            'HPMAX': '({CON}+{SIZ})/10',
+            'MP': '{POW}/5',
+            'MPMAX': '{POW}/5'
         },
         'synonyms':{
             'STR': ['力量', 'STR'],
@@ -406,8 +425,11 @@ dictPcCardTemplateDefault = {
             'EDU': ['教育', 'EDU'],
             'LUC': ['幸运', 'LUC'],
             'SAN': ['理智', 'SAN','Sanity'],
+            'SANMAX': ['理智上限', 'SANMAX','SanityMAX'],
             'HP': ['生命值','HP','HitPoints'],
+            'HPMAX': ['生命值上限','HPMAX','HitPointsMAX'],
             'MP': ['魔法','MP','MagicPoints'],
+            'MPMAX': ['魔法上限','MPMAX','MagicPointsMAX'],
             'MOV': ['移动力','MOV'],
             '会计': ['会计','Accounting'],
             '人类学': ['人类学','Anthropology'],
@@ -863,8 +885,11 @@ dictPcCardTemplateDefault = {
                 'EDU',
                 'LUC',
                 'SAN',
+                'SANMAX',
                 'HP',
+                'HPMAX',
                 'MP',
+                'MPMAX',
                 'IDEA',
                 'KNOW'
             ],
@@ -928,8 +953,11 @@ dictPcCardTemplateDefault = {
                 'EDU',
                 'LUC',
                 'SAN',
+                'SANMAX',
                 'HP',
+                'HPMAX',
                 'MP',
+                'MPMAX',
                 '克苏鲁神话',
                 '信用'
             ]
@@ -947,7 +975,9 @@ dictPcCardTemplateDefault = {
         'mapping': {
             'SAN': '{POW}*5',
             'HP': '({CON}+{SIZ})/2',
+            'HPMAX': '({CON}+{SIZ})/2',
             'MP': '{POW}',
+            'MPMAX': '{POW}',
             'LUC': '{POW}*5',
             'IDEA': '{INT}*5',
             'KNOW': '{EDU}*5'
@@ -963,8 +993,11 @@ dictPcCardTemplateDefault = {
             'EDU': ['教育', 'EDU'],
             'LUC': ['幸运', 'LUC'],
             'SAN': ['理智', 'SAN', 'Sanity'],
+            'SANMAX': ['理智上限', 'SANMAX', 'SanityMAX'],
             'HP': ['生命值','HP', 'HitPoints'],
+            'HPMAX': ['生命值上限','HPMAX', 'HitPointsMAX'],
             'MP': ['魔法','MP', 'MagicPoints'],
+            'MPMAX': ['魔法上限','MPMAX', 'MagicPointsMAX'],
             'IDEA': ['灵感', 'IDEA'],
             'KNOW': ['知识', 'KNOW'],
             'MOV': ['移动力','MOV'],

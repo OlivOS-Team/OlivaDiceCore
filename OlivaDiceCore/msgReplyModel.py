@@ -522,3 +522,33 @@ def setUserConfigForInit(
     OlivaDiceCore.userConfig.writeUserConfigByUserHash(
         userHash = tmp_groupHash
     )
+
+def getNoteFormat(
+    data:str,
+    pcHash:str,
+    hagID
+):
+    res = data
+    tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pcHash, hagID)
+    if tmp_pc_name != None:
+        res = res.replace(
+            '{tName}',
+            '%s' % tmp_pc_name
+        )
+    tmp_dict_pc_card = OlivaDiceCore.pcCard.pcCardDataGetByPcName(
+        pcHash,
+        hagId = pcHash
+    )
+    for skill_name in tmp_dict_pc_card:
+        res = res.replace(
+            '{%s}' % skill_name,
+            '%d' % tmp_dict_pc_card[skill_name]
+        )
+    tmp_value = 99
+    if '克苏鲁神话' in tmp_dict_pc_card:
+        tmp_value = 99 - tmp_dict_pc_card['克苏鲁神话']
+    res = res.replace(
+        '{SANMAX}',
+        '%d' % (tmp_value)
+    )
+    return res

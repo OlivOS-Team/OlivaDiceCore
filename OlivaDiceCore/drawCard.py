@@ -19,9 +19,15 @@ import OlivaDiceCore
 
 import os
 import json
-import yaml
+#import yaml
 import re
 import traceback
+
+# 兼容OlivOS 0.10.2及以下版本
+try:
+    import yaml
+except:
+    pass
 
 def initDeck(bot_info_dict):
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
@@ -85,6 +91,7 @@ def initDeck(bot_info_dict):
                 with open(customDeckPath, 'r', encoding = 'utf_8_sig') as customDeckPath_f:
                     obj_Deck_this = yaml.load(customDeckPath_f.read(), Loader = yaml.FullLoader)
             except:
+                dictTValue['tInitDataName'] = customDeckFile
                 OlivaDiceCore.msgReply.globalLog(
                     3,
                     dictStrConst['strInitDeckDataError'].format(**dictTValue),

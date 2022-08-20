@@ -1782,6 +1782,88 @@ def unity_reply(plugin_event, Proc):
             else:
                 replyMsgLazyHelpByEvent(plugin_event, 'nn')
             return
+        elif isMatchWordStart(tmp_reast_str, 'sn'):
+            tmp_pc_id = plugin_event.data.user_id
+            tmp_pc_platform = plugin_event.platform['platform']
+            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'sn')
+            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            flag_mode = 'coc'
+            flag_force = True
+            sn_title = None
+            sn_title_new = None
+            if tmp_hagID == None:
+                tmp_reply_str = dictStrCustom['strForGroupOnly'].format(**dictTValue)
+                OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+                return
+            if '' == tmp_reast_str.lower():
+                flag_mode = 'coc'
+                flag_force = False
+            elif tmp_reast_str.lower() in ['dnd', 'dnd5e']:
+                flag_mode = 'dnd'
+            elif tmp_reast_str.lower() in ['coc', 'coc6', 'coc7']:
+                flag_mode = 'coc'
+            else:
+                flag_mode = 'custom'
+                sn_title_new = tmp_reast_str
+            tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
+                tmp_pc_id,
+                tmp_pc_platform
+            )
+            tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
+                tmp_pcHash,
+                tmp_hagID
+            )
+            tmp_Record = {}
+            if tmp_pc_name != None:
+                tmp_Record = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                    pcHash = tmp_pcHash,
+                    pcCardName = tmp_pc_name,
+                    dataKey = 'noteRecord',
+                    resDefault = {}
+                )
+                if '名片' in tmp_Record:
+                    sn_title = tmp_Record['名片']
+            if flag_force or sn_title == None:
+                if 'coc' == flag_mode:
+                    sn_title = '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}'
+                elif 'dnd' == flag_mode:
+                    sn_title = '{tName} hp{HP}/{HPMAX} mp{MP}/{MPMAX} dex{DEX}'
+                elif 'custom' == flag_mode:
+                    sn_title = sn_title_new
+            if sn_title != None:
+                if flag_force:
+                    OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
+                        plugin_event = plugin_event,
+                        tmp_pc_id = tmp_pc_id,
+                        tmp_pc_platform = tmp_pc_platform,
+                        tmp_hagID = tmp_hagID,
+                        dictTValue = dictTValue,
+                        dictStrCustom = dictStrCustom,
+                        keyName = 'noteRecord',
+                        tmp_key = '名片',
+                        tmp_value = sn_title,
+                        flag_mode = 'note',
+                        enableFalse = False
+                    )
+                    plugin_event:OlivOS.API.Event
+                sn_title = OlivaDiceCore.msgReplyModel.getNoteFormat(
+                    data = sn_title,
+                    pcHash = tmp_pcHash,
+                    hagID = tmp_hagID
+                )
+                plugin_event.set_group_card(
+                    group_id = plugin_event.data.group_id,
+                    user_id = plugin_event.data.user_id,
+                    card = sn_title,
+                    host_id = plugin_event.data.host_id
+                )
+                dictTValue['tResult'] = sn_title
+                tmp_reply_str = dictStrCustom['strSnSet'].format(**dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
+            else:
+                tmp_reply_str = dictStrCustom['strSnPcCardNone'].format(**dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
+            return
         elif isMatchWordStart(tmp_reast_str, 'st'):
             tmp_pc_name = None
             tmp_pc_id = plugin_event.data.user_id
@@ -1886,7 +1968,15 @@ def unity_reply(plugin_event, Proc):
                                 '<%s>\n%s' % (
                                     keyName_key,
                                     '\n'.join(
-                                        ['%s:%s' % (tmp_Record_this, tmp_Record[tmp_Record_this]) for tmp_Record_this in tmp_Record]
+                                        [
+                                            '%s:%s' % (
+                                                tmp_Record_this, OlivaDiceCore.msgReplyModel.getNoteFormat(
+                                                    data = tmp_Record[tmp_Record_this],
+                                                    pcHash = tmp_pcHash,
+                                                    hagID = tmp_hagID
+                                                ) if keyName_key in ['记录'] else tmp_Record[tmp_Record_this]
+                                            ) for tmp_Record_this in tmp_Record
+                                        ]
                                     )
                                 )
                             )

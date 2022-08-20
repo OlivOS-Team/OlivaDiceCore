@@ -182,7 +182,8 @@ https://github.com/OlivOS-Team/onedice
 .rah [技能名] [技能值]    暗技能检定
 .ra[次数]#[技能名] [技能值]    多轮检定
 .ra(b/p)[技能名] [技能值]    奖惩检定
-.ra[技能名](+-*/)[运算数] [技能值]    快速检定''',
+.ra[技能名](+-*/)[运算数] [技能值]    快速检定
+.rav [技能名] [@对方] 与指定用户进行对抗检定''',
 
 
     'sc': '''理智检定
@@ -209,11 +210,11 @@ https://github.com/OlivOS-Team/onedice
 .dnd [数量]    DND5E人物作成
 推荐使用[.st init]指令进行人物卡作成，详情请使用[.help st]查看''',
 
-    'helpdoc': '''自定义帮助文档:
+    'helpdoc': '''自定义帮助文档：
 .helpdoc [帮助名称] [帮助内容]  设置帮助文档
 .helpdoc [帮助名称]  删除帮助文档''',
 
-    'str': '''自定义回复词:
+    'str': '''自定义回复词：
 .str[配置项] [配置值]  修改对应的自定义配置
 .str[配置项]  查看对应的自定义配置
 本核心内置了一套str回复词配置工具，可以通过以上指令进行骰子回复词的配置，例如：
@@ -224,12 +225,12 @@ https://github.com/OlivOS-Team/onedice
 更多可以设置的回复词请看文档：
 https://wiki.dice.center/OlivOS_Login.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9B%9E%E5%A4%8D%E8%AF%8D--customreplyjson''',
 
-    'draw': '''抽牌:
+    'draw': '''抽牌：
 .draw [牌堆名称]  抽牌堆
 .drawh [牌堆名称]  暗抽牌堆
 当没有对应牌堆时将进行模糊搜索''',
 
-    'init': '''先攻:
+    'init': '''先攻：
 .ri [表达式] [名称]  添加先攻
 表达式有如下格式:
 .ri +6  表示 1D20+6
@@ -248,6 +249,12 @@ https://wiki.dice.center/OlivOS_Login.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9B%9E%
 .ob exit 退出旁观模式
 .ob exit all 退出所有已旁观
 .ob clear 清空本群旁观列表''',
+
+    'sn': '''跑团名片：
+.sn  套用人物卡中的名片记录
+.sn coc  套用coc跑团名片
+.sn dnd  套用dnd跑团名片
+.sn [自定义名片]  套用任意自定义名片''',
 
     'rav': '''对抗检定：
 .rav [技能名] [@对方] 与指定用户进行对抗检定''',
@@ -358,6 +365,7 @@ https://github.com/OlivOS-Team/onedice
     '先攻列表': '&init',
     '自定义回复词': '&str',
     '旁观': '&ob',
+    '跑团名片': '&sn',
     '对抗': '&rav',
     '对抗检定': '&rav',
     '旁观模式': '&ob',
