@@ -787,6 +787,17 @@ class RD(object):
                     if tmp_priority_this < rootPriority:
                         tmp_node_this_output_str = '(' + tmp_node_this_output_str + ')'
                         tmp_node_this_output_data_final = [{'op': '('}] + tmp_node_this_output_data_final + [{'op': ')'}]
+                    # 多元组处理
+                    tmp_node_this_left_resMetaTuple_raw = tmp_main_val_left_obj.resMetaTuple
+                    tmp_node_this_right_resMetaTuple_raw = tmp_main_val_right_obj.resMetaTuple
+                    tmp_node_this_left_resMetaTuple = self.get_from_metaTuple(tmp_node_this_left_resMetaTuple_raw)
+                    tmp_node_this_right_resMetaTuple = self.get_from_metaTuple(tmp_node_this_right_resMetaTuple_raw)
+                    tmp_node_this_resMetaTuple = [tmp_node_this_output]
+                    if len(tmp_node_this_left_resMetaTuple) > 1 and not len(tmp_node_this_right_resMetaTuple) > 1:
+                        tmp_node_this_resMetaTuple = [(tmp_node_this_resMetaTuple_this + tmp_main_val_right[0]) for tmp_node_this_resMetaTuple_this in tmp_node_this_left_resMetaTuple]
+                    elif not len(tmp_node_this_left_resMetaTuple) > 1 and len(tmp_node_this_right_resMetaTuple) > 1:
+                        tmp_node_this_resMetaTuple = [(tmp_node_this_resMetaTuple_this + tmp_main_val_left[0]) for tmp_node_this_resMetaTuple_this in tmp_node_this_right_resMetaTuple]
+                    tmp_node_this_output_meta_tuple = tmp_node_this_resMetaTuple
                 elif tmp_node_this.data == '-':
                     tmp_node_this_output = tmp_main_val_left[0] - tmp_main_val_right[0]
                     if boolByListAnd([
@@ -820,6 +831,17 @@ class RD(object):
                     if tmp_priority_this < rootPriority:
                         tmp_node_this_output_str = '(' + tmp_node_this_output_str + ')'
                         tmp_node_this_output_data_final = [{'op': '('}] + tmp_node_this_output_data_final + [{'op': ')'}]
+                    # 多元组处理
+                    tmp_node_this_left_resMetaTuple_raw = tmp_main_val_left_obj.resMetaTuple
+                    tmp_node_this_right_resMetaTuple_raw = tmp_main_val_right_obj.resMetaTuple
+                    tmp_node_this_left_resMetaTuple = self.get_from_metaTuple(tmp_node_this_left_resMetaTuple_raw)
+                    tmp_node_this_right_resMetaTuple = self.get_from_metaTuple(tmp_node_this_right_resMetaTuple_raw)
+                    tmp_node_this_resMetaTuple = [tmp_node_this_output]
+                    if len(tmp_node_this_left_resMetaTuple) > 1 and not len(tmp_node_this_right_resMetaTuple) > 1:
+                        tmp_node_this_resMetaTuple = [(tmp_node_this_resMetaTuple_this - tmp_main_val_right[0]) for tmp_node_this_resMetaTuple_this in tmp_node_this_left_resMetaTuple]
+                    elif not len(tmp_node_this_left_resMetaTuple) > 1 and len(tmp_node_this_right_resMetaTuple) > 1:
+                        tmp_node_this_resMetaTuple = [(tmp_node_this_resMetaTuple_this - tmp_main_val_left[0]) for tmp_node_this_resMetaTuple_this in tmp_node_this_right_resMetaTuple]
+                    tmp_node_this_output_meta_tuple = tmp_node_this_resMetaTuple
                 elif tmp_node_this.data == '*' or tmp_node_this.data == 'x':
                     tmp_node_this_output = tmp_main_val_left[0] * tmp_main_val_right[0]
                     tmp_node_this_output_ExtremumType_1 = self.resExtremeType.INT_LIMITED
@@ -1023,6 +1045,17 @@ class RD(object):
                     elif forkSideRight and tmp_priority_this == rootPriority:
                         tmp_node_this_output_str = '(' + tmp_node_this_output_str + ')'
                         tmp_node_this_output_data_final = [{'op': '('}] + tmp_node_this_output_data_final + [{'op': ')'}]
+                    # 多元组处理
+                    tmp_node_this_left_resMetaTuple_raw = tmp_main_val_left_obj.resMetaTuple
+                    tmp_node_this_right_resMetaTuple_raw = tmp_main_val_right_obj.resMetaTuple
+                    tmp_node_this_left_resMetaTuple = self.get_from_metaTuple(tmp_node_this_left_resMetaTuple_raw)
+                    tmp_node_this_right_resMetaTuple = self.get_from_metaTuple(tmp_node_this_right_resMetaTuple_raw)
+                    tmp_node_this_resMetaTuple = [tmp_node_this_output]
+                    if len(tmp_node_this_left_resMetaTuple) > 1 and not len(tmp_node_this_right_resMetaTuple) > 1:
+                        tmp_node_this_resMetaTuple = [(tmp_node_this_resMetaTuple_this * tmp_main_val_right[0]) for tmp_node_this_resMetaTuple_this in tmp_node_this_left_resMetaTuple]
+                    elif not len(tmp_node_this_left_resMetaTuple) > 1 and len(tmp_node_this_right_resMetaTuple) > 1:
+                        tmp_node_this_resMetaTuple = [(tmp_node_this_resMetaTuple_this * tmp_main_val_left[0]) for tmp_node_this_resMetaTuple_this in tmp_node_this_right_resMetaTuple]
+                    tmp_node_this_output_meta_tuple = tmp_node_this_resMetaTuple
                 elif tmp_node_this.data == '/':
                     if tmp_main_val_right[0] == 0:
                         self.resError = self.resErrorType.NODE_RIGHT_VAL_INVALID
@@ -1274,6 +1307,17 @@ class RD(object):
                     elif forkSideRight and tmp_priority_this == rootPriority:
                         tmp_node_this_output_str = '(' + tmp_node_this_output_str + ')'
                         tmp_node_this_output_data_final = [{'op': '('}] + tmp_node_this_output_data_final + [{'op': ')'}]
+                    # 多元组处理
+                    tmp_node_this_left_resMetaTuple_raw = tmp_main_val_left_obj.resMetaTuple
+                    tmp_node_this_right_resMetaTuple_raw = tmp_main_val_right_obj.resMetaTuple
+                    tmp_node_this_left_resMetaTuple = self.get_from_metaTuple(tmp_node_this_left_resMetaTuple_raw)
+                    tmp_node_this_right_resMetaTuple = self.get_from_metaTuple(tmp_node_this_right_resMetaTuple_raw)
+                    tmp_node_this_resMetaTuple = [tmp_node_this_output]
+                    if len(tmp_node_this_left_resMetaTuple) > 1 and not len(tmp_node_this_right_resMetaTuple) > 1:
+                        tmp_node_this_resMetaTuple = [(int(tmp_node_this_resMetaTuple_this / tmp_main_val_right[0])) for tmp_node_this_resMetaTuple_this in tmp_node_this_left_resMetaTuple]
+                    elif not len(tmp_node_this_left_resMetaTuple) > 1 and len(tmp_node_this_right_resMetaTuple) > 1:
+                        tmp_node_this_resMetaTuple = [(int(tmp_main_val_left[0] / tmp_node_this_resMetaTuple_this)) for tmp_node_this_resMetaTuple_this in tmp_node_this_right_resMetaTuple]
+                    tmp_node_this_output_meta_tuple = tmp_node_this_resMetaTuple
                 elif tmp_node_this.data == '^':
                     if tmp_main_val_left[0] == 0 and tmp_main_val_right[0] == 0:
                         self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
@@ -1974,6 +2018,19 @@ class RD(object):
                     elif forkSideRight and tmp_priority_this == rootPriority:
                         tmp_node_this_output_str = '(' + tmp_node_this_output_str + ')'
                         tmp_node_this_output_data_final = [{'op': '('}] + tmp_node_this_output_data_final + [{'op': ')'}]
+                    # 多元组处理
+                    tmp_node_this_left_resMetaTuple_raw = tmp_main_val_left_obj.resMetaTuple
+                    tmp_node_this_right_resMetaTuple_raw = tmp_main_val_right_obj.resMetaTuple
+                    tmp_node_this_left_resMetaTuple = self.get_from_metaTuple(tmp_node_this_left_resMetaTuple_raw)
+                    tmp_node_this_right_resMetaTuple = self.get_from_metaTuple(tmp_node_this_right_resMetaTuple_raw)
+                    tmp_node_this_resMetaTuple = [tmp_node_this_output]
+                    print([tmp_node_this_left_resMetaTuple, tmp_node_this_right_resMetaTuple])
+                    if len(tmp_node_this_left_resMetaTuple) > 1 and not len(tmp_node_this_right_resMetaTuple) > 1:
+                        tmp_node_this_resMetaTuple = [(int(tmp_node_this_resMetaTuple_this ** tmp_main_val_right[0])) for tmp_node_this_resMetaTuple_this in tmp_node_this_left_resMetaTuple]
+                        print(tmp_node_this_resMetaTuple)
+                    elif not len(tmp_node_this_left_resMetaTuple) > 1 and len(tmp_node_this_right_resMetaTuple) > 1:
+                        tmp_node_this_resMetaTuple = [(int(tmp_main_val_left[0] ** tmp_node_this_resMetaTuple_this)) for tmp_node_this_resMetaTuple_this in tmp_node_this_right_resMetaTuple]
+                    tmp_node_this_output_meta_tuple = tmp_node_this_resMetaTuple
                 elif tmp_node_this.data == 'd':
                     if tmp_main_val_right[0] <= 0 or tmp_main_val_right[0] >= 10000:
                         self.resError = self.resErrorType.NODE_RIGHT_VAL_INVALID
@@ -2745,7 +2802,7 @@ class RD(object):
                     tmp_node_this_output_data_final = [{
                         'result': [
                             tmp_last_resMetaTuple,
-                            tmp_node_this_output_meta_tuple,
+                            [],
                             tmp_node_this_output_meta_tuple
                         ],
                         'key': {
@@ -2761,7 +2818,6 @@ class RD(object):
                             }
                         }
                     }]
-                    
                     #if type(tmp_last_resMetaTuple) == list and len(tmp_last_resMetaTuple) > 0:
                     #    pass
                     #else:
@@ -2783,6 +2839,12 @@ class RD(object):
             resRecursiveObj.resDetailData = tmp_node_this_output_data_final
             resRecursiveObj.resMetaTuple = tmp_node_this_output_meta_tuple
             return resRecursiveObj
+
+    def get_from_metaTuple(self, data):
+        return [
+            data_this if type(data_this) == int else data_this
+            for data_this in data
+        ]
 
 def boolByListAnd(data):
     res = True
@@ -2823,7 +2885,11 @@ if __name__ == '__main__':
         '7a10k5q5m9',
         '7df',
         '2d20kl',
-        '2d20kh'
+        '2d20kh',
+        '(2d20+2)kh',
+        '(2d20-20)kh',
+        '(2d20/10)kh',
+        '((2d20)^2)kh'
     ]
     val_table = {
         '力量': 60,
