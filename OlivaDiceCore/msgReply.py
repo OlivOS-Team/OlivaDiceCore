@@ -1951,6 +1951,13 @@ def unity_reply(plugin_event, Proc):
                                 ' '.join(tmp_reply_str_1_dict[tmp_reply_str_1_dict_this])
                             )
                         )
+                if flag_hit_skill_list_name_default in tmp_reply_str_1_dict:
+                    tmp_reply_str_1_list.append(
+                        '<%s>\n%s' % (
+                            flag_hit_skill_list_name_default,
+                            ' '.join(tmp_reply_str_1_dict[flag_hit_skill_list_name_default])
+                        )
+                    )
                 if tmp_pc_name_1 != None:
                     tmp_class_map = {
                         '映射': 'mappingRecord',
@@ -1980,13 +1987,6 @@ def unity_reply(plugin_event, Proc):
                                     )
                                 )
                             )
-                if flag_hit_skill_list_name_default in tmp_reply_str_1_dict:
-                    tmp_reply_str_1_list.append(
-                        '<%s>\n%s' % (
-                            flag_hit_skill_list_name_default,
-                            ' '.join(tmp_reply_str_1_dict[flag_hit_skill_list_name_default])
-                        )
-                    )
                 tmp_reply_str_1 = '\n'.join(tmp_reply_str_1_list)
                 dictTValue['tPcShow'] = tmp_reply_str_1
                 tmp_reply_str = dictStrCustom['strPcShow'].format(**dictTValue)
@@ -4538,8 +4538,12 @@ def getExpression(data, reverse = False, valueTable = None):
                         flag_value = True
                 if (not flag_not_hit) and (data[tmp_total_offset:tmp_total_offset + tmp_offset_len] in OlivaDiceCore.onedice.dictOperationPriority or data[tmp_total_offset:tmp_total_offset + tmp_offset_len] in OlivaDiceCore.onedice.listOperationSub):
                     flag_value = False
-            if flag_not_hit and data[tmp_total_offset] in OlivaDiceCore.onedice.dictOperationPriority:
-                flag_not_hit = False
+            for range_this in reversed(range(1, OlivaDiceCore.onedice.lenOperationMax + 1)):
+                if flag_not_hit and (
+                    tmp_total_offset + range_this <= len(data)
+                ) and data[tmp_total_offset:tmp_total_offset + range_this] in OlivaDiceCore.onedice.dictOperationPriority:
+                    tmp_offset_len = range_this
+                    flag_not_hit = False
             if flag_not_hit and data[tmp_total_offset] in OlivaDiceCore.onedice.listOperationSub:
                 flag_not_hit = False
             if flag_not_hit:

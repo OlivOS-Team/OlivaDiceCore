@@ -18,7 +18,7 @@ from enum import Enum
 import random
 import traceback
 
-pypi_version = '1.0.1'
+pypi_version = '1.0.4'
 
 dictOperationPriority = {
     '(' : None,
@@ -34,21 +34,25 @@ dictOperationPriority = {
     'X' : 4,
     '/' : 4,
     '^' : 5,
-    'df' : 6,
-    'DF' : 6,
-    'd' : 6,
-    'D' : 6,
-    'a' : 6,
-    'A' : 6,
-    'c' : 6,
-    'C' : 6,
-    'f' : 6,
-    'F' : 6,
-    'b' : 6,
-    'B' : 6,
-    'p' : 6,
-    'P' : 6,
-    '?' : 7
+    'kl' : 6,
+    'KL' : 6,
+    'kh' : 6,
+    'KH' : 6,
+    'df' : 7,
+    'DF' : 7,
+    'd' : 7,
+    'D' : 7,
+    'a' : 7,
+    'A' : 7,
+    'c' : 7,
+    'C' : 7,
+    'f' : 7,
+    'F' : 7,
+    'b' : 7,
+    'B' : 7,
+    'p' : 7,
+    'P' : 7,
+    '?' : 8
 }
 
 dictOperationMapping = {
@@ -232,6 +236,10 @@ class calOperationNode(calNode):
         elif self.data == '?':
             self.valRightDefault = 0
             self.vals[':'] = None
+        elif self.data == 'kh':
+            self.valRightDefault = 1
+        elif self.data == 'kl':
+            self.valRightDefault = 1
         if self.customDefault != None:
             if self.data in self.customDefault:
                 if 'leftD' in self.customDefault[self.data]:
@@ -270,6 +278,7 @@ class RD(object):
         self.resIntMaxType = None
         self.resDetail = None
         self.resDetailData = []
+        self.resMetaTuple = []
         self.resError = None
         self.dictOperationPriority = dictOperationPriority
         self.customDefault = customDefault
@@ -309,6 +318,7 @@ class RD(object):
             self.resIntMaxType = resRecursiveObj.resIntMaxType
             self.resDetail = resRecursiveObj.resDetail
             self.resDetailData = resRecursiveObj.resDetailData
+            self.resMetaTuple = resRecursiveObj.resMetaTuple
         return
 
     class resErrorType(Enum):
@@ -339,6 +349,7 @@ class RD(object):
             self.resIntMaxType = RD.resExtremeType.INT_LIMITED
             self.resDetail = resDetail
             self.resDetailData = []
+            self.resMetaTuple = []
 
     def getPriority(self, data):
         res = None
@@ -642,6 +653,7 @@ class RD(object):
             tmp_node_this_output_str = ''
             tmp_node_this_output_data = {}
             tmp_node_this_output_data_final = []
+            tmp_node_this_output_meta_tuple = []
             if self.calTree.peek().isNumber():
                 tmp_node_this = self.calTree.pop()
                 tmp_node_this_output = tmp_node_this.getInt()
@@ -2113,7 +2125,11 @@ class RD(object):
                         'r': tmp_main_val_right[0],
                         'v': tmp_node_this.vals
                     }
+                    tmp_node_this_output_data_4 = tmp_node_this_output_data_1
+                    if len(tmp_node_this_output_data_2) > 0:
+                        tmp_node_this_output_data_4 = tmp_node_this_output_data_2
                     tmp_node_this_output_data_final = [tmp_node_this_output_data]
+                    tmp_node_this_output_meta_tuple = tmp_node_this_output_data_4
                     # str主要处理流程
                     if tmp_node_this.vals['b'] == None and tmp_node_this.vals['p'] == None:
                         flag_begin = True
@@ -2648,6 +2664,7 @@ class RD(object):
                         'v': tmp_node_this.vals
                     }
                     tmp_node_this_output_data_final = [tmp_node_this_output_data]
+                    tmp_node_this_output_meta_tuple = tmp_node_this_output_data_1
                 elif tmp_node_this.data == '?':
                     if tmp_node_this.vals[':'] != None:
                         tmp_flag_True = True
@@ -2704,6 +2721,52 @@ class RD(object):
                                 [tmp_node_this_output]
                             ]
                         }]
+                elif tmp_node_this.data == 'kh' or tmp_node_this.data == 'kl':
+                    tmp_last_resMetaTuple = tmp_main_val_left_obj.resMetaTuple
+                    if type(tmp_last_resMetaTuple) == list and len(tmp_last_resMetaTuple) > 0:
+                        tmp_last_resMetaTuple = [
+                            tmp_last_resMetaTuple_this if type(tmp_last_resMetaTuple_this) == int else tmp_last_resMetaTuple_this
+                            for tmp_last_resMetaTuple_this in tmp_last_resMetaTuple
+                        ]
+                    else:
+                        tmp_last_resMetaTuple = [tmp_main_val_left[0]]
+                    tmp_node_this_output = 0
+                    if tmp_node_this.data == 'kh':
+                        tmp_node_this_output = max(tmp_last_resMetaTuple)
+                    elif tmp_node_this.data == 'kl':
+                        tmp_node_this_output = min(tmp_last_resMetaTuple)
+                    tmp_node_this_output_Max = tmp_node_this_output
+                    tmp_node_this_output_Min = tmp_node_this_output
+                    tmp_node_this_output_meta_tuple = [tmp_node_this_output]
+                    tmp_node_this_output_str = '{%s}(%d)' % (
+                        ','.join([str(tmp_last_resMetaTuple_this) for tmp_last_resMetaTuple_this in tmp_last_resMetaTuple]),
+                        tmp_node_this_output
+                    )
+                    tmp_node_this_output_data_final = [{
+                        'result': [
+                            tmp_last_resMetaTuple,
+                            tmp_node_this_output_meta_tuple,
+                            tmp_node_this_output_meta_tuple
+                        ],
+                        'key': {
+                            'op': 'd',
+                            'l': len(tmp_last_resMetaTuple),
+                            'r': 100,
+                            'v': {
+                                'k': 1,
+                                'q': None,
+                                'p': None,
+                                'b': None,
+                                'a': None
+                            }
+                        }
+                    }]
+                    
+                    #if type(tmp_last_resMetaTuple) == list and len(tmp_last_resMetaTuple) > 0:
+                    #    pass
+                    #else:
+                    #    self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
+                    #    return resNoneTemplate
                 else:
                     self.resError = self.resErrorType.NODE_OPERATION_INVALID
                     return resNoneTemplate
@@ -2718,6 +2781,7 @@ class RD(object):
             resRecursiveObj.resIntMinType = tmp_node_this_output_MinType
             resRecursiveObj.resDetail = tmp_node_this_output_str
             resRecursiveObj.resDetailData = tmp_node_this_output_data_final
+            resRecursiveObj.resMetaTuple = tmp_node_this_output_meta_tuple
             return resRecursiveObj
 
 def boolByListAnd(data):
@@ -2757,7 +2821,9 @@ if __name__ == '__main__':
         '7a10k10q5m9',
         '7a10k6q5m9',
         '7a10k5q5m9',
-        '7df'
+        '7df',
+        '2d20kl',
+        '2d20kh'
     ]
     val_table = {
         '力量': 60,
