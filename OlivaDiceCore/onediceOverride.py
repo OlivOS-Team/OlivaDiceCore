@@ -443,6 +443,16 @@ def RDDataFormat_default(data:list, mode = 'default'):
                             res += '[%s?]' % (' '.join(getRDdataNodeResultListStr(data_this, 1)))
                         if checkRDdataNodeResult(data_this, 2):
                             res += '(%s)' % (', '.join(getRDdataNodeResultListStr(data_this, 2)))
+                elif checkRDdataNodeKeyOP(data_this, 'kh'):
+                    if checkRDdataNodeResult(data_this, 0):
+                        res += '{%s}' % (', '.join(getRDdataNodeResultListStr(data_this, 0)))
+                    if checkRDdataNodeResult(data_this, 2):
+                        res += '(%s)' % (', '.join(getRDdataNodeResultListStr(data_this, 2)))
+                elif checkRDdataNodeKeyOP(data_this, 'kl'):
+                    if checkRDdataNodeResult(data_this, 0):
+                        res += '{%s}' % (', '.join(getRDdataNodeResultListStr(data_this, 0)))
+                    if checkRDdataNodeResult(data_this, 2):
+                        res += '(%s)' % (', '.join(getRDdataNodeResultListStr(data_this, 2)))
     if '' == res:
         res = None
     return res

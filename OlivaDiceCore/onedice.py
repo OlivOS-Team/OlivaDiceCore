@@ -2806,16 +2806,10 @@ class RD(object):
                             tmp_node_this_output_meta_tuple
                         ],
                         'key': {
-                            'op': 'd',
-                            'l': len(tmp_last_resMetaTuple),
-                            'r': 100,
-                            'v': {
-                                'k': 1,
-                                'q': None,
-                                'p': None,
-                                'b': None,
-                                'a': None
-                            }
+                            'op': tmp_node_this.data,
+                            'l': tmp_main_val_left[0],
+                            'r': tmp_main_val_right[0],
+                            'v': tmp_node_this.vals
                         }
                     }]
                     #if type(tmp_last_resMetaTuple) == list and len(tmp_last_resMetaTuple) > 0:
