@@ -260,6 +260,12 @@ def RDDataFormat_default(data:list, mode = 'default'):
             if 'op' in data_this:
                 if data_this['op'] in ['(', ')', '+', '-', '*', '/', '^', '<', '>']:
                     res += data_this['op']
+                elif data_this['op'] in ['[']:
+                    if len(data) > 1:
+                        if 'v' in data_this:
+                            res += '[%s]' % ', '.join([str(data_this) for data_this in data_this['v']])
+                        else:
+                            res += '[多元组]'
             elif 'key' in data_this and 'result' in data_this:
                 if checkRDdataNodeKeyOP(data_this, 'd'):
                     if checkRDdataNodeKeyVActive(data_this, 'k') or checkRDdataNodeKeyVActive(data_this, 'q'):
@@ -443,13 +449,28 @@ def RDDataFormat_default(data:list, mode = 'default'):
                             res += '[%s?]' % (' '.join(getRDdataNodeResultListStr(data_this, 1)))
                         if checkRDdataNodeResult(data_this, 2):
                             res += '(%s)' % (', '.join(getRDdataNodeResultListStr(data_this, 2)))
-                elif checkRDdataNodeKeyOP(data_this, 'kh'):
-                    if checkRDdataNodeResult(data_this, 0):
-                        res += '{%s}' % (', '.join(getRDdataNodeResultListStr(data_this, 0)))
-                    if checkRDdataNodeResult(data_this, 2):
-                        res += '(%s)' % (', '.join(getRDdataNodeResultListStr(data_this, 2)))
-                elif checkRDdataNodeKeyOP(data_this, 'kl'):
-                    if checkRDdataNodeResult(data_this, 0):
+                elif checkRDdataNodeKeyOP(data_this, 'kh') or checkRDdataNodeKeyOP(data_this, 'kl'):
+                    if checkRDdataNodeResult(data_this, 0) and checkRDdataNodeResult(data_this, 1):
+                        res_list_this = []
+                        if len(data_this['result'][0]) == len(data_this['result'][1]):
+                            for data_i in range(len(data_this['result'][0])):
+                                try:
+                                    if int(data_this['result'][1][data_i]) == data_this['result'][0][data_i]:
+                                        res_list_this.append(str(data_this['result'][0][data_i]))
+                                    else:
+                                        raise Exception('not int')
+                                except:
+                                    res_list_this.append(
+                                        '%s = %s' % (
+                                            str(data_this['result'][1][data_i]),
+                                            str(data_this['result'][0][data_i])
+                                        )
+                                    )
+                        else:
+                            res_list_this = getRDdataNodeResultListStr(data_this, 0)
+                        res += '{%s}' % (', '.join(res_list_this))
+                    elif checkRDdataNodeResult(data_this, 0):
+                        res_list_this = getRDdataNodeResultListStr(data_this, 0)
                         res += '{%s}' % (', '.join(getRDdataNodeResultListStr(data_this, 0)))
                     if checkRDdataNodeResult(data_this, 2):
                         res += '(%s)' % (', '.join(getRDdataNodeResultListStr(data_this, 2)))
@@ -483,3 +504,17 @@ def checkRDdataNodeKeyVActive(data:dict, key:str):
 
 def getRDdataNodeResultListStr(data:dict, offset:int, callback = None):
     return [str(int_this) for int_this in data['result'][offset]]
+
+def getRDResultFromList(data:list):
+    res = []
+    for data_this in data:
+        if type(data_this) == int:
+            res.append(str(data_this))
+        elif type(data_this) == str:
+            tmp_para = OlivaDiceCore.onedice.RD(data_this)
+            tmp_para.roll()
+            if tmp_para.resError == None:
+                res.append(str(tmp_para.resInt))
+            else:
+                res.append('出错')
+    return res

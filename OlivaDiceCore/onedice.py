@@ -21,6 +21,9 @@ import traceback
 pypi_version = '1.0.4'
 
 dictOperationPriority = {
+    '[' : None,
+    ']' : None,
+    ',' : None,
     '(' : None,
     ')' : None,
     '<' : 1,
@@ -140,7 +143,8 @@ class calNode(object):
     class nodeType(Enum):
         NUMBER = 0
         OPERATION = 1
-        MAX = 2
+        TUPLE = 2
+        MAX = 3
 
     def __str__(self):
         return '<calNode \'%s\' %s>' % (self.data, self.type)
@@ -153,6 +157,12 @@ class calNode(object):
 
     def isOperation(self):
         if self.type == self.nodeType.OPERATION:
+            return True
+        else:
+            return False
+
+    def isTuple(self):
+        if self.type == self.nodeType.TUPLE:
             return True
         else:
             return False
@@ -183,6 +193,16 @@ class calNumberNode(calNode):
         if str(data).isdigit():
             self.data += str(data)
         return calNumberNode(self.data)
+
+'''
+语法树多元组节点结构体
+'''
+class calTupleNode(calNode):
+    def __init__(self, data):
+        calNode.__init__(self)
+        self.data = data
+        self.type = self.nodeType.TUPLE
+        self.num = 0
 
 '''
 语法树运算符节点结构体
@@ -318,7 +338,9 @@ class RD(object):
             self.resIntMaxType = resRecursiveObj.resIntMaxType
             self.resDetail = resRecursiveObj.resDetail
             self.resDetailData = resRecursiveObj.resDetailData
-            self.resMetaTuple = resRecursiveObj.resMetaTuple
+            self.resMetaTuple = self.get_from_metaTuple(resRecursiveObj.resMetaTuple)
+            if len(self.resMetaTuple) > 0:
+                self.resMetaTuple[-1] = self.resInt
         return
 
     class resErrorType(Enum):
@@ -448,6 +470,44 @@ class RD(object):
                     flag_old_number = True
                     flag_left_as_number = True
                     tmp_offset = 1
+                elif lenOperation_this == 1 and tmp_data_this == '[':
+                    tmp_tuple_len = 2
+                    tmp_tuple_deep = 1
+                    tmp_tuple_para = ''
+                    tmp_tuple_data = []
+                    while it_offset + tmp_tuple_len <= len(tmp_data):
+                        if tmp_data[it_offset + tmp_tuple_len - 1] == '[':
+                            tmp_tuple_deep += 1
+                            if tmp_tuple_deep > 1:
+                                tmp_tuple_para += tmp_data[it_offset + tmp_tuple_len - 1]
+                        elif tmp_data[it_offset + tmp_tuple_len - 1] == ']':
+                            if tmp_tuple_deep > 1:
+                                tmp_tuple_para += tmp_data[it_offset + tmp_tuple_len - 1]
+                            elif tmp_tuple_deep == 1 and tmp_tuple_para != '':
+                                tmp_tuple_data.append(tmp_tuple_para)
+                                tmp_tuple_para = ''
+                            tmp_tuple_deep -= 1
+                            if tmp_tuple_deep == 0:
+                                break
+                        elif tmp_data[it_offset + tmp_tuple_len - 1] == ' ':
+                            if tmp_tuple_deep > 1:
+                                tmp_tuple_para += tmp_data[it_offset + tmp_tuple_len - 1]
+                        elif tmp_data[it_offset + tmp_tuple_len - 1] == ',':
+                            if tmp_tuple_deep > 1:
+                                tmp_tuple_para += tmp_data[it_offset + tmp_tuple_len - 1]
+                            elif tmp_tuple_deep == 1 and tmp_tuple_para != '':
+                                tmp_tuple_data.append(tmp_tuple_para)
+                                tmp_tuple_para = ''
+                        else:
+                            tmp_tuple_para += tmp_data[it_offset + tmp_tuple_len - 1]
+                        tmp_tuple_len += 1
+                    if tmp_tuple_deep != 0:
+                        self.resError = self.resErrorType.INPUT_RAW_INVALID
+                        break
+                    tmp_res.push(calTupleNode(tmp_tuple_data))
+                    flag_old_number = False
+                    flag_left_as_number = True
+                    tmp_offset = tmp_tuple_len
                 elif lenOperation_this == 1 and flag_is_op_val and op_stack.size() > 0:
                     tmp_op_peek_this = op_stack.peek()
                     if tmp_op_peek_this != None:
@@ -608,7 +668,7 @@ class RD(object):
                         flag_old_number = False
                         flag_left_as_number = True
                         tmp_offset = 1
-                    else:
+                    elif lenOperation_this == 1:
                         self.resError = self.resErrorType.INPUT_NODE_OPERATION_INVALID
                     break
                 elif lenOperation_this == 1:
@@ -661,6 +721,24 @@ class RD(object):
                 tmp_node_this_output_Min = tmp_node_this.getInt()
                 tmp_node_this_output_str = str(tmp_node_this_output)
                 tmp_node_this_output_data_final = [tmp_node_this_output]
+                tmp_node_this_output_meta_tuple = [tmp_node_this_output]
+            elif self.calTree.peek().isTuple():
+                tmp_node_this = self.calTree.pop()
+                tmp_node_this_output = 0
+                tmp_node_this_output_Max = 0
+                tmp_node_this_output_Min = 0
+                if len(tmp_node_this.data) > 0:
+                    tmp_para = RD(tmp_node_this.data[-1])
+                    tmp_para.roll()
+                    if tmp_para.resError == None:
+                        tmp_node_this_output = tmp_para.resInt
+                        tmp_node_this_output_Max = tmp_para.resIntMax
+                        tmp_node_this_output_MaxType = tmp_para.resIntMaxType
+                        tmp_node_this_output_Min = tmp_para.resIntMin
+                        tmp_node_this_output_MinType = tmp_para.resIntMinType
+                tmp_node_this_output_str = '[%s]' % ','.join([str(data_this) for data_this in tmp_node_this.data])
+                tmp_node_this_output_data_final = [{'op': '[', 'v': tmp_node_this.data}]
+                tmp_node_this_output_meta_tuple = tmp_node_this.data
             elif self.calTree.peek().isOperation():
                 tmp_node_this = self.calTree.pop()
                 tmp_priority_this = tmp_node_this.getPriority()
@@ -2024,10 +2102,8 @@ class RD(object):
                     tmp_node_this_left_resMetaTuple = self.get_from_metaTuple(tmp_node_this_left_resMetaTuple_raw)
                     tmp_node_this_right_resMetaTuple = self.get_from_metaTuple(tmp_node_this_right_resMetaTuple_raw)
                     tmp_node_this_resMetaTuple = [tmp_node_this_output]
-                    print([tmp_node_this_left_resMetaTuple, tmp_node_this_right_resMetaTuple])
                     if len(tmp_node_this_left_resMetaTuple) > 1 and not len(tmp_node_this_right_resMetaTuple) > 1:
                         tmp_node_this_resMetaTuple = [(int(tmp_node_this_resMetaTuple_this ** tmp_main_val_right[0])) for tmp_node_this_resMetaTuple_this in tmp_node_this_left_resMetaTuple]
-                        print(tmp_node_this_resMetaTuple)
                     elif not len(tmp_node_this_left_resMetaTuple) > 1 and len(tmp_node_this_right_resMetaTuple) > 1:
                         tmp_node_this_resMetaTuple = [(int(tmp_main_val_left[0] ** tmp_node_this_resMetaTuple_this)) for tmp_node_this_resMetaTuple_this in tmp_node_this_right_resMetaTuple]
                     tmp_node_this_output_meta_tuple = tmp_node_this_resMetaTuple
@@ -2779,14 +2855,16 @@ class RD(object):
                             ]
                         }]
                 elif tmp_node_this.data == 'kh' or tmp_node_this.data == 'kl':
-                    tmp_last_resMetaTuple = tmp_main_val_left_obj.resMetaTuple
+                    tmp_last_resMetaTuple_raw = tmp_main_val_left_obj.resMetaTuple
+                    tmp_last_resMetaTuple = tmp_last_resMetaTuple_raw
                     if type(tmp_last_resMetaTuple) == list and len(tmp_last_resMetaTuple) > 0:
-                        tmp_last_resMetaTuple = [
-                            tmp_last_resMetaTuple_this if type(tmp_last_resMetaTuple_this) == int else tmp_last_resMetaTuple_this
-                            for tmp_last_resMetaTuple_this in tmp_last_resMetaTuple
-                        ]
+                        tmp_last_resMetaTuple = self.get_from_metaTuple(tmp_last_resMetaTuple_raw)
                     else:
-                        tmp_last_resMetaTuple = [tmp_main_val_left[0]]
+                        tmp_last_resMetaTuple_raw = [tmp_main_val_left[0]]
+                        tmp_last_resMetaTuple = tmp_last_resMetaTuple_raw
+                    if len(tmp_last_resMetaTuple_raw) != len(tmp_last_resMetaTuple):
+                        self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
+                        return resNoneTemplate
                     tmp_node_this_output = 0
                     if tmp_node_this.data == 'kh':
                         tmp_node_this_output = max(tmp_last_resMetaTuple)
@@ -2796,13 +2874,13 @@ class RD(object):
                     tmp_node_this_output_Min = tmp_node_this_output
                     tmp_node_this_output_meta_tuple = [tmp_node_this_output]
                     tmp_node_this_output_str = '{%s}(%d)' % (
-                        ','.join([str(tmp_last_resMetaTuple_this) for tmp_last_resMetaTuple_this in tmp_last_resMetaTuple]),
+                        ','.join(self.get_str_from_metaTuple(tmp_last_resMetaTuple_raw, tmp_last_resMetaTuple)),
                         tmp_node_this_output
                     )
                     tmp_node_this_output_data_final = [{
                         'result': [
                             tmp_last_resMetaTuple,
-                            [],
+                            tmp_last_resMetaTuple_raw,
                             tmp_node_this_output_meta_tuple
                         ],
                         'key': {
@@ -2835,10 +2913,31 @@ class RD(object):
             return resRecursiveObj
 
     def get_from_metaTuple(self, data):
-        return [
-            data_this if type(data_this) == int else data_this
-            for data_this in data
-        ]
+        res = []
+        for data_this in data:
+            if type(data_this) == int:
+                res.append(data_this)
+            elif type(data_this) == str:
+                para_this = RD(data_this)
+                para_this.roll()
+                if para_this.resError == None:
+                    res.append(para_this.resInt)
+        return res
+
+    def get_str_from_metaTuple(self, data_raw, data):
+        res = []
+        for data_i in range(len(data)):
+            if type(data_raw[data_i]) == int:
+                res.append(str(data[data_i]))
+            elif type(data_raw[data_i]) == str:
+                try:
+                    if int(data_raw[data_i]) == data[data_i]:
+                        res.append(str(data[data_i]))
+                    else:
+                        raise Exception('not int')
+                except:
+                    res.append('%s=%s' % (str(data_raw[data_i]), str(data[data_i])))
+        return res
 
 def boolByListAnd(data):
     res = True
@@ -2883,7 +2982,13 @@ if __name__ == '__main__':
         '(2d20+2)kh',
         '(2d20-20)kh',
         '(2d20/10)kh',
-        '((2d20)^2)kh'
+        '((2d20)^2)kh',
+        '[1,2]kh',
+        '[1,2]kl',
+        '[1d20,10]kl',
+        '[1d20,[1,2]kh]kl',
+        '[1,2]',
+        '[1,2d6]'
     ]
     val_table = {
         '力量': 60,
@@ -2904,4 +3009,6 @@ if __name__ == '__main__':
             print(rd_para.resIntMinType)
             print(rd_para.resDetail)
             print(rd_para.resDetailData)
+            print(rd_para.resMetaTuple)
         print('================')
+3
