@@ -194,7 +194,8 @@ dictFormatMappingMode = {
     '默认': 'default',
     '美化': 'pretty',
     '无限': 'ww',
-    '双重十字': 'dx'
+    '双重十字': 'dx',
+    '短': 'short'
 }
 
 def RDDataFormat(data:'list|None', mode:str = 'default'):
@@ -213,6 +214,8 @@ def RDDataFormat(data:'list|None', mode:str = 'default'):
             res = RDDataFormat_default(data, 'dx')
         elif mode_real == 'ww':
             res = RDDataFormat_default(data, 'ww')
+        elif mode_real == 'short':
+            res = RDDataFormat_short(data)
     return res
 
 def RDDataFormat_debug(data:list):
@@ -489,6 +492,29 @@ def RDDataFormat_default_getMark(data:'int|dict'):
             elif data['op'] == 'mark02':
                 res = '<%s>' % RDDataFormat_default_getMark(data['v'])
     return res
+
+def RDDataFormat_short(data:list):
+    res = ''
+    for data_this in data:
+        if int == type(data_this):
+            res += str(data_this)
+        elif str == type(data_this):
+            res += data_this
+        elif dict == type(data_this):
+            if 'op' in data_this:
+                if data_this['op'] in ['(', ')', '+', '-', '*', '/', '^', '<', '>']:
+                    res += data_this['op']
+                elif data_this['op'] in ['[']:
+                    if len(data) > 1:
+                        if 'v' in data_this:
+                            res += '[%s]' % ', '.join([str(data_this) for data_this in data_this['v']])
+                        else:
+                            res += '[多元组]'
+            elif 'key' in data_this and 'result' in data_this:
+                if checkRDdataNodeResult(data_this, 2):
+                    res += '%s' % (', '.join(getRDdataNodeResultListStr(data_this, 2)))
+    return res
+
 
 def checkRDdataNodeResult(data:dict, offset:int):
     return 'result' in data and len(data['result']) > offset and len(data['result'][offset]) > 0

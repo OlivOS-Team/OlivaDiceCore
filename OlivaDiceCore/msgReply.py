@@ -3994,11 +3994,18 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str_1 = ''
                 if rd_para.resError == None:
                     tmp_resDetail_str = ''
+                    tmp_resDetail_short_str = ''
                     if flag_roll_mode in ['w', 'dxx']:
+                        tmp_resDetail_short_str = OlivaDiceCore.onediceOverride.RDDataFormat(
+                            data = rd_para.resDetailData,
+                            mode = 'short'
+                        )
+                        if tmp_resDetail_short_str == None:
+                            tmp_resDetail_short_str = ''
                         if len(str(rd_para.resInt)) > 100:
-                            tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
+                            tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_short_str) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
                         else:
-                            tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)
+                            tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_short_str) + '=' + str(rd_para.resInt)
                     elif flag_roll_mode in ['ww', 'dx']:
                         if flag_roll_mode in ['ww']:
                             tmp_resDetail_str = OlivaDiceCore.onediceOverride.RDDataFormat(
@@ -4010,8 +4017,16 @@ def unity_reply(plugin_event, Proc):
                                 data = rd_para.resDetailData,
                                 mode = 'dx'
                             )
+                        tmp_resDetail_short_str = OlivaDiceCore.onediceOverride.RDDataFormat(
+                            data = rd_para.resDetailData,
+                            mode = 'short'
+                        )
                         if tmp_resDetail_str == None:
                             tmp_resDetail_str = ''
+                        if tmp_resDetail_short_str == None:
+                            tmp_resDetail_short_str = ''
+                        if tmp_resDetail_short_str != tmp_resDetail_str:
+                            tmp_resDetail_str += '=%s' % tmp_resDetail_short_str
                         if len(tmp_resDetail_str) == 0 or len(tmp_resDetail_str) > OlivaDiceCore.console.getConsoleSwitchByHash(
                             'largeRollLimit',
                             plugin_event.bot_info.hash
@@ -4021,9 +4036,9 @@ def unity_reply(plugin_event, Proc):
                                     OlivaDiceCore.onediceOverride.getRDResultFromList(rd_para.resMetaTuple)
                                 ))
                             elif len(str(rd_para.resInt)) > 100:
-                                tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
+                                tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_short_str) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
                             else:
-                                tmp_reply_str_1 = rd_para_str + '=' + str(rd_para.resInt)
+                                tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_short_str) + '=' + str(rd_para.resInt)
                         else:
                             if len(rd_para.resMetaTuple) > 1:
                                 tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_str) + '=' + (', '.join(
