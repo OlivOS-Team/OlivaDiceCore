@@ -299,6 +299,7 @@ class RD(object):
         self.resDetail = None
         self.resDetailData = []
         self.resMetaTuple = []
+        self.resMetaTupleEnable = False
         self.resError = None
         self.dictOperationPriority = dictOperationPriority
         self.customDefault = customDefault
@@ -338,6 +339,7 @@ class RD(object):
             self.resIntMaxType = resRecursiveObj.resIntMaxType
             self.resDetail = resRecursiveObj.resDetail
             self.resDetailData = resRecursiveObj.resDetailData
+            self.resMetaTupleEnable = self.check_metaTuple(resRecursiveObj.resMetaTuple)
             self.resMetaTuple = self.get_from_metaTuple(resRecursiveObj.resMetaTuple)
             if len(self.resMetaTuple) > 0:
                 self.resMetaTuple[-1] = self.resInt
@@ -728,7 +730,11 @@ class RD(object):
                 tmp_node_this_output_Max = 0
                 tmp_node_this_output_Min = 0
                 if len(tmp_node_this.data) > 0:
-                    tmp_para = RD(tmp_node_this.data[-1])
+                    tmp_para = RD(
+                        tmp_node_this.data[-1],
+                        customDefault = self.customDefault,
+                        valueTable = self.valueTable
+                    )
                     tmp_para.roll()
                     if tmp_para.resError == None:
                         tmp_node_this_output = tmp_para.resInt
@@ -2918,10 +2924,22 @@ class RD(object):
             if type(data_this) == int:
                 res.append(data_this)
             elif type(data_this) == str:
-                para_this = RD(data_this)
+                para_this = RD(
+                    data_this,
+                    customDefault = self.customDefault,
+                    valueTable = self.valueTable
+                )
                 para_this.roll()
                 if para_this.resError == None:
                     res.append(para_this.resInt)
+        return res
+
+    def check_metaTuple(self, data):
+        res = False
+        for data_this in data:
+            if type(data_this) == str:
+                res = True
+                break
         return res
 
     def get_str_from_metaTuple(self, data_raw, data):
@@ -2988,7 +3006,8 @@ if __name__ == '__main__':
         '[1d20,10]kl',
         '[1d20,[1,2]kh]kl',
         '[1,2]',
-        '[1,2d6]'
+        '[1,2d6]',
+        '2d6'
     ]
     val_table = {
         '力量': 60,
@@ -3010,5 +3029,5 @@ if __name__ == '__main__':
             print(rd_para.resDetail)
             print(rd_para.resDetailData)
             print(rd_para.resMetaTuple)
+            print(rd_para.resMetaTupleEnable)
         print('================')
-3

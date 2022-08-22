@@ -4002,7 +4002,11 @@ def unity_reply(plugin_event, Proc):
                         )
                         if tmp_resDetail_short_str == None:
                             tmp_resDetail_short_str = ''
-                        if len(str(rd_para.resInt)) > 100:
+                        if rd_para.resMetaTupleEnable and len(rd_para.resMetaTuple) > 1:
+                            tmp_reply_str_1 = rd_para_str + '=' + (', '.join(
+                                OlivaDiceCore.onediceOverride.getRDResultFromList(rd_para.resMetaTuple)
+                            ))
+                        elif len(str(rd_para.resInt)) > 100:
                             tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_short_str) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
                         else:
                             tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_short_str) + '=' + str(rd_para.resInt)
@@ -4031,7 +4035,7 @@ def unity_reply(plugin_event, Proc):
                             'largeRollLimit',
                             plugin_event.bot_info.hash
                         ):
-                            if len(rd_para.resMetaTuple) > 1:
+                            if rd_para.resMetaTupleEnable and len(rd_para.resMetaTuple) > 1:
                                 tmp_reply_str_1 = rd_para_str + '=' + (', '.join(
                                     OlivaDiceCore.onediceOverride.getRDResultFromList(rd_para.resMetaTuple)
                                 ))
@@ -4040,7 +4044,7 @@ def unity_reply(plugin_event, Proc):
                             else:
                                 tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_short_str) + '=' + str(rd_para.resInt)
                         else:
-                            if len(rd_para.resMetaTuple) > 1:
+                            if rd_para.resMetaTupleEnable and len(rd_para.resMetaTuple) > 1:
                                 tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_str) + '=' + (', '.join(
                                     OlivaDiceCore.onediceOverride.getRDResultFromList(rd_para.resMetaTuple)
                                 ))
@@ -4064,7 +4068,7 @@ def unity_reply(plugin_event, Proc):
                         if rd_para_str_new == None:
                             rd_para_str_new = rd_para_str
                         if len(tmp_resDetail_str) == 0 or len(tmp_resDetail_str) > 150:
-                            if len(rd_para.resMetaTuple) > 1:
+                            if rd_para.resMetaTupleEnable and len(rd_para.resMetaTuple) > 1:
                                 tmp_reply_str_1 = rd_para_str_new + '=' + (', '.join(
                                     OlivaDiceCore.onediceOverride.getRDResultFromList(rd_para.resMetaTuple)
                                 ))
@@ -4073,7 +4077,7 @@ def unity_reply(plugin_event, Proc):
                             else:
                                 tmp_reply_str_1 = rd_para_str_new + '=' + str(rd_para.resInt)
                         else:
-                            if len(rd_para.resMetaTuple) > 1:
+                            if rd_para.resMetaTupleEnable and len(rd_para.resMetaTuple) > 1:
                                 tmp_reply_str_1 = rd_para_str_new + '=' + str(tmp_resDetail_str) + '=' + (', '.join(
                                     OlivaDiceCore.onediceOverride.getRDResultFromList(rd_para.resMetaTuple)
                                 ))
