@@ -477,6 +477,12 @@ def RDDataFormat_default(data:list, mode = 'default'):
                         res += '{%s}' % (', '.join(getRDdataNodeResultListStr(data_this, 0)))
                     if checkRDdataNodeResult(data_this, 2):
                         res += '(%s)' % (', '.join(getRDdataNodeResultListStr(data_this, 2)))
+                elif checkRDdataNodeKeyOP(data_this, 'lp'):
+                    if checkRDdataNodeResult(data_this, 0):
+                        res += '{%s}' % (':'.join(getRDdataNodeResultListStr(data_this, 0)))
+                    res += 'lp'
+                    if checkRDdataNodeResult(data_this, 1):
+                        res += '{%s}' % (', '.join(getRDdataNodeResultListStr(data_this, 1)))
     if '' == res:
         res = None
     return res
@@ -513,6 +519,8 @@ def RDDataFormat_short(data:list):
             elif 'key' in data_this and 'result' in data_this:
                 if checkRDdataNodeResult(data_this, 2):
                     res += '%s' % (', '.join(getRDdataNodeResultListStr(data_this, 2)))
+                elif 'op' in data_this['key'] and data_this['key']['op'] == 'lp':
+                    res += '[循环]'
     return res
 
 

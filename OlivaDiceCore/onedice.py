@@ -41,6 +41,8 @@ dictOperationPriority = {
     'KL' : 6,
     'kh' : 6,
     'KH' : 6,
+    'lp' : 6,
+    'LP' : 6,
     'df' : 7,
     'DF' : 7,
     'd' : 7,
@@ -55,7 +57,9 @@ dictOperationPriority = {
     'B' : 7,
     'p' : 7,
     'P' : 7,
-    '?' : 8
+    '?' : 8,
+    '$t' : 9,
+    '$T' : 9
 }
 
 dictOperationMapping = {
@@ -73,7 +77,9 @@ listOperationSub = [
     'B',
     'p',
     'P',
-    ':'
+    ':',
+    '=',
+    'i'
 ]
 
 lenOperationMax = 2
@@ -260,6 +266,11 @@ class calOperationNode(calNode):
             self.valRightDefault = 1
         elif self.data == 'kl':
             self.valRightDefault = 1
+        elif self.data == 'l':
+            self.valRightDefault = 1
+        elif self.data == '$t':
+            self.valLeftDefault = 1
+            self.vals['='] = None
         if self.customDefault != None:
             if self.data in self.customDefault:
                 if 'leftD' in self.customDefault[self.data]:
@@ -339,10 +350,10 @@ class RD(object):
             self.resIntMaxType = resRecursiveObj.resIntMaxType
             self.resDetail = resRecursiveObj.resDetail
             self.resDetailData = resRecursiveObj.resDetailData
-            self.resMetaTupleEnable = self.check_metaTuple(resRecursiveObj.resMetaTuple)
+            self.resMetaTupleEnable = resRecursiveObj.resMetaTupleEnable
+            if not self.resMetaTupleEnable:
+                self.resMetaTupleEnable = self.check_metaTuple(resRecursiveObj.resMetaTuple)
             self.resMetaTuple = self.get_from_metaTuple(resRecursiveObj.resMetaTuple)
-            if len(self.resMetaTuple) > 0:
-                self.resMetaTuple[-1] = self.resInt
         return
 
     class resErrorType(Enum):
@@ -374,6 +385,7 @@ class RD(object):
             self.resDetail = resDetail
             self.resDetailData = []
             self.resMetaTuple = []
+            self.resMetaTupleEnable = False
 
     def getPriority(self, data):
         res = None
@@ -560,7 +572,11 @@ class RD(object):
                                         elif tmp_data[tmp_total_offset] == ')':
                                             count_child_para_2 -= 1
                                     if count_child_para_2 == 0:
-                                        tmp_rd_child_para = RD(tmp_data[it_offset + 1 : it_offset + 1 + tmp_number_offset + 1], self.customDefault)
+                                        tmp_rd_child_para = RD(
+                                            tmp_data[it_offset + 1 : it_offset + 1 + tmp_number_offset + 1],
+                                            customDefault = self.customDefault,
+                                            valueTable = self.valueTable
+                                        )
                                         tmp_rd_child_para.roll()
                                         if tmp_rd_child_para.resError == None:
                                             op_stack.pop()
@@ -716,6 +732,7 @@ class RD(object):
             tmp_node_this_output_data = {}
             tmp_node_this_output_data_final = []
             tmp_node_this_output_meta_tuple = []
+            tmp_node_this_output_meta_tuple_enable = False
             if self.calTree.peek().isNumber():
                 tmp_node_this = self.calTree.pop()
                 tmp_node_this_output = tmp_node_this.getInt()
@@ -729,22 +746,16 @@ class RD(object):
                 tmp_node_this_output = 0
                 tmp_node_this_output_Max = 0
                 tmp_node_this_output_Min = 0
-                if len(tmp_node_this.data) > 0:
-                    tmp_para = RD(
-                        tmp_node_this.data[-1],
-                        customDefault = self.customDefault,
-                        valueTable = self.valueTable
-                    )
-                    tmp_para.roll()
-                    if tmp_para.resError == None:
-                        tmp_node_this_output = tmp_para.resInt
-                        tmp_node_this_output_Max = tmp_para.resIntMax
-                        tmp_node_this_output_MaxType = tmp_para.resIntMaxType
-                        tmp_node_this_output_Min = tmp_para.resIntMin
-                        tmp_node_this_output_MinType = tmp_para.resIntMinType
+                if len(tmp_node_this.data) > 0 and rootData not in ['kh', 'kl', 'lp']:
+                    tmp_metaTuple_res = self.get_from_metaTuple(tmp_node_this.data)
+                    if len(tmp_metaTuple_res) > 0:
+                        tmp_node_this_output = tmp_metaTuple_res[-1]
+                        tmp_node_this_output_Max = tmp_node_this_output
+                        tmp_node_this_output_Min = tmp_node_this_output
                 tmp_node_this_output_str = '[%s]' % ','.join([str(data_this) for data_this in tmp_node_this.data])
                 tmp_node_this_output_data_final = [{'op': '[', 'v': tmp_node_this.data}]
                 tmp_node_this_output_meta_tuple = tmp_node_this.data
+                tmp_node_this_output_meta_tuple_enable = True
             elif self.calTree.peek().isOperation():
                 tmp_node_this = self.calTree.pop()
                 tmp_priority_this = tmp_node_this.getPriority()
@@ -2896,11 +2907,68 @@ class RD(object):
                             'v': tmp_node_this.vals
                         }
                     }]
-                    #if type(tmp_last_resMetaTuple) == list and len(tmp_last_resMetaTuple) > 0:
-                    #    pass
-                    #else:
-                    #    self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
-                    #    return resNoneTemplate
+                elif tmp_node_this.data == '$t':
+                    tmp_key = 't%d' % tmp_main_val_right[0]
+                    if tmp_node_this.vals['='] != None:
+                        self.valueTable[tmp_key] = tmp_node_this.vals['=']
+                        tmp_node_this_output = tmp_node_this.vals['=']
+                    else:
+                        if tmp_key in self.valueTable:
+                            tmp_node_this_output = self.valueTable[tmp_key]
+                    tmp_node_this_output_Max = tmp_node_this_output
+                    tmp_node_this_output_Min = tmp_node_this_output
+                    tmp_node_this_output_str = str(tmp_node_this_output)
+                    tmp_node_this_output_data_final = [tmp_node_this_output]
+                elif tmp_node_this.data == 'lp':
+                    tmp_last_left_resMetaTuple_raw = [tmp_main_val_left[0]]
+                    if tmp_main_val_left_obj.resMetaTupleEnable and len(tmp_main_val_left_obj.resMetaTuple) > 0:
+                        tmp_last_left_resMetaTuple_raw = tmp_main_val_left_obj.resMetaTuple
+                    tmp_last_left_resMetaTuple = tmp_last_left_resMetaTuple_raw.copy()
+                    tmp_last_left_resMetaTuple = self.get_from_metaTuple(tmp_last_left_resMetaTuple)
+                    tmp_last_right_resMetaTuple_raw = tmp_main_val_right_obj.resMetaTuple
+                    tmp_last_right_resMetaTuple = tmp_last_right_resMetaTuple_raw.copy()
+                    tmp_start = 1
+                    tmp_step = 1
+                    tmp_end = 1
+                    if len(tmp_last_left_resMetaTuple) == 1:
+                        tmp_end = tmp_last_left_resMetaTuple[0]
+                    elif len(tmp_last_left_resMetaTuple) == 2:
+                        tmp_start = tmp_last_left_resMetaTuple[0]
+                        tmp_end = tmp_last_left_resMetaTuple[1]
+                    elif len(tmp_last_left_resMetaTuple) >= 3:
+                        tmp_start = tmp_last_left_resMetaTuple[0]
+                        tmp_step = tmp_last_left_resMetaTuple[1]
+                        tmp_end = tmp_last_left_resMetaTuple[2]
+                    if tmp_start > tmp_end or tmp_step < 1:
+                        self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
+                        return resNoneTemplate
+                    tmp_res_resMetaTuple = []
+                    for tmp_count_i in range(tmp_start, tmp_end + 1, tmp_step):
+                        tmp_res_resMetaTuple += [
+                            tmp_last_right_resMetaTuple_this.replace('i', str(tmp_count_i))
+                            for tmp_last_right_resMetaTuple_this in tmp_last_right_resMetaTuple
+                        ]
+                    if len(tmp_res_resMetaTuple) > 1000:
+                        tmp_res_resMetaTuple = tmp_res_resMetaTuple[:1000]
+                    tmp_node_this_output_str = '{%s:%s:%s}lp{%s}' % (
+                        str(tmp_start), str(tmp_step), str(tmp_end),
+                        ','.join([str(tmp_last_right_resMetaTuple_raw_this) for tmp_last_right_resMetaTuple_raw_this in tmp_last_right_resMetaTuple_raw])
+                    )
+                    tmp_node_this_output_data_final = [{
+                        'key': {
+                            'op': 'lp',
+                            'l': tmp_main_val_left[0],
+                            'r': tmp_main_val_right[0],
+                            'v': tmp_node_this.vals
+                        },
+                        'result': [
+                            [tmp_start, tmp_step, tmp_end],
+                            tmp_last_right_resMetaTuple_raw,
+                            []
+                        ]
+                    }]
+                    tmp_node_this_output_meta_tuple = tmp_res_resMetaTuple
+                    tmp_node_this_output_meta_tuple_enable = True
                 else:
                     self.resError = self.resErrorType.NODE_OPERATION_INVALID
                     return resNoneTemplate
@@ -2916,9 +2984,10 @@ class RD(object):
             resRecursiveObj.resDetail = tmp_node_this_output_str
             resRecursiveObj.resDetailData = tmp_node_this_output_data_final
             resRecursiveObj.resMetaTuple = tmp_node_this_output_meta_tuple
+            resRecursiveObj.resMetaTupleEnable = tmp_node_this_output_meta_tuple_enable
             return resRecursiveObj
 
-    def get_from_metaTuple(self, data):
+    def get_from_metaTuple(self, data, flag_last = False, flag_update = True):
         res = []
         for data_this in data:
             if type(data_this) == int:
@@ -2932,6 +3001,16 @@ class RD(object):
                 para_this.roll()
                 if para_this.resError == None:
                     res.append(para_this.resInt)
+                if flag_update:
+                    self.valueTable.update(para_this.valueTable)
+                if flag_last:
+                    self.resInt = para_this.resInt
+                    self.resIntMin = para_this.resIntMin
+                    self.resIntMax = para_this.resIntMax
+                    self.resIntMinType = para_this.resIntMinType
+                    self.resIntMaxType = para_this.resIntMaxType
+                    self.resDetail = para_this.resDetail
+                    self.resDetailData = para_this.resDetailData
         return res
 
     def check_metaTuple(self, data):

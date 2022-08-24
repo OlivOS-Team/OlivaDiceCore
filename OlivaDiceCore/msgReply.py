@@ -4063,7 +4063,10 @@ def unity_reply(plugin_event, Proc):
                                 data = rd_para.resDetailData,
                                 mode = 'default'
                             )
+                        tmp_resInt_str = str(rd_para.resInt)
                         if tmp_resDetail_str == None:
+                            tmp_resDetail_str = ''
+                        if tmp_resDetail_str == str(tmp_resInt_str):
                             tmp_resDetail_str = ''
                         if rd_para_str_new == None:
                             rd_para_str_new = rd_para_str
@@ -4072,19 +4075,19 @@ def unity_reply(plugin_event, Proc):
                                 tmp_reply_str_1 = rd_para_str_new + '=' + (', '.join(
                                     OlivaDiceCore.onediceOverride.getRDResultFromList(rd_para.resMetaTuple)
                                 ))
-                            elif len(str(rd_para.resInt)) > 100:
-                                tmp_reply_str_1 = rd_para_str_new + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
+                            elif len(str(tmp_resInt_str)) > 100:
+                                tmp_reply_str_1 = rd_para_str_new + '=' + str(tmp_resInt_str)[:50] + '...的天文数字'
                             else:
-                                tmp_reply_str_1 = rd_para_str_new + '=' + str(rd_para.resInt)
+                                tmp_reply_str_1 = rd_para_str_new + '=' + str(tmp_resInt_str)
                         else:
                             if rd_para.resMetaTupleEnable and len(rd_para.resMetaTuple) > 1:
                                 tmp_reply_str_1 = rd_para_str_new + '=' + str(tmp_resDetail_str) + '=' + (', '.join(
                                     OlivaDiceCore.onediceOverride.getRDResultFromList(rd_para.resMetaTuple)
                                 ))
-                            elif len(str(rd_para.resInt)) > 50:
-                                tmp_reply_str_1 = rd_para_str_new + '=' + str(tmp_resDetail_str) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
+                            elif len(str(tmp_resInt_str)) > 50:
+                                tmp_reply_str_1 = rd_para_str_new + '=' + str(tmp_resDetail_str) + '=' + str(tmp_resInt_str)[:50] + '...的天文数字'
                             else:
-                                tmp_reply_str_1 = rd_para_str_new + '=' + str(tmp_resDetail_str) + '=' + str(rd_para.resInt)
+                                tmp_reply_str_1 = rd_para_str_new + '=' + str(tmp_resDetail_str) + '=' + str(tmp_resInt_str)
                 else:
                     dictTValue['tResult'] = str(rd_para.resError)
                     dictTValue['tRollPara'] = str(rd_para_str)
