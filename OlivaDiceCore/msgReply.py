@@ -1992,6 +1992,36 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = dictStrCustom['strPcShow'].format(**dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
+            elif isMatchWordStart(tmp_reast_str, 'show'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'show')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_reast_str = tmp_reast_str.strip(' ')
+                tmp_skill_name = tmp_reast_str
+                if tmp_skill_name == '':
+                    tmp_skill_name = None
+                if tmp_skill_name != None:
+                    tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
+                        OlivaDiceCore.pcCard.getPcHash(
+                            tmp_pc_id,
+                            tmp_pc_platform
+                        ),
+                        tmp_hagID
+                    )
+                    tmp_skill_value_find = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
+                        OlivaDiceCore.pcCard.getPcHash(
+                            tmp_pc_id,
+                            tmp_pc_platform
+                        ),
+                        tmp_skill_name,
+                        hagId = tmp_hagID
+                    )
+                    if tmp_pc_name != None:
+                        dictTValue['tName'] = tmp_pc_name
+                    dictTValue['tSkillName'] = tmp_skill_name
+                    dictTValue['tSkillValue'] = str(tmp_skill_value_find)
+                    tmp_reply_str = dictStrCustom['strPcGetSingleSkillValue'].format(**dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                return
             elif isMatchWordStart(tmp_reast_str, 'list', fullMatch = True):
                 tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
                     OlivaDiceCore.pcCard.getPcHash(
