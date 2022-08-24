@@ -113,9 +113,12 @@ def saveRDDataUser(data:OlivaDiceCore.onedice.RD, botHash:str, userId:str, platf
             userType = 'user',
             platform = platform
         )
+        tmp_resInt = data.resInt
+        if data.resMetaTupleEnable and len(data.resMetaTuple) > 0:
+            tmp_resInt = data.resMetaTuple
         OlivaDiceCore.userConfig.setUserConfigByKey(
             userConfigKey = 'RDRecordInt',
-            userConfigValue = data.resInt,
+            userConfigValue = tmp_resInt,
             botHash = botHash,
             userId = userId,
             userType = 'user',

@@ -46,18 +46,25 @@ def replyRR_command(plugin_event, Proc, valDict):
     tmp_reply_str = None
     if tmp_RDData_str != None:
         dictTValue['tRollFormatType'] = flag_mode
-        dictTValue['tRollResult'] = '%s=%s=%d' % (
+        tmp_RDDataIntUser = OlivaDiceCore.onediceOverride.getRDDataIntUser(
+            botHash = plugin_event.bot_info.hash,
+            userId = tmp_userID,
+            platform = tmp_user_platform
+        )
+        if type(tmp_RDDataIntUser) == int:
+            tmp_RDDataIntUser = str(tmp_RDDataIntUser)
+        elif type(tmp_RDDataIntUser) == str:
+            tmp_RDDataIntUser = str(tmp_RDDataIntUser)
+        elif type(tmp_RDDataIntUser) == list:
+            tmp_RDDataIntUser = ', '.join([str(tmp_RDDataIntUser_this) for tmp_RDDataIntUser_this in tmp_RDDataIntUser])
+        dictTValue['tRollResult'] = '%s=%s=%s' % (
             OlivaDiceCore.onediceOverride.getRDDataRawUser(
                 botHash = plugin_event.bot_info.hash,
                 userId = tmp_userID,
                 platform = tmp_user_platform
             ),
             tmp_RDData_str,
-            OlivaDiceCore.onediceOverride.getRDDataIntUser(
-                botHash = plugin_event.bot_info.hash,
-                userId = tmp_userID,
-                platform = tmp_user_platform
-            )
+            str(tmp_RDDataIntUser)
         )
         tmp_reply_str = dictStrCustom['strRollRecord'].format(**dictTValue)
     if tmp_reply_str != None:
