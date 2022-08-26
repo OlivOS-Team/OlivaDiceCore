@@ -64,7 +64,7 @@ def initDeck(bot_info_dict):
                 dictTValue['tInitDataName'] = customDeckFile
                 OlivaDiceCore.msgReply.globalLog(
                     3,
-                    dictStrConst['strInitDeckDataError'].format(**dictTValue),
+                    OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitDeckDataError'], dictTValue),
                     [
                         ('OlivaDice', 'default'),
                         ('Init', 'default')
@@ -94,7 +94,7 @@ def initDeck(bot_info_dict):
                 dictTValue['tInitDataName'] = customDeckFile
                 OlivaDiceCore.msgReply.globalLog(
                     3,
-                    dictStrConst['strInitDeckDataError'].format(**dictTValue),
+                    OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitDeckDataError'], dictTValue),
                     [
                         ('OlivaDice', 'default'),
                         ('Init', 'default')
@@ -113,7 +113,7 @@ def initDeck(bot_info_dict):
         dictTValue['tInitDataCount01'] = str(obj_Deck_this_count_total)
         OlivaDiceCore.msgReply.globalLog(
             2,
-            dictStrConst['strInitDeckData'].format(**dictTValue),
+            OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitDeckData'], dictTValue),
             [
                 ('OlivaDice', 'default'),
                 ('Init', 'default')
@@ -149,7 +149,7 @@ def initDeck(bot_info_dict):
                     dictTValue['tInitDataName'] = customDeckFile
                     OlivaDiceCore.msgReply.globalLog(
                         3,
-                        dictStrConst['strInitDeckDataError'].format(**dictTValue),
+                        OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitDeckDataError'], dictTValue),
                         [
                             ('OlivaDice', 'default'),
                             ('Init', 'default')
@@ -176,7 +176,7 @@ def initDeck(bot_info_dict):
                     dictTValue['tInitDataName'] = customDeckFile
                     OlivaDiceCore.msgReply.globalLog(
                         3,
-                        dictStrConst['strInitDeckDataError'].format(**dictTValue),
+                        OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitDeckDataError'], dictTValue),
                         [
                             ('OlivaDice', 'default'),
                             ('Init', 'default')
@@ -191,7 +191,7 @@ def initDeck(bot_info_dict):
         dictTValue['tInitDataCount01'] = str(obj_Deck_this_count)
         OlivaDiceCore.msgReply.globalLog(
             2,
-            dictStrConst['strInitDeckData'].format(**dictTValue),
+            OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitDeckData'], dictTValue),
             [
                 ('OlivaDice', 'default'),
                 ('Init', 'default')
@@ -250,7 +250,7 @@ def getDrawDeck(key_str, bot_hash, count = 1):
                     if tmp_draw_str != None and type(tmp_draw_str) == str:
                         tmp_card_list.append(tmp_draw_str)
                 dictTValue['tDrawDeckResult'] = '\n'.join(tmp_card_list)
-                tmp_reply_str = dictStrCustom['strDrawDeck'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawDeck'], dictTValue)
                 return tmp_reply_str
     tmp_recommend_list = getDeckRecommend(key_str, bot_hash)
     if type(tmp_recommend_list) == list:
@@ -259,9 +259,9 @@ def getDrawDeck(key_str, bot_hash, count = 1):
                 ['[.draw %s]' % tmp_recommend_list_this for tmp_recommend_list_this in tmp_recommend_list]
             )
             dictTValue['tDrawDeckResult'] = tmp_recommend_str
-            tmp_reply_str = dictStrCustom['strDrawDeckRecommend'].format(**dictTValue)
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawDeckRecommend'], dictTValue)
         else:
-            tmp_reply_str = dictStrCustom['strDrawDeckNotFound'].format(**dictTValue)
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawDeckNotFound'], dictTValue)
     return tmp_reply_str
 
 def getDeckRecommend(key_str:str, bot_hash:str):

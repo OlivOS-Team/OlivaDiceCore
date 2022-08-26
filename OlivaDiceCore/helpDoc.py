@@ -132,7 +132,7 @@ def getHelp(key_str, bot_hash):
             if key_str == 'default':
                 tmp_reply_str = '%s\n%s' % (OlivaDiceCore.data.bot_info, dictTValue['tHelpDocResult'])
             else:
-                tmp_reply_str = dictStrCustom['strHelpDoc'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDoc'], dictTValue)
             return tmp_reply_str
         else:
             tmp_recommend_list = getHelpRecommend(key_str, bot_hash)
@@ -146,11 +146,11 @@ def getHelp(key_str, bot_hash):
                             flag_is_begin = False
                         tmp_recommend_str += '[.help %s]' % (tmp_recommend_list_this,)
                     dictTValue['tHelpDocResult'] = tmp_recommend_str
-                    tmp_reply_str = dictStrCustom['strHelpDocRecommend'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDocRecommend'], dictTValue)
                 else:
-                    tmp_reply_str = dictStrCustom['strHelpDocNotFound'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDocNotFound'], dictTValue)
                 return tmp_reply_str
-    tmp_reply_str = dictStrCustom['strHelpDocNotFound'].format(**dictTValue)
+    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDocNotFound'], dictTValue)
     return tmp_reply_str
 
 def getHelpRecommend(key_str:str, bot_hash:str):

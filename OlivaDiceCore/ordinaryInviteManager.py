@@ -43,10 +43,10 @@ def unity_group_invite_request(plugin_event, Proc):
                             dictTValue['tComment'] = plugin_event.data.comment
                             if flag_enable == 0:
                                 dictTValue['tAcceptCommand'] = '.master accept %s' % (str(plugin_event.data.flag),)
-                                dictTValue['tResult'] = dictStrCustom['strBotAddGroupNoticeIgnoreResult'].format(**dictTValue)
+                                dictTValue['tResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAddGroupNoticeIgnoreResult'], dictTValue)
                             elif flag_enable == 1:
-                                dictTValue['tResult'] = dictStrCustom['strAccept'].format(**dictTValue)
-                            tmp_reply_str = dictStrCustom['strBotAddGroupNotice'].format(**dictTValue)
+                                dictTValue['tResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strAccept'], dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAddGroupNotice'], dictTValue)
                             OlivaDiceCore.msgReply.sendMsgByEvent(plugin_event, tmp_reply_str, noticeGroupList_this[0], 'group')
 
 def unity_friend_add_request(plugin_event, Proc):
@@ -73,10 +73,10 @@ def unity_friend_add_request(plugin_event, Proc):
                             dictTValue['tUserId'] = str(plugin_event.data.user_id)
                             dictTValue['tComment'] = plugin_event.data.comment
                             if flag_enable == 0:
-                                dictTValue['tResult'] = dictStrCustom['strIgnore'].format(**dictTValue)
+                                dictTValue['tResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strIgnore'], dictTValue)
                             elif flag_enable == 1:
-                                dictTValue['tResult'] = dictStrCustom['strAccept'].format(**dictTValue)
-                            tmp_reply_str = dictStrCustom['strBotAddFriendNotice'].format(**dictTValue)
+                                dictTValue['tResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strAccept'], dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAddFriendNotice'], dictTValue)
                             OlivaDiceCore.msgReply.sendMsgByEvent(plugin_event, tmp_reply_str, noticeGroupList_this[0], 'group')
 
 def isInMasterList(bot_hash, user_hash):

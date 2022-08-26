@@ -54,7 +54,7 @@ def unity_init(plugin_event, Proc):
     total_count = OlivaDiceCore.pcCard.dataPcCardTotalCount()
     dictTValue['tInitDataCount'] = str(total_count)
     dictTValue['tInitDataType'] = '人物卡'
-    tmp_log_str =  dictStrConst['strInitData'].format(**dictTValue)
+    tmp_log_str =  OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitData'], dictTValue)
     logProc(Proc, 2, tmp_log_str, [
         ('OlivaDice', 'default'),
         ('Init', 'default')
@@ -63,20 +63,20 @@ def unity_init(plugin_event, Proc):
     total_count = OlivaDiceCore.userConfig.dataUserConfigTotalCount()
     dictTValue['tInitDataCount'] = str(total_count)
     dictTValue['tInitDataType'] = '用户记录'
-    tmp_log_str =  dictStrConst['strInitData'].format(**dictTValue)
+    tmp_log_str =  OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitData'], dictTValue)
     logProc(Proc, 2, tmp_log_str, [
         ('OlivaDice', 'default'),
         ('Init', 'default')
     ])
     #显示Master认主信息
     dictTValue['tInitMasterKey'] = '.master %s' % OlivaDiceCore.data.bot_content['masterKey']
-    tmp_log_str =  dictStrConst['strToBeMaster'].format(**dictTValue)
+    tmp_log_str =  OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strToBeMaster'], dictTValue)
     logProc(Proc, 2, tmp_log_str, [
         ('OlivaDice', 'default'),
         ('Init', 'default')
     ])
     dictTValue['tVersion'] = OlivaDiceCore.data.OlivaDiceCore_ver_short
-    tmp_log_str =  dictStrConst['strShowVersionOnLog'].format(**dictTValue)
+    tmp_log_str =  OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strShowVersionOnLog'], dictTValue)
     logProc(Proc, 2, tmp_log_str, [
         ('OlivaDice', 'default'),
         ('Init', 'default')
@@ -115,7 +115,7 @@ def unity_save(plugin_event, Proc):
     total_count = OlivaDiceCore.userConfig.dataUserConfigTotalCount()
     dictTValue['tInitDataCount'] = str(total_count)
     dictTValue['tInitDataType'] = '用户记录'
-    tmp_log_str =  dictStrConst['strSaveData'].format(**dictTValue)
+    tmp_log_str =  OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strSaveData'], dictTValue)
     logProc(Proc, 2, tmp_log_str, [
         ('OlivaDice', 'default'),
         ('Save', 'default')
@@ -333,9 +333,9 @@ def unity_reply(plugin_event, Proc):
                         tmp_group_id = (-1) * int(tmp_reast_str[1:])
                     if tmp_group_id != None:
                         dictTValue['tGroupId'] = str(tmp_group_id)
-                        tmp_reply_str = dictStrCustom['strBotExitRemote'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotExitRemote'], dictTValue)
                         sendMsgByEvent(plugin_event, tmp_reply_str, tmp_group_id, 'group')
-                        tmp_reply_str = dictStrCustom['strBotExitRemoteShow'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotExitRemoteShow'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                         time.sleep(1)
                         plugin_event.set_group_leave(tmp_group_id)
@@ -402,14 +402,14 @@ def unity_reply(plugin_event, Proc):
                                         userHash = tmp_groupUserHash
                                     )
                                     if flag_will_enable:
-                                        tmp_reply_str = dictStrCustom['strMasterRemoteOn'].format(**dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOn'], dictTValue)
                                     else:
-                                        tmp_reply_str = dictStrCustom['strMasterRemoteOff'].format(**dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOff'], dictTValue)
                                 elif flag_now_enable == flag_will_enable:
                                     if flag_will_enable:
-                                        tmp_reply_str = dictStrCustom['strMasterRemoteOnAlready'].format(**dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOnAlready'], dictTValue)
                                     else:
-                                        tmp_reply_str = dictStrCustom['strMasterRemoteOffAlready'].format(**dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOffAlready'], dictTValue)
                             elif len(tmp_groupUserId_list) == 2:
                                 tmp_hostUserId_in = tmp_groupUserId_list[0]
                                 tmp_hostUserHash = OlivaDiceCore.userConfig.getUserHash(
@@ -452,18 +452,18 @@ def unity_reply(plugin_event, Proc):
                                             userHash = tmp_groupUserHash
                                         )
                                         if flag_will_enable:
-                                            tmp_reply_str = dictStrCustom['strMasterRemoteOn'].format(**dictTValue)
+                                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOn'], dictTValue)
                                         else:
-                                            tmp_reply_str = dictStrCustom['strMasterRemoteOff'].format(**dictTValue)
+                                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOff'], dictTValue)
                                     elif flag_now_enable == flag_will_enable:
                                         if flag_will_enable:
-                                            tmp_reply_str = dictStrCustom['strMasterRemoteOnAlready'].format(**dictTValue)
+                                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOnAlready'], dictTValue)
                                         else:
-                                            tmp_reply_str = dictStrCustom['strMasterRemoteOffAlready'].format(**dictTValue)
+                                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOffAlready'], dictTValue)
                                 else:
-                                    tmp_reply_str = dictStrCustom['strMasterRemoteNone'].format(**dictTValue)
+                                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteNone'], dictTValue)
                             else:
-                                tmp_reply_str = dictStrCustom['strMasterRemoteNone'].format(**dictTValue)
+                                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteNone'], dictTValue)
                         if tmp_reply_str != None:
                             replyMsg(plugin_event, tmp_reply_str)
                     elif isMatchWordStart(tmp_reast_str, 'host'):
@@ -524,25 +524,25 @@ def unity_reply(plugin_event, Proc):
                                 )
                                 if flag_userConfigKey == 'hostEnable':
                                     if flag_will_enable:
-                                        tmp_reply_str = dictStrCustom['strMasterRemoteDefaultOn'].format(**dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteDefaultOn'], dictTValue)
                                     else:
-                                        tmp_reply_str = dictStrCustom['strMasterRemoteDefaultOff'].format(**dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteDefaultOff'], dictTValue)
                                 else:
                                     if flag_will_enable:
-                                        tmp_reply_str = dictStrCustom['strMasterRemoteOn'].format(**dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOn'], dictTValue)
                                     else:
-                                        tmp_reply_str = dictStrCustom['strMasterRemoteOff'].format(**dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOff'], dictTValue)
                             elif flag_now_enable == flag_will_enable:
                                 if flag_userConfigKey == 'hostEnable':
                                     if flag_will_enable:
-                                        tmp_reply_str = dictStrCustom['strMasterRemoteDefaultOnAlready'].format(**dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteDefaultOnAlready'], dictTValue)
                                     else:
-                                        tmp_reply_str = dictStrCustom['strMasterRemoteDefaultOffAlready'].format(**dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteDefaultOffAlready'], dictTValue)
                                 else:
                                     if flag_will_enable:
-                                        tmp_reply_str = dictStrCustom['strMasterRemoteOnAlready'].format(**dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOnAlready'], dictTValue)
                                     else:
-                                        tmp_reply_str = dictStrCustom['strMasterRemoteOffAlready'].format(**dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOffAlready'], dictTValue)
                         if tmp_reply_str != None:
                             replyMsg(plugin_event, tmp_reply_str)
                     return
@@ -553,7 +553,7 @@ def unity_reply(plugin_event, Proc):
                     if len(tmp_reast_str) > 0:
                         tmp_flag = tmp_reast_str
                         dictTValue['tInvateFlag'] = str(tmp_flag)
-                        tmp_reply_str = dictStrCustom['strBotAddGroupRemoteAcceptShow'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAddGroupRemoteAcceptShow'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                         time.sleep(1)
                         plugin_event.set_group_add_request(tmp_flag, 'invite', True, '')
@@ -617,7 +617,7 @@ def unity_reply(plugin_event, Proc):
                                         tmp_pulseUrlList_new.append(tmp_pulseUrlList_this)
                             flag_done = True
                         else:
-                            tmp_reply_str = dictStrCustom['strMasterConsoleSetInvalid'].format(**dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleSetInvalid'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
                             return
                         tmp_pulseUrlList = OlivaDiceCore.console.setConsoleSwitchByHash(
@@ -627,7 +627,7 @@ def unity_reply(plugin_event, Proc):
                         )
                         OlivaDiceCore.console.saveConsoleSwitch()
                         dictTValue['tConsoleKey'] = tmp_editKey
-                        tmp_reply_str = dictStrCustom['strMasterConsoleAppend'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleAppend'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                     return
                 elif isMatchWordStart(tmp_reast_str, 'notice') or isMatchWordStart(tmp_reast_str, 'master'):
@@ -679,7 +679,7 @@ def unity_reply(plugin_event, Proc):
                             ]:
                                 if 'host_id' in plugin_event.data.__dict__:
                                     if plugin_event.data.host_id != None:
-                                        tmp_reply_str = dictStrCustom['strMasterConsoleSetInvalid'].format(**dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleSetInvalid'], dictTValue)
                                         replyMsg(plugin_event, tmp_reply_str)
                                         return
                                 tmp_listValue = plugin_event.data.group_id
@@ -697,13 +697,13 @@ def unity_reply(plugin_event, Proc):
                                     if tmp_listValue_new.isdigit():
                                         tmp_listValue = int(tmp_listValue_new)
                                     else:
-                                        tmp_reply_str = dictStrCustom['strMasterConsoleSetInvalid'].format(**dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleSetInvalid'], dictTValue)
                                         replyMsg(plugin_event, tmp_reply_str)
                                         return
                                 else:
                                     tmp_listValue = tmp_listValue_new
                             else:
-                                tmp_reply_str = dictStrCustom['strMasterConsoleSetInvalid'].format(**dictTValue)
+                                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleSetInvalid'], dictTValue)
                                 replyMsg(plugin_event, tmp_reply_str)
                                 return
                     if tmp_listValue != None and tmp_editKey != None:
@@ -734,7 +734,7 @@ def unity_reply(plugin_event, Proc):
                                         tmp_dataList_new.append(tmp_dataList_this)
                             flag_done = True
                         else:
-                            tmp_reply_str = dictStrCustom['strMasterConsoleSetInvalid'].format(**dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleSetInvalid'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
                             return
                         tmp_dataList = OlivaDiceCore.console.setConsoleSwitchByHash(
@@ -744,7 +744,7 @@ def unity_reply(plugin_event, Proc):
                         )
                         OlivaDiceCore.console.saveConsoleSwitch()
                         dictTValue['tConsoleKey'] = tmp_editKey
-                        tmp_reply_str = dictStrCustom['strMasterConsoleAppend'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleAppend'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                     elif flag_action == 'show' and tmp_listValue == None and tmp_editKey != None:
                         tmp_dataList_new = []
@@ -757,7 +757,7 @@ def unity_reply(plugin_event, Proc):
                                 tmp_dataList_new.append(str(tmp_dataList_this[0]))
                         dictTValue['tConsoleKey'] = tmp_editKey
                         dictTValue['tConsoleValue'] = '\n'.join(tmp_dataList_new)
-                        tmp_reply_str = dictStrCustom['strMasterConsoleShowList'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleShowList'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                     return
                 elif isMatchWordStart(tmp_reast_str, 'host'):
@@ -783,12 +783,12 @@ def unity_reply(plugin_event, Proc):
                                             platform = plugin_event.platform['platform']
                                         )
                                     )
-                                    tmp_reply_str = dictStrCustom['strBotHostOn'].format(**dictTValue)
+                                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotHostOn'], dictTValue)
                             else:
-                                tmp_reply_str = dictStrCustom['strBotAlreadyHostOn'].format(**dictTValue)
+                                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAlreadyHostOn'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
                         else:
-                            tmp_reply_str = dictStrCustom['strBotNotUnderHost'].format(**dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotNotUnderHost'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
                             return
                     elif isMatchWordStart(tmp_reast_str, 'off'):
@@ -811,12 +811,12 @@ def unity_reply(plugin_event, Proc):
                                             platform = plugin_event.platform['platform']
                                         )
                                     )
-                                    tmp_reply_str = dictStrCustom['strBotHostOff'].format(**dictTValue)
+                                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotHostOff'], dictTValue)
                             else:
-                                tmp_reply_str = dictStrCustom['strBotAlreadyHostOff'].format(**dictTValue)
+                                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAlreadyHostOff'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
                         else:
-                            tmp_reply_str = dictStrCustom['strBotNotUnderHost'].format(**dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotNotUnderHost'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
                             return
                 else:
@@ -828,16 +828,16 @@ def unity_reply(plugin_event, Proc):
                                 if type(OlivaDiceCore.console.dictConsoleSwitch[plugin_event.bot_info.hash][tmp_reast_list[0]]) == int:
                                     dictTValue['tConsoleKey'] = tmp_reast_list[0]
                                     dictTValue['tConsoleValue'] = str(OlivaDiceCore.console.dictConsoleSwitch[plugin_event.bot_info.hash][tmp_reast_list[0]])
-                                    tmp_reply_str = dictStrCustom['strMasterConsoleShow'].format(**dictTValue)
+                                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleShow'], dictTValue)
                                     replyMsg(plugin_event, tmp_reply_str)
                                     return
-                        tmp_reply_str = dictStrCustom['strMasterConsoleNotFound'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleNotFound'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                     elif len(tmp_reast_list) > 1:
                         tmp_reast_str = ' '.join(tmp_reast_list[1:])
                         tmp_reast_str = tmp_reast_str.strip(' ')
                         if not tmp_reast_str.isdigit():
-                            tmp_reply_str = dictStrCustom['strMasterConsoleSetInvalid'].format(**dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleSetInvalid'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
                             return
                         if plugin_event.bot_info.hash in OlivaDiceCore.console.dictConsoleSwitch:
@@ -847,10 +847,10 @@ def unity_reply(plugin_event, Proc):
                                     OlivaDiceCore.console.saveConsoleSwitch()   
                                     dictTValue['tConsoleKey'] = tmp_reast_list[0]
                                     dictTValue['tConsoleValue'] = tmp_reast_str
-                                    tmp_reply_str = dictStrCustom['strMasterConsoleSet'].format(**dictTValue)
+                                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleSet'], dictTValue)
                                     replyMsg(plugin_event, tmp_reply_str)
                                     return
-                        tmp_reply_str = dictStrCustom['strMasterConsoleNotFound'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleNotFound'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'system'):
@@ -859,7 +859,7 @@ def unity_reply(plugin_event, Proc):
                 if isMatchWordStart(tmp_reast_str, 'restart'):
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'restart')
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
-                    tmp_reply_str = dictStrCustom['strMasterSystemRestart'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterSystemRestart'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     time.sleep(1)
                     Proc.set_restart()
@@ -878,7 +878,7 @@ def unity_reply(plugin_event, Proc):
                     OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash][tmp_reast_list[0]] = tmp_new_str
                     OlivaDiceCore.msgCustomManager.saveMsgCustomByBotHash(plugin_event.bot_info.hash)
                     dictTValue['tStrName'] = tmp_reast_list[0]
-                    tmp_reply_str = dictStrCustom['strSetStr'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSetStr'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'helpdoc'):
@@ -893,7 +893,7 @@ def unity_reply(plugin_event, Proc):
                         botHash = plugin_event.bot_info.hash,
                         helpdocKey = tmp_helpdoc_key
                     )
-                    tmp_reply_str = dictStrCustom['strHelpdocDel'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpdocDel'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 elif tmp_reast_list_len >= 2:
                     tmp_helpdoc_key = tmp_reast_list[0]
@@ -903,7 +903,7 @@ def unity_reply(plugin_event, Proc):
                         helpdocKey = tmp_helpdoc_key,
                         helpdocVal = tmp_helpdoc_val
                     )
-                    tmp_reply_str = dictStrCustom['strHelpdocSet'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpdocSet'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
         else:
@@ -918,11 +918,11 @@ def unity_reply(plugin_event, Proc):
                     OlivaDiceCore.data.bot_content['masterKey'] = str(uuid.uuid4())
                     OlivaDiceCore.console.setMasterListAppend(plugin_event.bot_info.hash, [plugin_event.data.user_id, plugin_event.platform['platform']])
                     OlivaDiceCore.console.saveConsoleSwitch()
-                    tmp_reply_str = dictStrCustom['strBecomeMaster'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBecomeMaster'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     #显示Master认主信息
                     dictTValue['tInitMasterKey'] = '.master %s' % OlivaDiceCore.data.bot_content['masterKey']
-                    tmp_log_str =  dictStrConst['strToBeMaster'].format(**dictTValue)
+                    tmp_log_str =  OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strToBeMaster'], dictTValue)
                     logProc(Proc, 2, tmp_log_str, [
                         ('OlivaDice', 'default'),
                         ('reply', 'default')
@@ -930,7 +930,7 @@ def unity_reply(plugin_event, Proc):
                 else:
                     if (not flag_hostLocalEnable or not flag_groupEnable) and not flag_force_reply:
                         return
-                    tmp_reply_str = dictStrCustom['strCantBecomeMaster'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strCantBecomeMaster'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
         if flag_messageFliterModeDisabled:
@@ -970,7 +970,7 @@ def unity_reply(plugin_event, Proc):
                                             platform = plugin_event.platform['platform']
                                         )
                                     else:
-                                        tmp_reply_str = dictStrCustom['strNeedMaster'].format(**dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedMaster'], dictTValue)
                                         replyMsg(plugin_event, tmp_reply_str)
                                         return
                             else:
@@ -989,10 +989,10 @@ def unity_reply(plugin_event, Proc):
                                     platform = plugin_event.platform['platform']
                                 )
                             )
-                            tmp_reply_str = dictStrCustom['strBotOn'].format(**dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotOn'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
                         else:
-                            tmp_reply_str = dictStrCustom['strBotAlreadyOn'].format(**dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAlreadyOn'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'off'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'off')
@@ -1022,7 +1022,7 @@ def unity_reply(plugin_event, Proc):
                                             platform = plugin_event.platform['platform']
                                         )
                                     else:
-                                        tmp_reply_str = dictStrCustom['strNeedMaster'].format(**dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedMaster'], dictTValue)
                                         replyMsg(plugin_event, tmp_reply_str)
                                         return
                             else:
@@ -1041,10 +1041,10 @@ def unity_reply(plugin_event, Proc):
                                     platform = plugin_event.platform['platform']
                                 )
                             )
-                            tmp_reply_str = dictStrCustom['strBotOff'].format(**dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotOff'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
                         else:
-                            tmp_reply_str = dictStrCustom['strBotAlreadyOff'].format(**dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAlreadyOff'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'host'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'host')
@@ -1072,13 +1072,13 @@ def unity_reply(plugin_event, Proc):
                                             platform = plugin_event.platform['platform']
                                         )
                                     )
-                                    tmp_reply_str = dictStrCustom['strBotHostLocalOn'].format(**dictTValue)
+                                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotHostLocalOn'], dictTValue)
                                     replyMsg(plugin_event, tmp_reply_str)
                                 else:
-                                    tmp_reply_str = dictStrCustom['strBotAlreadyHostLocalOn'].format(**dictTValue)
+                                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAlreadyHostLocalOn'], dictTValue)
                                     replyMsg(plugin_event, tmp_reply_str)
                             else:
-                                tmp_reply_str = dictStrCustom['strBotNotUnderHost'].format(**dictTValue)
+                                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotNotUnderHost'], dictTValue)
                                 replyMsg(plugin_event, tmp_reply_str)
                 elif isMatchWordStart(tmp_reast_str, 'off'):
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'off')
@@ -1103,13 +1103,13 @@ def unity_reply(plugin_event, Proc):
                                             platform = plugin_event.platform['platform']
                                         )
                                     )
-                                    tmp_reply_str = dictStrCustom['strBotHostLocalOff'].format(**dictTValue)
+                                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotHostLocalOff'], dictTValue)
                                     replyMsg(plugin_event, tmp_reply_str)
                                 else:
-                                    tmp_reply_str = dictStrCustom['strBotAlreadyHostLocalOff'].format(**dictTValue)
+                                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAlreadyHostLocalOff'], dictTValue)
                                     replyMsg(plugin_event, tmp_reply_str)
                             else:
-                                tmp_reply_str = dictStrCustom['strBotNotUnderHost'].format(**dictTValue)
+                                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotNotUnderHost'], dictTValue)
                                 replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'exit'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'exit')
@@ -1117,7 +1117,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = tmp_reast_str.rstrip(' ')
                 if flag_is_from_group and tmp_reast_str in tmp_end_list:
                     if (flag_is_from_group_have_admin and flag_is_from_group_admin) or flag_is_from_master:
-                        tmp_reply_str = dictStrCustom['strBotExit'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotExit'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                         time.sleep(1)
                         plugin_event.set_group_leave(plugin_event.data.group_id)
@@ -1133,7 +1133,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = '\n'.join(tmp_reply_str_list)
                 replyMsg(plugin_event, tmp_reply_str)
             elif len(tmp_reast_str) == 0:
-                tmp_reply_str = OlivaDiceCore.data.bot_info + '\n' + dictStrCustom['strBot'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.data.bot_info + '\n' + OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBot'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
             return
         #此频道关闭时中断处理
@@ -1187,7 +1187,7 @@ def unity_reply(plugin_event, Proc):
                                 )
                             )
                     dictTValue['tHelpDocResult'] = '\n'.join(tmp_dataList_new)
-                    tmp_reply_str = dictStrCustom['strHelpDoc'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDoc'], dictTValue)
                 else:
                     tmp_reply_str = OlivaDiceCore.helpDoc.getHelp(tmp_reast_str, plugin_event.bot_info.hash)
             else:
@@ -1225,7 +1225,7 @@ def unity_reply(plugin_event, Proc):
                 )
                 if flag_hide:
                     replyMsgPrivateByEvent(plugin_event, tmp_reply_str)
-                    tmp_reply_str = dictStrCustom['strDrawDeckHideShow'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawDeckHideShow'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
             else:
@@ -1299,7 +1299,7 @@ def unity_reply(plugin_event, Proc):
                         OlivaDiceCore.userConfig.writeUserConfigByUserHash(
                             userHash = tmp_groupHash
                         )
-                        tmp_reply_str = dictStrCustom['strObClear'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strObClear'], dictTValue)
                         if tmp_reply_str != None:
                             replyMsg(plugin_event, tmp_reply_str)
             if isMatchWordStart(tmp_reast_str, 'list', fullMatch = True):
@@ -1346,9 +1346,9 @@ def unity_reply(plugin_event, Proc):
                         )
                     if len(tmp_reply_str_list) > 0:
                         dictTValue['tResult'] = '\n'.join(tmp_reply_str_list)
-                        tmp_reply_str = dictStrCustom['strObList'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strObList'], dictTValue)
                     else:
-                        tmp_reply_str = dictStrCustom['strObListNone'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strObListNone'], dictTValue)
                     if tmp_reply_str != None:
                         replyMsg(plugin_event, tmp_reply_str)
             elif flag_solo or isMatchWordStart(tmp_reast_str, 'exit', fullMatch = True) or isMatchWordStart(tmp_reast_str, 'join', fullMatch = True):
@@ -1409,7 +1409,7 @@ def unity_reply(plugin_event, Proc):
                             tmp_groupObList_list.append(tmp_userHash)
                         if tmp_groupHash not in tmp_userObList_list:
                             tmp_userObList_list.append(tmp_groupHash)
-                        tmp_reply_str = dictStrCustom['strObJoin'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strObJoin'], dictTValue)
                     elif flag_ob_is_enable and not flag_ob_will_enable:
                         tmp_groupObList_list_new = []
                         tmp_userObList_list_new = []
@@ -1421,11 +1421,11 @@ def unity_reply(plugin_event, Proc):
                             if tmp_groupHash != tmp_userObList_list_this:
                                 tmp_userObList_list_new.append(tmp_userObList_list_this)
                         tmp_userObList_list = tmp_userObList_list_new
-                        tmp_reply_str = dictStrCustom['strObExit'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strObExit'], dictTValue)
                     elif flag_ob_is_enable and flag_ob_will_enable:
-                        tmp_reply_str = dictStrCustom['strObJoinAlready'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strObJoinAlready'], dictTValue)
                     elif not flag_ob_is_enable and not flag_ob_will_enable:
-                        tmp_reply_str = dictStrCustom['strObExitAlready'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strObExitAlready'], dictTValue)
                     if flag_ob_is_enable != flag_ob_will_enable:
                         OlivaDiceCore.userConfig.setUserConfigByKey(
                             userConfigKey = 'groupObList',
@@ -1528,17 +1528,17 @@ def unity_reply(plugin_event, Proc):
                     OlivaDiceCore.userConfig.writeUserConfigByUserHash(
                         userHash = tmp_userHash
                     )
-                    tmp_reply_str = dictStrCustom['strObExitAll'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strObExitAll'], dictTValue)
                     if tmp_reply_str != None:
                         replyMsg(plugin_event, tmp_reply_str)
         elif isMatchWordStart(tmp_reast_str, 'ti', fullMatch = True):
             dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck('即时症状', plugin_event.bot_info.hash)
-            tmp_reply_str = dictStrCustom['strDrawTi'].format(**dictTValue)
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawTi'], dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
             return
         elif isMatchWordStart(tmp_reast_str, 'li', fullMatch = True):
             dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck('总结症状', plugin_event.bot_info.hash)
-            tmp_reply_str = dictStrCustom['strDrawLi'].format(**dictTValue)
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawLi'], dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
             return
         elif isMatchWordStart(tmp_reast_str, 'uinfo'):
@@ -1742,7 +1742,7 @@ def unity_reply(plugin_event, Proc):
                     plugin_event.bot_info.hash,
                     count = tmp_card_count
                 )
-            tmp_reply_str = dictStrCustom['strDrawName'].format(**dictTValue)
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawName'], dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
             return
         elif isMatchWordStart(tmp_reast_str, 'nn'):
@@ -1777,7 +1777,7 @@ def unity_reply(plugin_event, Proc):
                         dictTValue['tPcSelection'] = tmp_pc_name_1
                     else:
                         dictTValue['tPcSelection'] = dictTValue['tName']
-                    tmp_reply_str = dictStrCustom['strPcRename'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRename'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
             else:
                 replyMsgLazyHelpByEvent(plugin_event, 'nn')
@@ -1792,7 +1792,7 @@ def unity_reply(plugin_event, Proc):
             sn_title = None
             sn_title_new = None
             if tmp_hagID == None:
-                tmp_reply_str = dictStrCustom['strForGroupOnly'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
                 OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
                 return
             if '' == tmp_reast_str.lower():
@@ -1858,10 +1858,10 @@ def unity_reply(plugin_event, Proc):
                     host_id = plugin_event.data.host_id
                 )
                 dictTValue['tResult'] = sn_title
-                tmp_reply_str = dictStrCustom['strSnSet'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnSet'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
             else:
-                tmp_reply_str = dictStrCustom['strSnPcCardNone'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnPcCardNone'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
             return
         elif isMatchWordStart(tmp_reast_str, 'st'):
@@ -1989,7 +1989,7 @@ def unity_reply(plugin_event, Proc):
                             )
                 tmp_reply_str_1 = '\n'.join(tmp_reply_str_1_list)
                 dictTValue['tPcShow'] = tmp_reply_str_1
-                tmp_reply_str = dictStrCustom['strPcShow'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShow'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'show'):
@@ -2019,7 +2019,7 @@ def unity_reply(plugin_event, Proc):
                         dictTValue['tName'] = tmp_pc_name
                     dictTValue['tSkillName'] = tmp_skill_name
                     dictTValue['tSkillValue'] = str(tmp_skill_value_find)
-                    tmp_reply_str = dictStrCustom['strPcGetSingleSkillValue'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcGetSingleSkillValue'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'list', fullMatch = True):
@@ -2046,7 +2046,7 @@ def unity_reply(plugin_event, Proc):
                 if tmp_pc_name_1 != None:
                     dictTValue['tPcSelection'] = tmp_pc_name_1
                 dictTValue['tPcList'] = tmp_reply_str_1
-                tmp_reply_str = dictStrCustom['strPcList'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcList'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'lock', fullMatch = True):
@@ -2063,17 +2063,17 @@ def unity_reply(plugin_event, Proc):
                             tmp_hagID
                         ):
                             dictTValue['tName'] = tmp_pc_name_1
-                            tmp_reply_str = dictStrCustom['strPcLock'].format(**dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcLock'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
                         else:
                             dictTValue['tName'] = tmp_pc_name_1
-                            tmp_reply_str = dictStrCustom['strPcLockError'].format(**dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcLockError'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
                     else:
-                        tmp_reply_str = dictStrCustom['strPcLockNone'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcLockNone'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                 else:
-                    tmp_reply_str = dictStrCustom['strForGroupOnly'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'unlock', fullMatch = True):
@@ -2086,13 +2086,13 @@ def unity_reply(plugin_event, Proc):
                     if tmp_pc_name_1 != None:
                         OlivaDiceCore.pcCard.pcCardDataDelSelectionKeyLock(tmp_pc_hash, tmp_hagID)
                         dictTValue['tName'] = tmp_pc_name_1
-                        tmp_reply_str = dictStrCustom['strPcUnLock'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcUnLock'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                     else:
-                        tmp_reply_str = dictStrCustom['strPcUnLockNone'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcUnLockNone'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                 else:
-                    tmp_reply_str = dictStrCustom['strForGroupOnly'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'set'):
@@ -2122,9 +2122,9 @@ def unity_reply(plugin_event, Proc):
                         )
                     if tmp_flag_done:
                         dictTValue['tPcSelection'] = tmp_pc_name
-                        tmp_reply_str = dictStrCustom['strPcSet'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSet'], dictTValue)
                     else:
-                        tmp_reply_str = dictStrCustom['strPcSetError'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetError'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'init'):
@@ -2197,7 +2197,7 @@ def unity_reply(plugin_event, Proc):
                             )
                 dictTValue['tPcInitResult'] = '\n%s' % ' '.join(tmp_pcCard_list)
                 dictTValue['tPcTempName'] = tmp_template_name
-                tmp_reply_str = dictStrCustom['strPcInitSt'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitSt'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'del'):
@@ -2226,11 +2226,11 @@ def unity_reply(plugin_event, Proc):
                         tmp_pc_name
                     ):
                         dictTValue['tPcSelection'] = tmp_pc_name
-                        tmp_reply_str = dictStrCustom['strPcDel'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcDel'], dictTValue)
                     else:
-                        tmp_reply_str = dictStrCustom['strPcDelError'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcDelError'], dictTValue)
                 else:
-                    tmp_reply_str = dictStrCustom['strPcDelNone'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcDelNone'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'clear', fullMatch = True):
@@ -2262,9 +2262,9 @@ def unity_reply(plugin_event, Proc):
                         tmp_hagID
                     )
                     dictTValue['tPcSelection'] = tmp_pc_name
-                    tmp_reply_str = dictStrCustom['strPcClear'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcClear'], dictTValue)
                 else:
-                    tmp_reply_str = dictStrCustom['strPcClearNone'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcClearNone'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'rm'):
@@ -2312,10 +2312,10 @@ def unity_reply(plugin_event, Proc):
                     )
                     dictTValue['tPcSelection'] = tmp_pc_name
                     dictTValue['tSkillName'] = tmp_pcSkillName
-                    tmp_reply_str = dictStrCustom['strPcRm'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRm'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 elif tmp_pcSkillName != None:
-                    tmp_reply_str = dictStrCustom['strPcRmCardNone'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRmCardNone'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 else:
                     replyMsgLazyHelpByEvent(plugin_event, 'st')
@@ -2345,11 +2345,11 @@ def unity_reply(plugin_event, Proc):
                         ):
                             dictTValue['tPcSelection'] = tmp_pc_name
                             dictTValue['tPcTempName'] = tmp_template_name
-                            tmp_reply_str = dictStrCustom['strPcTemp'].format(**dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcTemp'], dictTValue)
                         else:
-                            tmp_reply_str = dictStrCustom['strPcTempError'].format(**dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcTempError'], dictTValue)
                     else:
-                        tmp_reply_str = dictStrCustom['strPcTempError'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcTempError'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 else:
                     if tmp_pc_name != None:
@@ -2385,12 +2385,12 @@ def unity_reply(plugin_event, Proc):
                         if tmp_groupTemplate != None and tmp_groupTemplateRule != None:
                             dictTValue['tPcTempName'] = tmp_groupTemplate
                             dictTValue['tPcTempRuleName'] = tmp_groupTemplateRule
-                            dictTValue['tResult'] = dictStrCustom['strPcGroupTempRuleShow'].format(**dictTValue)
+                            dictTValue['tResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcGroupTempRuleShow'], dictTValue)
                         dictTValue['tPcSelection'] = tmp_pc_name
                         dictTValue['tPcTempName'] = tmp_template_name
-                        tmp_reply_str = dictStrCustom['strPcTempShow'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcTempShow'], dictTValue)
                     else:
-                        tmp_reply_str = dictStrCustom['strPcTempError'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcTempError'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'rule'):
@@ -2429,11 +2429,11 @@ def unity_reply(plugin_event, Proc):
                             dictTValue['tPcSelection'] = tmp_pc_name
                             dictTValue['tPcTempName'] = tmp_template_name
                             dictTValue['tPcTempRuleName'] = tmp_template_rule_name
-                            tmp_reply_str = dictStrCustom['strPcTempRule'].format(**dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcTempRule'], dictTValue)
                         else:
-                            tmp_reply_str = dictStrCustom['strPcTempRuleError'].format(**dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcTempRuleError'], dictTValue)
                     else:
-                        tmp_reply_str = dictStrCustom['strPcTempRuleError'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcTempRuleError'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 else:
                     if tmp_pc_name != None:
@@ -2479,13 +2479,13 @@ def unity_reply(plugin_event, Proc):
                         if tmp_groupTemplate != None and tmp_groupTemplateRule != None:
                             dictTValue['tPcTempName'] = tmp_groupTemplate
                             dictTValue['tPcTempRuleName'] = tmp_groupTemplateRule
-                            dictTValue['tResult'] = dictStrCustom['strPcGroupTempRuleShow'].format(**dictTValue)
+                            dictTValue['tResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcGroupTempRuleShow'], dictTValue)
                         dictTValue['tPcSelection'] = tmp_pc_name
                         dictTValue['tPcTempName'] = tmp_template_name
                         dictTValue['tPcTempRuleName'] = tmp_template_rule_name
-                        tmp_reply_str = dictStrCustom['strPcTempRuleShow'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcTempRuleShow'], dictTValue)
                     else:
-                        tmp_reply_str = dictStrCustom['strPcTempRuleError'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcTempRuleError'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'note') or isMatchWordStart(tmp_reast_str, 'rec'):
@@ -2641,7 +2641,7 @@ def unity_reply(plugin_event, Proc):
                                 dictTValue['tSkillUpdate'] = '%s=%s=%s' % (rd_para_str, rd_para.resDetail, str(tmp_skill_value_new)[:50] + '...')
                             else:
                                 dictTValue['tSkillUpdate'] = '%s=%s=%s' % (rd_para_str, rd_para.resDetail, str(tmp_skill_value_new))
-                        tmp_reply_str = dictStrCustom['strPcUpdateSkillValue'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcUpdateSkillValue'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                         return
                 tmp_skill_name = None
@@ -2752,7 +2752,7 @@ def unity_reply(plugin_event, Proc):
                                 flag_mode = 'rec',
                                 enableFalse = False
                             )
-                    tmp_reply_str = dictStrCustom['strPcSetSkillValue'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetSkillValue'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
             else:
                 tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
@@ -2774,7 +2774,7 @@ def unity_reply(plugin_event, Proc):
                     dictTValue['tName'] = tmp_pc_name_1
                 dictTValue['tSkillName'] = tmp_skill_name_find
                 dictTValue['tSkillValue'] = str(tmp_skill_value_find)
-                tmp_reply_str = dictStrCustom['strPcGetSingleSkillValue'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcGetSingleSkillValue'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
         elif isMatchWordStart(tmp_reast_str, 'setcoc'):
             if flag_is_from_group:
@@ -2815,7 +2815,7 @@ def unity_reply(plugin_event, Proc):
                     dictTValue['tPcTempRuleName'] = tmp_templateRuleName
                     if tmp_templateRuleName in OlivaDiceCore.msgCustom.dictSetCOCDetail:
                         dictTValue['tLazyResult'] = ':\n%s' % OlivaDiceCore.msgCustom.dictSetCOCDetail[tmp_templateRuleName]
-                    tmp_reply_str = dictStrCustom['strSetGroupTempRule'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSetGroupTempRule'], dictTValue)
                 else:
                     OlivaDiceCore.userConfig.setUserConfigByKey(
                         userConfigKey = 'groupTemplate',
@@ -2833,7 +2833,7 @@ def unity_reply(plugin_event, Proc):
                         userType = 'group',
                         platform = tmp_user_platform
                     )
-                    tmp_reply_str = dictStrCustom['strDelGroupTempRule'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDelGroupTempRule'], dictTValue)
                 OlivaDiceCore.userConfig.writeUserConfigByUserHash(
                     userHash = OlivaDiceCore.userConfig.getUserHash(
                         userId = tmp_hag_id,
@@ -2842,7 +2842,7 @@ def unity_reply(plugin_event, Proc):
                     )
                 )
             else:
-                tmp_reply_str = dictStrCustom['strForGroupOnly'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
             return
         elif (
@@ -2908,7 +2908,7 @@ def unity_reply(plugin_event, Proc):
                     elif tmp_pcCardTemplateName in ['COC6', 'DND5E']:
                         tmp_reply_str_1 += '共计:%d' % tmp_total_count_1
                 dictTValue['tPcInitResult'] = tmp_reply_str_1
-                tmp_reply_str = dictStrCustom['strPcInit'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInit'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
             else:
                 return
@@ -3062,16 +3062,16 @@ def unity_reply(plugin_event, Proc):
                         dictTValue['tSkillValueNew'] = str(tmp_skill_value)
                         dictTValue['tRollResult'] = '1D100=' + str(tmp_rd_int)
                         if flag_GreatFailed:
-                            tmp_reply_str = dictStrCustom['strSanCheckGreatFailed'].format(**dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSanCheckGreatFailed'], dictTValue)
                         else:
-                            tmp_reply_str = dictStrCustom['strSanCheck'].format(**dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSanCheck'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                     else:
                         dictTValue['tName'] = tmp_pc_name
                         dictTValue['tSkillValue'] = str(tmp_skill_value_old)
                         dictTValue['tRollResult'] = '1D100=' + str(tmp_rd_int)
                         dictTValue['tRollSubResult'] = tmp_sancheck_para_final
-                        tmp_reply_str = dictStrCustom['strSanCheckError'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSanCheckError'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
             else:
                 replyMsgLazyHelpByEvent(plugin_event, 'sc')
@@ -3081,7 +3081,7 @@ def unity_reply(plugin_event, Proc):
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'ri')
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             if tmp_hagID == None:
-                tmp_reply_str = dictStrCustom['strForGroupOnly'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
                 OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
                 return
             OlivaDiceCore.msgReplyModel.replyRI_command(
@@ -3101,7 +3101,7 @@ def unity_reply(plugin_event, Proc):
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'init')
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             if tmp_hagID == None:
-                tmp_reply_str = dictStrCustom['strForGroupOnly'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
                 OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
                 return
             if isMatchWordStart(tmp_reast_str, 'set'):
@@ -3172,7 +3172,7 @@ def unity_reply(plugin_event, Proc):
                     userHash = tmp_groupHash
                 )
                 dictTValue['tName'] = tmp_name
-                tmp_reply_str = dictStrCustom['strPcInitDel'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitDel'], dictTValue)
                 OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'reset', fullMatch = True):
@@ -3244,11 +3244,11 @@ def unity_reply(plugin_event, Proc):
                             str(tmp_groupInitList_list_sort_this[1])
                         )
                     tmp_groupInitList_list_final.append(
-                        dictStrCustom['strPcInitShowNode'].format(**dictTValue)
+                        OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitShowNode'], dictTValue)
                     )
                     count += 1
                 dictTValue['tResult'] = '\n'.join(tmp_groupInitList_list_final)
-                tmp_reply_str = dictStrCustom['strPcInitReset'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitReset'], dictTValue)
                 OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'clear', fullMatch = True):
@@ -3276,7 +3276,7 @@ def unity_reply(plugin_event, Proc):
                 OlivaDiceCore.userConfig.writeUserConfigByUserHash(
                     userHash = tmp_groupHash
                 )
-                tmp_reply_str = dictStrCustom['strPcInitClear'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitClear'], dictTValue)
                 OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
                 return
             elif '' == tmp_reast_str:
@@ -3301,11 +3301,11 @@ def unity_reply(plugin_event, Proc):
                     dictTValue['tSubName'] = str(tmp_groupInitList_list_sort_this[0])
                     dictTValue['tSubResult'] = str(tmp_groupInitList_list_sort_this[1])
                     tmp_groupInitList_list_final.append(
-                        dictStrCustom['strPcInitShowNode'].format(**dictTValue)
+                        OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitShowNode'], dictTValue)
                     )
                     count += 1
                 dictTValue['tResult'] = '\n'.join(tmp_groupInitList_list_final)
-                tmp_reply_str = dictStrCustom['strPcInitShow'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitShow'], dictTValue)
                 OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
                 return
         elif isMatchWordStart(tmp_reast_str, 'rav'):
@@ -3645,17 +3645,17 @@ def unity_reply(plugin_event, Proc):
                 if flag_need_reply:
                     if tmp_skill_name != None:
                         dictTValue['tSkillName'] = tmp_skill_name
-                        tmp_reply_str = dictStrCustom['strPcSkillCheckWithSkillName'].format(**dictTValue)
-                        tmp_reply_str_show = dictStrCustom['strPcSkillCheckHideShowWithSkillName'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckWithSkillName'], dictTValue)
+                        tmp_reply_str_show = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckHideShowWithSkillName'], dictTValue)
                         if flag_hide_roll and flag_is_from_group:
                             dictTValue['tGroupId'] = str(plugin_event.data.group_id)
-                            tmp_reply_str = dictStrCustom['strPcSkillCheckHideWithSkillName'].format(**dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckHideWithSkillName'], dictTValue)
                     else:
-                        tmp_reply_str = dictStrCustom['strPcSkillCheck'].format(**dictTValue)
-                        tmp_reply_str_show = dictStrCustom['strPcSkillCheckHideShow'].format(**dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheck'], dictTValue)
+                        tmp_reply_str_show = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckHideShow'], dictTValue)
                         if flag_hide_roll and flag_is_from_group:
                             dictTValue['tGroupId'] = str(plugin_event.data.group_id)
-                            tmp_reply_str = dictStrCustom['strPcSkillCheckHide'].format(**dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckHide'], dictTValue)
                     if flag_hide_roll and flag_is_from_group:
                         replyMsg(plugin_event, tmp_reply_str_show)
                         replyMsgPrivateByEvent(plugin_event, tmp_reply_str)
@@ -3722,14 +3722,14 @@ def unity_reply(plugin_event, Proc):
                                 )
                                 dictTValue['tRollSubResult'] = '%s=%s=%s' % (rd_para_str_2, rd_para_2.resDetail, (rd_para_2.resInt))
                                 dictTValue['tSkillCheckReasult'] = '%s%s' % (
-                                    dictStrCustom['strPcSkillCheckSucceed'].format(**dictTValue),
-                                    dictStrCustom['strPcSkillEnhanceContent'].format(**dictTValue)
+                                    OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckSucceed'], dictTValue),
+                                    OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillEnhanceContent'], dictTValue)
                                 )
-                                tmp_reply_str = dictStrCustom['strPcSkillEnhanceCheck'].format(**dictTValue)
+                                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillEnhanceCheck'], dictTValue)
                                 replyMsg(plugin_event, tmp_reply_str)
                         else:
-                            dictTValue['tSkillCheckReasult'] = dictStrCustom['strPcSkillCheckFailed'].format(**dictTValue)
-                            tmp_reply_str = dictStrCustom['strPcSkillEnhanceCheck'].format(**dictTValue)
+                            dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckFailed'], dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillEnhanceCheck'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
                         if tmp_pc_name_1 != None:
                             tmp_enhanceList_new = []
@@ -3817,11 +3817,11 @@ def unity_reply(plugin_event, Proc):
                         dictTValue['tSkillEnhanceSucceedList'] = '\n%s' % ' '.join(tmp_enhance_succeed_list_2)
                     else:
                         dictTValue['tSkillEnhanceSucceedList'] = ''
-                    tmp_reply_str = dictStrCustom['strPcSkillEnhanceAll'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillEnhanceAll'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
                 else:
-                    tmp_reply_str = dictStrCustom['strPcSkillEnhanceError'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillEnhanceError'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
         #关闭该调试性质指令
         elif False and isMatchWordStart(tmp_reast_str, 'rrange'):
@@ -3867,7 +3867,7 @@ def unity_reply(plugin_event, Proc):
                 else:
                     dictTValue['tRollPara'] = rd_para_str[:50] + '...'
                 dictTValue['tRollResultInt'] = str(rd_para.resError)
-            tmp_reply_str = dictStrCustom['strRollRange'].format(**dictTValue)
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollRange'], dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
         #基于OneDice标准，这些指令不再需要，指引用户看HelpDoc
         #elif isMatchWordStart(tmp_reast_str, 'ww'):
@@ -4122,32 +4122,32 @@ def unity_reply(plugin_event, Proc):
                     dictTValue['tResult'] = str(rd_para.resError)
                     dictTValue['tRollPara'] = str(rd_para_str)
                     if rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_GENERATE_FATAL:
-                        tmp_reply_str_1 = dictStrCustom['strRollError01'].format(**dictTValue)
+                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError01'], dictTValue)
                     elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_COMPLETE_FATAL:
-                        tmp_reply_str_1 = dictStrCustom['strRollError02'].format(**dictTValue)
+                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError02'], dictTValue)
                     elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.INPUT_RAW_INVALID:
-                        tmp_reply_str_1 = dictStrCustom['strRollError03'].format(**dictTValue)
+                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError03'], dictTValue)
                     elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.INPUT_CHILD_PARA_INVALID:
-                        tmp_reply_str_1 = dictStrCustom['strRollError04'].format(**dictTValue)
+                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError04'], dictTValue)
                     elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.INPUT_NODE_OPERATION_INVALID:
-                        tmp_reply_str_1 = dictStrCustom['strRollError05'].format(**dictTValue)
+                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError05'], dictTValue)
                     elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_OPERATION_INVALID:
-                        tmp_reply_str_1 = dictStrCustom['strRollError06'].format(**dictTValue)
+                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError06'], dictTValue)
                     elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_STACK_EMPTY:
-                        tmp_reply_str_1 = dictStrCustom['strRollError07'].format(**dictTValue)
+                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError07'], dictTValue)
                     elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_LEFT_VAL_INVALID:
-                        tmp_reply_str_1 = dictStrCustom['strRollError08'].format(**dictTValue)
+                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError08'], dictTValue)
                     elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_RIGHT_VAL_INVALID:
-                        tmp_reply_str_1 = dictStrCustom['strRollError09'].format(**dictTValue)
+                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError09'], dictTValue)
                     elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_SUB_VAL_INVALID:
-                        tmp_reply_str_1 = dictStrCustom['strRollError10'].format(**dictTValue)
+                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError10'], dictTValue)
                     elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_EXTREME_VAL_INVALID:
-                        tmp_reply_str_1 = dictStrCustom['strRollError11'].format(**dictTValue)
+                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError11'], dictTValue)
                     elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_REPLACE_FATAL:
-                        tmp_reply_str_1 = dictStrCustom['strRollError12'].format(**dictTValue)
+                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError12'], dictTValue)
                     else:
-                        tmp_reply_str_1 = dictStrCustom['strRollErrorUnknown'].format(**dictTValue)
-                    tmp_reply_str_1 += dictStrCustom['strRollErrorHelp'].format(**dictTValue)
+                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollErrorUnknown'], dictTValue)
+                    tmp_reply_str_1 += OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollErrorHelp'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str_1)
                     return
                 dictTValue['tRollResult'] = tmp_reply_str_1
@@ -4172,17 +4172,17 @@ def unity_reply(plugin_event, Proc):
                 dictTValue['tRollResult'] = rd_para_str + '=' + tmp_reply_str_1
             if rd_reason_str != None:
                 dictTValue['tRollReason'] = rd_reason_str
-                tmp_reply_str = dictStrCustom['strRollWithReason'].format(**dictTValue)
-                tmp_reply_str_show = dictStrCustom['strRollHideShowWithReason'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollWithReason'], dictTValue)
+                tmp_reply_str_show = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollHideShowWithReason'], dictTValue)
                 if flag_hide_roll and flag_is_from_group:
                     dictTValue['tGroupId'] = str(plugin_event.data.group_id)
-                    tmp_reply_str = dictStrCustom['strRollHideWithReason'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollHideWithReason'], dictTValue)
             else:
-                tmp_reply_str = dictStrCustom['strRoll'].format(**dictTValue)
-                tmp_reply_str_show = dictStrCustom['strRollHideShow'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRoll'], dictTValue)
+                tmp_reply_str_show = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollHideShow'], dictTValue)
                 if flag_hide_roll and flag_is_from_group:
                     dictTValue['tGroupId'] = str(plugin_event.data.group_id)
-                    tmp_reply_str = dictStrCustom['strRollHide'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollHide'], dictTValue)
             if flag_hide_roll and flag_is_from_group:
                 replyMsg(plugin_event, tmp_reply_str_show)
                 replyMsgPrivateByEvent(plugin_event, tmp_reply_str)

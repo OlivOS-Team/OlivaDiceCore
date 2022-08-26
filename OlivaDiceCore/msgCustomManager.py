@@ -62,3 +62,14 @@ def saveMsgCustomByBotHash(botHash):
 def releaseDir(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
+
+def formatReplySTR(data:str, valDict:dict):
+    res = data
+    res = res.format(**valDict)
+    return res
+
+def formatReplySTRConst(data:str, valDict:dict):
+    res = data
+    res = res.format(**valDict)
+    return res
+

@@ -66,7 +66,7 @@ def replyRR_command(plugin_event, Proc, valDict):
             tmp_RDData_str,
             str(tmp_RDDataIntUser)
         )
-        tmp_reply_str = dictStrCustom['strRollRecord'].format(**dictTValue)
+        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollRecord'], dictTValue)
     if tmp_reply_str != None:
         replyMsg(plugin_event, tmp_reply_str)
 
@@ -298,12 +298,12 @@ def replyRAV_command(plugin_event, Proc, valDict):
                     dictTValue['tName01'] = res_1['data']['name']
             dictTValue['tSkillName'] = tmp_skill_name
             if flag_rav_type == '0':
-                dictTValue['tRAVResult'] = dictStrCustom['strRAVResult01'].format(**dictTValue)
+                dictTValue['tRAVResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRAVResult01'], dictTValue)
             elif flag_rav_type == '1':
-                dictTValue['tRAVResult'] = dictStrCustom['strRAVResult02'].format(**dictTValue)
+                dictTValue['tRAVResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRAVResult02'], dictTValue)
             elif flag_rav_type == '-':
-                dictTValue['tRAVResult'] = dictStrCustom['strRAVResult03'].format(**dictTValue)
-            tmp_reply_str = dictStrCustom['strRAVShow'].format(**dictTValue)
+                dictTValue['tRAVResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRAVResult03'], dictTValue)
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRAVShow'], dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
     else:
         OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'rav')
@@ -354,7 +354,7 @@ def setPcNoteOrRecData(
             if tmp_rd.resError != None:
                 if enableFalse:
                     dictTValue['tResult'] = tmp_value
-                    tmp_reply_str = dictStrCustom['strPcSetMapValueError'].format(**dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetMapValueError'], dictTValue)
                     OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
                 return
         tmp_mappingRecord[tmp_key] = tmp_value
@@ -365,7 +365,7 @@ def setPcNoteOrRecData(
             dataContent = tmp_mappingRecord
         )
         if enableFalse:
-            tmp_reply_str = dictStrCustom['strPcSetSkillValue'].format(**dictTValue)
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetSkillValue'], dictTValue)
             OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
     elif tmp_key != None and tmp_value == None:
         if tmp_key in tmp_mappingRecord:
@@ -373,7 +373,7 @@ def setPcNoteOrRecData(
             if enableFalse:
                 dictTValue['tSkillName'] = tmp_key
                 dictTValue['tSkillValue'] = tmp_value
-                tmp_reply_str = dictStrCustom['strPcGetSingleSkillValue'].format(**dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcGetSingleSkillValue'], dictTValue)
                 OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
 
 
@@ -487,12 +487,12 @@ def replyRI_command(
             dictTValue['tSubName'] = tmp_name
             dictTValue['tSubResult'] = '%s=%d' % (tmp_value, tmp_value_final)
             result_list.append(
-                dictStrCustom['strPcInitShowNode'].format(**dictTValue)
+                OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitShowNode'], dictTValue)
             )
             count += 1
     if flag_reply:
         dictTValue['tResult'] = '\n'.join(result_list)
-        tmp_reply_str = dictStrCustom['strPcInitSet'].format(**dictTValue)
+        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitSet'], dictTValue)
         OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
 
 def setUserConfigForInit(
