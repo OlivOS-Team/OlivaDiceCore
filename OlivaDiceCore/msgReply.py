@@ -142,7 +142,7 @@ def unity_reply(plugin_event, Proc):
     valDict['dictTValue'] = dictTValue
     valDict['dictStrCustom'] = dictStrCustom
     valDict['tmp_platform'] = plugin_event.platform['platform']
-    dictTValue['tBotHash'] = plugin_event.bot_info.hash
+    dictTValue = OlivaDiceCore.msgCustomManager.dictTValueInit(plugin_event, dictTValue)
 
     tmp_hook_host_id = None
     tmp_hook_group_id = None

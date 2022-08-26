@@ -139,3 +139,8 @@ def formatReplySTRReplace(data:str, valDict:dict):
     res = reg_res
     return res
 
+def dictTValueInit(plugin_event, dictTValue):
+    res = dictTValue
+    res['tBotHash'] = plugin_event.bot_info.hash
+    return res
+
