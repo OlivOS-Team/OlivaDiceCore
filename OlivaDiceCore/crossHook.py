@@ -44,6 +44,9 @@ def pokeHook(plugin_event, type = 'group'):
     else:
         return OlivaDiceCore.data.bot_info
 
+def msgFormatHook(data:str, valDict:dict):
+    return data
+
 #跨模块注入点
 dictHookList = {
     'model': listModel,
@@ -52,5 +55,6 @@ dictHookList = {
 
 dictHookFunc = {
     'msgHook': msgHook,
-    'pokeHook': pokeHook
+    'pokeHook': pokeHook,
+    'msgFormatHook': msgFormatHook
 }

@@ -19,6 +19,7 @@ import OlivaDiceCore
 
 import os
 import json
+import random
 
 def initMsgCustom(bot_info_dict):
     for bot_info_dict_this in bot_info_dict:
@@ -64,12 +65,77 @@ def releaseDir(dir_path):
         os.makedirs(dir_path)
 
 def formatReplySTR(data:str, valDict:dict):
-    res = data
-    res = res.format(**valDict)
+    res:str = data
+    res = random.choice(list(data.split('|')))
+    res = res.replace('{DEVIDE}', '|')
+    res = res.replace('{OR}', '|')
+    res = OlivaDiceCore.crossHook.dictHookFunc['msgFormatHook'](res, valDict)
+    res = formatReplySTRReplace(res, valDict)
     return res
 
 def formatReplySTRConst(data:str, valDict:dict):
     res = data
     res = res.format(**valDict)
+    return res
+
+# 用状态机实现高宽容度的变量引用
+# 替代Python内置Format
+def formatReplySTRReplace(data:str, valDict:dict):
+    raw = data
+    res = ''
+    reg_res = ''
+    reg_key = ''
+    flagType = 'str'
+    for i in raw:
+        if flagType == 'str':
+            if i == '{':
+                flagType = 'left'
+            else:
+                reg_res += i
+                flagType = 'str'
+        elif flagType == 'left':
+            if i == '}':
+                reg_key = ''
+                flagType = 'right'
+            else:
+                reg_key = i
+                flagType = 'key'
+        elif flagType == 'key':
+            if i == '}':
+                flag_hit = False
+                # 变量表替换
+                if not flag_hit and reg_key in valDict:
+                    reg_res += str(valDict[reg_key])
+                    flag_hit = True
+                # 牌堆抽取
+                if not flag_hit:
+                    tmp_bot_hash = 'unity'
+                    if 'tBotHash' in valDict:
+                        tmp_bot_hash = valDict['tBotHash']
+                    reg_res_this = OlivaDiceCore.drawCard.draw(
+                        key_str = reg_key,
+                        bot_hash = tmp_bot_hash,
+                        flag_need_give_back = True
+                    )
+                    if reg_res_this != None:
+                        reg_res += reg_res_this
+                        flag_hit = True
+                # 缺省确保原样返回
+                if not flag_hit:
+                    reg_res += '{%s}' % reg_key
+                flagType = 'right'
+            else:
+                reg_key += i
+                flagType = 'key'
+        elif flagType == 'right':
+            reg_key = ''
+            if i == '{':
+                flagType = 'left'
+            else:
+                reg_res += i
+                flagType = 'str'
+    if flagType == 'key':
+        reg_res += '{%s' % reg_key
+    res = reg_res
     return res
 

@@ -210,6 +210,7 @@ dictGValue = {
 
 dictTValue = {
     'tVersion' : 'N/A',
+    'tBotHash' : 'unity',
     'tId' : 'N/A',
     'tName' : 'N/A',
     'tName01' : 'N/A',
