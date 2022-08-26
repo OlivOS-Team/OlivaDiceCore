@@ -22,6 +22,7 @@ import json
 #import yaml
 import re
 import traceback
+import random
 
 # 兼容OlivOS 0.10.2及以下版本
 try:
@@ -307,7 +308,7 @@ def draw(key_str, bot_hash, flag_need_give_back = True, mark_dict = None):
             if type(tmp_deck_this) == list:
                 tmp_deck_this_len = len(tmp_deck_this)
                 if tmp_deck_this_len > 0:
-                    tmp_deck_this_hit = OlivaDiceCore.onedice.RD.random(None, 0, tmp_deck_this_len - 1)
+                    tmp_deck_this_hit = random.randint(0, tmp_deck_this_len - 1)
                     tmp_reply_str = tmp_deck_this[tmp_deck_this_hit]
                     if not flag_need_give_back:
                         tmp_deck_this.pop(tmp_deck_this_hit)
