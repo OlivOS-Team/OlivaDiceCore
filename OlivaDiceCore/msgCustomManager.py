@@ -104,7 +104,7 @@ def formatReplySTRReplace(data:str, valDict:dict):
             if i == '}':
                 flag_hit = False
                 # 变量表替换
-                if not flag_hit and reg_key in valDict:
+                if not flag_hit and reg_key in valDict and type(valDict[reg_key] == str):
                     reg_res += str(valDict[reg_key])
                     flag_hit = True
                 # 牌堆抽取
@@ -142,5 +142,8 @@ def formatReplySTRReplace(data:str, valDict:dict):
 def dictTValueInit(plugin_event, dictTValue):
     res = dictTValue
     res['tBotHash'] = plugin_event.bot_info.hash
+    if 'vValDict' not in dictTValue:
+        dictTValue['vValDict'] = {}
+    res['vValDict']['vPluginEvent'] = plugin_event
     return res
 
