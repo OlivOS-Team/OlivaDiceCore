@@ -46,14 +46,14 @@
             "main": {
                 "command": "OlivaDiceMaster",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceMaster.opk",
-                "svn": 8,
-                "version": "3.0.7"
+                "svn": 9,
+                "version": "3.0.8"
             },
             "github": {
                 "command": "OlivaDiceMaster",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceMaster/releases/latest/download/OlivaDiceMaster.opk",
-                "svn": 8,
-                "version": "3.0.7"
+                "svn": 9,
+                "version": "3.0.8"
             }
         },
         "OlivaDiceOdyssey": {
