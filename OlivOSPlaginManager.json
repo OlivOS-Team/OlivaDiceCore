@@ -46,14 +46,14 @@
             "main": {
                 "command": "OlivaDiceMaster",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceMaster.opk",
-                "svn": 9,
-                "version": "3.0.8"
+                "svn": 10,
+                "version": "3.0.9"
             },
             "github": {
                 "command": "OlivaDiceMaster",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceMaster/releases/latest/download/OlivaDiceMaster.opk",
-                "svn": 9,
-                "version": "3.0.8"
+                "svn": 10,
+                "version": "3.0.9"
             }
         },
         "OlivaDiceOdyssey": {
@@ -74,14 +74,14 @@
             "main": {
                 "command": "OlivaDiceNativeGUI",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceNativeGUI.opk",
-                "svn": 8,
-                "version": "3.0.7"
+                "svn": 9,
+                "version": "3.0.8"
             },
             "github": {
                 "command": "OlivaDiceNativeGUI",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceNativeGUI/releases/latest/download/OlivaDiceNativeGUI.opk",
-                "svn": 8,
-                "version": "3.0.7"
+                "svn": 9,
+                "version": "3.0.8"
             }
         },
         "ChanceCustom": {
