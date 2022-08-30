@@ -390,10 +390,12 @@ def replyRI_command(
     tmp_reast_str_list = tmp_reast_str.split(',')
     result_list = []
     count = 1
+    flagLazy = False
     for tmp_reast_str_list_this in tmp_reast_str_list:
         tmp_value = '0'
         tmp_name = None
         flag_para_mode = '-'
+        tmp_reast_str_list_this = tmp_reast_str_list_this.strip(' ')
         if len(tmp_reast_str_list_this) > 0:
             if len(tmp_reast_str_list_this) > 1 and tmp_reast_str_list_this[0] in ['+', '-', '*', '/', '^']:
                 flag_para_mode = '1'
@@ -441,7 +443,8 @@ def replyRI_command(
                 tmp_name = OlivaDiceCore.pcCard.fixName(tmp_name)
                 if not OlivaDiceCore.pcCard.checkPcName(tmp_name):
                     tmp_name = None
-        else:
+        elif not flagLazy:
+            flagLazy = True
             tmp_value = None
             tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
                 tmp_pc_id,
@@ -466,7 +469,7 @@ def replyRI_command(
         tmp_value_rd.roll()
         if tmp_value_rd.resError == None:
             tmp_value_final = tmp_value_rd.resInt
-        if tmp_value_final != None:
+        if tmp_name != None and tmp_value_final != None:
             setUserConfigForInit(
                 tmp_hagID = tmp_hagID,
                 tmp_pc_platform = tmp_pc_platform,
