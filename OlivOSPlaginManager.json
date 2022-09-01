@@ -4,28 +4,28 @@
             "main": {
                 "command": "OlivaDiceCore",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceCore.opk",
-                "svn": 1043,
-                "version": "3.2.13"
+                "svn": 1044,
+                "version": "3.2.14"
             },
             "github": {
                 "command": "OlivaDiceCore",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceCore/releases/latest/download/OlivaDiceCore.opk",
-                "svn": 1043,
-                "version": "3.2.13"
+                "svn": 1044,
+                "version": "3.2.14"
             }
         },
         "OlivaDiceJoy": {
             "main": {
                 "command": "OlivaDiceJoy",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceJoy.opk",
-                "svn": 15,
-                "version": "3.0.7"
+                "svn": 16,
+                "version": "3.0.8"
             },
             "github": {
                 "command": "OlivaDiceJoy",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceJoy/releases/latest/download/OlivaDiceJoy.opk",
-                "svn": 15,
-                "version": "3.0.7"
+                "svn": 16,
+                "version": "3.0.8"
             }
         },
         "OlivaDiceLogger": {
