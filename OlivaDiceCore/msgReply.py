@@ -87,6 +87,7 @@ def unity_init_after(plugin_event, Proc):
         bot_info = Proc.Proc_data['bot_info_dict'][bot_info_this]
         if bot_info.platform['sdk'] in [
             'telegram_poll',
+            'discord_link',
             'fanbook_poll',
             'dodo_link',
             'qqGuild_link',
