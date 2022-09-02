@@ -455,8 +455,20 @@ def RDDataFormat_default(data:list, mode = 'default'):
                             res += '[%s?]' % (' '.join(getRDdataNodeResultListStr(data_this, 1)))
                         if checkRDdataNodeResult(data_this, 2):
                             res += '(%s)' % (', '.join(getRDdataNodeResultListStr(data_this, 2)))
-                elif checkRDdataNodeKeyOP(data_this, 'kh') or checkRDdataNodeKeyOP(data_this, 'kl'):
-                    if checkRDdataNodeResult(data_this, 0) and checkRDdataNodeResult(data_this, 1):
+                elif (
+                    checkRDdataNodeKeyOP(data_this, 'kh')
+                ) or (
+                    checkRDdataNodeKeyOP(data_this, 'kl')
+                ) or (
+                    checkRDdataNodeKeyOP(data_this, 'dh')
+                ) or (
+                    checkRDdataNodeKeyOP(data_this, 'dl')
+                ) or (
+                    checkRDdataNodeKeyOP(data_this, 'max')
+                ) or (
+                    checkRDdataNodeKeyOP(data_this, 'min')
+                ):
+                    if checkRDdataNodeResult(data_this, 0) and checkRDdataNodeResult(data_this, 1) and checkRDdataNodeResult(data_this, 2):
                         res_list_this = []
                         if len(data_this['result'][0]) == len(data_this['result'][1]):
                             for data_i in range(len(data_this['result'][0])):
@@ -472,14 +484,33 @@ def RDDataFormat_default(data:list, mode = 'default'):
                                             str(data_this['result'][0][data_i])
                                         )
                                     )
+                                if (
+                                    checkRDdataNodeKeyOP(data_this, 'kh')
+                                ) or (
+                                    checkRDdataNodeKeyOP(data_this, 'kl')
+                                ):
+                                    if data_i + 1 == len(data_this['result'][2]):
+                                        res_list_this.append(' <| ')
+                                    else:
+                                        res_list_this.append(', ')
+                                elif (
+                                    checkRDdataNodeKeyOP(data_this, 'dh')
+                                ) or (
+                                    checkRDdataNodeKeyOP(data_this, 'dl')
+                                ):
+                                    if data_i + 1 == len(data_this['result'][0]) - len(data_this['result'][2]):
+                                        res_list_this.append(' |> ')
+                                    else:
+                                        res_list_this.append(', ')
+                                else:
+                                    res_list_this.append(', ')
+                            res_list_this.pop()
                         else:
                             res_list_this = getRDdataNodeResultListStr(data_this, 0)
-                        res += '{%s}' % (', '.join(res_list_this))
+                        res += '{%s}' % (''.join(res_list_this))
                     elif checkRDdataNodeResult(data_this, 0):
                         res_list_this = getRDdataNodeResultListStr(data_this, 0)
                         res += '{%s}' % (', '.join(getRDdataNodeResultListStr(data_this, 0)))
-                    if checkRDdataNodeResult(data_this, 2):
-                        res += '(%s)' % (', '.join(getRDdataNodeResultListStr(data_this, 2)))
                 elif checkRDdataNodeKeyOP(data_this, 'lp'):
                     if checkRDdataNodeResult(data_this, 0):
                         res += '{%s}' % (':'.join(getRDdataNodeResultListStr(data_this, 0)))

@@ -41,6 +41,14 @@ dictOperationPriority = {
     'KL' : 6,
     'kh' : 6,
     'KH' : 6,
+    'dl' : 6,
+    'DL' : 6,
+    'dh' : 6,
+    'DH' : 6,
+    'min' : 6,
+    'MIN' : 6,
+    'max' : 6,
+    'MAX' : 6,
     'lp' : 6,
     'LP' : 6,
     'df' : 7,
@@ -82,7 +90,7 @@ listOperationSub = [
     'i'
 ]
 
-lenOperationMax = 2
+lenOperationMax = 3
 
 '''
 朴素栈实现
@@ -265,6 +273,10 @@ class calOperationNode(calNode):
         elif self.data == 'kh':
             self.valRightDefault = 1
         elif self.data == 'kl':
+            self.valRightDefault = 1
+        elif self.data == 'dh':
+            self.valRightDefault = 1
+        elif self.data == 'dl':
             self.valRightDefault = 1
         elif self.data == 'l':
             self.valRightDefault = 1
@@ -2871,8 +2883,21 @@ class RD(object):
                                 [tmp_node_this_output]
                             ]
                         }]
-                elif tmp_node_this.data == 'kh' or tmp_node_this.data == 'kl':
+                elif (
+                    tmp_node_this.data == 'kh'
+                ) or (
+                    tmp_node_this.data == 'kl'
+                ) or (
+                    tmp_node_this.data == 'dh'
+                ) or (
+                    tmp_node_this.data == 'dl'
+                ) or (
+                    tmp_node_this.data == 'max'
+                ) or (
+                    tmp_node_this.data == 'min'
+                ):
                     tmp_last_resMetaTuple_raw = tmp_main_val_left_obj.resMetaTuple
+                    tmp_last_resMetaTuple_raw_new = tmp_last_resMetaTuple_raw
                     tmp_last_resMetaTuple = tmp_last_resMetaTuple_raw
                     if type(tmp_last_resMetaTuple) == list and len(tmp_last_resMetaTuple) > 0:
                         tmp_last_resMetaTuple = self.get_from_metaTuple(tmp_last_resMetaTuple_raw)
@@ -2882,14 +2907,55 @@ class RD(object):
                     if len(tmp_last_resMetaTuple_raw) != len(tmp_last_resMetaTuple):
                         self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
                         return resNoneTemplate
+                    if tmp_main_val_right[0] <= 0:
+                        self.resError = self.resErrorType.NODE_RIGHT_VAL_INVALID
+                        return resNoneTemplate
+                    tmp_last_resMetaTuple_list = []
+                    tmp_last_resMetaTuple_list_new = []
+                    for tmp_last_resMetaTuple_i in range(len(tmp_last_resMetaTuple_raw)):
+                        if tmp_last_resMetaTuple_i < len(tmp_last_resMetaTuple):
+                            tmp_last_resMetaTuple_list.append([
+                                tmp_last_resMetaTuple[tmp_last_resMetaTuple_i],
+                                tmp_last_resMetaTuple_raw[tmp_last_resMetaTuple_i]
+                            ])
                     tmp_node_this_output = 0
+                    tmp_node_this_output_meta_tuple_res = []
                     if tmp_node_this.data == 'kh':
-                        tmp_node_this_output = max(tmp_last_resMetaTuple)
+                        tmp_last_resMetaTuple_list.sort(reverse = True, key = lambda x:x[0])
                     elif tmp_node_this.data == 'kl':
-                        tmp_node_this_output = min(tmp_last_resMetaTuple)
+                        tmp_last_resMetaTuple_list.sort(reverse = False, key = lambda x:x[0])
+                    elif tmp_node_this.data == 'dh':
+                        tmp_last_resMetaTuple_list.sort(reverse = True, key = lambda x:x[0])
+                    elif tmp_node_this.data == 'dl':
+                        tmp_last_resMetaTuple_list.sort(reverse = False, key = lambda x:x[0])
+                    elif tmp_node_this.data == 'max':
+                        for tmp_last_resMetaTuple_list_this in tmp_last_resMetaTuple_list:
+                            if tmp_last_resMetaTuple_list_this[0] > tmp_main_val_right[0]:
+                                tmp_last_resMetaTuple_list_this[0] = tmp_main_val_right[0]
+                                tmp_last_resMetaTuple_list_this[1] = tmp_main_val_right[0]
+                    elif tmp_node_this.data == 'min':
+                        for tmp_last_resMetaTuple_list_this in tmp_last_resMetaTuple_list:
+                            if tmp_last_resMetaTuple_list_this[0] < tmp_main_val_right[0]:
+                                tmp_last_resMetaTuple_list_this[0] = tmp_main_val_right[0]
+                                tmp_last_resMetaTuple_list_this[1] = tmp_main_val_right[0]
+                    if tmp_node_this.data in ['kh', 'kl']:
+                        if tmp_main_val_right[0] <= len(tmp_last_resMetaTuple_list):
+                            tmp_last_resMetaTuple_list_new = tmp_last_resMetaTuple_list[:tmp_main_val_right[0]]
+                        else:
+                            tmp_last_resMetaTuple_list_new = tmp_last_resMetaTuple_list
+                    elif tmp_node_this.data in ['dh', 'dl']:
+                        if tmp_main_val_right[0] < len(tmp_last_resMetaTuple_list):
+                            tmp_last_resMetaTuple_list_new = tmp_last_resMetaTuple_list[tmp_main_val_right[0]:]
+                        else:
+                            tmp_last_resMetaTuple_list_new = tmp_last_resMetaTuple_list
+                    else:
+                        tmp_last_resMetaTuple_list_new = tmp_last_resMetaTuple_list
+                    tmp_last_resMetaTuple = [tmp_last_resMetaTuple_list_this[0] for tmp_last_resMetaTuple_list_this in tmp_last_resMetaTuple_list]
+                    tmp_last_resMetaTuple_raw_new = [tmp_last_resMetaTuple_list_this[1] for tmp_last_resMetaTuple_list_this in tmp_last_resMetaTuple_list]
+                    tmp_node_this_output_meta_tuple = [tmp_last_resMetaTuple_list_new_this[0] for tmp_last_resMetaTuple_list_new_this in tmp_last_resMetaTuple_list_new]
+                    tmp_node_this_output = sum(tmp_node_this_output_meta_tuple)
                     tmp_node_this_output_Max = tmp_node_this_output
                     tmp_node_this_output_Min = tmp_node_this_output
-                    tmp_node_this_output_meta_tuple = [tmp_node_this_output]
                     tmp_node_this_output_str = '{%s}(%d)' % (
                         ','.join(self.get_str_from_metaTuple(tmp_last_resMetaTuple_raw, tmp_last_resMetaTuple)),
                         tmp_node_this_output
@@ -2897,7 +2963,7 @@ class RD(object):
                     tmp_node_this_output_data_final = [{
                         'result': [
                             tmp_last_resMetaTuple,
-                            tmp_last_resMetaTuple_raw,
+                            tmp_last_resMetaTuple_raw_new,
                             tmp_node_this_output_meta_tuple
                         ],
                         'key': {
@@ -3086,7 +3152,9 @@ if __name__ == '__main__':
         '[1d20,[1,2]kh]kl',
         '[1,2]',
         '[1,2d6]',
-        '2d6'
+        '2d6',
+        '10d6max3',
+        '10d6dl3'
     ]
     val_table = {
         '力量': 60,
