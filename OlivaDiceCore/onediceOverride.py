@@ -511,6 +511,14 @@ def RDDataFormat_default(data:list, mode = 'default'):
                     elif checkRDdataNodeResult(data_this, 0):
                         res_list_this = getRDdataNodeResultListStr(data_this, 0)
                         res += '{%s}' % (', '.join(getRDdataNodeResultListStr(data_this, 0)))
+                elif checkRDdataNodeKeyOP(data_this, 's'):
+                    if checkRDdataNodeResult(data_this, 2):
+                        res_list_this = getRDdataNodeResultListStr(data_this, 2)
+                        res += '{%s}' % (', '.join(getRDdataNodeResultListStr(data_this, 2)))
+                elif checkRDdataNodeKeyOP(data_this, 'tp'):
+                    if checkRDdataNodeResult(data_this, 0):
+                        res_list_this = getRDdataNodeResultListStr(data_this, 0)
+                        res += '{%s}' % (', '.join(getRDdataNodeResultListStr(data_this, 0)))
                 elif checkRDdataNodeKeyOP(data_this, 'lp'):
                     if checkRDdataNodeResult(data_this, 0):
                         res += '{%s}' % (':'.join(getRDdataNodeResultListStr(data_this, 0)))

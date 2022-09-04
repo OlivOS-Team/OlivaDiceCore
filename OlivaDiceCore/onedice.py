@@ -37,6 +37,8 @@ dictOperationPriority = {
     'X' : 4,
     '/' : 4,
     '^' : 5,
+    's' : 6,
+    'S' : 6,
     'kl' : 6,
     'KL' : 6,
     'kh' : 6,
@@ -51,6 +53,8 @@ dictOperationPriority = {
     'MAX' : 6,
     'lp' : 6,
     'LP' : 6,
+    'tp' : 6,
+    'TP' : 6,
     'df' : 7,
     'DF' : 7,
     'd' : 7,
@@ -270,6 +274,8 @@ class calOperationNode(calNode):
         elif self.data == '?':
             self.valRightDefault = 0
             self.vals[':'] = None
+        elif self.data == 's':
+            self.valRightDefault = 1
         elif self.data == 'kh':
             self.valRightDefault = 1
         elif self.data == 'kl':
@@ -278,8 +284,8 @@ class calOperationNode(calNode):
             self.valRightDefault = 1
         elif self.data == 'dl':
             self.valRightDefault = 1
-        elif self.data == 'l':
-            self.valRightDefault = 1
+        elif self.data == 'tp':
+            self.valRightDefault = 0
         elif self.data == '$t':
             self.valLeftDefault = 1
             self.vals['='] = None
@@ -2973,6 +2979,90 @@ class RD(object):
                             'v': tmp_node_this.vals
                         }
                     }]
+                elif tmp_node_this.data in ['s', 'tp']:
+                    tmp_last_resMetaTuple_raw = tmp_main_val_left_obj.resMetaTuple
+                    tmp_last_resMetaTuple_raw_new = tmp_last_resMetaTuple_raw
+                    tmp_last_resMetaTuple = tmp_last_resMetaTuple_raw
+                    if type(tmp_last_resMetaTuple) == list and len(tmp_last_resMetaTuple) > 0:
+                        tmp_last_resMetaTuple = self.get_from_metaTuple(tmp_last_resMetaTuple_raw)
+                    else:
+                        tmp_last_resMetaTuple_raw = [tmp_main_val_left[0]]
+                        tmp_last_resMetaTuple = tmp_last_resMetaTuple_raw
+                    if len(tmp_last_resMetaTuple_raw) != len(tmp_last_resMetaTuple):
+                        self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
+                        return resNoneTemplate
+                    flag_cut = False
+                    tmp_last_right_resMetaTuple_raw = [tmp_main_val_right[0]]
+                    if tmp_main_val_right_obj.resMetaTupleEnable and len(tmp_main_val_right_obj.resMetaTuple) > 0:
+                        tmp_last_right_resMetaTuple_raw = tmp_main_val_right_obj.resMetaTuple
+                        if len(tmp_last_right_resMetaTuple_raw) > 1:
+                            flag_cut = True
+                    tmp_last_right_resMetaTuple = tmp_last_right_resMetaTuple_raw.copy()
+                    tmp_last_right_resMetaTuple = self.get_from_metaTuple(tmp_last_right_resMetaTuple)
+                    tmp_start = 1
+                    tmp_step = 1
+                    tmp_end = 1
+                    if len(tmp_last_right_resMetaTuple) == 1:
+                        tmp_end = tmp_last_right_resMetaTuple[0]
+                    elif len(tmp_last_right_resMetaTuple) == 2:
+                        tmp_start = tmp_last_right_resMetaTuple[0]
+                        tmp_end = tmp_last_right_resMetaTuple[1]
+                    elif len(tmp_last_right_resMetaTuple) >= 3:
+                        tmp_start = tmp_last_right_resMetaTuple[0]
+                        tmp_step = tmp_last_right_resMetaTuple[1]
+                        tmp_end = tmp_last_right_resMetaTuple[2]
+                    if tmp_node_this.data == 'tp':
+                        tmp_start = 1
+                        tmp_step = 1
+                        tmp_end = len(tmp_last_resMetaTuple)
+                        flag_cut = True
+                    if tmp_start > tmp_end or tmp_step < 1:
+                        self.resError = self.resErrorType.NODE_RIGHT_VAL_INVALID
+                        return resNoneTemplate
+                    tmp_last_resMetaTuple_list = []
+                    tmp_last_resMetaTuple_list_new = []
+                    for tmp_last_resMetaTuple_i in range(len(tmp_last_resMetaTuple_raw)):
+                        if tmp_last_resMetaTuple_i < len(tmp_last_resMetaTuple):
+                            tmp_last_resMetaTuple_list.append([
+                                tmp_last_resMetaTuple[tmp_last_resMetaTuple_i],
+                                tmp_last_resMetaTuple_raw[tmp_last_resMetaTuple_i]
+                            ])
+                    tmp_node_this_output = 0
+                    tmp_node_this_output_meta_tuple_res = []
+                    if flag_cut:
+                        tmp_last_resMetaTuple_list_new_2 = []
+                        tmp_last_resMetaTuple_list_new = tmp_last_resMetaTuple_list[tmp_start - 1:tmp_end]
+                        for tmp_last_resMetaTuple_list_new_i in range(len(tmp_last_resMetaTuple_list_new)):
+                            if tmp_last_resMetaTuple_list_new_i % tmp_step == 0:
+                                tmp_last_resMetaTuple_list_new_2.append(tmp_last_resMetaTuple_list_new[tmp_last_resMetaTuple_list_new_i])
+                        tmp_last_resMetaTuple_list_new = tmp_last_resMetaTuple_list_new_2
+                        tmp_node_this_output_meta_tuple_enable = True
+                    else:
+                        tmp_last_resMetaTuple_list_new = [tmp_last_resMetaTuple_list[tmp_end - 1]]
+                    tmp_last_resMetaTuple = [tmp_last_resMetaTuple_list_this[0] for tmp_last_resMetaTuple_list_this in tmp_last_resMetaTuple_list]
+                    tmp_last_resMetaTuple_raw_new = [tmp_last_resMetaTuple_list_this[1] for tmp_last_resMetaTuple_list_this in tmp_last_resMetaTuple_list]
+                    tmp_node_this_output_meta_tuple = [tmp_last_resMetaTuple_list_new_this[0] for tmp_last_resMetaTuple_list_new_this in tmp_last_resMetaTuple_list_new]
+                    if len(tmp_last_resMetaTuple) > 0:
+                        tmp_node_this_output = tmp_node_this_output_meta_tuple[-1]
+                    tmp_node_this_output_Max = tmp_node_this_output
+                    tmp_node_this_output_Min = tmp_node_this_output
+                    tmp_node_this_output_str = '{%s}(%d)' % (
+                        ','.join(self.get_str_from_metaTuple(tmp_last_resMetaTuple_raw, tmp_last_resMetaTuple)),
+                        tmp_node_this_output
+                    )
+                    tmp_node_this_output_data_final = [{
+                        'result': [
+                            tmp_last_resMetaTuple,
+                            tmp_last_resMetaTuple_raw_new,
+                            tmp_node_this_output_meta_tuple
+                        ],
+                        'key': {
+                            'op': tmp_node_this.data,
+                            'l': tmp_main_val_left[0],
+                            'r': tmp_main_val_right[0],
+                            'v': tmp_node_this.vals
+                        }
+                    }]
                 elif tmp_node_this.data == '$t':
                     tmp_key = 't%d' % tmp_main_val_right[0]
                     if tmp_node_this.vals['='] != None:
@@ -3154,7 +3244,11 @@ if __name__ == '__main__':
         '[1,2d6]',
         '2d6',
         '10d6max3',
-        '10d6dl3'
+        '10d6dl3',
+        '10d6s5',
+        '10d6s[2,2]',
+        '10d6s[1,3,6]',
+        '10d6tp'
     ]
     val_table = {
         '力量': 60,
