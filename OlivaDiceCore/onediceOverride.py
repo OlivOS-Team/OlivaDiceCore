@@ -511,7 +511,7 @@ def RDDataFormat_default(data:list, mode = 'default'):
                     elif checkRDdataNodeResult(data_this, 0):
                         res_list_this = getRDdataNodeResultListStr(data_this, 0)
                         res += '{%s}' % (', '.join(getRDdataNodeResultListStr(data_this, 0)))
-                elif checkRDdataNodeKeyOP(data_this, 's'):
+                elif checkRDdataNodeKeyOP(data_this, 'sp'):
                     if checkRDdataNodeResult(data_this, 2):
                         res_list_this = getRDdataNodeResultListStr(data_this, 2)
                         res += '{%s}' % (', '.join(getRDdataNodeResultListStr(data_this, 2)))

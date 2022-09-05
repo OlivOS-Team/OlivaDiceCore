@@ -37,8 +37,8 @@ dictOperationPriority = {
     'X' : 4,
     '/' : 4,
     '^' : 5,
-    's' : 6,
-    'S' : 6,
+    'sp' : 6,
+    'SP' : 6,
     'kl' : 6,
     'KL' : 6,
     'kh' : 6,
@@ -2979,7 +2979,7 @@ class RD(object):
                             'v': tmp_node_this.vals
                         }
                     }]
-                elif tmp_node_this.data in ['s', 'tp']:
+                elif tmp_node_this.data in ['sp', 'tp']:
                     tmp_last_resMetaTuple_raw = tmp_main_val_left_obj.resMetaTuple
                     tmp_last_resMetaTuple_raw_new = tmp_last_resMetaTuple_raw
                     tmp_last_resMetaTuple = tmp_last_resMetaTuple_raw
