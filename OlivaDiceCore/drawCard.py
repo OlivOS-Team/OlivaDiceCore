@@ -20,6 +20,7 @@ import OlivaDiceCore
 import os
 import json
 #import yaml
+#import openpyxl
 import re
 import traceback
 import random
@@ -27,6 +28,7 @@ import random
 # 兼容OlivOS 0.10.2及以下版本
 try:
     import yaml
+    import openpyxl
 except:
     pass
 
@@ -101,8 +103,55 @@ def initDeck(bot_info_dict):
                         ('Init', 'default')
                     ]
                 )
+        customDeckFile_deckName = customDeckFile
+        if customDeckFile_deckName.endswith('.yaml'):
+            customDeckFile_deckName = customDeckFile_deckName.rsplit('.yaml')
         if obj_Deck_this != None:
-            obj_Deck_this_new = initYamlDeckData(obj_Deck_this)
+            obj_Deck_this_new = initYamlDeckData(obj_Deck_this, deckName = customDeckFile_deckName)
+            if obj_Deck_this_new != None:
+                for bot_info_dict_this in OlivaDiceCore.drawCardData.dictDeck:
+                    botHash = bot_info_dict_this
+                    OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this_new)
+    # 全局 excel 牌堆
+    releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity/extend/deckexcel')
+    customDeckDir = OlivaDiceCore.data.dataDirRoot + '/unity/extend/deckexcel'
+    fileDeckList = os.listdir(customDeckDir)
+    for fileDeckList_this in fileDeckList:
+        customDeckFile = fileDeckList_this
+        customDeckPath = customDeckDir + '/' + customDeckFile
+        obj_Deck_this_root = None
+        try:
+            obj_Deck_this_root = openpyxl.load_workbook(customDeckPath)
+        except:
+            obj_Deck_this_root = None
+            dictTValue['tInitDataName'] = customDeckFile
+            OlivaDiceCore.msgReply.globalLog(
+                3,
+                OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitDeckDataError'], dictTValue),
+                [
+                    ('OlivaDice', 'default'),
+                    ('Init', 'default')
+                ]
+            )
+        if obj_Deck_this_root != None:
+            obj_Deck_this_new = None
+            try:
+                obj_Deck_this_new = initExcelDeckData(obj_Deck_this_root)
+            except:
+                obj_Deck_this_new = None
+                dictTValue['tInitDataName'] = customDeckFile
+                OlivaDiceCore.msgReply.globalLog(
+                    3,
+                    OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitDeckDataError'], dictTValue),
+                    [
+                        ('OlivaDice', 'default'),
+                        ('Init', 'default')
+                    ]
+                )
+            try:
+                obj_Deck_this_root.close()
+            except:
+                pass
             if obj_Deck_this_new != None:
                 for bot_info_dict_this in OlivaDiceCore.drawCardData.dictDeck:
                     botHash = bot_info_dict_this
@@ -184,8 +233,50 @@ def initDeck(bot_info_dict):
                         ]
                     )
             if obj_Deck_this != None:
-                obj_Deck_this_new = initYamlDeckData(obj_Deck_this)
+                obj_Deck_this_new = initYamlDeckData(obj_Deck_this, deckName = customDeckFile_deckName)
                 OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this_new)
+        # 全局 excel 牌堆
+        releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/extend/deckexcel')
+        customDeckDir = OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/extend/deckexcel'
+        fileDeckList = os.listdir(customDeckDir)
+        for fileDeckList_this in fileDeckList:
+            customDeckFile = fileDeckList_this
+            customDeckPath = customDeckDir + '/' + customDeckFile
+            obj_Deck_this_root = None
+            try:
+                obj_Deck_this_root = openpyxl.load_workbook(customDeckPath)
+            except:
+                obj_Deck_this_root = None
+                dictTValue['tInitDataName'] = customDeckFile
+                OlivaDiceCore.msgReply.globalLog(
+                    3,
+                    OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitDeckDataError'], dictTValue),
+                    [
+                        ('OlivaDice', 'default'),
+                        ('Init', 'default')
+                    ]
+                )
+            if obj_Deck_this_root != None:
+                obj_Deck_this_new = None
+                try:
+                    obj_Deck_this_new = initExcelDeckData(obj_Deck_this_root)
+                except:
+                    obj_Deck_this_new = None
+                    dictTValue['tInitDataName'] = customDeckFile
+                    OlivaDiceCore.msgReply.globalLog(
+                        3,
+                        OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitDeckDataError'], dictTValue),
+                        [
+                            ('OlivaDice', 'default'),
+                            ('Init', 'default')
+                        ]
+                    )
+                try:
+                    obj_Deck_this_root.close()
+                except:
+                    pass
+                if obj_Deck_this_new != None:
+                    OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this_new)
         # 日志
         obj_Deck_this_count = len(OlivaDiceCore.drawCardData.dictDeck[botHash])
         dictTValue['tInitDataCount'] = str(obj_Deck_this_count - obj_Deck_this_count_total)
@@ -198,14 +289,58 @@ def initDeck(bot_info_dict):
                 ('Init', 'default')
             ]
         )
+        
+def initExcelDeckData(data):
+    res = {}
+    for obj_Deck_this_name in data.sheetnames:
+        obj_Deck_this = None
+        obj_Deck_this = data.get_sheet_by_name(obj_Deck_this_name)
+        checkIndex = []
+        deckData = []
+        flag_first = True
+        for data_row in obj_Deck_this:
+            data_row_offset = 0
+            checkData = {
+                'Content': None,
+                'Weight': None,
+                'Redraw': None,
+                'Finalize': None
+            }
+            for data_cell in data_row:
+                data_row_value = data_cell.value
+                if flag_first:
+                    checkIndex.append(data_row_value)
+                else:
+                    if len(checkIndex) > data_row_offset:
+                        dataType = checkIndex[data_row_offset]
+                        if dataType in checkData and data_row_value not in [None, '']:
+                            checkData[dataType] = data_row_value
+                data_row_offset += 1
+            if flag_first:
+                flag_first = False
+            else:
+                if checkData['Content'] != None:
+                    tmp_deckData_this = checkData['Content']
+                    tmp_deckData_this = re.sub(r'DRAW\(\s*(.+?)\s*,\s*0\s*\)', r'{\1}', tmp_deckData_this)
+                    tmp_deckData_this = re.sub(r'DRAW\(\s*(.+?)\s*,\s*1\s*\)', r'{%\1}', tmp_deckData_this)
+                    tmp_deckData_this = re.sub(r'DRAW\(\s*(.+?)\s*\)', r'{\1}', tmp_deckData_this)
+                    if checkData['Weight'] != None:
+                        tmp_deckData_this = '::%s::%s' % (
+                            str(checkData['Weight']),
+                            tmp_deckData_this
+                        )
+                    deckData.append(tmp_deckData_this)
+        if len(deckData) > 0:
+            res[obj_Deck_this_name] = deckData
+    return res
 
-def initYamlDeckData(data:dict):
-    name = None
+def initYamlDeckData(data:dict, deckName = None):
+    name = deckName
     includes = ['default']
     default = None
     keyList = ['name', 'author', 'version', 'command', 'desc', 'includes']
     res = {}
-    if 'name' in data:
+    if name == None and 'name' in data:
         name = data['name']
     if 'includes' in data:
         includes = data['includes']
@@ -220,8 +355,8 @@ def initYamlDeckData(data:dict):
             if key not in keyList:
                 for dataThis in data[key]:
                     dataThisNew = dataThis
-                    dataThisNew = re.sub(r'\{%(.+)\}', r'{_' + name + r':\1}', dataThisNew)
-                    dataThisNew = re.sub(r'\{\$(.+)\}', r'{%_' + name + r':\1}', dataThisNew)
+                    dataThisNew = re.sub(r'\{%(.+?)\}', r'{_' + name + r':\1}', dataThisNew)
+                    dataThisNew = re.sub(r'\{\$(.+?)\}', r'{%_' + name + r':\1}', dataThisNew)
                     for keyIncThis in includes:
                         keyIncThisNew = '%s:%s' % (name, keyIncThis)
                         dataThisNew = dataThisNew.replace('{_%s}' % keyIncThisNew, '{%s}' % keyIncThisNew)
