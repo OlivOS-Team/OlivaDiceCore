@@ -33,7 +33,7 @@ dictHelpDocTemp = {
 [.help链接] 查看源码文档
 [.help更新] 查看更新日志
 有问题请联系(请优先加群)
-青果核心用户群：661366095''',
+青果核心用户群：772730969''',
 
     'OlivaDiceCore': '''[OlivaDiceCore]
 OlivaDice核心模块
