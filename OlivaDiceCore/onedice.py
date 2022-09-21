@@ -1435,10 +1435,10 @@ class RD(object):
                     if tmp_main_val_left[0] == 0 and tmp_main_val_right[0] == 0:
                         self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
                         return resNoneTemplate
-                    if tmp_main_val_left[0] >= 10000:
+                    if tmp_main_val_left[0] > 10000:
                         self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
                         return resNoneTemplate
-                    if tmp_main_val_right[0] >= 10000:
+                    if tmp_main_val_right[0] > 10000:
                         self.resError = self.resErrorType.NODE_RIGHT_VAL_INVALID
                         return resNoneTemplate
                     tmp_node_this_output = int(tmp_main_val_left[0] ** tmp_main_val_right[0])
@@ -2143,10 +2143,10 @@ class RD(object):
                         tmp_node_this_resMetaTuple = [(int(tmp_main_val_left[0] ** tmp_node_this_resMetaTuple_this)) for tmp_node_this_resMetaTuple_this in tmp_node_this_right_resMetaTuple]
                     tmp_node_this_output_meta_tuple = tmp_node_this_resMetaTuple
                 elif tmp_node_this.data == 'd':
-                    if tmp_main_val_right[0] <= 0 or tmp_main_val_right[0] >= 10000:
+                    if tmp_main_val_right[0] <= 0 or tmp_main_val_right[0] > 10000:
                         self.resError = self.resErrorType.NODE_RIGHT_VAL_INVALID
                         return resNoneTemplate
-                    if tmp_main_val_left[0] <= 0 or tmp_main_val_left[0] >= 10000:
+                    if tmp_main_val_left[0] <= 0 or tmp_main_val_left[0] > 10000:
                         self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
                         return resNoneTemplate
                     tmp_range_list = range(0, tmp_main_val_left[0])
@@ -2225,7 +2225,7 @@ class RD(object):
                                 tmp_node_this_output_data_2.append(tmp_node_this_output_list[tmp_it_this_2])
                     elif tmp_node_this.vals['b'] != None or tmp_node_this.vals['p'] != None:
                         if tmp_node_this.vals['b'] != None:
-                            if tmp_node_this.vals['b'] <= 0 or tmp_node_this.vals['b'] * tmp_main_val_left[0] >= 10000:
+                            if tmp_node_this.vals['b'] <= 0 or tmp_node_this.vals['b'] * tmp_main_val_left[0] > 10000:
                                 self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
                                 return resNoneTemplate
                             flag_begin = True
@@ -2249,7 +2249,7 @@ class RD(object):
                                     tmp_node_this_output_data_1.append(tmp_rd_this.resDetailData)
                                     tmp_node_this_output_data_2.append(tmp_node_this_output_this)
                         elif tmp_node_this.vals['p'] != None:
-                            if tmp_node_this.vals['p'] <= 0 or tmp_node_this.vals['p'] * tmp_main_val_left[0] >= 10000:
+                            if tmp_node_this.vals['p'] <= 0 or tmp_node_this.vals['p'] * tmp_main_val_left[0] > 10000:
                                 self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
                                 return resNoneTemplate
                             flag_begin = True
@@ -2606,10 +2606,10 @@ class RD(object):
                     }
                     tmp_node_this_output_data_final = [tmp_node_this_output_data]
                 elif tmp_node_this.data == 'b':
-                    if tmp_main_val_right[0] >= 10000:
+                    if tmp_main_val_right[0] > 10000:
                         self.resError = self.resErrorType.NODE_RIGHT_VAL_INVALID
                         return resNoneTemplate
-                    if tmp_main_val_left[0] >= 10000:
+                    if tmp_main_val_left[0] > 10000:
                         self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
                         return resNoneTemplate
                     tmp_node_this_output_MaxType = self.resExtremeType.INT_LIMITED
@@ -2687,10 +2687,10 @@ class RD(object):
                     tmp_node_this_output_str_2 += ']'
                     tmp_node_this_output_str = '{%s %s}(%s)' % (tmp_node_this_output_str_1, tmp_node_this_output_str_2, str(tmp_node_this_output))
                 elif tmp_node_this.data == 'p':
-                    if tmp_main_val_right[0] >= 10000:
+                    if tmp_main_val_right[0] > 10000:
                         self.resError = self.resErrorType.NODE_RIGHT_VAL_INVALID
                         return resNoneTemplate
-                    if tmp_main_val_left[0] >= 10000:
+                    if tmp_main_val_left[0] > 10000:
                         self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
                         return resNoneTemplate
                     tmp_node_this_output_MaxType = self.resExtremeType.INT_LIMITED
@@ -2768,10 +2768,10 @@ class RD(object):
                     tmp_node_this_output_str_2 += ']'
                     tmp_node_this_output_str = '{%s %s}(%s)' % (tmp_node_this_output_str_1, tmp_node_this_output_str_2, str(tmp_node_this_output))
                 elif tmp_node_this.data == 'f':
-                    if tmp_main_val_right[0] <= 1 or tmp_main_val_right[0] >= 10000:
+                    if tmp_main_val_right[0] <= 1 or tmp_main_val_right[0] > 10000:
                         self.resError = self.resErrorType.NODE_RIGHT_VAL_INVALID
                         return resNoneTemplate
-                    if tmp_main_val_left[0] <= 0 or tmp_main_val_left[0] >= 10000:
+                    if tmp_main_val_left[0] <= 0 or tmp_main_val_left[0] > 10000:
                         self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
                         return resNoneTemplate
                     if tmp_main_val_left_obj.resIntMaxType == self.resExtremeType.INT_POSITIVE_INFINITE:
