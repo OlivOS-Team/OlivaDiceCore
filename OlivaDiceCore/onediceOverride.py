@@ -242,7 +242,10 @@ def RDDataFormat_default_is1step(data:list):
             ) and (
                 'v' in data[0]['key'] and type(data[0]['key']['v']) == dict
             ):
-                res = 1
+                if data[0]['key']['l'] == 1:
+                    res = 1
+                else:
+                    res = 2
                 for v_this in data[0]['key']['v']:
                     if data[0]['key']['v'][v_this] != None:
                         res = False
@@ -266,22 +269,23 @@ def RDDataFormat_default_is1step(data:list):
         ) and (
             type(data[2]) == int
         ):
-            res = 2
+            res = 3
             for v_this in data[0]['key']['v']:
                 if data[0]['key']['v'][v_this] != None:
                     res = False
+    print(res)
     return res
 
 def RDDataFormat_default_1step(data:list):
     res = None
     res_1step = RDDataFormat_default_is1step(data)
     if res_1step != False:
-        if res_1step == 1:
+        if res_1step in [1, 2]:
             res = '%dD%d' % (
                 data[0]['key']['l'],
                 data[0]['key']['r']
             )
-        if res_1step == 2:
+        elif res_1step == 3:
             res = '%dD%d%s%d' % (
                 data[0]['key']['l'],
                 data[0]['key']['r'],
