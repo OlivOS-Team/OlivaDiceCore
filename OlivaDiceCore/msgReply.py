@@ -4087,9 +4087,9 @@ def unity_reply(plugin_event, Proc):
                     elif flag_roll_mode in ['r', 'rx'] or True:
                         rd_para_str_new = None
                         tmp_resDetail_str = None
-                        if OlivaDiceCore.onediceOverride.RDDataFormat_default_is1D(rd_para.resDetailData):
+                        if OlivaDiceCore.onediceOverride.RDDataFormat_default_is1step(rd_para.resDetailData) != False:
                             tmp_resDetail_str = None
-                            rd_para_str_new = OlivaDiceCore.onediceOverride.RDDataFormat_default_when1D(rd_para.resDetailData)
+                            rd_para_str_new = OlivaDiceCore.onediceOverride.RDDataFormat_default_1step(rd_para.resDetailData)
                         else:
                             tmp_resDetail_str = OlivaDiceCore.onediceOverride.RDDataFormat(
                                 data = rd_para.resDetailData,

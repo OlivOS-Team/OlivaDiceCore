@@ -229,30 +229,65 @@ def RDDataFormat_debug(data:list):
         pass
     return res
 
-def RDDataFormat_default_is1D(data:list):
+def RDDataFormat_default_is1step(data:list):
     res = False
     if len(data) == 1 and type(data[0]) == dict:
-        if 'key' in data[0] and type(data[0]['key']):
+        if 'key' in data[0] and type(data[0]['key']) == dict:
             if (
                 'op' in data[0]['key'] and type(data[0]['key']['op']) == str and data[0]['key']['op'] == 'd'
             ) and (
                 'l' in data[0]['key'] and type(data[0]['key']['l']) == int
             ) and (
+                'r' in data[0]['key'] and type(data[0]['key']['r']) == int
+            ) and (
                 'v' in data[0]['key'] and type(data[0]['key']['v']) == dict
             ):
-                res = True
+                res = 1
                 for v_this in data[0]['key']['v']:
                     if data[0]['key']['v'][v_this] != None:
                         res = False
+    elif len(data) == 3:
+        if (
+            type(data[0]) == dict and (
+                'key' in data[0] and type(data[0]['key']) == dict
+            ) and (
+                'op' in data[0]['key'] and type(data[0]['key']['op']) == str and data[0]['key']['op'] == 'd'
+            ) and (
+                'l' in data[0]['key'] and type(data[0]['key']['l']) == int
+            ) and (
+                'r' in data[0]['key'] and type(data[0]['key']['r']) == int
+            ) and (
+                'v' in data[0]['key'] and type(data[0]['key']['v']) == dict
+            )
+        ) and (
+            type(data[1]) == dict and (
+                'op' in data[1] and type(data[1]['op']) == str and data[1]['op'] in ['+', '-', '*', '/']
+            )
+        ) and (
+            type(data[2]) == int
+        ):
+            res = 2
+            for v_this in data[0]['key']['v']:
+                if data[0]['key']['v'][v_this] != None:
+                    res = False
     return res
 
-def RDDataFormat_default_when1D(data:list):
+def RDDataFormat_default_1step(data:list):
     res = None
-    if RDDataFormat_default_is1D(data):
-        res = '%dD%d' % (
-            data[0]['key']['l'],
-            data[0]['key']['r']
-        )
+    res_1step = RDDataFormat_default_is1step(data)
+    if res_1step != False:
+        if res_1step == 1:
+            res = '%dD%d' % (
+                data[0]['key']['l'],
+                data[0]['key']['r']
+            )
+        if res_1step == 2:
+            res = '%dD%d%s%d' % (
+                data[0]['key']['l'],
+                data[0]['key']['r'],
+                data[1]['op'],
+                data[2]
+            )
     return res
 
 def RDDataFormat_default(data:list, mode = 'default'):
@@ -298,7 +333,10 @@ def RDDataFormat_default(data:list, mode = 'default'):
                     else:
                         if checkRDdataNodeResult(data_this, 0):
                             res += '{%s}' % ('+'.join(getRDdataNodeResultListStr(data_this, 0)))
-                        if checkRDdataNodeResult(data_this, 2):
+                        if checkRDdataNodeResult(data_this, 0) and checkRDdataNodeResult(data_this, 2):
+                            if ' - '.join(getRDdataNodeResultListStr(data_this, 0)) != ' - '.join(getRDdataNodeResultListStr(data_this, 2)):
+                                res += '(%s)' % (', '.join(getRDdataNodeResultListStr(data_this, 2)))
+                        elif checkRDdataNodeResult(data_this, 2):
                             res += '(%s)' % (', '.join(getRDdataNodeResultListStr(data_this, 2)))
                 elif checkRDdataNodeKeyOP(data_this, 'a'):
                     if checkRDdataNodeResult(data_this, 0):
