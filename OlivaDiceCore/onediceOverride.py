@@ -273,7 +273,6 @@ def RDDataFormat_default_is1step(data:list):
             for v_this in data[0]['key']['v']:
                 if data[0]['key']['v'][v_this] != None:
                     res = False
-    print(res)
     return res
 
 def RDDataFormat_default_1step(data:list):
