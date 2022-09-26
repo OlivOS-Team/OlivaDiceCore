@@ -236,7 +236,7 @@ def RDDataFormat_default_is1D(data:list):
             if (
                 'op' in data[0]['key'] and type(data[0]['key']['op']) == str and data[0]['key']['op'] == 'd'
             ) and (
-                'l' in data[0]['key'] and type(data[0]['key']['l']) == int and data[0]['key']['l'] == 1
+                'l' in data[0]['key'] and type(data[0]['key']['l']) == int
             ) and (
                 'v' in data[0]['key'] and type(data[0]['key']['v']) == dict
             ):
