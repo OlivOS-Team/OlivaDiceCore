@@ -21,6 +21,7 @@ import html
 import time
 import uuid
 import re
+import copy
 
 def logProc(Proc, level, message, segment):
     Proc.log(
@@ -2847,6 +2848,8 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
             return
+        elif isMatchWordStart(tmp_reast_str, 'set'):
+            OlivaDiceCore.msgReplyModel.replySET_command(plugin_event, Proc, valDict)
         elif (
             isMatchWordStart(tmp_reast_str, 'coc6')
         ) or (
@@ -4014,6 +4017,27 @@ def unity_reply(plugin_event, Proc):
                 if 'mainDice' in tmp_template and not flag_have_para:
                     if flag_roll_mode in ['r', 'rx']:
                         rd_para_str = tmp_template['mainDice']
+            rd_para_main_str = OlivaDiceCore.userConfig.getUserConfigByKey(
+                userId = tmp_hagID,
+                userType = 'group',
+                platform = tmp_user_platform,
+                userConfigKey = 'groupMainDice',
+                botHash = plugin_event.bot_info.hash
+            )
+            rd_para_main_D_right = OlivaDiceCore.userConfig.getUserConfigByKey(
+                userId = tmp_hagID,
+                userType = 'group',
+                platform = tmp_user_platform,
+                userConfigKey = 'groupMainDiceDRight',
+                botHash = plugin_event.bot_info.hash
+            )
+            if rd_para_main_str != None and not flag_have_para and flag_roll_mode in ['r', 'rx']:
+                rd_para_str = rd_para_main_str
+            tmp_template_customDefault = copy.deepcopy(tmp_template_customDefault)
+            if type(rd_para_main_D_right) == int:
+                if 'd' not in tmp_template_customDefault:
+                    tmp_template_customDefault = {}
+                tmp_template_customDefault['d']['rightD'] = rd_para_main_D_right
             if roll_times_count == 1:
                 rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_template_customDefault, valueTable = skill_valueTable)
                 rd_para.roll()

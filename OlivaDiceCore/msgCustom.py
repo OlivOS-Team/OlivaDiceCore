@@ -103,6 +103,8 @@ dictStrCustom = {
     'strRollErrorHelp' : '\n请使用[.help r]查看掷骰帮助，或使用[.help onedice]查看先进的OneDice标准。',
     'strSetGroupTempRule' : '已设置本群套用模板[{tPcTempName}]的规则[{tPcTempRuleName}]{tLazyResult}',
     'strDelGroupTempRule' : '已清除本群套用模板与规则，将按照人物卡设置各自进行检定',
+    'strSetGroupMainDice' : '已设置本群套用主骰[{tResult}]',
+    'strDelGroupMainDice' : '已清除本群套用主骰',
     'strSnSet' : '已将群名片修改为[{tResult}]',
     'strSnPcCardNone' : '未设置人物卡，无法进行名片设置',
     'strPcSetMapValueError' : '[{tResult}]不是合法的表达式',
