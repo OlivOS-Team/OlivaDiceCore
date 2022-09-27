@@ -14,6 +14,7 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @Desc      :   None
 '''
 
+import OlivOS
 import OlivaDiceCore
 
 listModel = [
@@ -47,6 +48,9 @@ def pokeHook(plugin_event, type = 'group'):
 def msgFormatHook(data:str, valDict:dict):
     return data
 
+def drawFormatHook(data:str, plugin_event:OlivOS.API.Event):
+    return data
+
 #跨模块注入点
 dictHookList = {
     'model': listModel,
@@ -56,5 +60,6 @@ dictHookList = {
 dictHookFunc = {
     'msgHook': msgHook,
     'pokeHook': pokeHook,
-    'msgFormatHook': msgFormatHook
+    'msgFormatHook': msgFormatHook,
+    'drawFormatHook': drawFormatHook
 }

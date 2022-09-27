@@ -1224,7 +1224,8 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = OlivaDiceCore.drawCard.getDrawDeck(
                     tmp_deck_name,
                     plugin_event.bot_info.hash,
-                    count = tmp_card_count
+                    count = tmp_card_count,
+                    valDict = valDict
                 )
                 if flag_hide:
                     replyMsgPrivateByEvent(plugin_event, tmp_reply_str)
@@ -1535,12 +1536,12 @@ def unity_reply(plugin_event, Proc):
                     if tmp_reply_str != None:
                         replyMsg(plugin_event, tmp_reply_str)
         elif isMatchWordStart(tmp_reast_str, 'ti', fullMatch = True):
-            dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck('即时症状', plugin_event.bot_info.hash)
+            dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck('即时症状', plugin_event.bot_info.hash, valDict = valDict)
             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawTi'], dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
             return
         elif isMatchWordStart(tmp_reast_str, 'li', fullMatch = True):
-            dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck('总结症状', plugin_event.bot_info.hash)
+            dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck('总结症状', plugin_event.bot_info.hash, valDict = valDict)
             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawLi'], dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
             return
@@ -1737,13 +1738,15 @@ def unity_reply(plugin_event, Proc):
                 dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck(
                     '随机姓名_%s' % tmp_reast_str, 
                     plugin_event.bot_info.hash,
-                    count = tmp_card_count
+                    count = tmp_card_count,
+                    valDict = valDict
                 )
             else:
                 dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck(
                     '随机姓名',
                     plugin_event.bot_info.hash,
-                    count = tmp_card_count
+                    count = tmp_card_count,
+                    valDict = valDict
                 )
             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawName'], dictTValue)
             replyMsg(plugin_event, tmp_reply_str)

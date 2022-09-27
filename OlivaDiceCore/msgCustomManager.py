@@ -64,12 +64,13 @@ def releaseDir(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
 
-def formatReplySTR(data:str, valDict:dict):
+def formatReplySTR(data:str, valDict:dict, flagCross:bool = True):
     res:str = data
     res = random.choice(list(data.split('|')))
     res = res.replace('{DEVIDE}', '|')
     res = res.replace('{OR}', '|')
-    res = OlivaDiceCore.crossHook.dictHookFunc['msgFormatHook'](res, valDict)
+    if flagCross:
+        res = OlivaDiceCore.crossHook.dictHookFunc['msgFormatHook'](res, valDict)
     res = formatReplySTRReplace(res, valDict)
     return res
 
@@ -110,12 +111,16 @@ def formatReplySTRReplace(data:str, valDict:dict):
                 # 牌堆抽取
                 if not flag_hit:
                     tmp_bot_hash = 'unity'
+                    plugin_event = None
                     if 'tBotHash' in valDict:
                         tmp_bot_hash = valDict['tBotHash']
+                    if 'vValDict' in valDict and 'vPluginEvent' in valDict['vValDict']:
+                        plugin_event = valDict['vValDict']['vPluginEvent']
                     reg_res_this = OlivaDiceCore.drawCard.draw(
                         key_str = reg_key,
                         bot_hash = tmp_bot_hash,
-                        flag_need_give_back = True
+                        flag_need_give_back = True,
+                        plugin_event = plugin_event
                     )
                     if reg_res_this != None:
                         reg_res += reg_res_this

@@ -373,7 +373,7 @@ def initYamlDeckData(data:dict, deckName = None):
                     res[name] = dataNew
     return res
 
-def getDrawDeck(key_str, bot_hash, count = 1):
+def getDrawDeck(key_str, bot_hash, count = 1, valDict = None):
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
     dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustom
     tmp_reply_str = None
@@ -384,9 +384,17 @@ def getDrawDeck(key_str, bot_hash, count = 1):
             if count >= 1 and count <= 10:
                 tmp_for_list = range(count)
                 tmp_card_list = []
+                plugin_event = None
+                dictTValue = None
+                if valDict != None and 'dictTValue' in valDict and 'vValDict' in valDict['dictTValue'] and 'vPluginEvent' in valDict['dictTValue']['vValDict']:
+                    plugin_event = valDict['dictTValue']['vValDict']['vPluginEvent']
+                if valDict != None and 'dictTValue' in valDict:
+                    dictTValue = valDict['dictTValue']
                 for tmp_for_list_this in tmp_for_list:
-                    tmp_draw_str = draw(key_str, bot_hash)
+                    tmp_draw_str = draw(key_str, bot_hash, mark_dict = None, plugin_event = plugin_event)
                     if tmp_draw_str != None and type(tmp_draw_str) == str:
+                        if dictTValue != None:
+                            tmp_draw_str = OlivaDiceCore.msgCustomManager.formatReplySTR(tmp_draw_str, dictTValue, flagCross = False)
                         tmp_card_list.append(tmp_draw_str)
                 dictTValue['tDrawDeckResult'] = '\n'.join(tmp_card_list)
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawDeck'], dictTValue)
@@ -426,7 +434,7 @@ def getDeckRecommend(key_str:str, bot_hash:str):
         count += 1
     return res
 
-def draw(key_str, bot_hash, flag_need_give_back = True, mark_dict = None):
+def draw(key_str:str, bot_hash:str, flag_need_give_back:bool = True, mark_dict:'dict|None' = None, plugin_event:'OlivOS.API.Event|None' = None):
     tmp_reply_str = None
     tmp_deck_this = []
     tmp_deck_this_len = 1
@@ -510,6 +518,8 @@ def draw(key_str, bot_hash, flag_need_give_back = True, mark_dict = None):
                             flag_need_roll = False
                         tmp_mark_left = -1
                         tmp_mark_right = -1
+    if tmp_reply_str != None and plugin_event != None:
+        tmp_reply_str = OlivaDiceCore.crossHook.dictHookFunc['drawFormatHook'](tmp_reply_str, plugin_event)
     return tmp_reply_str
 
 def initCloneDeckList(src_deck):
