@@ -27,88 +27,104 @@ def replySET_command(plugin_event, Proc, valDict):
     replyMsg = OlivaDiceCore.msgReply.replyMsg
 
     tmp_user_platform = plugin_event.platform['platform']
+    tmp_reply_str = None
 
     tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'set')
     tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
     tmp_set_para = None
     tmp_set_D_right = None
-    if len(tmp_reast_str) > 0:
-        if tmp_reast_str.isdigit():
-            tmp_set_D_right = int(tmp_reast_str)
-            tmp_set_para = '1D%d' % tmp_set_D_right
+    if tmp_reast_str == 'show':
+        tmp_set_para = OlivaDiceCore.userConfig.getUserConfigByKey(
+            userId = tmp_hagID,
+            userType = 'group',
+            platform = tmp_user_platform,
+            userConfigKey = 'groupMainDice',
+            botHash = plugin_event.bot_info.hash
+        )
+        if tmp_set_para != None:
+            dictTValue['tResult'] = tmp_set_para
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strShowGroupMainDice'], dictTValue)
         else:
-            tmp_set_para = tmp_reast_str
-            tmp_set_para = tmp_set_para.upper()
-            tmp_set_para_rd = OlivaDiceCore.onedice.RD(tmp_set_para)
-            tmp_set_para_rd.roll()
-            if tmp_set_para_rd.resError == None:
-                tmp_set_para_list = tmp_set_para.split('D')
-                if len(tmp_set_para_list) == 2:
-                    if tmp_set_para_list[0].isdigit() and tmp_set_para_list[1].isdigit():
-                        tmp_set_D_right = int(tmp_set_para_list[1])
-                    elif tmp_set_para_list[0].isdigit() and tmp_set_para_list[1] == '':
-                        tmp_set_D_right = 100
-                        tmp_set_para = '%sD%d' % (
-                            tmp_set_para_list[0],
-                            tmp_set_D_right
-                        )
-                    elif tmp_set_para_list[0] == '' and tmp_set_para_list[1].isdigit():
-                        tmp_set_D_right = int(tmp_set_para_list[1])
-                        tmp_set_para = '1D%d' % (
-                            tmp_set_D_right
-                        )
-                    elif tmp_set_para_list[0] == '' and tmp_set_para_list[1] == '':
-                        tmp_set_D_right = 100
-                        tmp_set_para = '1D%d' % (
-                            tmp_set_D_right
-                        )
-            else:
-                tmp_set_para = None
-    if tmp_set_para != None:
-        OlivaDiceCore.userConfig.setUserConfigByKey(
-            userConfigKey = 'groupMainDice',
-            userConfigValue = tmp_set_para,
-            botHash = plugin_event.bot_info.hash,
-            userId = tmp_hagID,
-            userType = 'group',
-            platform = tmp_user_platform
-        )
-        OlivaDiceCore.userConfig.setUserConfigByKey(
-            userConfigKey = 'groupMainDiceDRight',
-            userConfigValue = tmp_set_D_right,
-            botHash = plugin_event.bot_info.hash,
-            userId = tmp_hagID,
-            userType = 'group',
-            platform = tmp_user_platform
-        )
-        dictTValue['tResult'] = tmp_set_para
-        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSetGroupMainDice'], dictTValue)
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strShowGroupMainDiceNone'], dictTValue)
     else:
-        OlivaDiceCore.userConfig.setUserConfigByKey(
-            userConfigKey = 'groupMainDice',
-            userConfigValue = None,
-            botHash = plugin_event.bot_info.hash,
-            userId = tmp_hagID,
-            userType = 'group',
-            platform = tmp_user_platform
+        if len(tmp_reast_str) > 0:
+            if tmp_reast_str.isdigit():
+                tmp_set_D_right = int(tmp_reast_str)
+                tmp_set_para = '1D%d' % tmp_set_D_right
+            else:
+                tmp_set_para = tmp_reast_str
+                tmp_set_para = tmp_set_para.upper()
+                tmp_set_para_rd = OlivaDiceCore.onedice.RD(tmp_set_para)
+                tmp_set_para_rd.roll()
+                if tmp_set_para_rd.resError == None:
+                    tmp_set_para_list = tmp_set_para.split('D')
+                    if len(tmp_set_para_list) == 2:
+                        if tmp_set_para_list[0].isdigit() and tmp_set_para_list[1].isdigit():
+                            tmp_set_D_right = int(tmp_set_para_list[1])
+                        elif tmp_set_para_list[0].isdigit() and tmp_set_para_list[1] == '':
+                            tmp_set_D_right = 100
+                            tmp_set_para = '%sD%d' % (
+                                tmp_set_para_list[0],
+                                tmp_set_D_right
+                            )
+                        elif tmp_set_para_list[0] == '' and tmp_set_para_list[1].isdigit():
+                            tmp_set_D_right = int(tmp_set_para_list[1])
+                            tmp_set_para = '1D%d' % (
+                                tmp_set_D_right
+                            )
+                        elif tmp_set_para_list[0] == '' and tmp_set_para_list[1] == '':
+                            tmp_set_D_right = 100
+                            tmp_set_para = '1D%d' % (
+                                tmp_set_D_right
+                            )
+                else:
+                    tmp_set_para = None
+        if tmp_set_para != None:
+            OlivaDiceCore.userConfig.setUserConfigByKey(
+                userConfigKey = 'groupMainDice',
+                userConfigValue = tmp_set_para,
+                botHash = plugin_event.bot_info.hash,
+                userId = tmp_hagID,
+                userType = 'group',
+                platform = tmp_user_platform
+            )
+            OlivaDiceCore.userConfig.setUserConfigByKey(
+                userConfigKey = 'groupMainDiceDRight',
+                userConfigValue = tmp_set_D_right,
+                botHash = plugin_event.bot_info.hash,
+                userId = tmp_hagID,
+                userType = 'group',
+                platform = tmp_user_platform
+            )
+            dictTValue['tResult'] = tmp_set_para
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSetGroupMainDice'], dictTValue)
+        else:
+            OlivaDiceCore.userConfig.setUserConfigByKey(
+                userConfigKey = 'groupMainDice',
+                userConfigValue = None,
+                botHash = plugin_event.bot_info.hash,
+                userId = tmp_hagID,
+                userType = 'group',
+                platform = tmp_user_platform
+            )
+            OlivaDiceCore.userConfig.setUserConfigByKey(
+                userConfigKey = 'groupMainDiceDRight',
+                userConfigValue = tmp_set_D_right,
+                botHash = plugin_event.bot_info.hash,
+                userId = tmp_hagID,
+                userType = 'group',
+                platform = tmp_user_platform
+            )
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDelGroupMainDice'], dictTValue)
+        OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+            userHash = OlivaDiceCore.userConfig.getUserHash(
+                userId = tmp_hagID,
+                userType = 'group',
+                platform = tmp_user_platform
+            )
         )
-        OlivaDiceCore.userConfig.setUserConfigByKey(
-            userConfigKey = 'groupMainDiceDRight',
-            userConfigValue = tmp_set_D_right,
-            botHash = plugin_event.bot_info.hash,
-            userId = tmp_hagID,
-            userType = 'group',
-            platform = tmp_user_platform
-        )
-        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDelGroupMainDice'], dictTValue)
-    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
-        userHash = OlivaDiceCore.userConfig.getUserHash(
-            userId = tmp_hagID,
-            userType = 'group',
-            platform = tmp_user_platform
-        )
-    )
-    replyMsg(plugin_event, tmp_reply_str)
+    if tmp_reply_str not in ['', None]:
+        replyMsg(plugin_event, tmp_reply_str)
 
 
 def replyRR_command(plugin_event, Proc, valDict):
