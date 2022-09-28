@@ -480,7 +480,7 @@ def draw(key_str:str, bot_hash:str, flag_need_give_back:bool = True, mark_dict:'
                                     tmp_reply_str_1 = tmp_reply_str_2[tmp_mark_left + 1:tmp_mark_right]
                             else:
                                 tmp_reply_str_1 = tmp_reply_str_2[tmp_mark_left + 1:tmp_mark_right]
-                            tmp_reply_str_1 = draw(tmp_reply_str_1, bot_hash, flag_need_give_back_2, tmp_mark_dict)
+                            tmp_reply_str_1 = draw(tmp_reply_str_1, bot_hash, flag_need_give_back_2, tmp_mark_dict, plugin_event = plugin_event)
                             if tmp_reply_str_1 != None:
                                 tmp_reply_str += tmp_reply_str_1
                             else:

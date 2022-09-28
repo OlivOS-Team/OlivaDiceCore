@@ -16,7 +16,28 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 
 import OlivaDiceCore
 
-dictPcCardTemplateDefault = {
+dictPcCardTemplateDefault = {}
+
+dictPcCardTemplateModel = {
+    'mainDice': '1D100',
+    'customDefault': {},
+    'skill': {},
+    'skillConfig': {
+        'skipEnhance': []
+    },
+    'init': {},
+    'mapping': {},
+    'synonyms':{},
+    'redirect': {},
+    'showName': {},
+    'checkRules': {
+        'default': {
+            'checkList': []
+        }
+    }
+}
+
+dictPcCardTemplateDefaultTemp = {
     'default': {
         'mainDice': '1D100',
         'customDefault': {

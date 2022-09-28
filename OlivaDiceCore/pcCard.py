@@ -21,6 +21,8 @@ import hashlib
 import json
 import os
 
+import copy
+
 dictPcCardData = {
     'unity' : {}
 }
@@ -40,6 +42,53 @@ dictPcCardTemplateDefault = {
 def releaseDir(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
+
+def dataPcCardTemplateDefaultInit():
+    dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
+    dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
+    dictGValue = OlivaDiceCore.msgCustom.dictGValue
+    dictTValue.update(dictGValue)
+
+    OlivaDiceCore.pcCardData.dictPcCardTemplateDefault = copy.deepcopy(
+        OlivaDiceCore.pcCardData.dictPcCardTemplateDefaultTemp
+    )
+
+    dataDirRoot_this = OlivaDiceCore.data.dataDirRoot
+    releaseDir(dataDirRoot_this + '/unity')
+    releaseDir(dataDirRoot_this + '/unity/extend')
+    releaseDir(dataDirRoot_this + '/unity/extend/template')
+    dataDir = dataDirRoot_this + '/unity/extend/template'
+    dataPathList = os.listdir(dataDir)
+    for dataName in dataPathList:
+        dataPath = dataDir + '/' + dataName
+        try:
+            with open(dataPath, 'r', encoding = 'utf-8') as data_f:
+                tmp_dictPcCardTemplatePatch = json.loads(data_f.read())
+                for templateName in tmp_dictPcCardTemplatePatch:
+                    if templateName not in OlivaDiceCore.pcCardData.dictPcCardTemplateDefault:
+                        OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[templateName] = copy.deepcopy(
+                            OlivaDiceCore.pcCardData.dictPcCardTemplateModel
+                        )
+                    for templateModelName in tmp_dictPcCardTemplatePatch[templateName]:
+                        if templateModelName not in OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[templateName]:
+                            OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[templateName][templateModelName] = tmp_dictPcCardTemplatePatch[templateName][templateModelName]
+                        else:
+                            if False:
+                                # 此处等待后续实现特异化的补丁逻辑
+                                pass
+                            else:
+                                OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[templateName][templateModelName] = tmp_dictPcCardTemplatePatch[templateName][templateModelName]
+        except:
+            dictTValue['tName'] = '全局'
+            dictTValue['tInitDataName'] = dataName
+            OlivaDiceCore.msgReply.globalLog(
+                3,
+                OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitTempDataError'], dictTValue),
+                [
+                    ('OlivaDice', 'default'),
+                    ('Init', 'default')
+                ]
+            )
 
 def dataPcCardTotalCount():
     total_count = 0
