@@ -32,6 +32,16 @@ try:
 except:
     pass
 
+dictReMappingDrawFormat = {
+    'self': 'tName',
+}
+
+def reMappingDrawFormat(data:str):
+    res = data
+    for key in dictReMappingDrawFormat:
+        res = res.replace('{%s}' % key, '{%s}' % dictReMappingDrawFormat[key])
+    return res
+
 def initDeck(bot_info_dict):
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
     dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
@@ -393,8 +403,11 @@ def getDrawDeck(key_str, bot_hash, count = 1, valDict = None):
                 for tmp_for_list_this in tmp_for_list:
                     tmp_draw_str = draw(key_str, bot_hash, mark_dict = None, plugin_event = plugin_event)
                     if tmp_draw_str != None and type(tmp_draw_str) == str:
+                        tmp_draw_str = reMappingDrawFormat(tmp_draw_str)
                         if dictTValue != None:
-                            tmp_draw_str = OlivaDiceCore.msgCustomManager.formatReplySTR(tmp_draw_str, dictTValue, flagCross = False)
+                            tmp_draw_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                tmp_draw_str, dictTValue, flagCross = False, flagSplit = False
+                            )
                         tmp_card_list.append(tmp_draw_str)
                 dictTValue['tDrawDeckResult'] = '\n'.join(tmp_card_list)
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawDeck'], dictTValue)

@@ -64,11 +64,12 @@ def releaseDir(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
 
-def formatReplySTR(data:str, valDict:dict, flagCross:bool = True):
+def formatReplySTR(data:str, valDict:dict, flagCross:bool = True, flagSplit:bool = True):
     res:str = data
-    res = random.choice(list(data.split('|')))
-    res = res.replace('{DEVIDE}', '|')
-    res = res.replace('{OR}', '|')
+    if flagSplit:
+        res = random.choice(list(res.split('|')))
+        res = res.replace('{DEVIDE}', '|')
+        res = res.replace('{OR}', '|')
     if flagCross:
         res = OlivaDiceCore.crossHook.dictHookFunc['msgFormatHook'](res, valDict)
     res = formatReplySTRReplace(res, valDict)
