@@ -17,6 +17,100 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 import OlivaDiceCore
 import OlivOS
 
+import time
+import hashlib
+
+contextFeq = 0.1
+
+def replyCONTEXT_fliter(tmp_reast_str):
+    res = False
+    if 'replyContextFliter' in OlivaDiceCore.crossHook.dictHookList:
+        for key_this in OlivaDiceCore.crossHook.dictHookList['replyContextFliter']:
+            if OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, key_this):
+                res = True
+    return res
+
+def replyCONTEXT_regGet(plugin_event:OlivOS.API.Event, tmp_reast_str:str):
+    res = False
+    flagResult = False
+    tmp_hagID = None
+    tmp_bothash = plugin_event.bot_info.hash
+    tmp_userID = plugin_event.data.user_id
+    tmp_hash = contextRegHash([tmp_hagID, tmp_userID])
+    if (
+        tmp_bothash in OlivaDiceCore.crossHook.dictReplyContextReg
+    ) and (
+        tmp_hash in OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash]
+    ) and (
+        'block' in OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash][tmp_hash]
+    ):
+        if (
+            'res' in OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash][tmp_hash]
+        ) and (
+            OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash][tmp_hash]['res'] == None
+        ):
+            tmp_data_block = OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash][tmp_hash]['block']
+            if type(tmp_data_block) == bool:
+                res = OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash][tmp_hash]['block']
+                flagResult = True
+            elif type(tmp_data_block) == str:
+                if tmp_data_block == 'allowCommand':
+                    flag_is_command = False
+                    [tmp_reast_str_tmp, flag_is_command] = OlivaDiceCore.msgReply.msgIsCommand(
+                        tmp_reast_str,
+                        OlivaDiceCore.crossHook.dictHookList['prefix']
+                    )
+                    if flag_is_command:
+                        res = False
+                        OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash].pop(tmp_hash)
+                    else:
+                        res = True
+                        flagResult = True
+                    time.sleep(contextFeq * 2)
+                else:
+                    res = True
+            if flagResult:
+                OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash][tmp_hash]['res'] = tmp_reast_str
+        else:
+            res = False
+    return res
+
+def contextRegHash(data:list):
+    res = None
+    hash_tmp = hashlib.new('md5')
+    for data_this in data:
+        if type(data_this) == str:
+            hash_tmp.update(str(data_this).encode(encoding='UTF-8'))
+    res = hash_tmp.hexdigest()
+    return res
+
+def replyCONTEXT_regWait(plugin_event:OlivOS.API.Event, flagBlock = True, hash:'str|None' = None):
+    res = None
+    tmp_hash = None
+    tmp_bothash = plugin_event.bot_info.hash
+    tmp_block = flagBlock
+    if hash != None:
+        tmp_hash = hash
+    if tmp_bothash not in OlivaDiceCore.crossHook.dictReplyContextReg:
+        OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash] = {}
+    OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash][tmp_hash] = {
+        'hash': tmp_hash,
+        'block': tmp_block,
+        'res': None
+    }
+    feq = contextFeq
+    count = 30 * int(1 / feq)
+    while count > 0:
+        count -= 1
+        time.sleep(feq)
+        if tmp_bothash in OlivaDiceCore.crossHook.dictReplyContextReg and tmp_hash in OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash]:
+            if 'res' in OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash][tmp_hash] and OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash][tmp_hash]['res'] != None:
+                res = OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash][tmp_hash]['res']
+                break
+        else:
+            break
+    return res
+
 def replySET_command(plugin_event, Proc, valDict):
     tmp_reast_str = valDict['tmp_reast_str']
     flag_is_from_master = valDict['flag_is_from_master']

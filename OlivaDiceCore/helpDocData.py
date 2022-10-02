@@ -310,6 +310,10 @@ https://wiki.dice.center/OlivOS_Login.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9B%9E%
 大于检定目标失败，若结果为100或两骰相同为大失败（相当于整除11）
 没有极难成功/困难成功''',
 
+    'set': '''设置主骰：
+.set [面数]  设置主骰为1D[面数]
+.set [表达式]  设置主骰为[表达式]''',
+
     'setcoc': '''为当前群或频道组设置COC房规
 如[.setcoc 1],当前参数0-6
 
@@ -374,6 +378,8 @@ https://github.com/OlivOS-Team/onedice
     '随机数': '&random',
     '随机数算法': '&random',
     '村规': '&setcoc',
+    '主骰': '&set',
+    '设置主骰': '&set',
     '先攻': '&init',
     '先攻列表': '&init',
     '自定义回复词': '&str',

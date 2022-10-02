@@ -199,6 +199,14 @@ def unity_reply(plugin_event, Proc):
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, tmp_at_str_sub)
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             flag_force_reply = True
+
+    # 输入流缓存区
+    if OlivaDiceCore.msgReplyModel.replyCONTEXT_regGet(
+        plugin_event = plugin_event,
+        tmp_reast_str = tmp_reast_str
+    ):
+        plugin_event.set_block()
+
     [tmp_reast_str, flag_is_command] = msgIsCommand(
         tmp_reast_str,
         OlivaDiceCore.crossHook.dictHookList['prefix']
@@ -1148,7 +1156,9 @@ def unity_reply(plugin_event, Proc):
         if not flag_groupEnable and not flag_force_reply:
             plugin_event.set_block()
             return
-        if isMatchWordStart(tmp_reast_str, 'help'):
+        if OlivaDiceCore.msgReplyModel.replyCONTEXT_fliter(tmp_reast_str):
+            pass
+        elif isMatchWordStart(tmp_reast_str, 'help'):
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'help')
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             tmp_reast_str = tmp_reast_str.rstrip(' ')

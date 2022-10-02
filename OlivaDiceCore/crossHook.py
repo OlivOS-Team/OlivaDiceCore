@@ -27,6 +27,10 @@ listPrefix = [
     '/'
 ]
 
+listReplyContextFliter = []
+
+dictReplyContextReg = {}
+
 def msgHook(event, funcType, sender, dectData, message):
     [host_id, group_id, user_id] = dectData
     tmp_name = 'N/A'
@@ -54,7 +58,9 @@ def drawFormatHook(data:str, plugin_event:OlivOS.API.Event):
 #跨模块注入点
 dictHookList = {
     'model': listModel,
-    'prefix': listPrefix
+    'prefix': listPrefix,
+    'replyContextFliter': listReplyContextFliter,
+    'replyContextReg': dictReplyContextReg
 }
 
 dictHookFunc = {
