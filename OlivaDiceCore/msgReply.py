@@ -1203,7 +1203,11 @@ def unity_reply(plugin_event, Proc):
                     dictTValue['tHelpDocResult'] = '\n'.join(tmp_dataList_new)
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDoc'], dictTValue)
                 else:
-                    tmp_reply_str = OlivaDiceCore.helpDoc.getHelp(tmp_reast_str, plugin_event.bot_info.hash)
+                    tmp_reply_str = OlivaDiceCore.helpDoc.getHelp(
+                        tmp_reast_str,
+                        plugin_event.bot_info.hash,
+                        plugin_event = plugin_event
+                    )
             else:
                 tmp_reply_str = OlivaDiceCore.helpDoc.getHelp('default', plugin_event.bot_info.hash)
             if tmp_reply_str != None:
@@ -4355,6 +4359,8 @@ def replyMsgPrivateForObByEvent(plugin_event, message):
 
 def replyMsgLazyHelpByEvent(plugin_event, help_key):
     tmp_reply_str = OlivaDiceCore.helpDoc.getHelp(str(help_key), plugin_event.bot_info.hash)
+    if tmp_reply_str == None or tmp_reply_str == '':
+        return None
     return replyMsg(plugin_event, str(tmp_reply_str))
 
 

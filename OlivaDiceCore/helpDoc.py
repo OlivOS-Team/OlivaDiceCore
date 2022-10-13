@@ -113,45 +113,82 @@ def saveHelpDocByBotHash(botHash):
         except:
             pass
 
-def getHelp(key_str, bot_hash):
+
+# plugin_event 为 None 时仅返回回复内容，否则接管回复流程
+def getHelp(key_str, bot_hash, plugin_event = None):
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
     dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustom
     tmp_reply_str = None
     tmp_recommend_list = []
     tmp_recommend_str = ''
+    key_str_new = key_str
     if bot_hash in OlivaDiceCore.msgCustom.dictStrCustomDict:
         dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[bot_hash]
     if bot_hash in OlivaDiceCore.helpDocData.dictHelpDoc:
-        if key_str in OlivaDiceCore.helpDocData.dictHelpDoc[bot_hash]:
-            tmp_tHelpDocResult = OlivaDiceCore.helpDocData.dictHelpDoc[bot_hash][key_str]
-            if len(tmp_tHelpDocResult) > 1:
-                if tmp_tHelpDocResult[0] == '&' and tmp_tHelpDocResult[1:] != key_str:
-                    tmp_reply_str = getHelp(tmp_tHelpDocResult[1:], bot_hash)
-                    return tmp_reply_str
-            dictTValue['tHelpDocResult'] = OlivaDiceCore.helpDocData.dictHelpDoc[bot_hash][key_str]
-            if key_str == 'default':
-                tmp_reply_str = '%s\n%s' % (OlivaDiceCore.data.bot_info, dictTValue['tHelpDocResult'])
-            else:
-                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDoc'], dictTValue)
-            return tmp_reply_str
-        else:
-            tmp_recommend_list = getHelpRecommend(key_str, bot_hash)
-            if type(tmp_recommend_list) == list:
-                if len(tmp_recommend_list) > 0:
-                    flag_is_begin = True
-                    for tmp_recommend_list_this in tmp_recommend_list:
-                        if not flag_is_begin:
-                            tmp_recommend_str += '\n'
-                        else:
-                            flag_is_begin = False
-                        tmp_recommend_str += '[.help %s]' % (tmp_recommend_list_this,)
-                    dictTValue['tHelpDocResult'] = tmp_recommend_str
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDocRecommend'], dictTValue)
+        while True:
+            if key_str_new in OlivaDiceCore.helpDocData.dictHelpDoc[bot_hash]:
+                tmp_tHelpDocResult = OlivaDiceCore.helpDocData.dictHelpDoc[bot_hash][key_str_new]
+                if len(tmp_tHelpDocResult) > 1:
+                    if tmp_tHelpDocResult[0] == '&' and tmp_tHelpDocResult[1:] != key_str_new:
+                        tmp_reply_str = getHelp(tmp_tHelpDocResult[1:], bot_hash)
+                        return tmp_reply_str
+                dictTValue['tHelpDocResult'] = OlivaDiceCore.helpDocData.dictHelpDoc[bot_hash][key_str_new]
+                if key_str_new == 'default':
+                    tmp_reply_str = '%s\n%s' % (OlivaDiceCore.data.bot_info, dictTValue['tHelpDocResult'])
                 else:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDocNotFound'], dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDoc'], dictTValue)
                 return tmp_reply_str
+            else:
+                flag_need_loop = False
+                tmp_recommend_list = getHelpRecommend(key_str_new, bot_hash)
+                if type(tmp_recommend_list) == list:
+                    if len(tmp_recommend_list) > 0:
+                        flag_is_begin = True
+                        tmp_count = 0
+                        for tmp_recommend_list_this in tmp_recommend_list:
+                            if not flag_is_begin:
+                                tmp_recommend_str += '\n'
+                            else:
+                                flag_is_begin = False
+                            tmp_recommend_str += '%d. %s' % (tmp_count + 1,tmp_recommend_list_this)
+                            tmp_count += 1
+                        if plugin_event != None:
+                            tmp_recommend_str += '\n请输入序号以查看对应选项'
+                        dictTValue['tHelpDocResult'] = tmp_recommend_str
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDocRecommend'], dictTValue)
+                        flag_need_loop = True
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDocNotFound'], dictTValue)
+                    if plugin_event == None:
+                        return tmp_reply_str
+                    else:
+                        OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+                        if flag_need_loop:
+                            tmp_select:'str|None' = OlivaDiceCore.msgReplyModel.replyCONTEXT_regWait(
+                                plugin_event = plugin_event,
+                                flagBlock = 'allowCommand',
+                                hash = OlivaDiceCore.msgReplyModel.contextRegHash([None, plugin_event.data.user_id])
+                            )
+                            if type(tmp_select) == str and tmp_select.isdigit():
+                                tmp_select = int(tmp_select) - 1
+                                if tmp_select >= 0 and tmp_select < len(tmp_recommend_list):
+                                    key_str_new = tmp_recommend_list[tmp_select]
+                                else:
+                                    flag_need_loop = False
+                            elif tmp_select == None:
+                                return None
+                            else:
+                                flag_need_loop = False
+                        if not flag_need_loop:
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDocNotFound'], dictTValue)
+                            return tmp_reply_str
+                        else:
+                            continue
+            if plugin_event == None:
+                break
     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDocNotFound'], dictTValue)
-    return tmp_reply_str
+    if plugin_event == None:
+        return tmp_reply_str
 
 def getHelpRecommend(key_str:str, bot_hash:str):
     res = []

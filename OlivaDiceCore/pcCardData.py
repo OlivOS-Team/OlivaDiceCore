@@ -731,11 +731,17 @@ dictPcCardTemplateDefaultTemp = {
             },
             'C4': {
                 'greatSuccess': {
-                    '.and': {
-                        '.<=': ['$roll', {'./': ['$skill', 10]}],
-                        '.>=': ['$roll', 1],
-                        '.<=': ['$roll', 5]
-                    }
+                    '.and': [
+                        {
+                            '.<=': ['$roll', {'./': ['$skill', 10]}]
+                        },
+                        {
+                            '.>=': ['$roll', 1]
+                        },
+                        {
+                            '.<=': ['$roll', 5]
+                        }
+                    ]
                 },
                 'greatFail': {
                     '.or': [
