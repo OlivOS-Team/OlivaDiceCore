@@ -20,7 +20,7 @@ jobs:
           cd $PACK_NAME
           zip -r ../$PACK_NAME.opk ./
       - name: Upload
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Artifacts
           path: ${{ env.PACK_NAME }}.opk
