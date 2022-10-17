@@ -39,32 +39,32 @@ jobs:
           mkdir ./release/OlivOS-Linux/plugin/app
           echo "Unpack OlivOS Done"
       - name: Checkout OlivaDiceCore
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
           repository: OlivOS-Team/OlivaDiceCore
           path: ./download/OlivaDiceCore/
       - name: Checkout OlivaDiceJoy
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
           repository: OlivOS-Team/OlivaDiceJoy
           path: ./download/OlivaDiceJoy/
       - name: Checkout OlivaDiceLogger
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
           repository: OlivOS-Team/OlivaDiceLogger
           path: ./download/OlivaDiceLogger/
       - name: Checkout OlivaDiceMaster
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
           repository: OlivOS-Team/OlivaDiceMaster
           path: ./download/OlivaDiceMaster/
       - name: Checkout OlivaDiceOdyssey
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
           repository: OlivOS-Team/OlivaDiceOdyssey
           path: ./download/OlivaDiceOdyssey/
       - name: Checkout OlivaDiceNativeGUI
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
           repository: OlivOS-Team/OlivaDiceNativeGUI
           path: ./download/OlivaDiceNativeGUI/
@@ -100,15 +100,15 @@ jobs:
           cp ./unpack/*.opk ./release/OlivOS-Win-32/plugin/app
           cp ./unpack/*.opk ./release/OlivOS-Linux/plugin/app
           echo "Setup OlivaDice Done"
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: OlivaDice-OlivOS-Win
           path: ./release/OlivOS
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: OlivaDice-OlivOS-Win-32
           path: ./release/OlivOS-Win-32
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: OlivaDice-OlivOS-Linux
           path: ./release/OlivOS-Linux
