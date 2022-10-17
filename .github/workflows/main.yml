@@ -10,7 +10,7 @@ jobs:
       PACK_NAME: ""
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.5.0
       - name: Pack
         run: |
           if [ ! $PACK_NAME ]; then
