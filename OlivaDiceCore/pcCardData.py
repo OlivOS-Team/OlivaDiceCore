@@ -247,6 +247,9 @@ dictPcCardTemplateDefaultTemp = {
             'EDU': '教育',
             'LUC': '幸运'
         },
+        'defaultSkillValue': {
+            '图书馆': 20
+        },
         'checkRules': {
             'default': {
                 'checkList': [
@@ -520,6 +523,9 @@ dictPcCardTemplateDefaultTemp = {
             'POW': '意志',
             'EDU': '教育',
             'LUC': '幸运'
+        },
+        'defaultSkillValue': {
+            '图书馆': 20
         },
         'checkRules': {
             'default': {

@@ -330,14 +330,35 @@ def pcCardDataDelBySkillName(pcHash, skillName, pcCardName = 'default'):
             dictPcCardData['unity'][pcHash][tmp_pc_card_name_key].pop(tmp_pc_card_synonyms_hit_this)
     dataPcCardSave('unity', pcHash)
 
+# 获取用户当前人物卡某技能
 def pcCardDataGetBySkillName(pcHash, skillName, hagId = None):
     tmp_skill_value = 0
+    skillName_src = pcCardDataSkillNameMapper(pcHash, skillName, flagShow = False, hagId = hagId)
     tmp_pc_card_name_key = 'default'
     tmp_pc_card_name_key_1 = pcCardDataGetSelectionKey(pcHash, hagId)
     if tmp_pc_card_name_key_1 != None:
         tmp_pc_card_name_key = tmp_pc_card_name_key_1
     else:
         return tmp_skill_value
+    tmp_template_name = pcCardDataGetTemplateKey(pcHash, tmp_pc_card_name_key)
+    tmp_template_defaultSkillValue = None
+    if tmp_template_name == None:
+        tmp_template_name = 'default'
+    if tmp_template_name != None:
+        tmp_template = pcCardDataGetTemplateByKey(tmp_template_name)
+        if tmp_template != None:
+            if 'defaultSkillValue' in tmp_template:
+                tmp_template_defaultSkillValue = tmp_template['defaultSkillValue']
+    if type(tmp_template_defaultSkillValue) == dict:
+        if skillName_src in tmp_template_defaultSkillValue and type(tmp_template_defaultSkillValue[skillName_src]) == int:
+            tmp_skill_value = tmp_template_defaultSkillValue[skillName_src]
+            pcCardDataSetBySkillName(
+                pcHash = pcHash,
+                skillName = skillName_src,
+                skillValue = tmp_skill_value,
+                pcCardName = tmp_pc_card_name_key,
+                hagId = hagId
+            )
     if pcHash not in dictPcCardData['unity']:
         return tmp_skill_value
     if tmp_pc_card_name_key not in dictPcCardData['unity'][pcHash]:
@@ -561,6 +582,7 @@ def pcCardDataGetUserAll(pcHash):
         tmp_card_dict = dictPcCardData['unity'][pcHash]
     return tmp_card_dict
 
+# 获取某用户当前人物卡技能表
 def pcCardDataGetByPcName(pcHash, hagId = None):
     tmp_skill_list = {}
     tmp_pc_card_name_key = 'default'
@@ -572,6 +594,27 @@ def pcCardDataGetByPcName(pcHash, hagId = None):
     if pcHash in dictPcCardData['unity']:
         if tmp_pc_card_name_key in dictPcCardData['unity'][pcHash]:
             tmp_skill_list = dictPcCardData['unity'][pcHash][tmp_pc_card_name_key]
+    tmp_template_name = pcCardDataGetTemplateKey(pcHash, tmp_pc_card_name_key)
+    tmp_template_defaultSkillValue = None
+    if tmp_template_name == None:
+        tmp_template_name = 'default'
+    if tmp_template_name != None:
+        tmp_template = pcCardDataGetTemplateByKey(tmp_template_name)
+        if tmp_template != None:
+            if 'defaultSkillValue' in tmp_template:
+                tmp_template_defaultSkillValue = tmp_template['defaultSkillValue']
+    if type(tmp_template_defaultSkillValue) == dict:
+        for skillName_src in tmp_template_defaultSkillValue:
+            if skillName_src in tmp_template_defaultSkillValue and type(tmp_template_defaultSkillValue[skillName_src]) == int:
+                if skillName_src not in tmp_skill_list:
+                    tmp_skill_value = tmp_template_defaultSkillValue[skillName_src]
+                    pcCardDataSetBySkillName(
+                        pcHash = pcHash,
+                        skillName = skillName_src,
+                        skillValue = tmp_skill_value,
+                        pcCardName = tmp_pc_card_name_key,
+                        hagId = hagId
+                    )
     return tmp_skill_list
 
 def fixName(data:str, flagMode = 'default'):
