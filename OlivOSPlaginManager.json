@@ -4,14 +4,14 @@
             "main": {
                 "command": "OlivaDiceCore",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceCore.opk",
-                "svn": 1052,
-                "version": "3.3.2"
+                "svn": 1053,
+                "version": "3.3.3"
             },
             "github": {
                 "command": "OlivaDiceCore",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceCore/releases/latest/download/OlivaDiceCore.opk",
-                "svn": 1051,
-                "version": "3.3.1"
+                "svn": 1053,
+                "version": "3.3.3"
             }
         },
         "OlivaDiceJoy": {
