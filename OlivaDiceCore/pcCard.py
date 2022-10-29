@@ -352,19 +352,20 @@ def pcCardDataGetBySkillName(pcHash, skillName, hagId = None):
     if type(tmp_template_defaultSkillValue) == dict:
         if skillName_src in tmp_template_defaultSkillValue and type(tmp_template_defaultSkillValue[skillName_src]) == int:
             tmp_skill_value = tmp_template_defaultSkillValue[skillName_src]
-            pcCardDataSetBySkillName(
-                pcHash = pcHash,
-                skillName = skillName_src,
-                skillValue = tmp_skill_value,
-                pcCardName = tmp_pc_card_name_key,
-                hagId = hagId
-            )
     if pcHash not in dictPcCardData['unity']:
         return tmp_skill_value
     if tmp_pc_card_name_key not in dictPcCardData['unity'][pcHash]:
         return tmp_skill_value
     if str(skillName) in dictPcCardData['unity'][pcHash][tmp_pc_card_name_key]:
         tmp_skill_value = dictPcCardData['unity'][pcHash][tmp_pc_card_name_key][str(skillName)]
+    else:
+        pcCardDataSetBySkillName(
+            pcHash = pcHash,
+            skillName = skillName_src,
+            skillValue = tmp_skill_value,
+            pcCardName = tmp_pc_card_name_key,
+            hagId = hagId
+        )
     return tmp_skill_value
 
 def pcCardDataGetSelectionKey(pcHash, hagId = None):
@@ -605,7 +606,7 @@ def pcCardDataGetByPcName(pcHash, hagId = None):
                 tmp_template_defaultSkillValue = tmp_template['defaultSkillValue']
     if type(tmp_template_defaultSkillValue) == dict:
         for skillName_src in tmp_template_defaultSkillValue:
-            if skillName_src in tmp_template_defaultSkillValue and type(tmp_template_defaultSkillValue[skillName_src]) == int:
+            if type(tmp_template_defaultSkillValue[skillName_src]) == int:
                 if skillName_src not in tmp_skill_list:
                     tmp_skill_value = tmp_template_defaultSkillValue[skillName_src]
                     pcCardDataSetBySkillName(
