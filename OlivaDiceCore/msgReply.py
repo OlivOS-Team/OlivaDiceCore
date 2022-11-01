@@ -2221,6 +2221,40 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitSt'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
+            elif isMatchWordStart(tmp_reast_str, 'new'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'new')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_reast_str = tmp_reast_str.rstrip('')
+                tmp_pc_name = None
+                if len(tmp_reast_str) > 0:
+                    tmp_pc_name = tmp_reast_str
+                if tmp_pc_name != None:
+                    tmp_pc_name = OlivaDiceCore.pcCard.fixName(tmp_pc_name)
+                    if not OlivaDiceCore.pcCard.checkPcName(tmp_pc_name):
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcNewError'], dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
+                        return
+                    else:
+                        tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
+                            tmp_pc_id,
+                            tmp_pc_platform
+                        )
+                        OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
+                            tmp_pcHash,
+                            '__new',
+                            0,
+                            tmp_pc_name,
+                            hagId = tmp_hagID
+                        )
+                        OlivaDiceCore.pcCard.pcCardDataDelBySkillName(
+                            tmp_pcHash,
+                            '__new',
+                            tmp_pc_name
+                        )
+                        dictTValue['tPcSelection'] = tmp_pc_name
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcNew'], dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
+                return
             elif isMatchWordStart(tmp_reast_str, 'del'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'del')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
