@@ -162,8 +162,8 @@ def getHelp(key_str, bot_hash, plugin_event = None):
                     if plugin_event == None:
                         return tmp_reply_str
                     else:
-                        OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
                         if flag_need_loop:
+                            OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
                             tmp_select:'str|None' = OlivaDiceCore.msgReplyModel.replyCONTEXT_regWait(
                                 plugin_event = plugin_event,
                                 flagBlock = 'allowCommand',
