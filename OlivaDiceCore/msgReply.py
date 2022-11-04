@@ -4062,6 +4062,7 @@ def unity_reply(plugin_event, Proc):
                 )
             tmp_template = None
             tmp_template_customDefault = None
+            rd_para_str = '1D100'
             if tmp_template_name != None:
                 tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
                 if 'customDefault' in tmp_template:
