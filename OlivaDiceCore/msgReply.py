@@ -3974,7 +3974,8 @@ def unity_reply(plugin_event, Proc):
             #此处只对实体化后的&做处理，因为这是运算符，其余保持原样
             #如果以后有全面反实体化的需求则需直接调整这里
             #tmp_reast_str = tmp_reast_str.replace('&amp;', '&')
-            if 'r' == flag_roll_mode:
+            rd_para_str = '1D100'
+            if flag_roll_mode in ['r', 'rx']:
                 rd_para_str = '1D100'
             elif flag_roll_mode in ['ww', 'w']:
                 rd_para_str = '10A10'
@@ -4062,7 +4063,6 @@ def unity_reply(plugin_event, Proc):
                 )
             tmp_template = None
             tmp_template_customDefault = None
-            rd_para_str = '1D100'
             if tmp_template_name != None:
                 tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
                 if 'customDefault' in tmp_template:
