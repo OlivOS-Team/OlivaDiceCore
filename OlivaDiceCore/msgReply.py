@@ -4088,10 +4088,10 @@ def unity_reply(plugin_event, Proc):
                 rd_para_str = rd_para_main_str
             tmp_template_customDefault = copy.deepcopy(tmp_template_customDefault)
             if type(rd_para_main_D_right) == int:
-                if type(tmp_template_customDefault) != dict or 'd' not in tmp_template_customDefault:
-                    tmp_template_customDefault = {
-                        'd': {}
-                    }
+                if type(tmp_template_customDefault) != dict:
+                    tmp_template_customDefault = {}
+                    if 'd' not in tmp_template_customDefault:
+                        tmp_template_customDefault['d'] = {}
                 tmp_template_customDefault['d']['rightD'] = rd_para_main_D_right
             if roll_times_count == 1:
                 rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_template_customDefault, valueTable = skill_valueTable)

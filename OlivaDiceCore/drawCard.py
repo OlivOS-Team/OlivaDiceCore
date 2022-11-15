@@ -302,7 +302,7 @@ def initDeck(bot_info_dict):
                 ('Init', 'default')
             ]
         )
-        
+
 def initExcelDeckData(data):
     res = {}
     for obj_Deck_this_name in data.sheetnames:
