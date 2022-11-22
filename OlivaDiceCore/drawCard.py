@@ -115,7 +115,7 @@ def initDeck(bot_info_dict):
                 )
         customDeckFile_deckName = customDeckFile
         if customDeckFile_deckName.endswith('.yaml'):
-            customDeckFile_deckName = customDeckFile_deckName.rsplit('.yaml')
+            customDeckFile_deckName = customDeckFile_deckName.rstrip('.yaml')
         if obj_Deck_this != None:
             obj_Deck_this_new = initYamlDeckData(obj_Deck_this, deckName = customDeckFile_deckName)
             if obj_Deck_this_new != None:
@@ -244,7 +244,7 @@ def initDeck(bot_info_dict):
                     )
             customDeckFile_deckName = customDeckFile
             if customDeckFile_deckName.endswith('.yaml'):
-                customDeckFile_deckName = customDeckFile_deckName.rsplit('.yaml')
+                customDeckFile_deckName = customDeckFile_deckName.rstrip('.yaml')
             if obj_Deck_this != None:
                 obj_Deck_this_new = initYamlDeckData(obj_Deck_this, deckName = customDeckFile_deckName)
                 OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this_new)
