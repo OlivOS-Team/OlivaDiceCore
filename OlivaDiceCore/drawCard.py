@@ -412,7 +412,12 @@ def getDrawDeck(key_str, bot_hash, count = 1, valDict = None):
                 dictTValue['tDrawDeckResult'] = '\n'.join(tmp_card_list)
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawDeck'], dictTValue)
                 return tmp_reply_str
-    tmp_recommend_list = getDeckRecommend(key_str, bot_hash)
+    tmp_recommend_list = []
+    if OlivaDiceCore.console.getConsoleSwitchByHash(
+        'drawRecommendMode',
+        bot_hash
+    ) == 1:
+        tmp_recommend_list = getDeckRecommend(key_str, bot_hash)
     if type(tmp_recommend_list) == list:
         if len(tmp_recommend_list) > 0:
             tmp_recommend_str = '\n'.join(
