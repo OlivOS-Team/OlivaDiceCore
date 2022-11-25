@@ -18,7 +18,7 @@ from enum import Enum
 import random
 import traceback
 
-pypi_version = '1.0.4'
+pypi_version = '1.0.5'
 
 dictOperationPriority = {
     '[' : None,
@@ -2641,9 +2641,6 @@ class RD(object):
                             tmp_node_this_output_2_mark = tmp_node_this_output_this
                     tmp_node_this_output_1_1 = int(tmp_node_this_output_1 / 10)
                     tmp_node_this_output_1_2 = int(tmp_node_this_output_1 % 10)
-                    if tmp_node_this_output_1_2 == 0:
-                        tmp_node_this_output_1_2 = 10
-                        tmp_node_this_output_1_1 -= 1
                     if tmp_node_this_output_1_1 > tmp_node_this_output_2_mark:
                         tmp_node_this_output = tmp_node_this_output_1_2 + tmp_node_this_output_2_mark * 10
                     else:
@@ -2722,9 +2719,6 @@ class RD(object):
                             tmp_node_this_output_2_mark = tmp_node_this_output_this
                     tmp_node_this_output_1_1 = int(tmp_node_this_output_1 / 10)
                     tmp_node_this_output_1_2 = int(tmp_node_this_output_1 % 10)
-                    if tmp_node_this_output_1_2 == 0:
-                        tmp_node_this_output_1_2 = 10
-                        tmp_node_this_output_1_1 -= 1
                     if tmp_node_this_output_1_1 < tmp_node_this_output_2_mark:
                         tmp_node_this_output = tmp_node_this_output_1_2 + tmp_node_this_output_2_mark * 10
                     else:
