@@ -676,6 +676,7 @@ def setPcSkillAPI(pcHash, skillName, skillValue, hagId, defaultName = '人物卡
         )
     return res
 
+## 保证至少有一个目标人物卡
 def getPcNameAPI(pcHash, hagId, defaultName = '人物卡'):
     res = None
     tmp_pcCardNameKey = pcCardDataGetSelectionKey(pcHash, hagId)
@@ -693,9 +694,33 @@ def getPcNameAPI(pcHash, hagId, defaultName = '人物卡'):
     res = tmp_pcCardNameKey
     return res
 
+## 保证指定的目标人物卡一定存在
+def getPcNameForceAPI(pcHash, hagId, pcName = '人物卡'):
+    res = None
+    tmp_pcCardNameKey = pcCardDataGetSelectionKey(pcHash, hagId)
+    if tmp_pcCardNameKey != pcName:
+        tmp_pcCardNameKey = pcName
+        tmp_pcCardNameKey = OlivaDiceCore.pcCard.fixName(tmp_pcCardNameKey)
+        if not OlivaDiceCore.pcCard.checkPcName(tmp_pcCardNameKey):
+            tmp_pcCardNameKey = '人物卡'
+        OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
+            pcHash,
+            '__new',
+            0,
+            tmp_pcCardNameKey,
+            hagId = hagId
+        )
+        OlivaDiceCore.pcCard.pcCardDataDelBySkillName(
+            pcHash,
+            '__new',
+            tmp_pcCardNameKey
+        )
+    res = tmp_pcCardNameKey
+    return res
+
 def setPcSwitchAPI(pcHash, hagId, switchName = '人物卡'):
     res = False
-    if getPcNameAPI(pcHash, hagId, switchName) != None:
+    if getPcNameForceAPI(pcHash, hagId, switchName) != None:
         if OlivaDiceCore.pcCard.pcCardDataGetSelectionKeyLock(
             pcHash,
             hagId
@@ -710,25 +735,28 @@ def setPcSwitchAPI(pcHash, hagId, switchName = '人物卡'):
                 switchName,
                 hagId
             )
+        res = True
     return res
 
 def setPcLockAPI(pcHash, hagId, setFlag:bool, pcName = '人物卡'):
     res = False
-    getPcNameAPI(pcHash, hagId, pcName)
-    if OlivaDiceCore.pcCard.pcCardDataGetSelectionKeyLock(
-        pcHash,
-        hagId
-    ) == None:
-        if setFlag == True:
-            OlivaDiceCore.pcCard.pcCardDataSetSelectionKeyLock(
-                pcHash,
-                pcName,
-                hagId
-            )
-    else:
-        if setFlag == False:
-            OlivaDiceCore.pcCard.pcCardDataDelSelectionKeyLock(
-                pcHash,
-                hagId
-            )
+    tmp_pcName = getPcNameAPI(pcHash, hagId, pcName)
+    if tmp_pcName != None:
+        if OlivaDiceCore.pcCard.pcCardDataGetSelectionKeyLock(
+            pcHash,
+            hagId
+        ) == None:
+            if setFlag == True:
+                OlivaDiceCore.pcCard.pcCardDataSetSelectionKeyLock(
+                    pcHash,
+                    tmp_pcName,
+                    hagId
+                )
+        else:
+            if setFlag == False:
+                OlivaDiceCore.pcCard.pcCardDataDelSelectionKeyLock(
+                    pcHash,
+                    hagId
+                )
+        res = True
     return res
