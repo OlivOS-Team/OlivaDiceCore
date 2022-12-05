@@ -20,6 +20,8 @@ import OlivaDiceCore
 import os
 import json
 
+dictDeckIndex = {}
+
 dictDeck = {}
 
 dictDeckTemp = {

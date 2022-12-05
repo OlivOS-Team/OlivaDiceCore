@@ -389,5 +389,8 @@ https://github.com/OlivOS-Team/onedice
     '对抗检定': '&rav',
     '旁观模式': '&ob',
     '用户记录': '&uinfo',
-    '群记录': '&uinfo'
+    '群记录': '&uinfo',
+    '全牌堆列表': '',
+    '内置牌堆': '',
+    '扩展牌堆': ''
 }

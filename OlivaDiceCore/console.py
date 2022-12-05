@@ -35,6 +35,7 @@ dictConsoleSwitchTemplate = {
         'largeRollLimit' : 300,
         'randomMode' : 0,
         'drawRecommendMode' : 1,
+        'drawListMode' : 2,
         'masterList' : [],
         'noticeGroupList' : [],
         'pulseUrlList' : []
