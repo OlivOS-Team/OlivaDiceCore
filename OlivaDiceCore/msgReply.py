@@ -2021,6 +2021,7 @@ def unity_reply(plugin_event, Proc):
                 if tmp_skill_name == '':
                     tmp_skill_name = None
                 if tmp_skill_name != None:
+                    tmp_skill_name = tmp_skill_name.upper()
                     tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
                         OlivaDiceCore.pcCard.getPcHash(
                             tmp_pc_id,
@@ -2593,7 +2594,13 @@ def unity_reply(plugin_event, Proc):
                     tmp_skill_name = None
                 if tmp_skill_value == '':
                     tmp_skill_value = None
-                if tmp_skill_value != None:
+                if tmp_skill_value != None and (
+                    (
+                        type(tmp_skill_name) == str
+                    ) and (
+                        not tmp_skill_name.startswith('&') and not tmp_skill_value.startswith('=')
+                    )
+                ):
                     if tmp_skill_value[0] not in op_list:
                         tmp_split_list_all = [[tmp_reast_str_new.split(op_this), op_this] for op_this in op_list]
                         tmp_split_list_match = None
