@@ -3076,7 +3076,7 @@ def unity_reply(plugin_event, Proc):
                         dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckSucceed'], dictTValue)
                     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_EXTREME_HARD_SUCCESS:
                         tmp_sancheck_para_final = tmp_sancheck_para_s
-                        dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckSucceed'], dictTValue)
+                        dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckGreatSucceed'], dictTValue)
                     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_SUCCESS:
                         tmp_sancheck_para_final = tmp_sancheck_para_s
                         dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckSucceed'], dictTValue)
