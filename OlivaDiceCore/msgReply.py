@@ -3063,10 +3063,30 @@ def unity_reply(plugin_event, Proc):
                         'roll': tmp_rd_int,
                         'skill': tmp_skill_value
                     }
+                    flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
+                        userId = tmp_hagID,
+                        userType = 'group',
+                        platform = plugin_event.platform['platform'],
+                        userConfigKey = 'groupTemplate',
+                        botHash = plugin_event.bot_info.hash
+                    )
+                    flag_groupTemplateRule = OlivaDiceCore.userConfig.getUserConfigByKey(
+                        userId = tmp_hagID,
+                        userType = 'group',
+                        platform = plugin_event.platform['platform'],
+                        userConfigKey = 'groupTemplateRule',
+                        botHash = plugin_event.bot_info.hash
+                    )
+                    tmp_template_name = 'COC7'
+                    tmp_template_rule_name = 'default'
+                    if flag_groupTemplate != None:
+                        tmp_template_name = flag_groupTemplate
+                        if flag_groupTemplateRule != None:
+                            tmp_template_rule_name = flag_groupTemplateRule
                     tmpSkillCheckType = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
                         dictRuleTempData,
-                        OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey('COC7'),
-                        'default'
+                        OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name),
+                        tmp_template_rule_name
                     )
                     if tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS:
                         tmp_sancheck_para_final = tmp_sancheck_para_s
@@ -3076,10 +3096,10 @@ def unity_reply(plugin_event, Proc):
                         dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckSucceed'], dictTValue)
                     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_EXTREME_HARD_SUCCESS:
                         tmp_sancheck_para_final = tmp_sancheck_para_s
-                        dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckGreatSucceed'], dictTValue)
+                        dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckSucceed'], dictTValue)
                     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_SUCCESS:
                         tmp_sancheck_para_final = tmp_sancheck_para_s
-                        dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckSucceed'], dictTValue)
+                        dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckGreatSucceed'], dictTValue)
                     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FAIL:
                         tmp_sancheck_para_final = tmp_sancheck_para_f
                         dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckFailed'], dictTValue)
