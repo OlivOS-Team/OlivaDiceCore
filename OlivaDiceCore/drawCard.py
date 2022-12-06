@@ -78,6 +78,37 @@ def initDeckHelp(bot_info_dict):
                 }
         elif flag_drawListMode == 2:
             if bot_hash in OlivaDiceCore.drawCardData.dictDeckIndex and type(OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash]) == dict:
+                deck_name_tmp_list_index = {'内置牌堆': '内置牌堆:\n%s' % deck_name_tmp_list_str}
+                deck_name_list_index = {
+                    '扩展牌堆 %s' % deck_name_list_this: '%s:\n%s' % (
+                        deck_name_list_this,
+                        '/'.join([
+                            deck_name_list_this_this
+                            for deck_name_list_this_this in OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash][deck_name_list_this]
+                            if type(deck_name_list_this_this) == str and not deck_name_list_this_this.startswith('_')
+                        ])
+                    )
+                    for deck_name_list_this in OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash]
+                    if type(deck_name_list_this) == str and type(OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash][deck_name_list_this]) == list
+                }
+                deck_name_tmp_list_index_check = [
+                    deck_name_tmp_list_index_key
+                    for deck_name_tmp_list_index_key in deck_name_tmp_list_index
+                    if type(deck_name_tmp_list_index_key) == str and type(deck_name_tmp_list_index[deck_name_tmp_list_index_key]) == str
+                ]
+                deck_name_list_index_check = [
+                    deck_name_list_this
+                    for deck_name_list_this in OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash]
+                    if type(deck_name_list_this) == str and type(OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash][deck_name_list_this]) == list
+                ]
+                helpdoc_patch.update(deck_name_tmp_list_index)
+                helpdoc_patch.update(deck_name_list_index)
+                helpdoc_patch.update({
+                    '全牌堆列表': '/'.join(deck_name_tmp_list_index_check + deck_name_list_index_check),
+                    '扩展牌堆': '/'.join(deck_name_list_index_check)
+                })
+        elif flag_drawListMode == 3:
+            if bot_hash in OlivaDiceCore.drawCardData.dictDeckIndex and type(OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash]) == dict:
                 deck_name_tmp_list_index = ['内置牌堆:\n%s' % deck_name_tmp_list_str]
                 deck_name_list_index = [
                     '%s:\n%s' % (
