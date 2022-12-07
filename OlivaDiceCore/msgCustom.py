@@ -103,6 +103,8 @@ dictStrCustom = {
     'strRollErrorHelp' : '\n请使用[.help r]查看掷骰帮助，或使用[.help onedice]查看先进的OneDice标准。',
     'strSetGroupTempRule' : '已设置本群套用模板[{tPcTempName}]的规则[{tPcTempRuleName}]{tLazyResult}',
     'strDelGroupTempRule' : '已清除本群套用模板与规则，将按照人物卡设置各自进行检定',
+    'strSetGroupTempError' : '试图套用的模板不存在',
+    'strSetGroupTempRuleError' : '试图套用的模板规则不存在',
     'strSetGroupMainDice' : '已设置本群套用主骰[{tResult}]',
     'strShowGroupMainDice' : '本群已套用主骰[{tResult}]',
     'strShowGroupMainDiceNone' : '本群未设置主骰',

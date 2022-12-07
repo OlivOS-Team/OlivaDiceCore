@@ -543,6 +543,41 @@ def pcCardDataSetTemplateKey(pcHash, pcCardName, templateName = 'default', ruleN
     else:
         return False
 
+def pcCardDataCheckTemplateKey(templateName = 'default', ruleName = 'default', resMode = 'flag'):
+    res = None
+    if resMode == 'flag':
+        res = False
+    elif resMode == 'temp':
+        res = None
+    elif resMode == 'rule':
+        res = None
+    selection_key = 'template'
+    selection_key_2 = 'checkRules'
+    templateName_core = getKeyWithUpper(
+        data = dictPcCardTemplateDefault['unity'],
+        key = templateName
+    )
+    if templateName_core == None:
+        return res
+    if templateName_core not in dictPcCardTemplateDefault['unity']:
+        return res
+    if selection_key_2 not in dictPcCardTemplateDefault['unity'][templateName_core]:
+        return res
+    ruleName_core = getKeyWithUpper(
+        data = dictPcCardTemplateDefault['unity'][templateName_core][selection_key_2],
+        key = ruleName
+    )
+    if ruleName_core == None:
+        return res
+    res = True
+    if resMode == 'flag':
+        res = True
+    elif resMode == 'temp':
+        res = templateName_core
+    elif resMode == 'rule':
+        res = ruleName_core
+    return res
+
 #更通用的接口
 
 def pcCardDataGetTemplateDataByKey(pcHash, pcCardName, dataKey, resDefault = None):

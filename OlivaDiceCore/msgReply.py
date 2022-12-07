@@ -2907,6 +2907,173 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
             return
+        elif isMatchWordStart(tmp_reast_str, 'setdnd', fullMatch = True):
+            if flag_is_from_group:
+                tmp_user_platform = plugin_event.platform['platform']
+                tmp_hag_id = tmp_hagID
+                tmp_switch_setcoc = None
+                flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_hag_id,
+                    userType = 'group',
+                    platform = tmp_user_platform,
+                    userConfigKey = 'groupTemplate',
+                    botHash = plugin_event.bot_info.hash
+                )
+                flag_groupTemplateRule = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_hag_id,
+                    userType = 'group',
+                    platform = tmp_user_platform,
+                    userConfigKey = 'groupTemplateRule',
+                    botHash = plugin_event.bot_info.hash
+                )
+                if flag_groupTemplate not in ['DND5E']:
+                    tmp_templateName = 'DND5E'
+                    tmp_templateRuleName = 'default'
+                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                        userConfigKey = 'groupTemplate',
+                        userConfigValue = tmp_templateName,
+                        botHash = plugin_event.bot_info.hash,
+                        userId = tmp_hag_id,
+                        userType = 'group',
+                        platform = tmp_user_platform
+                    )
+                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                        userConfigKey = 'groupTemplateRule',
+                        userConfigValue = tmp_templateRuleName,
+                        botHash = plugin_event.bot_info.hash,
+                        userId = tmp_hag_id,
+                        userType = 'group',
+                        platform = tmp_user_platform
+                    )
+                    dictTValue['tPcTempName'] = tmp_templateName
+                    dictTValue['tPcTempRuleName'] = tmp_templateRuleName
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSetGroupTempRule'], dictTValue)
+                else:
+                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                        userConfigKey = 'groupTemplate',
+                        userConfigValue = None,
+                        botHash = plugin_event.bot_info.hash,
+                        userId = tmp_hag_id,
+                        userType = 'group',
+                        platform = tmp_user_platform
+                    )
+                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                        userConfigKey = 'groupTemplateRule',
+                        userConfigValue = None,
+                        botHash = plugin_event.bot_info.hash,
+                        userId = tmp_hag_id,
+                        userType = 'group',
+                        platform = tmp_user_platform
+                    )
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDelGroupTempRule'], dictTValue)
+                OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                    userHash = OlivaDiceCore.userConfig.getUserHash(
+                        userId = tmp_hag_id,
+                        userType = 'group',
+                        platform = tmp_user_platform
+                    )
+                )
+            else:
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
+            replyMsg(plugin_event, tmp_reply_str)
+            return
+        elif isMatchWordStart(tmp_reast_str, 'settemp') or isMatchWordStart(tmp_reast_str, 'setrule'):
+            if flag_is_from_group:
+                flag_settemp_mode = 'settemp'
+                tmp_templateName_input = 'default'
+                tmp_templateRuleName_input = 'default'
+                tmp_user_platform = plugin_event.platform['platform']
+                tmp_hag_id = tmp_hagID
+                if isMatchWordStart(tmp_reast_str, 'settemp'):
+                    flag_settemp_mode = 'settemp'
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'settemp')
+                elif isMatchWordStart(tmp_reast_str, 'setrule'):
+                    flag_settemp_mode = 'setrule'
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'setrule')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_reast_str = tmp_reast_str.rstrip()
+                if flag_settemp_mode == 'settemp':
+                    tmp_templateName_input = tmp_reast_str
+                elif flag_settemp_mode == 'setrule':
+                    flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
+                        userId = tmp_hag_id,
+                        userType = 'group',
+                        platform = tmp_user_platform,
+                        userConfigKey = 'groupTemplate',
+                        botHash = plugin_event.bot_info.hash
+                    )
+                    if flag_groupTemplate != None:
+                        tmp_templateName_input = flag_groupTemplate
+                    tmp_templateRuleName_input = tmp_reast_str
+                    if tmp_templateRuleName_input == '':
+                        tmp_templateRuleName_input = 'default'
+                if tmp_templateName_input == '' or OlivaDiceCore.pcCard.pcCardDataCheckTemplateKey(tmp_templateName_input, tmp_templateRuleName_input):
+                    if tmp_templateName_input != '':
+                        tmp_templateName_input = OlivaDiceCore.pcCard.pcCardDataCheckTemplateKey(
+                            tmp_templateName_input,
+                            tmp_templateRuleName_input,
+                            resMode = 'temp'
+                        )
+                        tmp_templateRuleName_input = OlivaDiceCore.pcCard.pcCardDataCheckTemplateKey(
+                            tmp_templateName_input,
+                            tmp_templateRuleName_input,
+                            resMode = 'rule'
+                        )
+                        tmp_templateName = tmp_templateName_input
+                        tmp_templateRuleName = tmp_templateRuleName_input
+                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                            userConfigKey = 'groupTemplate',
+                            userConfigValue = tmp_templateName,
+                            botHash = plugin_event.bot_info.hash,
+                            userId = tmp_hag_id,
+                            userType = 'group',
+                            platform = tmp_user_platform
+                        )
+                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                            userConfigKey = 'groupTemplateRule',
+                            userConfigValue = tmp_templateRuleName,
+                            botHash = plugin_event.bot_info.hash,
+                            userId = tmp_hag_id,
+                            userType = 'group',
+                            platform = tmp_user_platform
+                        )
+                        dictTValue['tPcTempName'] = tmp_templateName
+                        dictTValue['tPcTempRuleName'] = tmp_templateRuleName
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSetGroupTempRule'], dictTValue)
+                    else:
+                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                            userConfigKey = 'groupTemplate',
+                            userConfigValue = None,
+                            botHash = plugin_event.bot_info.hash,
+                            userId = tmp_hag_id,
+                            userType = 'group',
+                            platform = tmp_user_platform
+                        )
+                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                            userConfigKey = 'groupTemplateRule',
+                            userConfigValue = None,
+                            botHash = plugin_event.bot_info.hash,
+                            userId = tmp_hag_id,
+                            userType = 'group',
+                            platform = tmp_user_platform
+                        )
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDelGroupTempRule'], dictTValue)
+                    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                        userHash = OlivaDiceCore.userConfig.getUserHash(
+                            userId = tmp_hag_id,
+                            userType = 'group',
+                            platform = tmp_user_platform
+                        )
+                    )
+                else:
+                    if flag_settemp_mode == 'settemp':
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSetGroupTempError'], dictTValue)
+                    elif flag_settemp_mode == 'setrule':
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSetGroupTempRuleError'], dictTValue)
+            else:
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
+            replyMsg(plugin_event, tmp_reply_str)
+            return
         elif isMatchWordStart(tmp_reast_str, 'set'):
             OlivaDiceCore.msgReplyModel.replySET_command(plugin_event, Proc, valDict)
         elif (
@@ -4090,6 +4257,15 @@ def unity_reply(plugin_event, Proc):
                 )
             tmp_template = None
             tmp_template_customDefault = None
+            flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
+                userId = tmp_hagID,
+                userType = 'group',
+                platform = tmp_pc_platform,
+                userConfigKey = 'groupTemplate',
+                botHash = plugin_event.bot_info.hash
+            )
+            if flag_groupTemplate != None:
+                tmp_template_name = flag_groupTemplate
             if tmp_template_name != None:
                 tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
                 if 'customDefault' in tmp_template:
