@@ -82,7 +82,7 @@ def formatReplySTRConst(data:str, valDict:dict):
 
 # 用状态机实现高宽容度的变量引用
 # 替代Python内置Format
-def formatReplySTRReplace(data:str, valDict:dict):
+def formatReplySTRReplace(data:str, valDict:dict, flagPure:bool = False):
     raw = data
     res = ''
     reg_res = ''
@@ -110,7 +110,7 @@ def formatReplySTRReplace(data:str, valDict:dict):
                     reg_res += str(valDict[reg_key])
                     flag_hit = True
                 # 牌堆抽取
-                if not flag_hit:
+                if not flag_hit and not flagPure:
                     tmp_bot_hash = 'unity'
                     plugin_event = None
                     if 'tBotHash' in valDict:

@@ -137,6 +137,12 @@ def getHelp(key_str, bot_hash, plugin_event = None):
                     tmp_reply_str = '%s\n%s' % (OlivaDiceCore.data.bot_info, dictTValue['tHelpDocResult'])
                 else:
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDoc'], dictTValue)
+                for count_index in range(100):
+                    tmp_reply_str_old = tmp_reply_str
+                    tmp_reply_str = formatSTRReplace(tmp_reply_str, OlivaDiceCore.helpDocData.dictHelpDoc[bot_hash])
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(tmp_reply_str, dictTValue)
+                    if tmp_reply_str_old == tmp_reply_str:
+                        break
                 return tmp_reply_str
             else:
                 flag_need_loop = False
@@ -274,3 +280,51 @@ def getRecommendRank(word1_in:str, word2_in:str):
 def releaseDir(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
+
+# 用状态机实现高宽容度的变量引用
+# 替代Python内置Format
+def formatSTRReplace(data:str, valDict:dict):
+    raw = data
+    res = ''
+    reg_res = ''
+    reg_key = ''
+    flagType = 'str'
+    for i in raw:
+        if flagType == 'str':
+            if i == '{':
+                flagType = 'left'
+            else:
+                reg_res += i
+                flagType = 'str'
+        elif flagType == 'left':
+            if i == '}':
+                reg_key = ''
+                flagType = 'right'
+            else:
+                reg_key = i
+                flagType = 'key'
+        elif flagType == 'key':
+            if i == '}':
+                flag_hit = False
+                # 变量表替换
+                if not flag_hit and reg_key in valDict and type(valDict[reg_key] == str):
+                    reg_res += str(valDict[reg_key])
+                    flag_hit = True
+                # 缺省确保原样返回
+                if not flag_hit:
+                    reg_res += '{%s}' % reg_key
+                flagType = 'right'
+            else:
+                reg_key += i
+                flagType = 'key'
+        elif flagType == 'right':
+            reg_key = ''
+            if i == '{':
+                flagType = 'left'
+            else:
+                reg_res += i
+                flagType = 'str'
+    if flagType == 'key':
+        reg_res += '{%s' % reg_key
+    res = reg_res
+    return res
