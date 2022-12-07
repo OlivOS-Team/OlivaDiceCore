@@ -349,6 +349,14 @@ https://wiki.dice.center/OlivOS_Login.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9B%9E%
 如果其他房规可向开发者反馈，或是使用人物卡模板扩展系统
 群内检定会优先调用群内设置''',
 
+    'settemp': '''房规设置
+.settemp [规则名] 为当前群或频道组设置规则书
+.setrule [村规名] 为当前群或频道组设置村规
+.setcoc 为当前群或频道组设置COC房规
+    详见[.help setcoc]
+.setdnd 切换当前群或频道组设置DND5E房规开启状态
+''',
+
 
     'name': '''随机姓名：
 .name (cn/jp/en/enzh)
@@ -398,5 +406,8 @@ https://github.com/OlivOS-Team/onedice
     '群记录': '&uinfo',
     '全牌堆列表': '',
     '内置牌堆': '',
-    '扩展牌堆': ''
+    '扩展牌堆': '',
+    'setrule': '&settemp',
+    'setdnd': '&settemp',
+    '房规设置': '&settemp'
 }
