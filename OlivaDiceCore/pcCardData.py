@@ -155,6 +155,8 @@ dictPcCardTemplateDefaultTemp = {
             'LUC': '3d6x5'
         },
         'mapping': {
+            '闪避': '{DEX}/2',
+            '母语': '{EDU}',
             'SAN': '{POW}',
             'HP': '({CON}+{SIZ})/10',
             'HPMAX': '({CON}+{SIZ})/10',
@@ -258,7 +260,6 @@ dictPcCardTemplateDefaultTemp = {
             '信用': 0,
             '克苏鲁神话': 0,
             '乔装': 5,
-            '闪避': 0,
             '汽车驾驶': 20,
             '电气维修': 10,
             '电子学': 1,
@@ -476,6 +477,8 @@ dictPcCardTemplateDefaultTemp = {
             'LUC': '3d6x5'
         },
         'mapping': {
+            '闪避': '{DEX}/2',
+            '母语': '{EDU}',
             'SAN': '{POW}',
             'HP': '({CON}+{SIZ})/10',
             'HPMAX': '({CON}+{SIZ})/10',
@@ -579,7 +582,6 @@ dictPcCardTemplateDefaultTemp = {
             '信用': 0,
             '克苏鲁神话': 0,
             '乔装': 5,
-            '闪避': 0,
             '汽车驾驶': 20,
             '电气维修': 10,
             '电子学': 1,
