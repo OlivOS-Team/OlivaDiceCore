@@ -24,8 +24,8 @@ contextFeq = 0.1
 
 def replyCONTEXT_fliter(tmp_reast_str):
     res = False
-    if 'replyContextFliter' in OlivaDiceCore.crossHook.dictHookList:
-        for key_this in OlivaDiceCore.crossHook.dictHookList['replyContextFliter']:
+    if 'replyContextPrefixFliter' in OlivaDiceCore.crossHook.dictHookList:
+        for key_this in OlivaDiceCore.crossHook.dictHookList['replyContextPrefixFliter']:
             if OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, key_this):
                 res = True
     return res

@@ -29,6 +29,8 @@ listPrefix = [
 
 listReplyContextFliter = []
 
+listReplyContextPrefixFliter = []
+
 dictReplyContextReg = {}
 
 def msgHook(event, funcType, sender, dectData, message):
@@ -60,6 +62,7 @@ dictHookList = {
     'model': listModel,
     'prefix': listPrefix,
     'replyContextFliter': listReplyContextFliter,
+    'replyContextPrefixFliter': listReplyContextPrefixFliter,
     'replyContextReg': dictReplyContextReg
 }
 

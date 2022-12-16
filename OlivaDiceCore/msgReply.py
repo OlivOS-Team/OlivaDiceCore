@@ -1157,7 +1157,7 @@ def unity_reply(plugin_event, Proc):
             plugin_event.set_block()
             return
         #放弃使用全前缀匹配方案
-        if False and OlivaDiceCore.msgReplyModel.replyCONTEXT_fliter(tmp_reast_str):
+        if OlivaDiceCore.msgReplyModel.replyCONTEXT_fliter(tmp_reast_str):
             pass
         elif isMatchWordStart(tmp_reast_str, 'help', isCommand = True):
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'help')
