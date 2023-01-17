@@ -487,7 +487,7 @@ def initYamlDeckData(data:dict, deckName = None):
             dataNew = []
             if key not in keyList:
                 for dataThis in data[key]:
-                    dataThisNew = dataThis
+                    dataThisNew = str(dataThis)
                     dataThisNew = re.sub(r'\{%(.+?)\}', r'{_' + name + r':\1}', dataThisNew)
                     dataThisNew = re.sub(r'\{\$(.+?)\}', r'{%_' + name + r':\1}', dataThisNew)
                     for keyIncThis in includes:
