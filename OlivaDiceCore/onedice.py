@@ -18,7 +18,7 @@ from enum import Enum
 import random
 import traceback
 
-pypi_version = '1.0.5'
+pypi_version = '1.0.6'
 
 dictOperationPriority = {
     '[' : None,
@@ -2634,14 +2634,18 @@ class RD(object):
                     tmp_node_this_output_this = self.random(1, 100)
                     tmp_node_this_output_1 = tmp_node_this_output_this
                     tmp_range_list = range(0, tmp_main_val_right[0])
+                    tmp_node_this_output_1_1 = int(tmp_node_this_output_1 / 10)
+                    tmp_node_this_output_1_2 = int(tmp_node_this_output_1 % 10)
                     for tmp_it_this in tmp_range_list:
                         tmp_node_this_output_this = self.random(1, 10) - 1
+                        if tmp_node_this_output_1_2 == 0 and tmp_node_this_output_this == 0:
+                            tmp_node_this_output_this = 10
                         tmp_node_this_output_list_2.append(tmp_node_this_output_this)
                         if tmp_node_this_output_2_mark > tmp_node_this_output_this:
                             tmp_node_this_output_2_mark = tmp_node_this_output_this
-                    tmp_node_this_output_1_1 = int(tmp_node_this_output_1 / 10)
-                    tmp_node_this_output_1_2 = int(tmp_node_this_output_1 % 10)
-                    if tmp_node_this_output_1_1 > tmp_node_this_output_2_mark:
+                    if tmp_node_this_output_1_2 == 0 and tmp_node_this_output_2_mark == 0:
+                        tmp_node_this_output = 100
+                    elif tmp_node_this_output_1_1 > tmp_node_this_output_2_mark:
                         tmp_node_this_output = tmp_node_this_output_1_2 + tmp_node_this_output_2_mark * 10
                     else:
                         tmp_node_this_output = tmp_node_this_output_1
@@ -2712,14 +2716,18 @@ class RD(object):
                     tmp_node_this_output_this = self.random(1, 100)
                     tmp_node_this_output_1 = tmp_node_this_output_this
                     tmp_range_list = range(0, tmp_main_val_right[0])
+                    tmp_node_this_output_1_1 = int(tmp_node_this_output_1 / 10)
+                    tmp_node_this_output_1_2 = int(tmp_node_this_output_1 % 10)
                     for tmp_it_this in tmp_range_list:
                         tmp_node_this_output_this = self.random(1, 10) - 1
+                        if tmp_node_this_output_1_2 == 0 and tmp_node_this_output_this == 0:
+                            tmp_node_this_output_this = 10
                         tmp_node_this_output_list_2.append(tmp_node_this_output_this)
                         if tmp_node_this_output_2_mark < tmp_node_this_output_this:
                             tmp_node_this_output_2_mark = tmp_node_this_output_this
-                    tmp_node_this_output_1_1 = int(tmp_node_this_output_1 / 10)
-                    tmp_node_this_output_1_2 = int(tmp_node_this_output_1 % 10)
-                    if tmp_node_this_output_1_1 < tmp_node_this_output_2_mark:
+                    if tmp_node_this_output_1_2 == 0 and tmp_node_this_output_2_mark == 0:
+                        tmp_node_this_output = 100
+                    elif tmp_node_this_output_1_1 < tmp_node_this_output_2_mark:
                         tmp_node_this_output = tmp_node_this_output_1_2 + tmp_node_this_output_2_mark * 10
                     else:
                         tmp_node_this_output = tmp_node_this_output_1
