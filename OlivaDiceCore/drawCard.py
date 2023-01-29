@@ -35,6 +35,10 @@ try:
     import yaml
 except:
     pass
+try:
+    import pyjson5
+except:
+    pass
 
 dictReMappingDrawFormat = {
     'self': 'tName',
@@ -181,7 +185,11 @@ def initDeck(bot_info_dict):
         obj_Deck_this = None
         try:
             with open(customDeckPath, 'rb') as customDeckPath_f:
-                obj_Deck_this = json.loads(formatUTF8WithBOM(customDeckPath_f.read()).decode('utf-8'))
+                customDeckPath_fs = formatUTF8WithBOM(customDeckPath_f.read()).decode('utf-8')
+                try:
+                    obj_Deck_this = pyjson5.loads(customDeckPath_fs)
+                except:
+                    obj_Deck_this = json.loads(customDeckPath_fs)
         except:
             dictTValue['tInitDataName'] = customDeckFile
             OlivaDiceCore.msgReply.globalLog(
@@ -316,7 +324,11 @@ def initDeck(bot_info_dict):
             obj_Deck_this = None
             try:
                 with open(customDeckPath, 'rb') as customDeckPath_f:
-                    obj_Deck_this = json.loads(formatUTF8WithBOM(customDeckPath_f.read()).decode('utf-8'))
+                    customDeckPath_fs = formatUTF8WithBOM(customDeckPath_f.read()).decode('utf-8')
+                    try:
+                        obj_Deck_this = pyjson5.loads(customDeckPath_fs)
+                    except:
+                        obj_Deck_this = json.loads(customDeckPath_fs)
             except:
                 dictTValue['tInitDataName'] = customDeckFile
                 OlivaDiceCore.msgReply.globalLog(
