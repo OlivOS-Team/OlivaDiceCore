@@ -28,8 +28,11 @@ import codecs
 
 # 兼容OlivOS 0.10.2及以下版本
 try:
-    import yaml
     import openpyxl
+except:
+    pass
+try:
+    import yaml
 except:
     pass
 
@@ -312,22 +315,18 @@ def initDeck(bot_info_dict):
             customDeckPath = customDeckDir + '/' + customDeckFile
             obj_Deck_this = None
             try:
-                with open(customDeckPath, 'r', encoding = 'utf-8') as customDeckPath_f:
-                    obj_Deck_this = json.loads(customDeckPath_f.read())
+                with open(customDeckPath, 'rb') as customDeckPath_f:
+                    obj_Deck_this = json.loads(formatUTF8WithBOM(customDeckPath_f.read()).decode('utf-8'))
             except:
-                try:
-                    with open(customDeckPath, 'r', encoding = 'utf_8_sig') as customDeckPath_f:
-                        obj_Deck_this = json.loads(customDeckPath_f.read())
-                except:
-                    dictTValue['tInitDataName'] = customDeckFile
-                    OlivaDiceCore.msgReply.globalLog(
-                        3,
-                        OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitDeckDataError'], dictTValue),
-                        [
-                            ('OlivaDice', 'default'),
-                            ('Init', 'default')
-                        ]
-                    )
+                dictTValue['tInitDataName'] = customDeckFile
+                OlivaDiceCore.msgReply.globalLog(
+                    3,
+                    OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitDeckDataError'], dictTValue),
+                    [
+                        ('OlivaDice', 'default'),
+                        ('Init', 'default')
+                    ]
+                )
             if obj_Deck_this != None:
                 OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this)
                 setDeckIndex(botHash, customDeckFile.rstrip('.json'), obj_Deck_this)
@@ -340,22 +339,21 @@ def initDeck(bot_info_dict):
             customDeckPath = customDeckDir + '/' + customDeckFile
             obj_Deck_this = None
             try:
-                with open(customDeckPath, 'r', encoding = 'utf-8') as customDeckPath_f:
-                    obj_Deck_this = yaml.load(customDeckPath_f.read(), Loader = yaml.FullLoader)
-            except:
-                try:
-                    with open(customDeckPath, 'r', encoding = 'utf_8_sig') as customDeckPath_f:
-                        obj_Deck_this = yaml.load(customDeckPath_f.read(), Loader = yaml.FullLoader)
-                except:
-                    dictTValue['tInitDataName'] = customDeckFile
-                    OlivaDiceCore.msgReply.globalLog(
-                        3,
-                        OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitDeckDataError'], dictTValue),
-                        [
-                            ('OlivaDice', 'default'),
-                            ('Init', 'default')
-                        ]
+                with open(customDeckPath, 'rb') as customDeckPath_f:
+                    obj_Deck_this = yaml.load(
+                        formatUTF8WithBOM(customDeckPath_f.read()).decode('utf-8'),
+                        Loader = yaml.FullLoader
                     )
+            except:
+                dictTValue['tInitDataName'] = customDeckFile
+                OlivaDiceCore.msgReply.globalLog(
+                    3,
+                    OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitDeckDataError'], dictTValue),
+                    [
+                        ('OlivaDice', 'default'),
+                        ('Init', 'default')
+                    ]
+                )
             customDeckFile_deckName = customDeckFile
             if customDeckFile_deckName.endswith('.yaml'):
                 customDeckFile_deckName = customDeckFile_deckName.rstrip('.yaml')
