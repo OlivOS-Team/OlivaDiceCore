@@ -204,7 +204,11 @@ def initDeck(bot_info_dict):
             for bot_info_dict_this in OlivaDiceCore.drawCardData.dictDeck:
                 botHash = bot_info_dict_this
                 OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this)
-                setDeckIndex(botHash, customDeckFile.rstrip('.json'), obj_Deck_this)
+                if customDeckFile.endswith('.json5'):
+                    customDeckFile = customDeckFile.rstrip('.json5')
+                elif customDeckFile.endswith('.json'):
+                    customDeckFile = customDeckFile.rstrip('.json')
+                setDeckIndex(botHash, customDeckFile, obj_Deck_this)
     # 全局 yaml 牌堆
     obj_Deck_this = None
     releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity/extend/deckyaml')
@@ -341,7 +345,11 @@ def initDeck(bot_info_dict):
                 )
             if obj_Deck_this != None:
                 OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this)
-                setDeckIndex(botHash, customDeckFile.rstrip('.json'), obj_Deck_this)
+                if customDeckFile.endswith('.json5'):
+                    customDeckFile = customDeckFile.rstrip('.json5')
+                elif customDeckFile.endswith('.json'):
+                    customDeckFile = customDeckFile.rstrip('.json')
+                setDeckIndex(botHash, customDeckFile, obj_Deck_this)
         # yaml 牌堆
         releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/extend/deckyaml')
         customDeckDir = OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/extend/deckyaml'
