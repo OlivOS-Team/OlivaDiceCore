@@ -4218,10 +4218,35 @@ def unity_reply(plugin_event, Proc):
                         tmp_reast_str = tmp_reast_str_list_1[1]
             if len(tmp_reast_str) > 0:
                 tmp_rd_para_str = None
+                tmp_rd_para_str_show = None
                 if flag_roll_mode in ['rx']:
                     [tmp_rd_para_str, tmp_reast_str] = getExpression(tmp_reast_str, valueTable = None)
+                    tmp_rd_para_str_show = tmp_rd_para_str
                 else:
-                    [tmp_rd_para_str, tmp_reast_str] = getExpression(tmp_reast_str, valueTable = skill_valueTable)
+                    tmp_reast_str_old = tmp_reast_str
+                    tmp_pcCardRule = 'default'
+                    if flag_roll_mode in ['r']:
+                        tmp_pcCardRule_new = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_pc_name_0)
+                        if tmp_pcCardRule_new != None:
+                            tmp_pcCardRule = tmp_pcCardRule_new
+                    elif flag_roll_mode in ['ww', 'w']:
+                        tmp_pcCardRule = 'WW'
+                    elif flag_roll_mode in ['dx', 'dxx']:
+                        tmp_pcCardRule = 'DX3'
+                    [tmp_rd_para_str, tmp_reast_str] = getExpression(
+                        tmp_reast_str_old,
+                        valueTable = skill_valueTable,
+                        pcCardRule = tmp_pcCardRule,
+                        flagDynamic = True
+                    )
+                    [tmp_rd_para_str_show, tmp_reast_str_2] = getExpression(
+                        tmp_reast_str_old,
+                        valueTable = skill_valueTable,
+                        pcCardRule = tmp_pcCardRule,
+                        flagDynamic = False
+                    )
+                    if tmp_reast_str != tmp_reast_str_2:
+                        tmp_rd_para_str_show = tmp_rd_para_str
                 if tmp_rd_para_str != None and tmp_rd_para_str != '':
                     rd_para_str = tmp_rd_para_str
                     if flag_roll_mode in ['ww', 'w']:
@@ -4311,6 +4336,7 @@ def unity_reply(plugin_event, Proc):
                     tmp_resDetail_str = ''
                     tmp_resDetail_short_str = ''
                     if flag_roll_mode in ['w', 'dxx']:
+                        rd_para_str_new = tmp_rd_para_str_show
                         tmp_resDetail_short_str = OlivaDiceCore.onediceOverride.RDDataFormat(
                             data = rd_para.resDetailData,
                             mode = 'short'
@@ -4318,14 +4344,15 @@ def unity_reply(plugin_event, Proc):
                         if tmp_resDetail_short_str == None:
                             tmp_resDetail_short_str = ''
                         if rd_para.resMetaTupleEnable and len(rd_para.resMetaTuple) > 1:
-                            tmp_reply_str_1 = rd_para_str + '=' + (', '.join(
+                            tmp_reply_str_1 = rd_para_str_new + '=' + (', '.join(
                                 OlivaDiceCore.onediceOverride.getRDResultFromList(rd_para.resMetaTuple)
                             ))
                         elif len(str(rd_para.resInt)) > 100:
-                            tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_short_str) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
+                            tmp_reply_str_1 = rd_para_str_new + '=' + str(tmp_resDetail_short_str) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
                         else:
-                            tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_short_str) + '=' + str(rd_para.resInt)
+                            tmp_reply_str_1 = rd_para_str_new + '=' + str(tmp_resDetail_short_str) + '=' + str(rd_para.resInt)
                     elif flag_roll_mode in ['ww', 'dx']:
+                        rd_para_str_new = tmp_rd_para_str_show
                         if flag_roll_mode in ['ww']:
                             tmp_resDetail_str = OlivaDiceCore.onediceOverride.RDDataFormat(
                                 data = rd_para.resDetailData,
@@ -4351,22 +4378,22 @@ def unity_reply(plugin_event, Proc):
                             plugin_event.bot_info.hash
                         ):
                             if rd_para.resMetaTupleEnable and len(rd_para.resMetaTuple) > 1:
-                                tmp_reply_str_1 = rd_para_str + '=' + (', '.join(
+                                tmp_reply_str_1 = rd_para_str_new + '=' + (', '.join(
                                     OlivaDiceCore.onediceOverride.getRDResultFromList(rd_para.resMetaTuple)
                                 ))
                             elif len(str(rd_para.resInt)) > 100:
-                                tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_short_str) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
+                                tmp_reply_str_1 = rd_para_str_new + '=' + str(tmp_resDetail_short_str) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
                             else:
-                                tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_short_str) + '=' + str(rd_para.resInt)
+                                tmp_reply_str_1 = rd_para_str_new + '=' + str(tmp_resDetail_short_str) + '=' + str(rd_para.resInt)
                         else:
                             if rd_para.resMetaTupleEnable and len(rd_para.resMetaTuple) > 1:
-                                tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_str) + '=' + (', '.join(
+                                tmp_reply_str_1 = rd_para_str_new + '=' + str(tmp_resDetail_str) + '=' + (', '.join(
                                     OlivaDiceCore.onediceOverride.getRDResultFromList(rd_para.resMetaTuple)
                                 ))
                             elif len(str(rd_para.resInt)) > 50:
-                                tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_str) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
+                                tmp_reply_str_1 = rd_para_str_new + '=' + str(tmp_resDetail_str) + '=' + str(rd_para.resInt)[:50] + '...的天文数字'
                             else:
-                                tmp_reply_str_1 = rd_para_str + '=' + str(tmp_resDetail_str) + '=' + str(rd_para.resInt)
+                                tmp_reply_str_1 = rd_para_str_new + '=' + str(tmp_resDetail_str) + '=' + str(rd_para.resInt)
                     elif flag_roll_mode in ['r', 'rx'] or True:
                         rd_para_str_new = None
                         tmp_resDetail_str = None
@@ -4386,7 +4413,7 @@ def unity_reply(plugin_event, Proc):
                         if tmp_resDetail_str == str(tmp_resInt_str):
                             tmp_resDetail_str = ''
                         if rd_para_str_new == None:
-                            rd_para_str_new = rd_para_str
+                            rd_para_str_new = tmp_rd_para_str_show
                         if len(tmp_resDetail_str) == 0 or len(tmp_resDetail_str) > 150:
                             if rd_para.resMetaTupleEnable and len(rd_para.resMetaTuple) > 1:
                                 tmp_reply_str_1 = rd_para_str_new + '=' + (', '.join(
@@ -4407,7 +4434,7 @@ def unity_reply(plugin_event, Proc):
                                 tmp_reply_str_1 = rd_para_str_new + '=' + str(tmp_resDetail_str) + '=' + str(tmp_resInt_str)
                 else:
                     dictTValue['tResult'] = str(rd_para.resError)
-                    dictTValue['tRollPara'] = str(rd_para_str)
+                    dictTValue['tRollPara'] = str(tmp_rd_para_str_show)
                     if rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_GENERATE_FATAL:
                         tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError01'], dictTValue)
                     elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_COMPLETE_FATAL:
@@ -4859,7 +4886,7 @@ def splitBy(data, key):
             tmp_output_str_2 = data[tmp_total_offset:]
     return [tmp_output_str_1, tmp_output_str_2]
 
-def getExpression(data, reverse = False, valueTable = None):
+def getExpression(data, reverse = False, valueTable = None, pcCardRule = 'default', flagDynamic:bool = False):
     tmp_output_str_1 = ''
     tmp_output_str_reg = ''
     tmp_output_str_2 = ''
@@ -4887,13 +4914,21 @@ def getExpression(data, reverse = False, valueTable = None):
                 break
             if flag_not_hit and data[tmp_total_offset].isdigit():
                 flag_not_hit = False
-            if flag_not_hit and not reverse and valueTable != None:
+            if flag_not_hit and not reverse:
                 for idx in range(tmp_total_offset, len(data)):
-                    if data[tmp_total_offset:idx + 1].upper() in valueTable:
+                    if valueTable != None \
+                    and data[tmp_total_offset:idx + 1].upper() in valueTable:
                         tmp_offset_len = idx - tmp_total_offset + 1
                         flag_not_hit = False
                         flag_value = True
-                if (not flag_not_hit) and (data[tmp_total_offset:tmp_total_offset + tmp_offset_len] in OlivaDiceCore.onedice.dictOperationPriority or data[tmp_total_offset:tmp_total_offset + tmp_offset_len] in OlivaDiceCore.onedice.listOperationSub):
+                    elif pcCardRule in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial \
+                    and data[tmp_total_offset:idx + 1].upper() in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[pcCardRule]:
+                        tmp_offset_len = idx - tmp_total_offset + 1
+                        flag_not_hit = False
+                        flag_value = True
+                if (not flag_not_hit) \
+                and (data[tmp_total_offset:tmp_total_offset + tmp_offset_len] in OlivaDiceCore.onedice.dictOperationPriority \
+                or data[tmp_total_offset:tmp_total_offset + tmp_offset_len] in OlivaDiceCore.onedice.listOperationSub):
                     flag_value = False
             for range_this in reversed(range(1, OlivaDiceCore.onedice.lenOperationMax + 1)):
                 if flag_not_hit and (
@@ -4918,6 +4953,35 @@ def getExpression(data, reverse = False, valueTable = None):
             tmp_output_str_2 = data[tmp_total_offset:]
             if not reverse and valueTable != None:
                 tmp_output_str_1 = tmp_output_str_reg
+            if not reverse:
+                if flagDynamic:
+                    for i in range(100):
+                        tmp_output_str_1_old = tmp_output_str_1
+                        for value_this in valueTable:
+                            if '{%s}' % value_this in tmp_output_str_1:
+                                tmp_output_str_1 = tmp_output_str_1.replace(
+                                    '{%s}' % value_this,
+                                    getExpression(
+                                        data = str(valueTable[value_this]),
+                                        reverse = reverse,
+                                        valueTable = valueTable,
+                                        pcCardRule = pcCardRule,
+                                        flagDynamic = False
+                                    )[0]
+                                )
+                        tmp_output_str_1 = OlivaDiceCore.skillCheck.getSpecialSkillReplace(
+                            tmp_output_str_1,
+                            pcCardRule,
+                            valueTable
+                        )
+                        if tmp_output_str_1_old == tmp_output_str_1:
+                            break
+                else:
+                    tmp_output_str_1 = OlivaDiceCore.skillCheck.getSpecialSkillReplace(
+                        tmp_output_str_1,
+                        pcCardRule,
+                        valueTable
+                    )
     return [tmp_output_str_1, tmp_output_str_2]
 
 def getNumberPara(data, reverse = False):

@@ -17,6 +17,7 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 import OlivaDiceCore
 
 from enum import Enum
+import traceback
 
 class resultType(Enum):
     SKILLCHECK_NOPE = 0
@@ -225,3 +226,63 @@ def culRule(nodeKey, nodeData, tempData):
                 temp_result_1 = int(temp_result_2_1 % temp_result_2_2)
             temp_result = temp_result_1
     return temp_result
+
+def getSpecialSkillReplace(srcPara:str, pcCardRule:str, pcCardData:dict):
+    res = srcPara
+    if pcCardRule in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial:
+        for skill_this in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[pcCardRule]:
+            res_this = getSpecialSkill(skill_this, pcCardRule, pcCardData)
+            if type(res_this) is str:
+                res = res.replace('{%s}' % skill_this, skill_this)
+                res = res.replace('%s' % skill_this, res_this)
+    return res
+
+def getSpecialSkill(skillName:str, pcCardRule:str, pcCardData:dict):
+    res = None
+    if pcCardRule in ['default', 'COC7']:
+        if skillName == '体格':
+            if type(pcCardData) is dict \
+            and 'STR' in pcCardData \
+            and 'SIZ' in pcCardData:
+                try:
+                    tmp_sum = int(pcCardData['STR']) + int(pcCardData['SIZ'])
+                    if tmp_sum <= 64:
+                        res = -2
+                    elif tmp_sum <= 84:
+                        res = -1
+                    elif tmp_sum <= 124:
+                        res = 0
+                    elif tmp_sum <= 164:
+                        res = 1
+                    elif tmp_sum <= 204:
+                        res = 2
+                    else:
+                        res = int((tmp_sum - 205) / 80) + 2
+                except:
+                    res = None
+            else:
+                res = -2
+        elif skillName == 'DB':
+            if type(pcCardData) is dict \
+            and 'STR' in pcCardData \
+            and 'SIZ' in pcCardData:
+                try:
+                    tmp_sum = int(pcCardData['STR']) + int(pcCardData['SIZ'])
+                    if tmp_sum <= 64:
+                        res = -2
+                    elif tmp_sum <= 84:
+                        res = -1
+                    elif tmp_sum <= 124:
+                        res = 0
+                    elif tmp_sum <= 164:
+                        res = '1d4'
+                    elif tmp_sum <= 204:
+                        res = '1d6'
+                    else:
+                        res = '%dd6' % (int((tmp_sum - 205) / 80) + 1)
+                except:
+                    res = None
+            else:
+                res = -2
+    res = res if res == None else str(res)
+    return res
