@@ -41,7 +41,7 @@ except:
     pass
 
 dictReMappingDrawFormat = {
-    'self': 'tName',
+    'player': 'tName'
 }
 
 def reMappingDrawFormat(data:str):
@@ -543,11 +543,6 @@ def getDrawDeck(key_str, bot_hash, count = 1, valDict = None):
                 for tmp_for_list_this in tmp_for_list:
                     tmp_draw_str = draw(key_str, bot_hash, mark_dict = None, plugin_event = plugin_event)
                     if tmp_draw_str != None and type(tmp_draw_str) == str:
-                        tmp_draw_str = reMappingDrawFormat(tmp_draw_str)
-                        if dictTValue != None:
-                            tmp_draw_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
-                                tmp_draw_str, dictTValue, flagCross = False, flagSplit = False
-                            )
                         tmp_card_list.append(tmp_draw_str)
                 dictTValue['tDrawDeckResult'] = '\n'.join(tmp_card_list)
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawDeck'], dictTValue)
@@ -676,9 +671,23 @@ def draw(key_str:str, bot_hash:str, flag_need_give_back:bool = True, mark_dict:'
                             flag_need_roll = False
                         tmp_mark_left = -1
                         tmp_mark_right = -1
+    dictTValue = {}
     if tmp_reply_str != None and plugin_event != None:
         tmp_reply_str = OlivaDiceCore.crossHook.dictHookFunc['drawFormatHook'](tmp_reply_str, plugin_event)
+        dictTValue = dictTValueGet(plugin_event)
+    if tmp_reply_str != None and type(tmp_reply_str) == str:
+        tmp_reply_str = reMappingDrawFormat(tmp_reply_str)
+        if dictTValue != None:
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                tmp_reply_str, dictTValue, flagCross = False, flagSplit = False
+            )
     return tmp_reply_str
+
+def dictTValueGet(plugin_event):
+    res = {}
+    if 'name' in plugin_event.data.sender:
+        res['tName'] = plugin_event.data.sender['name']
+    return res
 
 def initCloneDeckList(src_deck):
     res_deck = []
