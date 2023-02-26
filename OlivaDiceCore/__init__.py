@@ -32,6 +32,8 @@ from . import helpDoc
 from . import helpDocData
 from . import drawCard
 from . import drawCardData
+from . import censorDFA
+from . import censorAPI
 from . import pulse
 from . import crossHook
 from . import webTool

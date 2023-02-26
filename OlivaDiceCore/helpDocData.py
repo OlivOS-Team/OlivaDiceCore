@@ -125,7 +125,8 @@ OlivaDice核心模块
 .str[配置项] [配置值]  修改对应的自定义配置
 .str[配置项]  查看对应的自定义配置
 .helpdoc [帮助名称] [帮助内容]  设置帮助文档
-.helpdoc [帮助名称]  删除帮助文档''',
+.helpdoc [帮助名称]  删除帮助文档
+.censor [add/del/+/-] [敏感词]  新增/删除敏感词''',
 
     '链接': '''查看源码: https://github.com/OlivOS-Team/OlivaDiceCore
 OneDice标准: https://github.com/OlivOS-Team/onedice
@@ -232,6 +233,9 @@ https://github.com/OlivOS-Team/onedice
     'helpdoc': '''自定义帮助文档：
 .helpdoc [帮助名称] [帮助内容]  设置帮助文档
 .helpdoc [帮助名称]  删除帮助文档''',
+
+    'censor': '''管理敏感词检测：
+.censor [add/del/+/-] [敏感词]  新增/删除敏感词''',
 
     'str': '''自定义回复词：
 .str[配置项] [配置值]  修改对应的自定义配置

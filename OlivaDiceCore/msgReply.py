@@ -70,6 +70,7 @@ def unity_init(plugin_event, Proc):
         ('OlivaDice', 'default'),
         ('Init', 'default')
     ])
+    OlivaDiceCore.censorAPI.initCensor(Proc.Proc_data['bot_info_dict'])
     #显示Master认主信息
     dictTValue['tInitMasterKey'] = '.master %s' % OlivaDiceCore.data.bot_content['masterKey']
     tmp_log_str =  OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strToBeMaster'], dictTValue)
@@ -918,6 +919,51 @@ def unity_reply(plugin_event, Proc):
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpdocSet'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
+            elif isMatchWordStart(tmp_reast_str, 'censor'):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'censor')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_reast_str = tmp_reast_str.strip(' ')
+                bot_hash = plugin_event.bot_info.hash
+                if isMatchWordStart(tmp_reast_str, 'add') or isMatchWordStart(tmp_reast_str, '+'):
+                    if isMatchWordStart(tmp_reast_str, 'add'):
+                        tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'add')
+                    elif isMatchWordStart(tmp_reast_str, '+'):
+                        tmp_reast_str = getMatchWordStartRight(tmp_reast_str, '+')
+                    tmp_censor_list_old = tmp_reast_str.replace('\r\n', '\n').split('\n')
+                    tmp_censor_list = []
+                    for tmp_censor_this in tmp_censor_list_old:
+                        tmp_censor_list += tmp_censor_this.split('|')
+                    tmp_censor_list_old = tmp_censor_list
+                    tmp_censor_list = []
+                    for tmp_censor_this in tmp_censor_list_old:
+                        if len(tmp_censor_this) > 0:
+                            tmp_censor_list.append(tmp_censor_this)
+                    for tmp_censor_this in tmp_censor_list:
+                        OlivaDiceCore.censorAPI.addConfigList(bot_hash, tmp_censor_this)
+                    OlivaDiceCore.censorAPI.writeConfigListByHash(bot_hash)
+                    OlivaDiceCore.censorAPI.patchCensorByHash(bot_hash, tmp_censor_list)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strAddCensor'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                elif isMatchWordStart(tmp_reast_str, 'del') or isMatchWordStart(tmp_reast_str, '-'):
+                    if isMatchWordStart(tmp_reast_str, 'del'):
+                        tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'del')
+                    elif isMatchWordStart(tmp_reast_str, '-'):
+                        tmp_reast_str = getMatchWordStartRight(tmp_reast_str, '-')
+                    tmp_censor_list_old = tmp_reast_str.replace('\r\n', '\n').split('\n')
+                    tmp_censor_list = []
+                    for tmp_censor_this in tmp_censor_list_old:
+                        tmp_censor_list += tmp_censor_this.split('|')
+                    tmp_censor_list_old = tmp_censor_list
+                    tmp_censor_list = []
+                    for tmp_censor_this in tmp_censor_list_old:
+                        if len(tmp_censor_this) > 0:
+                            tmp_censor_list.append(tmp_censor_this)
+                    for tmp_censor_this in tmp_censor_list:
+                        OlivaDiceCore.censorAPI.delConfigList(bot_hash, tmp_censor_this)
+                    OlivaDiceCore.censorAPI.writeConfigListByHash(bot_hash)
+                    OlivaDiceCore.censorAPI.initCensorByHash(bot_hash)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDelCensor'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
         else:
             if flag_messageFliterModeDisabled:
                 plugin_event.set_block()
@@ -4621,6 +4667,13 @@ def pluginReply(plugin_event, message):
     )
     messageSplitDelay = messageSplitDelay / 1000
     message = message.replace('{SPLIT}', '\f')
+
+    # 敏感词检测
+    message = OlivaDiceCore.censorAPI.doCensorReplace(
+        botHash = botHash,
+        msg = message
+    )
+
     message_list = message.split('\f')
     message_list_new = []
     for message_list_this in message_list:
@@ -4647,7 +4700,7 @@ def pluginReply(plugin_event, message):
         if not flag_need_split or count > messageSplitPageLimit:
             break
 
-def pluginSend(plugin_event, send_type, target_id, message, host_id = None):
+def pluginSend(plugin_event:OlivOS.API.Event, send_type, target_id, message:str, host_id = None):
     botHash = plugin_event.bot_info.hash
     messageSplitGate = OlivaDiceCore.console.getConsoleSwitchByHash(
         'messageSplitGate',
@@ -4663,6 +4716,13 @@ def pluginSend(plugin_event, send_type, target_id, message, host_id = None):
     )
     messageSplitDelay = messageSplitDelay / 1000
     message = message.replace('{SPLIT}', '\f')
+
+    # 敏感词检测
+    message = OlivaDiceCore.censorAPI.doCensorReplace(
+        botHash = botHash,
+        msg = message
+    )
+
     message_list = message.split('\f')
     message_list_new = []
     for message_list_this in message_list:
