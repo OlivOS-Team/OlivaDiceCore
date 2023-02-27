@@ -887,7 +887,7 @@ def unity_reply(plugin_event, Proc):
             elif isMatchWordStart(tmp_reast_str, 'str'):
                 tmp_reast_str = tmp_reast_str.strip(' ')
                 tmp_reast_list = tmp_reast_str.split(' ')
-                if len(tmp_reast_list) == 1 and len(tmp_reast_list[0]) == 0:
+                if len(tmp_reast_list) == 1 and len(tmp_reast_list[0]) > 0:
                     if plugin_event.bot_info.hash in OlivaDiceCore.msgCustom.dictStrCustomDict:
                         if tmp_reast_list[0] in OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]:
                             tmp_reply_str = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash][tmp_reast_list[0]]
