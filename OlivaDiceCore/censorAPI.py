@@ -215,12 +215,13 @@ def patchCensorByHash(bot_hash, patchList:list):
         ]
     )
 
-def doCensorReplace(botHash:str, msg:str):
+def doCensorReplace(botHash:str, msg:str, replaceMark:str = '*'):
     global gCensorDFA
     res = msg
     if botHash in gCensorDFA:
         res = gCensorDFA[botHash].doReplace(
             inData = msg,
+            replaceMark = replaceMark,
             mode = OlivaDiceCore.censorDFA.maxMatchType
         )
     return res

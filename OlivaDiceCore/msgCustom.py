@@ -46,6 +46,7 @@ dictStrCustom = {
     'strMasterRemoteNone': '设置失败，未找到[{tId}]的相关记录',
     'strAddCensor': '敏感词已添加',
     'strDelCensor': '敏感词已移除',
+    'strCensorReplace': '*',
     'strNeedMaster': '需要Master权限',
     'strHello': '欢迎使用本机器人! 请使用[.help]查看帮助',
     'strBot': '欢迎使用本机器人! 请使用[.help]查看帮助',

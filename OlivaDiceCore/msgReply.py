@@ -4667,6 +4667,14 @@ def replyMsgLazyHelpByEvent(plugin_event, help_key):
 
 def pluginReply(plugin_event, message):
     botHash = plugin_event.bot_info.hash
+    dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
+    dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustom
+    dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
+    if botHash in OlivaDiceCore.msgCustom.dictStrCustomDict:
+        dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[botHash]
+    dictGValue = OlivaDiceCore.msgCustom.dictGValue
+    dictTValue.update(dictGValue)
+
     messageSplitGate = OlivaDiceCore.console.getConsoleSwitchByHash(
         'messageSplitGate',
         botHash
@@ -4685,6 +4693,10 @@ def pluginReply(plugin_event, message):
     # 敏感词检测
     message = OlivaDiceCore.censorAPI.doCensorReplace(
         botHash = botHash,
+        replaceMark = OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strCensorReplace'],
+            dictTValue
+        ),
         msg = message
     )
 
@@ -4716,6 +4728,14 @@ def pluginReply(plugin_event, message):
 
 def pluginSend(plugin_event:OlivOS.API.Event, send_type, target_id, message:str, host_id = None):
     botHash = plugin_event.bot_info.hash
+    dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
+    dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustom
+    dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
+    if botHash in OlivaDiceCore.msgCustom.dictStrCustomDict:
+        dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[botHash]
+    dictGValue = OlivaDiceCore.msgCustom.dictGValue
+    dictTValue.update(dictGValue)
+
     messageSplitGate = OlivaDiceCore.console.getConsoleSwitchByHash(
         'messageSplitGate',
         botHash
@@ -4734,6 +4754,10 @@ def pluginSend(plugin_event:OlivOS.API.Event, send_type, target_id, message:str,
     # 敏感词检测
     message = OlivaDiceCore.censorAPI.doCensorReplace(
         botHash = botHash,
+        replaceMark = OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strCensorReplace'],
+            dictTValue
+        ),
         msg = message
     )
 
