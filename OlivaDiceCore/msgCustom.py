@@ -26,6 +26,7 @@ dictStrCustom = {
     'strForGroupOnly': '此功能仅对群聊开放',
     'strSetStr': '回复词[{tStrName}]已更新',
     'strBecomeMaster': '口令正确，[{tName}]已成为Master',
+    'strBecomeMasterAlready': '你已经拥有Master权限，无需再次认证',
     'strCantBecomeMaster': '无Master权限且口令错误，拒绝认证',
     'strMasterSystemRestart': '[{tName}]远程调用重载',
     'strMasterConsoleShow': '[{tConsoleKey}]当前为[{tConsoleValue}]',

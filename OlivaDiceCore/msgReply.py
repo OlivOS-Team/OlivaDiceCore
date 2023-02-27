@@ -335,6 +335,11 @@ def unity_reply(plugin_event, Proc):
             if isMatchWordStart(tmp_reast_str, 'master'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'master')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                if re.compile(r'^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$')\
+                    .match(tmp_reast_str):
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBecomeMasterAlready'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
                 if isMatchWordStart(tmp_reast_str, 'exit'):
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'exit')
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -876,11 +881,13 @@ def unity_reply(plugin_event, Proc):
                     replyMsg(plugin_event, tmp_reply_str)
                     time.sleep(1)
                     Proc.set_restart()
+                else:
+                    replyMsgLazyHelpByEvent(plugin_event, 'system')
                 return
             elif isMatchWordStart(tmp_reast_str, 'str'):
                 tmp_reast_str = tmp_reast_str.strip(' ')
                 tmp_reast_list = tmp_reast_str.split(' ')
-                if len(tmp_reast_list) == 1:
+                if len(tmp_reast_list) == 1 and len(tmp_reast_list[0]) == 0:
                     if plugin_event.bot_info.hash in OlivaDiceCore.msgCustom.dictStrCustomDict:
                         if tmp_reast_list[0] in OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]:
                             tmp_reply_str = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash][tmp_reast_list[0]]
@@ -893,6 +900,8 @@ def unity_reply(plugin_event, Proc):
                     dictTValue['tStrName'] = tmp_reast_list[0]
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSetStr'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
+                else:
+                    replyMsgLazyHelpByEvent(plugin_event, 'str')
                 return
             elif isMatchWordStart(tmp_reast_str, 'helpdoc'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'helpdoc')
@@ -900,7 +909,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = tmp_reast_str.strip(' ')
                 tmp_reast_list = tmp_reast_str.split(' ')
                 tmp_reast_list_len = len(tmp_reast_list)
-                if tmp_reast_list_len == 1:
+                if tmp_reast_list_len == 1 and len(tmp_reast_list[0]) > 0:
                     tmp_helpdoc_key = tmp_reast_list[0]
                     OlivaDiceCore.helpDoc.delHelpDocByBotHash(
                         botHash = plugin_event.bot_info.hash,
@@ -918,6 +927,8 @@ def unity_reply(plugin_event, Proc):
                     )
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpdocSet'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
+                else:
+                    replyMsgLazyHelpByEvent(plugin_event, 'helpdoc')
                 return
             elif isMatchWordStart(tmp_reast_str, 'censor'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'censor')
@@ -964,6 +975,9 @@ def unity_reply(plugin_event, Proc):
                     OlivaDiceCore.censorAPI.initCensorByHash(bot_hash)
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDelCensor'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
+                else:
+                    replyMsgLazyHelpByEvent(plugin_event, 'censor')
+                return
         else:
             if flag_messageFliterModeDisabled:
                 plugin_event.set_block()
