@@ -199,6 +199,14 @@ def getHelp(key_str, bot_hash, plugin_event = None):
 def getHelpRecommend(key_str:str, bot_hash:str):
     res = []
     tmp_RecommendRank_list = []
+
+    helpRecommendGate = OlivaDiceCore.console.getConsoleSwitchByHash(
+        'helpRecommendGate',
+        bot_hash
+    )
+    if helpRecommendGate == None:
+        helpRecommendGate = 25
+
     if bot_hash in OlivaDiceCore.helpDocData.dictHelpDoc:
         for dictHelpDoc_this in OlivaDiceCore.helpDocData.dictHelpDoc[bot_hash]:
             tmp_RecommendRank_list.append([
@@ -212,7 +220,7 @@ def getHelpRecommend(key_str:str, bot_hash:str):
     tmp_for_list = range(min(8, len(tmp_RecommendRank_list)))
     for tmp_for_list_this in tmp_for_list:
         if tmp_RecommendRank_list[tmp_for_list_this][0] < 1000:
-            if len(tmp_RecommendRank_list[tmp_for_list_this][1]) < 25:
+            if len(tmp_RecommendRank_list[tmp_for_list_this][1]) < helpRecommendGate:
                 res.append(tmp_RecommendRank_list[tmp_for_list_this][1])
     return res
 
