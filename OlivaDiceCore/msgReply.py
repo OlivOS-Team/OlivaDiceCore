@@ -4667,13 +4667,6 @@ def replyMsgLazyHelpByEvent(plugin_event, help_key):
 
 def pluginReply(plugin_event, message):
     botHash = plugin_event.bot_info.hash
-    dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
-    dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustom
-    dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
-    if botHash in OlivaDiceCore.msgCustom.dictStrCustomDict:
-        dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[botHash]
-    dictGValue = OlivaDiceCore.msgCustom.dictGValue
-    dictTValue.update(dictGValue)
 
     messageSplitGate = OlivaDiceCore.console.getConsoleSwitchByHash(
         'messageSplitGate',
@@ -4691,12 +4684,8 @@ def pluginReply(plugin_event, message):
     message = message.replace('{SPLIT}', '\f')
 
     # 敏感词检测
-    message = OlivaDiceCore.censorAPI.doCensorReplace(
+    message = OlivaDiceCore.censorAPI.doCensorReplaceOlivOSSafe(
         botHash = botHash,
-        replaceMark = OlivaDiceCore.msgCustomManager.formatReplySTR(
-            dictStrCustom['strCensorReplace'],
-            dictTValue
-        ),
         msg = message
     )
 
@@ -4728,13 +4717,6 @@ def pluginReply(plugin_event, message):
 
 def pluginSend(plugin_event:OlivOS.API.Event, send_type, target_id, message:str, host_id = None):
     botHash = plugin_event.bot_info.hash
-    dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
-    dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustom
-    dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
-    if botHash in OlivaDiceCore.msgCustom.dictStrCustomDict:
-        dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[botHash]
-    dictGValue = OlivaDiceCore.msgCustom.dictGValue
-    dictTValue.update(dictGValue)
 
     messageSplitGate = OlivaDiceCore.console.getConsoleSwitchByHash(
         'messageSplitGate',
@@ -4752,12 +4734,8 @@ def pluginSend(plugin_event:OlivOS.API.Event, send_type, target_id, message:str,
     message = message.replace('{SPLIT}', '\f')
 
     # 敏感词检测
-    message = OlivaDiceCore.censorAPI.doCensorReplace(
+    message = OlivaDiceCore.censorAPI.doCensorReplaceOlivOSSafe(
         botHash = botHash,
-        replaceMark = OlivaDiceCore.msgCustomManager.formatReplySTR(
-            dictStrCustom['strCensorReplace'],
-            dictTValue
-        ),
         msg = message
     )
 

@@ -13,6 +13,7 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @Desc      :   None
 '''
 
+import OlivOS
 import OlivaDiceCore
 
 import os
@@ -20,6 +21,7 @@ import codecs
 import copy
 import time
 import json
+import traceback
 
 gCensorDFA = {}
 
@@ -229,3 +231,49 @@ def doCensorReplace(botHash:str, msg:str, replaceMark:str = '*'):
 def releaseDir(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
+
+# 外部调用的直接接口
+def doCensorReplaceOlivOSSafe(botHash:str, msg:str):
+    dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
+    dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustom
+    dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
+    if botHash in OlivaDiceCore.msgCustom.dictStrCustomDict:
+        dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[botHash]
+    dictGValue = OlivaDiceCore.msgCustom.dictGValue
+    dictTValue.update(dictGValue)
+
+    msg_para = OlivOS.messageAPI.Message_templet(
+        'old_string',
+        msg
+    )
+
+    res = ''
+    try:
+        for msg_para_this in msg_para.data:
+            if type(msg_para_this) is OlivOS.messageAPI.PARA.text:
+                res += OlivaDiceCore.censorAPI.doCensorReplace(
+                    botHash = botHash,
+                    replaceMark = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                        dictStrCustom['strCensorReplace'],
+                        dictTValue
+                    ),
+                    msg = msg_para_this.CQ()
+                )
+            else:
+                res += msg_para_this.CQ()
+    except Exception as e:
+        dictTValue['tResult'] = '%s\n%s' % (
+            str(e),
+            traceback.format_exc()
+        )
+        OlivaDiceCore.msgReply.globalLog(
+            4,
+            OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strRunCensorError'], dictTValue),
+            [
+                ('OlivaDice', 'default'),
+                ('Censor', 'default')
+            ]
+        )
+        res = msg
+
+    return res

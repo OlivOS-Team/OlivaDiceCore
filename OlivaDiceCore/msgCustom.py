@@ -214,6 +214,7 @@ dictStrConst = {
     'strInitDeckDataError' : '加载牌堆文件[{tInitDataName}]至[{tName}]时出错，请检查文件格式或软件版本！',
     'strInitCensor' : '已生成敏感词检测模型至[{tName}]，耗时[{tInitDataTimeCost}]，包含[{tInitDataCount}]条',
     'strPatchCensor' : '已补充敏感词检测模型至[{tName}]，耗时[{tInitDataTimeCost}]，新增[{tInitDataCount}]条',
+    'strRunCensorError' : '检测敏感词时发生错误，将按原样回复：\n{tResult}',
     'strInitBakData' : '[{tInitDataCount}]条[{tInitDataType}]数据已备份',
     'strSaveData' : '[{tInitDataCount}]条[{tInitDataType}]数据已写入',
     'strShowVersionOnLog' : '当前版本为[{tVersion}]'
