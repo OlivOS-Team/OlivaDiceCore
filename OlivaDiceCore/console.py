@@ -36,6 +36,8 @@ dictConsoleSwitchTemplate = {
         'randomMode' : 0,
         'drawRecommendMode' : 1,
         'drawListMode' : 2,
+        'censorMode' : 1,
+        'censorMatchMode' : 1,
         'masterList' : [],
         'noticeGroupList' : [],
         'pulseUrlList' : []

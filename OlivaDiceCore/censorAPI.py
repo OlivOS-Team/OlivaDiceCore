@@ -217,14 +217,19 @@ def patchCensorByHash(bot_hash, patchList:list):
         ]
     )
 
-def doCensorReplace(botHash:str, msg:str, replaceMark:str = '*'):
+def doCensorReplace(
+    botHash:str,
+    msg:str,
+    replaceMark:str = '*',
+    mode:str = OlivaDiceCore.censorDFA.maxMatchType
+):
     global gCensorDFA
     res = msg
     if botHash in gCensorDFA:
-        res = gCensorDFA[botHash].doReplace(
+        res:str = gCensorDFA[botHash].doReplace(
             inData = msg,
             replaceMark = replaceMark,
-            mode = OlivaDiceCore.censorDFA.maxMatchType
+            mode = mode
         )
     return res
 
@@ -247,20 +252,39 @@ def doCensorReplaceOlivOSSafe(botHash:str, msg:str):
         msg
     )
 
+    censorMode = OlivaDiceCore.console.getConsoleSwitchByHash(
+        'censorMode',
+        botHash
+    )
+    censorMatchMode = OlivaDiceCore.console.getConsoleSwitchByHash(
+        'censorMatchMode',
+        botHash
+    )
+
+    censorMatchModeFlag = OlivaDiceCore.censorDFA.minMatchType
+    if censorMatchMode == 1:
+        censorMatchModeFlag = OlivaDiceCore.censorDFA.maxMatchType
+    elif censorMatchMode == 0:
+        censorMatchModeFlag = OlivaDiceCore.censorDFA.minMatchType
+
     res = ''
     try:
-        for msg_para_this in msg_para.data:
-            if type(msg_para_this) is OlivOS.messageAPI.PARA.text:
-                res += OlivaDiceCore.censorAPI.doCensorReplace(
-                    botHash = botHash,
-                    replaceMark = OlivaDiceCore.msgCustomManager.formatReplySTR(
-                        dictStrCustom['strCensorReplace'],
-                        dictTValue
-                    ),
-                    msg = msg_para_this.CQ()
-                )
-            else:
-                res += msg_para_this.CQ()
+        if censorMode == 1:
+            for msg_para_this in msg_para.data:
+                if type(msg_para_this) is OlivOS.messageAPI.PARA.text:
+                    res += OlivaDiceCore.censorAPI.doCensorReplace(
+                        botHash = botHash,
+                        replaceMark = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                            dictStrCustom['strCensorReplace'],
+                            dictTValue
+                        ),
+                        mode = censorMatchModeFlag,
+                        msg = msg_para_this.CQ()
+                    )
+                else:
+                    res += msg_para_this.CQ()
+        else: # elif censorMode == 0:
+            res = msg
     except Exception as e:
         dictTValue['tResult'] = '%s\n%s' % (
             str(e),
