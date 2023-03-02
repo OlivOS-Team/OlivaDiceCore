@@ -4326,7 +4326,7 @@ def unity_reply(plugin_event, Proc):
                         tmp_reast_str_old,
                         valueTable = skill_valueTable,
                         pcCardRule = tmp_pcCardRule,
-                        flagDynamic = False
+                        flagDynamic = None
                     )
                     if tmp_reast_str != tmp_reast_str_2:
                         tmp_rd_para_str_show = tmp_rd_para_str
@@ -4985,7 +4985,7 @@ def splitBy(data, key):
             tmp_output_str_2 = data[tmp_total_offset:]
     return [tmp_output_str_1, tmp_output_str_2]
 
-def getExpression(data, reverse = False, valueTable = None, pcCardRule = 'default', flagDynamic:bool = False):
+def getExpression(data, reverse = False, valueTable = None, pcCardRule = None, flagDynamic:'bool|None' = False):
     tmp_output_str_1 = ''
     tmp_output_str_reg = ''
     tmp_output_str_2 = ''
@@ -5053,7 +5053,7 @@ def getExpression(data, reverse = False, valueTable = None, pcCardRule = 'defaul
             if not reverse and valueTable != None:
                 tmp_output_str_1 = tmp_output_str_reg
             if not reverse:
-                if flagDynamic:
+                if flagDynamic is True:
                     for i in range(100):
                         tmp_output_str_1_old = tmp_output_str_1
                         for value_this in valueTable:
@@ -5075,7 +5075,7 @@ def getExpression(data, reverse = False, valueTable = None, pcCardRule = 'defaul
                         )
                         if tmp_output_str_1_old == tmp_output_str_1:
                             break
-                else:
+                elif flagDynamic is False:
                     tmp_output_str_1 = OlivaDiceCore.skillCheck.getSpecialSkillReplace(
                         tmp_output_str_1,
                         pcCardRule,
