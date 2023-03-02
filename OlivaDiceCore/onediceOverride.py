@@ -17,6 +17,7 @@
 import random
 import requests as req
 import json
+import traceback
 
 import OlivaDiceCore
 
