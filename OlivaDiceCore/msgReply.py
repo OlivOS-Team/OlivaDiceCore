@@ -127,11 +127,24 @@ def unity_save(plugin_event, Proc):
 
 def poke_reply(plugin_event, Proc):
     if plugin_event.data.target_id == plugin_event.base_info['self_id']:
-        replyMsg(plugin_event, OlivaDiceCore.crossHook.dictHookFunc['pokeHook'](plugin_event = plugin_event, type = 'group'))
-    elif plugin_event.data.group_id == -1:
-        replyMsg(plugin_event, OlivaDiceCore.crossHook.dictHookFunc['pokeHook'](plugin_event = plugin_event, type = 'private'))
-    elif plugin_event.data.group_id == None:
-        replyMsg(plugin_event, OlivaDiceCore.crossHook.dictHookFunc['pokeHook'](plugin_event = plugin_event, type = 'private'))
+        if plugin_event.data.group_id not in [-1, None, '-1']:
+            new_plugin_event = OlivaDiceCore.msgEvent.getReRxEvent_group_message(
+                src = plugin_event,
+                message = '[戳一戳]'
+            )
+            replyMsg(
+                new_plugin_event,
+                OlivaDiceCore.crossHook.dictHookFunc['pokeHook'](plugin_event = new_plugin_event, type = 'group')
+            )
+        elif plugin_event.data.group_id in [-1, None, '-1']:
+            new_plugin_event = OlivaDiceCore.msgEvent.getReRxEvent_private_message(
+                src = plugin_event,
+                message = '[戳一戳]'
+            )
+            replyMsg(
+                new_plugin_event,
+                OlivaDiceCore.crossHook.dictHookFunc['pokeHook'](plugin_event = new_plugin_event, type = 'private')
+            )
 
 def unity_reply(plugin_event, Proc):
     OlivaDiceCore.userConfig.setMsgCount()

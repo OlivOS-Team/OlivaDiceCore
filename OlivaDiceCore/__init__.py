@@ -16,6 +16,7 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 
 from . import main
 from . import data
+from . import msgEvent
 from . import msgCustom
 from . import msgCustomManager
 from . import console
