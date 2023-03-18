@@ -4,28 +4,28 @@
             "main": {
                 "command": "OlivaDiceCore",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceCore.opk",
-                "svn": 1060,
-                "version": "3.3.10"
+                "svn": 1061,
+                "version": "3.3.11"
             },
             "github": {
                 "command": "OlivaDiceCore",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceCore/releases/latest/download/OlivaDiceCore.opk",
-                "svn": 1060,
-                "version": "3.3.10"
+                "svn": 1061,
+                "version": "3.3.11"
             }
         },
         "OlivaDiceJoy": {
             "main": {
                 "command": "OlivaDiceJoy",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceJoy.opk",
-                "svn": 19,
-                "version": "3.0.11"
+                "svn": 20,
+                "version": "3.0.12"
             },
             "github": {
                 "command": "OlivaDiceJoy",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceJoy/releases/latest/download/OlivaDiceJoy.opk",
-                "svn": 19,
-                "version": "3.0.11"
+                "svn": 20,
+                "version": "3.0.12"
             }
         },
         "OlivaDiceLogger": {
@@ -88,14 +88,14 @@
             "main": {
                 "command": "ChanceCustom",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/ChanceCustom.opk",
-                "svn": 24,
-                "version": "0.2.9"
+                "svn": 25,
+                "version": "0.2.10"
             },
             "github": {
                 "command": "ChanceCustom",
                 "opk_path": "https://github.com/OlivOS-Team/ChanceCustom/releases/latest/download/ChanceCustom.opk",
-                "svn": 24,
-                "version": "0.2.9"
+                "svn": 25,
+                "version": "0.2.10"
             }
         }
     }
