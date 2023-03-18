@@ -376,6 +376,9 @@ https://wiki.dice.center/OlivOS_Login.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9B%9E%
 https://github.com/OlivOS-Team/onedice
 基于先进的OneDice标准。''',
 
+    'welcome': '''设置欢迎词：
+.welcome [欢迎词]  设置欢迎词
+.welcome  删除欢迎词''',
 
     'OlivaDiceCore更新': '&更新',
     'ww': '&r',
@@ -416,5 +419,6 @@ https://github.com/OlivOS-Team/onedice
     '扩展牌堆': '',
     'setrule': '&settemp',
     'setdnd': '&settemp',
-    '房规设置': '&settemp'
+    '房规设置': '&settemp',
+    '欢迎词': '&welcome'
 }
