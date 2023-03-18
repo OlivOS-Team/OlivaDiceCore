@@ -4312,9 +4312,9 @@ def unity_reply(plugin_event, Proc):
                         if roll_times_count > 10:
                             roll_times_count = 10
                         tmp_reast_str = tmp_reast_str_list_1[1]
+            tmp_rd_para_str = None
+            tmp_rd_para_str_show = None
             if len(tmp_reast_str) > 0:
-                tmp_rd_para_str = None
-                tmp_rd_para_str_show = None
                 if flag_roll_mode in ['rx']:
                     [tmp_rd_para_str, tmp_reast_str] = getExpression(tmp_reast_str, valueTable = None)
                     tmp_rd_para_str_show = tmp_rd_para_str
@@ -4431,6 +4431,10 @@ def unity_reply(plugin_event, Proc):
                 if rd_para.resError == None:
                     tmp_resDetail_str = ''
                     tmp_resDetail_short_str = ''
+                    if tmp_rd_para_str_show == None:
+                        tmp_rd_para_str_show = rd_para_str
+                    elif tmp_rd_para_str_show == '':
+                        tmp_rd_para_str_show = rd_para_str
                     if flag_roll_mode in ['w', 'dxx']:
                         rd_para_str_new = tmp_rd_para_str_show
                         tmp_resDetail_short_str = OlivaDiceCore.onediceOverride.RDDataFormat(
