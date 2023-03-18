@@ -90,3 +90,22 @@ def isInMasterList(bot_hash, user_hash):
                             if OlivaDiceCore.userConfig.getUserHash(masterList_this[0], 'user', masterList_this[1]) == user_hash:
                                 res = True
     return res
+
+
+def unity_group_member_increase(plugin_event, Proc):
+    replyMsg = OlivaDiceCore.msgReply.replyMsg
+    tmp_hagID = str(plugin_event.data.group_id)
+    fake_plugin_event = OlivaDiceCore.msgEvent.getReRxEvent_group_message(plugin_event, '[加群]')
+    if fake_plugin_event.data.host_id != None:
+        tmp_hagID = '%s|%s' % (str(plugin_event.data.host_id), str(plugin_event.data.group_id))
+    else:
+        tmp_hagID = str(plugin_event.data.group_id)
+    reply_msg = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userConfigKey = 'welcomeMsg',
+        botHash = plugin_event.bot_info.hash,
+        userId = tmp_hagID,
+        userType = 'group',
+        platform = plugin_event.platform['platform']
+    )
+    if reply_msg != None:
+        replyMsg(fake_plugin_event, reply_msg)

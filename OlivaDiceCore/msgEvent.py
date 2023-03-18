@@ -70,6 +70,20 @@ def getReRxEvent_group_message(src:OlivOS.API.Event, message:str):
                 'user_id': res.data.user_id,
             }
             res.data.extend = {}
+    elif type(src.data) is OlivOS.API.Event.group_member_increase:
+        res.active = True
+        res.data.user_id = src.data.user_id
+        res.data.group_id = src.data.group_id
+        res.data.host_id = None
+        res.data.message_id = '-1'
+        res.data.font = None
+        res.data.sender = {
+            'name': 'Nobody',
+            'id': res.data.user_id,
+            'nickname': 'Nobody',
+            'user_id': res.data.user_id,
+        }
+        res.data.extend = {}
 
     getReRxEvent_message_format(res, target_message)
 

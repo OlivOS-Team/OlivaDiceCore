@@ -49,6 +49,7 @@ dictUserConfigNoteDefault = {
     'groupInitList' : None,
     'groupInitParaList' : None,
     'userObList' : None,
+    'welcomeMsg' : None,
     'RDRecord' : None,
     'RDRecordInt' : 0,
     'RDRecordRaw' : '',

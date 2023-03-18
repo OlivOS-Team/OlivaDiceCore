@@ -1255,6 +1255,54 @@ def unity_reply(plugin_event, Proc):
         #放弃使用全前缀匹配方案
         if OlivaDiceCore.msgReplyModel.replyCONTEXT_fliter(tmp_reast_str):
             pass
+        elif isMatchWordStart(tmp_reast_str, 'welcome', isCommand = True):
+            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'welcome')
+            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            if flag_is_from_group:
+                if (flag_is_from_group_have_admin and flag_is_from_group_admin) or flag_is_from_master:
+                    if len(tmp_reast_str) > 0:
+                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                            userConfigKey = 'welcomeMsg',
+                            userConfigValue = tmp_reast_str,
+                            botHash = plugin_event.bot_info.hash,
+                            userId = tmp_hagID,
+                            userType = 'group',
+                            platform = plugin_event.platform['platform']
+                        )
+                        OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                            userHash = OlivaDiceCore.userConfig.getUserHash(
+                                userId = tmp_hagID,
+                                userType = 'group',
+                                platform = plugin_event.platform['platform']
+                            )
+                        )
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strWelcomeSet'], dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
+                    else:
+                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                            userConfigKey = 'welcomeMsg',
+                            userConfigValue = None,
+                            botHash = plugin_event.bot_info.hash,
+                            userId = tmp_hagID,
+                            userType = 'group',
+                            platform = plugin_event.platform['platform']
+                        )
+                        OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                            userHash = OlivaDiceCore.userConfig.getUserHash(
+                                userId = tmp_hagID,
+                                userType = 'group',
+                                platform = plugin_event.platform['platform']
+                            )
+                        )
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strWelcomeDel'], dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
+                else:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+            else:
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
+            return
         elif isMatchWordStart(tmp_reast_str, 'help', isCommand = True):
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'help')
             tmp_reast_str = skipSpaceStart(tmp_reast_str)

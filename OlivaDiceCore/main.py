@@ -39,6 +39,9 @@ class Event(object):
     def group_invite_request(plugin_event, Proc):
         OlivaDiceCore.ordinaryInviteManager.unity_group_invite_request(plugin_event, Proc)
 
+    def group_member_increase(plugin_event, Proc):
+        OlivaDiceCore.ordinaryInviteManager.unity_group_member_increase(plugin_event, Proc)
+
     def heartbeat(plugin_event, Proc):
         OlivaDiceCore.pulse.unity_heartbeat(plugin_event, Proc)
 
