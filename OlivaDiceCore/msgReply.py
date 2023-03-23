@@ -201,10 +201,6 @@ def unity_reply(plugin_event, Proc):
     if isMatchWordStart(tmp_reast_str, '[CQ:reply,id='):
         tmp_reast_str = skipToRight(tmp_reast_str, ']')
         tmp_reast_str = tmp_reast_str[1:]
-        if isMatchWordStart(tmp_reast_str, tmp_at_str):
-            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, tmp_at_str)
-            tmp_reast_str = skipSpaceStart(tmp_reast_str)
-            flag_force_reply = True
     if flag_force_reply is False:
         tmp_reast_str_old = tmp_reast_str
         tmp_reast_obj = OlivOS.messageAPI.Message_templet(
