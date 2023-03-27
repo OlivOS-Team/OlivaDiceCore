@@ -228,6 +228,8 @@ dictGValue = {
 }
 
 dictTValue = {
+    'tAdapter': 'Native',
+    'tRandomMode': '未知',
     'tVersion' : 'N/A',
     'tBotHash' : 'unity',
     'tId' : 'N/A',
@@ -303,4 +305,31 @@ dictSetCOCDetail = {
     'DeltaGreen': '''小于等于检定目标成功，若结果为1或两骰相同为大成功（相当于整除11）
 大于检定目标失败，若结果为100或两骰相同为大失败（相当于整除11）
 没有极难成功/困难成功'''
+}
+
+dictAdapterMapper = {
+    'qq': {
+        'onebot': {
+            'default': 'onebotV11',
+            'onebotV12': 'onebotV12',
+            'gocqhttp': 'GoCqhttp',
+            'gocqhttp_hide': 'GoCqhttp',
+            'gocqhttp_show': 'GoCqhttp',
+            'gocqhttp_show_Android_Phone': 'GoCqhttp.aPhone',
+            'gocqhttp_show_Android_Pad': 'GoCqhttp.aPad',
+            'gocqhttp_show_Android_Watch': 'GoCqhttp.aWatch',
+            'gocqhttp_show_iPad': 'GoCqhttp.iPad',
+            'gocqhttp_show_iMac': 'GoCqhttp.iMac',
+            'gocqhttp_show_old': 'GoCqhttp',
+            'walleq': 'WalleQ',
+            'walleq_hide': 'WalleQ',
+            'walleq_show': 'WalleQ',
+            'walleq_show_Android_Phone': 'WalleQ.aPhone',
+            'walleq_show_Android_Pad': 'WalleQ.aPad',
+            'walleq_show_Android_Watch': 'WalleQ.aWatch',
+            'walleq_show_iPad': 'WalleQ.iPad',
+            'walleq_show_iMac': 'WalleQ.iMac',
+            'walleq_show_old': 'WalleQ'
+        }
+    }
 }

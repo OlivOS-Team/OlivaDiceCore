@@ -1237,7 +1237,9 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = '\n'.join(tmp_reply_str_list)
                 replyMsg(plugin_event, tmp_reply_str)
             elif len(tmp_reast_str) == 0:
-                tmp_reply_str = OlivaDiceCore.data.bot_info + '\n' + OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBot'], dictTValue)
+                dictTValue['tAdapter'] = OlivaDiceCore.msgCustomManager.loadAdapterType(plugin_event.bot_info)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(OlivaDiceCore.data.bot_info_auto, dictTValue) \
+                + '\n' + OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBot'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
             return
         #此频道关闭时中断处理

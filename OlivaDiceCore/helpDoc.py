@@ -134,7 +134,14 @@ def getHelp(key_str, bot_hash, plugin_event = None):
                         return tmp_reply_str
                 dictTValue['tHelpDocResult'] = OlivaDiceCore.helpDocData.dictHelpDoc[bot_hash][key_str_new]
                 if key_str_new == 'default':
-                    tmp_reply_str = '%s\n%s' % (OlivaDiceCore.data.bot_info, dictTValue['tHelpDocResult'])
+                    bot_info_str = OlivaDiceCore.data.bot_info
+                    if type(plugin_event) is OlivOS.API.Event:
+                        dictTValue['tAdapter'] = OlivaDiceCore.msgCustomManager.loadAdapterType(plugin_event.bot_info)
+                        bot_info_str = OlivaDiceCore.msgCustomManager.formatReplySTR(OlivaDiceCore.data.bot_info_auto, dictTValue)
+                    tmp_reply_str = '%s\n%s' % (
+                        bot_info_str,
+                        dictTValue['tHelpDocResult']
+                    )
                 else:
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDoc'], dictTValue)
                 for count_index in range(100):

@@ -37,6 +37,7 @@ bot_info_basic = 'OlivaDice By lunzhiPenxil Ver.%s' % bot_info_Ver
 bot_info_basic_short = 'OlivaDice Ver.%s' % bot_info_Ver
 
 bot_info = '%s [Python %s For OlivOS %s]' % (bot_info_basic, str(platform.python_version()), OlivOS.infoAPI.OlivOS_Version)
+bot_info_auto = '%s [Python %s For OlivOS %s {tAdapter}]' % (bot_info_basic, str(platform.python_version()), OlivOS.infoAPI.OlivOS_Version)
 
 bot_version_short = 'OlivaDice %s' % bot_info_Ver
 

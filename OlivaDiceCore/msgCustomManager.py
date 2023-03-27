@@ -153,3 +153,24 @@ def dictTValueInit(plugin_event, dictTValue):
     res['vValDict']['vPluginEvent'] = plugin_event
     return res
 
+def loadAdapterType(botInfo:OlivOS.API.bot_info_T):
+    res = 'Native'
+    if type(botInfo) is OlivOS.API.bot_info_T:
+        if 'platform' in botInfo.platform \
+        and 'sdk' in botInfo.platform \
+        and 'model' in botInfo.platform:
+            if botInfo.platform['platform'] in OlivaDiceCore.msgCustom.dictAdapterMapper \
+            and botInfo.platform['sdk'] in OlivaDiceCore.msgCustom.dictAdapterMapper\
+            [botInfo.platform['platform']] \
+            and botInfo.platform['model'] in OlivaDiceCore.msgCustom.dictAdapterMapper\
+            [botInfo.platform['platform']][botInfo.platform['sdk']]:
+                res = OlivaDiceCore.msgCustom.dictAdapterMapper[
+                    botInfo.platform['platform']
+                ][
+                    botInfo.platform['sdk']
+                ][
+                    botInfo.platform['model']
+                ]
+            else:
+                res = botInfo.platform['platform'].upper()
+    return res
