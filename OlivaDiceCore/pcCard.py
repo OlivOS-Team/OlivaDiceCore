@@ -20,6 +20,8 @@ import OlivaDiceCore
 import hashlib
 import json
 import os
+import traceback
+import sys
 
 import copy
 
@@ -78,7 +80,8 @@ def dataPcCardTemplateDefaultInit():
                                 pass
                             else:
                                 OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[templateName][templateModelName] = tmp_dictPcCardTemplatePatch[templateName][templateModelName]
-        except:
+        except Exception as e:
+            traceback.print_exc()
             dictTValue['tName'] = '全局'
             dictTValue['tInitDataName'] = dataName
             OlivaDiceCore.msgReply.globalLog(
@@ -265,12 +268,17 @@ def pcCardDataSetBySkillName(pcHash, skillName, skillValue, pcCardName = 'defaul
         dictPcCardData['unity'][pcHash][tmp_pc_card_name_key] = {}
     tmp_pc_card_synonyms = {}
     tmp_pc_card_mapping = {}
+    tmp_pc_card_forceMapping = []
     tmp_pc_card_template_name = pcCardDataGetTemplateDataByKey(pcHash, pcCardName, 'template', 'default')
     tmp_pc_card_template = pcCardDataGetTemplateByKey(tmp_pc_card_template_name)
     if 'synonyms' in tmp_pc_card_template:
         tmp_pc_card_synonyms = tmp_pc_card_template['synonyms']
     if 'mapping' in tmp_pc_card_template:
         tmp_pc_card_mapping = tmp_pc_card_template['mapping']
+    if 'skillConfig' in tmp_pc_card_template \
+    and 'forceMapping' in tmp_pc_card_template['skillConfig'] \
+    and type(tmp_pc_card_template['skillConfig']['forceMapping']) is list:
+        tmp_pc_card_forceMapping = tmp_pc_card_template['skillConfig']['forceMapping']
     tmp_pc_card_synonyms_hit = [str(skillName)]
     for tmp_pc_card_synonyms_this in tmp_pc_card_synonyms:
         if str(skillName) in tmp_pc_card_synonyms[tmp_pc_card_synonyms_this]:
@@ -281,7 +289,10 @@ def pcCardDataSetBySkillName(pcHash, skillName, skillValue, pcCardName = 'defaul
             tmp_hitList.append(tmp_pc_card_synonyms_hit_this)
     for tmp_pc_card_mapping_hit_this in tmp_pc_card_mapping:
         if tmp_pc_card_mapping_hit_this not in tmp_hitList:
-            if forceMapping or tmp_pc_card_mapping_hit_this not in dictPcCardData['unity'][pcHash][tmp_pc_card_name_key]:
+            tmp_forceMapping = False
+            if tmp_pc_card_mapping_hit_this in tmp_pc_card_forceMapping:
+                tmp_forceMapping = True
+            if tmp_forceMapping or forceMapping or tmp_pc_card_mapping_hit_this not in dictPcCardData['unity'][pcHash][tmp_pc_card_name_key]:
                 if type(tmp_pc_card_mapping[tmp_pc_card_mapping_hit_this]) == str:
                     tmp_template_customDefault = None
                     tmp_template_name = pcCardDataGetTemplateKey(pcHash, pcCardName)

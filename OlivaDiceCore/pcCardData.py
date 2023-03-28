@@ -142,6 +142,13 @@ dictPcCardTemplateDefaultTemp = {
                 'MPMAX',
                 '克苏鲁神话',
                 '信用'
+            ],
+            'forceMapping': [
+                '闪避',
+                '母语',
+                'SANMAX',
+                'HPMAX',
+                'MPMAX'
             ]
         },
         'init': {
@@ -159,6 +166,7 @@ dictPcCardTemplateDefaultTemp = {
             '闪避': '{DEX}/2',
             '母语': '{EDU}',
             'SAN': '{POW}',
+            'SANMAX': '{POW}',
             'HP': '({CON}+{SIZ})/10',
             'HPMAX': '({CON}+{SIZ})/10',
             'MP': '{POW}/5',
@@ -465,6 +473,13 @@ dictPcCardTemplateDefaultTemp = {
                 'MPMAX',
                 '克苏鲁神话',
                 '信用'
+            ],
+            'forceMapping': [
+                '闪避',
+                '母语',
+                'SANMAX',
+                'HPMAX',
+                'MPMAX'
             ]
         },
         'init': {
@@ -482,6 +497,7 @@ dictPcCardTemplateDefaultTemp = {
             '闪避': '{DEX}/2',
             '母语': '{EDU}',
             'SAN': '{POW}',
+            'SANMAX': '{POW}',
             'HP': '({CON}+{SIZ})/10',
             'HPMAX': '({CON}+{SIZ})/10',
             'MP': '{POW}/5',
@@ -1084,6 +1100,11 @@ dictPcCardTemplateDefaultTemp = {
                 'MPMAX',
                 '克苏鲁神话',
                 '信用'
+            ],
+            'forceMapping': [
+                'SANMAX',
+                'HPMAX',
+                'MPMAX'
             ]
         },
         'init': {
@@ -1099,6 +1120,7 @@ dictPcCardTemplateDefaultTemp = {
         },
         'mapping': {
             'SAN': '{POW}',
+            'SANMAX': '{POW}',
             'HP': '({CON}+{SIZ})/10',
             'HPMAX': '({CON}+{SIZ})/10',
             'MP': '{POW}/5',
@@ -1657,6 +1679,11 @@ dictPcCardTemplateDefaultTemp = {
                 'MPMAX',
                 '克苏鲁神话',
                 '信用'
+            ],
+            'forceMapping': [
+                'SANMAX',
+                'HPMAX',
+                'MPMAX'
             ]
         },
         'init': {
