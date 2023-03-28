@@ -23,7 +23,8 @@ dictPcCardTemplateModel = {
     'customDefault': {},
     'skill': {},
     'skillConfig': {
-        'skipEnhance': []
+        'skipEnhance': [],
+        'forceMapping': []
     },
     'init': {},
     'mapping': {},
