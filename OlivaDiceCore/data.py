@@ -44,10 +44,9 @@ bot_version_short = 'OlivaDice %s' % bot_info_Ver
 bot_version_short_header = 'OlivaDice/%s' % str(OlivaDiceCore_ver)
 
 bot_summary = bot_info_basic + '\n'
-bot_summary += 'Python ' + str(sys.version) + '\n'
-bot_summary += str(platform.machine()) + '\n'
-bot_summary += str(platform.processor()) + '\n'
-bot_summary += str(os.name) + ':' + str(platform.platform())
+bot_summary += '%s %s\n' % (str(platform.python_implementation()), str(sys.version))
+bot_summary += '%s : %s : %s\n' % (str(os.name), ' '.join(platform.architecture()), str(platform.platform()))
+bot_summary += '%s - %s' % (str(platform.machine()), str(platform.processor()))
 
 bot_content = {
     'masterKey': str(uuid.uuid4())
