@@ -145,8 +145,6 @@ dictPcCardTemplateDefaultTemp = {
                 '信用'
             ],
             'forceMapping': [
-                '闪避',
-                '母语',
                 'SANMAX',
                 'HPMAX',
                 'MPMAX'
@@ -476,8 +474,6 @@ dictPcCardTemplateDefaultTemp = {
                 '信用'
             ],
             'forceMapping': [
-                '闪避',
-                '母语',
                 'SANMAX',
                 'HPMAX',
                 'MPMAX'

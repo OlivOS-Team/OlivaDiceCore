@@ -3219,13 +3219,9 @@ def unity_reply(plugin_event, Proc):
             return
         elif isMatchWordStart(tmp_reast_str, 'set', isCommand = True):
             OlivaDiceCore.msgReplyModel.replySET_command(plugin_event, Proc, valDict)
-        elif (
-            isMatchWordStart(tmp_reast_str, 'coc6', isCommand = True)
-        ) or (
-            isMatchWordStart(tmp_reast_str, 'coc', isCommand = True)
-        ) or (
-            isMatchWordStart(tmp_reast_str, 'dnd', isCommand = True)
-        ):
+        elif isMatchWordStart(tmp_reast_str, 'coc6', isCommand = True) \
+        or isMatchWordStart(tmp_reast_str, 'coc', isCommand = True) \
+        or isMatchWordStart(tmp_reast_str, 'dnd', isCommand = True):
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
@@ -4272,19 +4268,12 @@ def unity_reply(plugin_event, Proc):
         #    return
         elif isMatchWordStart(tmp_reast_str, 'rr', isCommand = True):
             OlivaDiceCore.msgReplyModel.replyRR_command(plugin_event, Proc, valDict)
-        elif (
-            isMatchWordStart(tmp_reast_str, 'rx', isCommand = True)
-        ) or (
-            isMatchWordStart(tmp_reast_str, 'r', isCommand = True)
-        ) or (
-            isMatchWordStart(tmp_reast_str, 'ww', isCommand = True)
-        ) or (
-            isMatchWordStart(tmp_reast_str, 'w', isCommand = True)
-        ) or (
-            isMatchWordStart(tmp_reast_str, 'dxx', isCommand = True)
-        ) or (
-            isMatchWordStart(tmp_reast_str, 'dx', isCommand = True)
-        ):
+        elif isMatchWordStart(tmp_reast_str, 'rx', isCommand = True) \
+        or isMatchWordStart(tmp_reast_str, 'r', isCommand = True) \
+        or isMatchWordStart(tmp_reast_str, 'ww', isCommand = True) \
+        or isMatchWordStart(tmp_reast_str, 'w', isCommand = True) \
+        or isMatchWordStart(tmp_reast_str, 'dxx', isCommand = True) \
+        or isMatchWordStart(tmp_reast_str, 'dx', isCommand = True):
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
