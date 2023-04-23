@@ -25,6 +25,23 @@ import OlivaDiceCore
 random_default_mode = 'random_org'
 
 
+dictRuleOperationPriority = {
+    'DX3': {
+        'dx' : 7,
+        'DX' : 7
+    }
+}
+
+dictRuleOperationMapping = {
+    'DX3': {
+        'dx' : 'c',
+        'a' : 'c'
+    }
+}
+
+OlivaDiceCore.onedice.dictRuleOperationPriority = dictRuleOperationPriority
+OlivaDiceCore.onedice.dictRuleOperationMapping = dictRuleOperationMapping
+
 dictRandomInt = {
     'default': []
 }

@@ -4279,6 +4279,7 @@ def unity_reply(plugin_event, Proc):
             tmp_reply_str = ''
             tmp_reply_str_show = ''
             flag_roll_mode = 'r'
+            tmp_ruleMode = 'default'
             if isMatchWordStart(tmp_reast_str, 'rx'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rx')
                 flag_roll_mode = 'rx'
@@ -4294,9 +4295,11 @@ def unity_reply(plugin_event, Proc):
             elif isMatchWordStart(tmp_reast_str, 'dxx'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'dxx')
                 flag_roll_mode = 'dxx'
+                tmp_ruleMode = 'DX3'
             elif isMatchWordStart(tmp_reast_str, 'dx'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'dx')
                 flag_roll_mode = 'dx'
+                tmp_ruleMode = 'DX3'
             #此处只对实体化后的&做处理，因为这是运算符，其余保持原样
             #如果以后有全面反实体化的需求则需直接调整这里
             #tmp_reast_str = tmp_reast_str.replace('&amp;', '&')
@@ -4368,13 +4371,15 @@ def unity_reply(plugin_event, Proc):
                         tmp_reast_str_old,
                         valueTable = skill_valueTable,
                         pcCardRule = tmp_pcCardRule,
-                        flagDynamic = True
+                        flagDynamic = True,
+                        ruleMode = tmp_ruleMode
                     )
                     [tmp_rd_para_str_show, tmp_reast_str_2] = getExpression(
                         tmp_reast_str_old,
                         valueTable = skill_valueTable,
                         pcCardRule = tmp_pcCardRule,
-                        flagDynamic = None
+                        flagDynamic = None,
+                        ruleMode = tmp_ruleMode
                     )
                     if tmp_reast_str != tmp_reast_str_2:
                         tmp_rd_para_str_show = tmp_rd_para_str
@@ -4390,6 +4395,8 @@ def unity_reply(plugin_event, Proc):
                         rd_para_str = re.sub(r'^(\{.+\})$', r'\1c10', rd_para_str)
                         rd_para_str = re.sub(r'^(\d+)([+\-*xX/].+)$', r'\1c10\2', rd_para_str)
                         rd_para_str = re.sub(r'^(\{.+\})([+\-*xX/].+)$', r'\1c10\2', rd_para_str)
+                    if rd_para_str != tmp_rd_para_str:
+                        tmp_rd_para_str_show = rd_para_str
                     flag_have_para = True
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 if len(tmp_reast_str) > 0:
@@ -4455,6 +4462,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_template_customDefault['d']['rightD'] = rd_para_main_D_right
             if roll_times_count == 1:
                 rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_template_customDefault, valueTable = skill_valueTable)
+                rd_para.ruleMode = tmp_ruleMode
                 rd_para.roll()
                 OlivaDiceCore.onediceOverride.saveRDDataUser(
                     data = rd_para,
@@ -4605,6 +4613,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str_1 = ''
                 for i in range(roll_times_count):
                     rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_template_customDefault)
+                    rd_para.ruleMode = tmp_ruleMode
                     rd_para.roll()
                     if rd_para.resError == None:
                         if not flag_begin:
@@ -5037,7 +5046,14 @@ def splitBy(data, key):
             tmp_output_str_2 = data[tmp_total_offset:]
     return [tmp_output_str_1, tmp_output_str_2]
 
-def getExpression(data, reverse = False, valueTable = None, pcCardRule = None, flagDynamic:'bool|None' = False):
+def getExpression(
+    data,
+    reverse = False,
+    valueTable = None,
+    pcCardRule = None,
+    flagDynamic:'bool|None' = False,
+    ruleMode:str = 'default'
+):
     tmp_output_str_1 = ''
     tmp_output_str_reg = ''
     tmp_output_str_2 = ''
@@ -5079,12 +5095,16 @@ def getExpression(data, reverse = False, valueTable = None, pcCardRule = None, f
                         flag_value = True
                 if (not flag_not_hit) \
                 and (data[tmp_total_offset:tmp_total_offset + tmp_offset_len] in OlivaDiceCore.onedice.dictOperationPriority \
+                or (ruleMode in OlivaDiceCore.onedice.dictRuleOperationPriority \
+                and data[tmp_total_offset:tmp_total_offset + tmp_offset_len] in OlivaDiceCore.onedice.dictRuleOperationPriority[ruleMode]) \
                 or data[tmp_total_offset:tmp_total_offset + tmp_offset_len] in OlivaDiceCore.onedice.listOperationSub):
                     flag_value = False
             for range_this in reversed(range(1, OlivaDiceCore.onedice.lenOperationMax + 1)):
-                if flag_not_hit and (
-                    tmp_total_offset + range_this <= len(data)
-                ) and data[tmp_total_offset:tmp_total_offset + range_this] in OlivaDiceCore.onedice.dictOperationPriority:
+                if flag_not_hit \
+                and tmp_total_offset + range_this <= len(data) \
+                and (data[tmp_total_offset:tmp_total_offset + range_this] in OlivaDiceCore.onedice.dictOperationPriority \
+                or (ruleMode in OlivaDiceCore.onedice.dictRuleOperationPriority \
+                and data[tmp_total_offset:tmp_total_offset + range_this] in OlivaDiceCore.onedice.dictRuleOperationPriority[ruleMode])):
                     tmp_offset_len = range_this
                     flag_not_hit = False
             if flag_not_hit and data[tmp_total_offset] in OlivaDiceCore.onedice.listOperationSub:

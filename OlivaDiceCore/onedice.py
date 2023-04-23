@@ -18,7 +18,7 @@ from enum import Enum
 import random
 import traceback
 
-pypi_version = '1.0.6'
+pypi_version = '1.0.7'
 
 dictOperationPriority = {
     '[' : None,
@@ -77,6 +77,10 @@ dictOperationPriority = {
 dictOperationMapping = {
     'df' : 'f'
 }
+
+dictRuleOperationPriority = {}
+
+dictRuleOperationMapping = {}
 
 listOperationSub = [
     'm',
@@ -226,7 +230,12 @@ class calTupleNode(calNode):
 语法树运算符节点结构体
 '''
 class calOperationNode(calNode):
-    def __init__(self, data, customDefault = None):
+    def __init__(
+        self,
+        data,
+        customDefault = None,
+        ruleMode = 'default'
+    ):
         calNode.__init__(self)
         self.data = data.lower()
         self.type = self.nodeType.OPERATION
@@ -238,7 +247,9 @@ class calOperationNode(calNode):
         self.valEnderRightDefault = None
         self.priority = None
         self.dictOperationPriority = dictOperationPriority
+        self.dictRuleOperationPriority = dictRuleOperationPriority
         self.customDefault = customDefault
+        self.ruleMode = ruleMode
         self.initOperation()
 
     def initOperation(self):
@@ -307,16 +318,28 @@ class calOperationNode(calNode):
     def getPriority(self):
         if self.data in self.dictOperationPriority:
             self.priority = self.dictOperationPriority[self.data]
+        elif self.ruleMode in self.dictRuleOperationPriority \
+        and self.data in self.dictRuleOperationPriority[self.ruleMode]:
+            self.priority = self.dictRuleOperationPriority[self.ruleMode][self.data]
         return self.priority
 
     def inOperation(self):
         res = False
         if self.data in self.dictOperationPriority:
             res = True
+        elif self.ruleMode in self.dictRuleOperationPriority \
+        and self.data in self.dictRuleOperationPriority[self.ruleMode]:
+            res = True
         return res
 
 class RD(object):
-    def __init__(self, initData, customDefault = None, valueTable = None):
+    def __init__(
+        self,
+        initData,
+        customDefault = None,
+        valueTable = None,
+        ruleMode = 'default'
+    ):
         self.originDataRaw = initData
         self.originData = initData.lower()
         self.calTree = calNodeStack([])
@@ -331,8 +354,10 @@ class RD(object):
         self.resMetaTupleEnable = False
         self.resError = None
         self.dictOperationPriority = dictOperationPriority
+        self.dictRuleOperationPriority = dictRuleOperationPriority
         self.customDefault = customDefault
         self.valueTable = valueTable
+        self.ruleMode = ruleMode
 
     def roll(self):
         try:
@@ -409,11 +434,17 @@ class RD(object):
         res = None
         if data in self.dictOperationPriority:
             res = self.dictOperationPriority[data]
+        elif self.ruleMode in self.dictRuleOperationPriority \
+        and data in self.dictRuleOperationPriority[self.ruleMode]:
+            res = self.dictRuleOperationPriority[self.ruleMode][data]
         return res
 
     def inOperation(self, data):
         res = False
         if data in self.dictOperationPriority:
+            res = True
+        elif self.ruleMode in self.dictRuleOperationPriority \
+        and data in self.dictRuleOperationPriority[self.ruleMode]:
             res = True
         return res
 
@@ -633,7 +664,14 @@ class RD(object):
                         tmp_data_this_real = tmp_data_this
                         if tmp_data_this.lower() in dictOperationMapping:
                             tmp_data_this_real = dictOperationMapping[tmp_data_this.lower()]
-                        tmp_calOperationNode_this = calOperationNode(tmp_data_this_real, self.customDefault)
+                        elif self.ruleMode in dictRuleOperationMapping \
+                        and tmp_data_this.lower() in dictRuleOperationMapping[self.ruleMode]:
+                            tmp_data_this_real = dictRuleOperationMapping[self.ruleMode][tmp_data_this.lower()]
+                        tmp_calOperationNode_this = calOperationNode(
+                            data = tmp_data_this_real,
+                            customDefault = self.customDefault,
+                            ruleMode = self.ruleMode
+                        )
                         if not flag_left_as_number:
                             if tmp_op_peek_this == None:
                                 if tmp_calOperationNode_this.valStarterLeftDefault != None:
@@ -676,12 +714,20 @@ class RD(object):
                                 pass
                             elif self.getPriority(tmp_data_this_real) <= tmp_op_peek_this.getPriority():
                                 tmp_res.pushList(op_stack.popTo('(', self.getPriority(tmp_data_this_real), True))
-                        op_stack.push(calOperationNode(tmp_data_this_real, self.customDefault))
+                        op_stack.push(calOperationNode(
+                            data = tmp_data_this_real,
+                            customDefault = self.customDefault,
+                            ruleMode = self.ruleMode
+                        ))
                         flag_old_number = False
                         flag_left_as_number = False
                         tmp_offset = lenOperation_this
                     elif tmp_data_this == '(':
-                        op_stack.push(calOperationNode(tmp_data_this, self.customDefault))
+                        op_stack.push(calOperationNode(
+                            data = tmp_data_this,
+                            customDefault = self.customDefault,
+                            ruleMode = self.ruleMode
+                        ))
                         count_child_para += 1
                         flag_old_number = False
                         flag_left_as_number = False
