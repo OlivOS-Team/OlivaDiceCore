@@ -56,7 +56,7 @@ Latest Release: [![GitHub release](https://img.shields.io/github/release-pre/Oli
 名单还在补完，请加群进行沟通~
 
 ## 开始使用
-教程：[【教程】手把手教你搭建青果骰](https://forum.olivos.run/d/25) 
+教程: [【教程】手把手教你搭建青果骰](https://forum.olivos.run/d/25)  
 论坛: <https://forum.olivos.run>  
 主页: <http://oliva.dice.center>  
 手册: <https://wiki.dice.center>  
