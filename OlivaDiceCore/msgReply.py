@@ -3221,7 +3221,7 @@ def unity_reply(plugin_event, Proc):
             OlivaDiceCore.msgReplyModel.replySET_command(plugin_event, Proc, valDict)
         elif isMatchWordStart(tmp_reast_str, 'coc6', isCommand = True) \
         or isMatchWordStart(tmp_reast_str, 'coc', isCommand = True) \
-        or isMatchWordStart(tmp_reast_str, 'dnd', isCommand = True):
+        or (False and isMatchWordStart(tmp_reast_str, 'dnd', isCommand = True)):
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
@@ -3282,6 +3282,38 @@ def unity_reply(plugin_event, Proc):
                 replyMsg(plugin_event, tmp_reply_str)
             else:
                 return
+        elif isMatchWordStart(tmp_reast_str, 'dnd', isCommand = True):
+            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'dnd')
+            tmp_pcCardTemplateName = 'DND5E'
+            tmp_roll_count = 1
+            tmp_roll_count_str = None
+            tmp_res_list = []
+            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            if len(tmp_reast_str) > 0:
+                [tmp_roll_count_str, tmp_reast_str] = getNumberPara(tmp_reast_str)
+            if tmp_roll_count_str == '':
+                tmp_roll_count_str = None
+            if tmp_roll_count_str != None:
+                if tmp_roll_count_str.isdigit():
+                    tmp_roll_count = int(tmp_roll_count_str)
+            if tmp_roll_count > 0 and tmp_roll_count <= 10:
+                tmp_res_list = []
+                tmp_range_list = range(0, tmp_roll_count)
+                for tmp_i in tmp_range_list:
+                    tmp_res_list_this = []
+                    for tmp_i_this in range(6):
+                        rd_this = OlivaDiceCore.onedice.RD('4d6k3')
+                        rd_this.roll()
+                        if rd_this.resError is None:
+                            tmp_res_list_this.append(str(rd_this.resInt))
+                    tmp_res_list.append(tmp_res_list_this)
+            dictTValue['tPcTempName'] = tmp_pcCardTemplateName
+            dictTValue['tPcInitResult'] = '\n[%s]' % ']\n['.join([
+                ', '.join(tmp_res_list_this)
+                for tmp_res_list_this in tmp_res_list
+            ])
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInit'], dictTValue)
+            replyMsg(plugin_event, tmp_reply_str)
         elif isMatchWordStart(tmp_reast_str, 'sc', isCommand = True):
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
