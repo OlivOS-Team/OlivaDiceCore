@@ -4643,23 +4643,113 @@ def unity_reply(plugin_event, Proc):
             else:
                 flag_begin = True
                 tmp_reply_str_1 = ''
+                tmp_reply_str_1_list = []
+                rd_para_str_new = None
+                flag_multiRollDetail = OlivaDiceCore.console.getConsoleSwitchByHash(
+                    'multiRollDetail',
+                    plugin_event.bot_info.hash
+                )
                 for i in range(roll_times_count):
                     rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_template_customDefault)
                     rd_para.ruleMode = tmp_ruleMode
                     rd_para.roll()
                     if rd_para.resError == None:
-                        if not flag_begin:
-                            tmp_reply_str_1 += ', '
+                        tmp_resDetail_str = ''
+                        tmp_resDetail_short_str = ''
+                        if tmp_rd_para_str_show == None:
+                            tmp_rd_para_str_show = rd_para_str
+                        elif tmp_rd_para_str_show == '':
+                            tmp_rd_para_str_show = rd_para_str
+                        if 1 == flag_multiRollDetail \
+                        and flag_roll_mode in ['r', 'rx']:
+                            tmp_resDetail_str = None
+                            tmp_default_is1step = OlivaDiceCore.onediceOverride.RDDataFormat_default_is1step(rd_para.resDetailData)
+                            if tmp_default_is1step != False:
+                                rd_para_str_new = OlivaDiceCore.onediceOverride.RDDataFormat_default_1step(rd_para.resDetailData)
+                            if tmp_default_is1step == 1:
+                                tmp_resDetail_str = None
+                            else:
+                                tmp_resDetail_str = OlivaDiceCore.onediceOverride.RDDataFormat(
+                                    data = rd_para.resDetailData,
+                                    mode = 'default'
+                                )
+                            tmp_resInt_str = str(rd_para.resInt)
+                            if tmp_resDetail_str == None:
+                                tmp_resDetail_str = ''
+                            if tmp_resDetail_str == str(tmp_resInt_str):
+                                tmp_resDetail_str = ''
+                            if rd_para_str_new == None:
+                                rd_para_str_new = tmp_rd_para_str_show
+                            if len(tmp_resDetail_str) == 0 or len(tmp_resDetail_str) > 150:
+                                if rd_para.resMetaTupleEnable and len(rd_para.resMetaTuple) > 1:
+                                    tmp_reply_str_1 = ', '.join(
+                                        OlivaDiceCore.onediceOverride.getRDResultFromList(rd_para.resMetaTuple)
+                                    )
+                                elif len(str(tmp_resInt_str)) > 100:
+                                    tmp_reply_str_1 = str(tmp_resInt_str)[:50] + '...的天文数字'
+                                else:
+                                    tmp_reply_str_1 = str(tmp_resInt_str)
+                            else:
+                                if rd_para.resMetaTupleEnable and len(rd_para.resMetaTuple) > 1:
+                                    tmp_reply_str_1 = str(tmp_resDetail_str) + '=' + (', '.join(
+                                        OlivaDiceCore.onediceOverride.getRDResultFromList(rd_para.resMetaTuple)
+                                    ))
+                                elif len(str(tmp_resInt_str)) > 50:
+                                    tmp_reply_str_1 = str(tmp_resDetail_str) + '=' + str(tmp_resInt_str)[:50] + '...的天文数字'
+                                else:
+                                    tmp_reply_str_1 = str(tmp_resDetail_str) + '=' + str(tmp_resInt_str)
+                            tmp_reply_str_1_list.append(tmp_reply_str_1)
                         else:
-                            flag_begin = False
-                        if len(str(rd_para.resInt)) > 10:
-                            tmp_reply_str_1 += str(rd_para.resInt)[:10] + '...'
-                        else:
-                            tmp_reply_str_1 += str(rd_para.resInt)
+                            if not flag_begin:
+                                tmp_reply_str_1 += ', '
+                            else:
+                                flag_begin = False
+                            if len(str(rd_para.resInt)) > 10:
+                                tmp_reply_str_1 += str(rd_para.resInt)[:10] + '...'
+                            else:
+                                tmp_reply_str_1 += str(rd_para.resInt)
                     else:
-                        tmp_reply_str_1 = str(rd_para.resError)
-                        break
-                dictTValue['tRollResult'] = rd_para_str + '=' + tmp_reply_str_1
+                        dictTValue['tResult'] = str(rd_para.resError)
+                        dictTValue['tRollPara'] = str(rd_para_str)
+                        if rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_GENERATE_FATAL:
+                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError01'], dictTValue)
+                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_COMPLETE_FATAL:
+                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError02'], dictTValue)
+                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.INPUT_RAW_INVALID:
+                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError03'], dictTValue)
+                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.INPUT_CHILD_PARA_INVALID:
+                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError04'], dictTValue)
+                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.INPUT_NODE_OPERATION_INVALID:
+                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError05'], dictTValue)
+                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_OPERATION_INVALID:
+                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError06'], dictTValue)
+                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_STACK_EMPTY:
+                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError07'], dictTValue)
+                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_LEFT_VAL_INVALID:
+                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError08'], dictTValue)
+                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_RIGHT_VAL_INVALID:
+                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError09'], dictTValue)
+                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_SUB_VAL_INVALID:
+                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError10'], dictTValue)
+                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_EXTREME_VAL_INVALID:
+                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError11'], dictTValue)
+                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_REPLACE_FATAL:
+                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError12'], dictTValue)
+                        else:
+                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollErrorUnknown'], dictTValue)
+                        tmp_reply_str_1 += OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollErrorHelp'], dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str_1)
+                        return
+                if 1 == flag_multiRollDetail \
+                and flag_roll_mode in ['r', 'rx']:
+                    tmp_reply_str_1 = '\n'.join(tmp_reply_str_1_list)
+                    if rd_para_str_new == None:
+                        rd_para_str_new = rd_para_str
+                    elif rd_para_str_new == '':
+                        rd_para_str_new = rd_para_str
+                    dictTValue['tRollResult'] = rd_para_str_new + '= \n' + tmp_reply_str_1
+                else:
+                    dictTValue['tRollResult'] = rd_para_str + '=' + tmp_reply_str_1
             if rd_reason_str != None:
                 dictTValue['tRollReason'] = rd_reason_str
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollWithReason'], dictTValue)
