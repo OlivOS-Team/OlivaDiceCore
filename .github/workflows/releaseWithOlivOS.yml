@@ -16,7 +16,6 @@ jobs:
           mkdir ./unpack
           mkdir ./release
           curl -L https://github.com/OlivOS-Team/OlivOS/releases/latest/download/OlivOS-Win.zip -o ./download/OlivOS-Win.zip
-          curl -L https://github.com/OlivOS-Team/OlivOS/releases/latest/download/OlivOS-Win-32.zip -o ./download/OlivOS-Win-32.zip
           curl -L https://github.com/OlivOS-Team/OlivOS/releases/latest/download/OlivOS-Win-32-old.zip -o ./download/OlivOS-Win-32-old.zip
           curl -L https://github.com/OlivOS-Team/OlivOS/releases/latest/download/OlivOS-Linux.zip -o ./download/OlivOS-Linux.zip
           echo "Download OlivOS Done"
@@ -24,20 +23,16 @@ jobs:
           cp ./download/ChanceCustom.opk ./unpack
           echo "Download ChanceCustom Done"
           mkdir ./unpack/OlivOS
-          mkdir ./unpack/OlivOS-Win-32
+          mkdir ./unpack/OlivOS-Win-32-old
           mkdir ./unpack/OlivOS-Linux
           unzip ./download/OlivOS-Win.zip -d ./unpack/OlivOS
-          unzip ./download/OlivOS-Win-32.zip -d ./unpack/OlivOS-Win-32
           unzip ./download/OlivOS-Win-32-old.zip -d ./unpack/OlivOS-Win-32-old
           unzip ./download/OlivOS-Linux.zip -d ./unpack/OlivOS-Linux
           cp -r ./unpack/OlivOS ./release/OlivOS
-          cp -r ./unpack/OlivOS-Win-32 ./release/OlivOS-Win-32
           cp -r ./unpack/OlivOS-Win-32-old ./release/OlivOS-Win-32-old
           cp -r ./unpack/OlivOS-Linux ./release/OlivOS-Linux
           mkdir ./release/OlivOS/plugin
           mkdir ./release/OlivOS/plugin/app
-          mkdir ./release/OlivOS-Win-32/plugin
-          mkdir ./release/OlivOS-Win-32/plugin/app
           mkdir ./release/OlivOS-Win-32-old/plugin
           mkdir ./release/OlivOS-Win-32-old/plugin/app
           mkdir ./release/OlivOS-Linux/plugin
@@ -102,7 +97,6 @@ jobs:
           echo "Pack OlivaDiceNativeGUI Done"
           cd ../
           cp ./unpack/*.opk ./release/OlivOS/plugin/app
-          cp ./unpack/*.opk ./release/OlivOS-Win-32/plugin/app
           cp ./unpack/*.opk ./release/OlivOS-Win-32-old/plugin/app
           cp ./unpack/*.opk ./release/OlivOS-Linux/plugin/app
           echo "Setup OlivaDice Done"
@@ -110,10 +104,6 @@ jobs:
         with:
           name: OlivaDice-OlivOS-Win
           path: ./release/OlivOS
-      - uses: actions/upload-artifact@v3
-        with:
-          name: OlivaDice-OlivOS-Win-32
-          path: ./release/OlivOS-Win-32
       - uses: actions/upload-artifact@v3
         with:
           name: OlivaDice-OlivOS-Win-32-old
