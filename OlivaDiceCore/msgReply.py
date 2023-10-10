@@ -3301,15 +3301,18 @@ def unity_reply(plugin_event, Proc):
                 tmp_range_list = range(0, tmp_roll_count)
                 for tmp_i in tmp_range_list:
                     tmp_res_list_this = []
+                    tmp_sum = 0
                     for tmp_i_this in range(6):
                         rd_this = OlivaDiceCore.onedice.RD('4d6k3')
                         rd_this.roll()
                         if rd_this.resError is None:
-                            tmp_res_list_this.append(str(rd_this.resInt))
-                    tmp_res_list.append(tmp_res_list_this)
+                            tmp_res_list_this.append('%2d' % rd_this.resInt)
+                            tmp_sum += rd_this.resInt
+                    tmp_res_list.append([tmp_res_list_this, '%3d' % tmp_sum])
+            print(tmp_res_list)
             dictTValue['tPcTempName'] = tmp_pcCardTemplateName
-            dictTValue['tPcInitResult'] = '\n[%s]' % ']\n['.join([
-                ', '.join(tmp_res_list_this)
+            dictTValue['tPcInitResult'] = '\n' + '\n'.join([
+                '[%s] : %s' % (', '.join(tmp_res_list_this[0]), tmp_res_list_this[1])
                 for tmp_res_list_this in tmp_res_list
             ])
             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInit'], dictTValue)
