@@ -4,14 +4,14 @@
             "main": {
                 "command": "OlivaDiceCore",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceCore.opk",
-                "svn": 1068,
-                "version": "3.3.18"
+                "svn": 1070,
+                "version": "3.3.20"
             },
             "github": {
                 "command": "OlivaDiceCore",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceCore/releases/latest/download/OlivaDiceCore.opk",
-                "svn": 1068,
-                "version": "3.3.18"
+                "svn": 1070,
+                "version": "3.3.20"
             }
         },
         "OlivaDiceJoy": {
@@ -60,28 +60,28 @@
             "main": {
                 "command": "OlivaDiceOdyssey",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceOdyssey.opk",
-                "svn": 8,
-                "version": "3.0.7"
+                "svn": 10,
+                "version": "3.0.9"
             },
             "github": {
                 "command": "OlivaDiceOdyssey",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceOdyssey/releases/latest/download/OlivaDiceOdyssey.opk",
-                "svn": 8,
-                "version": "3.0.7"
+                "svn": 10,
+                "version": "3.0.9"
             }
         },
         "OlivaDiceNativeGUI": {
             "main": {
                 "command": "OlivaDiceNativeGUI",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceNativeGUI.opk",
-                "svn": 15,
-                "version": "3.0.14"
+                "svn": 16,
+                "version": "3.0.15"
             },
             "github": {
                 "command": "OlivaDiceNativeGUI",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceNativeGUI/releases/latest/download/OlivaDiceNativeGUI.opk",
-                "svn": 15,
-                "version": "3.0.14"
+                "svn": 16,
+                "version": "3.0.15"
             }
         },
         "ChanceCustom": {
