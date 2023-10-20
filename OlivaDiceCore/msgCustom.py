@@ -329,7 +329,18 @@ dictAdapterMapper = {
             'walleq_show_Android_Watch': 'WalleQ.aWatch',
             'walleq_show_iPad': 'WalleQ.iPad',
             'walleq_show_iMac': 'WalleQ.iMac',
-            'walleq_show_old': 'WalleQ'
+            'walleq_show_old': 'WalleQ',
+            'red': 'Chronocat'
+        }
+    },
+    'kaiheila': {
+        'kaiheila_link': {
+            'default': 'KOOK'
+        }
+    },
+    'terminal': {
+        'terminal_link': {
+            'ff14': 'FF14'
         }
     }
 }
