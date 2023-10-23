@@ -25,6 +25,7 @@ import re
 import traceback
 import random
 import codecs
+import traceback
 
 # 兼容OlivOS 0.10.2及以下版本
 try:
@@ -158,6 +159,40 @@ def setDeckIndex(bot_hash:str, deck_name:str, deck_data:dict):
         ]
         OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash][deck_name] = deck_data_list
 
+# 清空牌堆数据
+def cleanDeck():
+    for botInfo in OlivaDiceCore.drawCardData.dictDeck:
+        OlivaDiceCore.drawCardData.dictDeck[botInfo] = {}
+    for botInfo in OlivaDiceCore.drawCardData.dictDeckIndex:
+        OlivaDiceCore.drawCardData.dictDeckIndex[botInfo] = {}
+
+# 重载牌堆数据
+# 目前不会清理牌堆帮助文档数据，所以如果发生牌堆减量将会导致牌堆帮助文档数据残留
+# 但是我认为这个问题不明显，用户应该不在意 By lunzhiPenxil
+def reloadDeck():
+    if OlivaDiceCore.data.global_Proc != None \
+    and 'bot_info_dict' in OlivaDiceCore.data.global_Proc.Proc_data:
+        bot_info_dict = OlivaDiceCore.data.global_Proc.Proc_data['bot_info_dict']
+        cleanDeck()
+        initDeck(bot_info_dict = bot_info_dict)
+
+# 根除指定牌堆
+def removeDeck(deckName:str, botHash:str):
+    checkDict = {
+        'deckclassic': ['json', 'json5'],
+        'deckyaml': ['yaml'],
+        'deckexcel': ['xlsx', 'xls']
+    }
+    for deck_type in ['deckclassic', 'deckyaml', 'deckexcel']:
+        for dfix in checkDict.get(deck_type, []):
+            deck_path = os.path.join('plugin', 'data', 'OlivaDice', botHash, 'extend', deck_type, deckName + '.' + dfix)
+            if os.path.exists(deck_path):
+                try:
+                    os.remove(deck_path)
+                except Exception as e:
+                    traceback.print_exc()
+
+# 初始化牌堆数据
 def initDeck(bot_info_dict):
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
     dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
@@ -209,6 +244,7 @@ def initDeck(bot_info_dict):
                 elif customDeckFile.endswith('.json'):
                     customDeckFile = customDeckFile.rstrip('.json')
                 setDeckIndex(botHash, customDeckFile, obj_Deck_this)
+                setDeckIndex('unity', customDeckFile, obj_Deck_this)
     # 全局 yaml 牌堆
     obj_Deck_this = None
     releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity/extend/deckyaml')
@@ -244,6 +280,7 @@ def initDeck(bot_info_dict):
                     botHash = bot_info_dict_this
                     OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this_new)
                     setDeckIndex(botHash, customDeckFile_deckName, obj_Deck_this_new)
+                    setDeckIndex('unity', customDeckFile_deckName, obj_Deck_this_new)
     # 全局 excel 牌堆
     releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity/extend/deckexcel')
     customDeckDir = OlivaDiceCore.data.dataDirRoot + '/unity/extend/deckexcel'
@@ -294,6 +331,7 @@ def initDeck(bot_info_dict):
                     botHash = bot_info_dict_this
                     OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this_new)
                     setDeckIndex(botHash, customDeckFile_new, obj_Deck_this_new)
+                    setDeckIndex('unity', customDeckFile_new, obj_Deck_this_new)
     # 全局 牌堆 日志
     if botHash != None:
         obj_Deck_this_count_total = len(OlivaDiceCore.drawCardData.dictDeck[botHash])

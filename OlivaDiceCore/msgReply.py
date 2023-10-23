@@ -3309,7 +3309,6 @@ def unity_reply(plugin_event, Proc):
                             tmp_res_list_this.append('%2d' % rd_this.resInt)
                             tmp_sum += rd_this.resInt
                     tmp_res_list.append([tmp_res_list_this, '%3d' % tmp_sum])
-            print(tmp_res_list)
             dictTValue['tPcTempName'] = tmp_pcCardTemplateName
             dictTValue['tPcInitResult'] = '\n' + '\n'.join([
                 '[%s] : %s' % (', '.join(tmp_res_list_this[0]), tmp_res_list_this[1])
@@ -5371,3 +5370,8 @@ def getMatchWordStartRight(data, key, ignoreCase = True):
         if tmp_data[:len(tmp_key)] == tmp_key:
             tmp_output_str = data[len(key):]
     return tmp_output_str
+
+def isdigitSafe(data):
+    if data in '0123456789':
+        return True
+    return False
