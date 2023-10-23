@@ -377,9 +377,9 @@ def unity_reply(plugin_event, Proc):
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
                     tmp_reast_str = tmp_reast_str.rstrip(' ')
                     tmp_group_id = None
-                    if tmp_reast_str.isdigit():
+                    if tmp_reast_str.isdecimal():
                         tmp_group_id = int(tmp_reast_str)
-                    elif tmp_reast_str[0] == '-' and tmp_reast_str[1:].isdigit():
+                    elif tmp_reast_str[0] == '-' and tmp_reast_str[1:].isdecimal():
                         tmp_group_id = (-1) * int(tmp_reast_str[1:])
                     if tmp_group_id != None:
                         dictTValue['tGroupId'] = str(tmp_group_id)
@@ -717,7 +717,7 @@ def unity_reply(plugin_event, Proc):
                             flag_action = 'show'
                     if tmp_listValue != None:
                         if type(tmp_listValue) == str:
-                            if tmp_listValue.isdigit() and tmp_editKey in [
+                            if tmp_listValue.isdecimal() and tmp_editKey in [
                                 'noticeGroupList',
                                 'masterList'
                             ] and plugin_event.platform['platform'] not in [
@@ -744,7 +744,7 @@ def unity_reply(plugin_event, Proc):
                                 if plugin_event.platform['platform'] not in [
                                     'qqGuild'
                                 ]:
-                                    if tmp_listValue_new.isdigit():
+                                    if tmp_listValue_new.isdecimal():
                                         tmp_listValue = int(tmp_listValue_new)
                                     else:
                                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleSetInvalid'], dictTValue)
@@ -886,7 +886,7 @@ def unity_reply(plugin_event, Proc):
                     elif len(tmp_reast_list) > 1:
                         tmp_reast_str = ' '.join(tmp_reast_list[1:])
                         tmp_reast_str = tmp_reast_str.strip(' ')
-                        if not tmp_reast_str.isdigit():
+                        if not tmp_reast_str.isdecimal():
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleSetInvalid'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
                             return
@@ -2836,7 +2836,7 @@ def unity_reply(plugin_event, Proc):
                             hagId = tmp_hagID
                         )
                         dictTValue['tSkillName'] = tmp_skill_name
-                        if tmp_skill_value_update.isdigit() or len(rd_para.resDetail) > 100:
+                        if tmp_skill_value_update.isdecimal() or len(rd_para.resDetail) > 100:
                             if len(str(tmp_skill_value_new)) > 50:
                                 dictTValue['tSkillUpdate'] = '%s=%s' % (rd_para_str, str(tmp_skill_value_new)[:50] + '...')
                             else:
@@ -2989,7 +2989,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 tmp_reast_str = tmp_reast_str.rstrip()
                 tmp_switch_setcoc = None
-                if tmp_reast_str.isdigit():
+                if tmp_reast_str.isdecimal():
                     tmp_switch_setcoc = int(tmp_reast_str)
                     if tmp_switch_setcoc not in [0, 1, 2, 3, 4, 5, 6]:
                         tmp_switch_setcoc = None
@@ -3246,7 +3246,7 @@ def unity_reply(plugin_event, Proc):
             if tmp_roll_count_str == '':
                 tmp_roll_count_str = None
             if tmp_roll_count_str != None:
-                if tmp_roll_count_str.isdigit():
+                if tmp_roll_count_str.isdecimal():
                     tmp_roll_count = int(tmp_roll_count_str)
             if tmp_roll_count > 0 and tmp_roll_count <= 10:
                 tmp_res_list = []
@@ -3294,7 +3294,7 @@ def unity_reply(plugin_event, Proc):
             if tmp_roll_count_str == '':
                 tmp_roll_count_str = None
             if tmp_roll_count_str != None:
-                if tmp_roll_count_str.isdigit():
+                if tmp_roll_count_str.isdecimal():
                     tmp_roll_count = int(tmp_roll_count_str)
             if tmp_roll_count > 0 and tmp_roll_count <= 10:
                 tmp_res_list = []
@@ -3329,7 +3329,7 @@ def unity_reply(plugin_event, Proc):
             tmp_san_val = None
             if len(tmp_reast_str_list) >= 2:
                 tmp_sancheck_para = tmp_reast_str_list[0]
-                if tmp_reast_str_list[-1].isdigit():
+                if tmp_reast_str_list[-1].isdecimal():
                     tmp_san_val = tmp_reast_str_list[-1]
             elif len(tmp_reast_str_list) == 1:
                 tmp_sancheck_para = tmp_reast_str
@@ -3771,7 +3771,7 @@ def unity_reply(plugin_event, Proc):
             if len(tmp_reast_str) > 2:
                 tmp_reast_str_list_1 = tmp_reast_str.split('#')
                 if len(tmp_reast_str_list_1) > 1:
-                    if tmp_reast_str_list_1[0].isdigit():
+                    if tmp_reast_str_list_1[0].isdecimal():
                         roll_times_count = int(tmp_reast_str_list_1[0])
                         if roll_times_count > 10:
                             roll_times_count = 10
@@ -3795,7 +3795,7 @@ def unity_reply(plugin_event, Proc):
                     flag_bp_type = 2
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'P')
                 if flag_bp_type != 0 and len(tmp_reast_str) > 1:
-                    if tmp_reast_str[0].isdigit():
+                    if tmp_reast_str[0].isdecimal():
                         flag_bp_count = tmp_reast_str[0]
                         tmp_reast_str = tmp_reast_str[1:]
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -4379,7 +4379,7 @@ def unity_reply(plugin_event, Proc):
             if len(tmp_reast_str) > 2:
                 tmp_reast_str_list_1 = tmp_reast_str.split('#')
                 if len(tmp_reast_str_list_1) > 1:
-                    if tmp_reast_str_list_1[0].isdigit():
+                    if tmp_reast_str_list_1[0].isdecimal():
                         roll_times_count = int(tmp_reast_str_list_1[0])
                         if roll_times_count > 10:
                             roll_times_count = 10
@@ -5203,7 +5203,7 @@ def getExpression(
                 tmp_total_offset = 0
                 flag_have_para = True
                 break
-            if flag_not_hit and data[tmp_total_offset].isdigit():
+            if flag_not_hit and data[tmp_total_offset].isdecimal():
                 flag_not_hit = False
             if flag_not_hit and not reverse:
                 for idx in range(tmp_total_offset, len(data)):
@@ -5299,7 +5299,7 @@ def getNumberPara(data, reverse = False):
                 tmp_total_offset = 0
                 flag_have_para = True
                 break
-            if isdigitSafe(data[tmp_total_offset]):
+            if data[tmp_total_offset].isdecimal():
                 pass
             else:
                 flag_have_para = True
@@ -5324,7 +5324,7 @@ def getToNumberPara(data):
             if tmp_total_offset >= len(data):
                 flag_have_para = True
                 break
-            if isdigitSafe(data[tmp_total_offset]):
+            if data[tmp_total_offset].isdecimal():
                 flag_have_para = True
                 break
             if data[tmp_total_offset] == ' ':
