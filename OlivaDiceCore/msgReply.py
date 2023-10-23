@@ -5299,7 +5299,7 @@ def getNumberPara(data, reverse = False):
                 tmp_total_offset = 0
                 flag_have_para = True
                 break
-            if data[tmp_total_offset].isdigit():
+            if isdigitSafe(data[tmp_total_offset]):
                 pass
             else:
                 flag_have_para = True
@@ -5324,7 +5324,7 @@ def getToNumberPara(data):
             if tmp_total_offset >= len(data):
                 flag_have_para = True
                 break
-            if data[tmp_total_offset].isdigit():
+            if isdigitSafe(data[tmp_total_offset]):
                 flag_have_para = True
                 break
             if data[tmp_total_offset] == ' ':
