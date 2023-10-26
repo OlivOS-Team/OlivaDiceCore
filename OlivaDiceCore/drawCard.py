@@ -179,13 +179,13 @@ def reloadDeck():
 # 根除指定牌堆
 def removeDeck(deckName:str, botHash:str):
     checkDict = {
-        'deckclassic': ['json', 'json5'],
-        'deckyaml': ['yaml'],
-        'deckexcel': ['xlsx', 'xls']
+        'deckclassic': ['.json', '.json5'],
+        'deckyaml': ['', '.yaml'],
+        'deckexcel': ['.xlsx', '.xls']
     }
     for deck_type in ['deckclassic', 'deckyaml', 'deckexcel']:
         for dfix in checkDict.get(deck_type, []):
-            deck_path = os.path.join('plugin', 'data', 'OlivaDice', botHash, 'extend', deck_type, deckName + '.' + dfix)
+            deck_path = os.path.join('plugin', 'data', 'OlivaDice', botHash, 'extend', deck_type, deckName + dfix)
             if os.path.exists(deck_path):
                 try:
                     os.remove(deck_path)
