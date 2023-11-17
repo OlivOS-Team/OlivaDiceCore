@@ -94,6 +94,7 @@ def unity_init_after(plugin_event, Proc):
             'fanbook_poll',
             'dodo_link',
             'qqGuild_link',
+            'qqGuildv2_link',
             'kaiheila_link'
         ]:
             plugin_event_fake = OlivOS.API.Event(
