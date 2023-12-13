@@ -32,14 +32,14 @@
             "main": {
                 "command": "OlivaDiceLogger",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceLogger.opk",
-                "svn": 16,
-                "version": "3.0.8"
+                "svn": 17,
+                "version": "3.0.9"
             },
             "github": {
                 "command": "OlivaDiceLogger",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceLogger/releases/latest/download/OlivaDiceLogger.opk",
-                "svn": 16,
-                "version": "3.0.8"
+                "svn": 17,
+                "version": "3.0.9"
             }
         },
         "OlivaDiceMaster": {
