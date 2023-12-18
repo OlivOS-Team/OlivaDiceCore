@@ -331,7 +331,10 @@ dictAdapterMapper = {
             'walleq_show_iMac': 'WalleQ.iMac',
             'walleq_show_old': 'WalleQ',
             'red': 'Chronocat',
-            'opqbot_default': 'OPQBot'
+            'opqbot_default': 'OPQBot',
+            'opqbot_auto': 'OPQBot',
+            'opqbot_port': 'OPQBot',
+            'opqbot_port_old': 'OPQBot'
         }
     },
     'kaiheila': {
