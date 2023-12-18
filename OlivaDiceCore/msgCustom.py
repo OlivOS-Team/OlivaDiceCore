@@ -339,7 +339,8 @@ dictAdapterMapper = {
     },
     'kaiheila': {
         'kaiheila_link': {
-            'default': 'KOOK'
+            'default': 'KOOK',
+            'text': 'KOOK'
         }
     },
     'terminal': {
