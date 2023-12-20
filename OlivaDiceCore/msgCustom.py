@@ -311,6 +311,8 @@ dictAdapterMapper = {
     'qq': {
         'onebot': {
             'default': 'onebotV11',
+            'shamrock_default': 'Shamrock',
+            'para_default': 'onebotV11',
             'onebotV12': 'onebotV12',
             'gocqhttp': 'GoCqhttp',
             'gocqhttp_hide': 'GoCqhttp',
