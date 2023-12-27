@@ -53,6 +53,7 @@ dictUserConfigNoteDefault = {
     'RDRecord' : None,
     'RDRecordInt' : 0,
     'RDRecordRaw' : '',
+    'RDRecordSkillInt' : None,
     'userName' : '用户',
     'trustLevel' : 0,
     'trustRank' : 1000

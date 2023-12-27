@@ -3912,6 +3912,13 @@ def unity_reply(plugin_event, Proc):
                             'roll': rd_para.resInt,
                             'skill': tmp_skill_value
                         }
+                        OlivaDiceCore.onediceOverride.saveRDDataUser(
+                            data = rd_para,
+                            botHash = plugin_event.bot_info.hash,
+                            userId = tmp_pc_id,
+                            platform = tmp_pc_platform,
+                            skillValue = tmp_skill_value
+                        )
                         tmpSkillCheckType = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
                             dictRuleTempData,
                             tmp_Template,

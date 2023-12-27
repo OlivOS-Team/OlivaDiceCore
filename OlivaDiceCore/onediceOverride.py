@@ -113,7 +113,7 @@ class RD(OlivaDiceCore.onedice.RD):
 
 OlivaDiceCore.onedice.RD = RD
 
-def saveRDDataUser(data:OlivaDiceCore.onedice.RD, botHash:str, userId:str, platform:str):
+def saveRDDataUser(data:OlivaDiceCore.onedice.RD, botHash:str, userId:str, platform:str, skillValue:'None|int' = None):
     if data.resError == None:
         OlivaDiceCore.userConfig.setUserConfigByKey(
             userConfigKey = 'RDRecord',
@@ -137,6 +137,14 @@ def saveRDDataUser(data:OlivaDiceCore.onedice.RD, botHash:str, userId:str, platf
         OlivaDiceCore.userConfig.setUserConfigByKey(
             userConfigKey = 'RDRecordInt',
             userConfigValue = tmp_resInt,
+            botHash = botHash,
+            userId = userId,
+            userType = 'user',
+            platform = platform
+        )
+        OlivaDiceCore.userConfig.setUserConfigByKey(
+            userConfigKey = 'RDRecordSkillInt',
+            userConfigValue = skillValue,
             botHash = botHash,
             userId = userId,
             userType = 'user',
