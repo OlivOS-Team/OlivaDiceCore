@@ -70,6 +70,20 @@
                 "version": "3.0.11"
             }
         },
+        "OlivaStoryCore": {
+            "main": {
+                "command": "OlivaStoryCore",
+                "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaStoryCore.opk",
+                "svn": 1,
+                "version": "3.0.0"
+            },
+            "github": {
+                "command": "OlivaStoryCore",
+                "opk_path": "https://github.com/OlivOS-Team/OlivaStoryCore/releases/latest/download/OlivaStoryCore.opk",
+                "svn": 1,
+                "version": "3.0.0"
+            }
+        },
         "OlivaDiceNativeGUI": {
             "main": {
                 "command": "OlivaDiceNativeGUI",
