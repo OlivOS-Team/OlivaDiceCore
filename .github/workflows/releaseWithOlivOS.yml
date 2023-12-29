@@ -63,6 +63,11 @@ jobs:
         with:
           repository: OlivOS-Team/OlivaDiceOdyssey
           path: ./download/OlivaDiceOdyssey/
+      - name: Checkout OlivaStoryCore
+        uses: actions/checkout@v3
+        with:
+          repository: OlivOS-Team/OlivaStoryCore
+          path: ./download/OlivaStoryCore/
       - name: Checkout OlivaDiceNativeGUI
         uses: actions/checkout@v3
         with:
@@ -91,6 +96,10 @@ jobs:
           zip -r ../../../unpack/OlivaDiceOdyssey.opk ./
           cd ../../
           echo "Pack OlivaDiceOdyssey Done"
+          cd ./OlivaStoryCore/OlivaStoryCore
+          zip -r ../../../unpack/OlivaStoryCore.opk ./
+          cd ../../
+          echo "Pack OlivaStoryCore Done"
           cd ./OlivaDiceNativeGUI/OlivaDiceNativeGUI
           zip -r ../../../unpack/OlivaDiceNativeGUI.opk ./
           cd ../../
