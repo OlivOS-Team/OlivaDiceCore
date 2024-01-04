@@ -43,6 +43,13 @@ Multi-Platform Dice Robot For TRPG Based on OlivOS
 Latest Stable Release: [![GitHub release](https://img.shields.io/github/release/OlivOS-Team/OlivaDiceCore.svg)](https://github.com/OlivOS-Team/OlivaDiceCore/releases) [![GitHub Release Date](https://img.shields.io/github/release-date/OlivOS-Team/OlivaDiceCore.svg)](https://github.com/OlivOS-Team/OlivaDiceCore/releases)  
 Latest Release: [![GitHub release](https://img.shields.io/github/release-pre/OlivOS-Team/OlivaDiceCore.svg)](https://github.com/OlivOS-Team/OlivaDiceCore/releases) [![GitHub Release Date](https://img.shields.io/github/release-date-pre/OlivOS-Team/OlivaDiceCore.svg)](https://github.com/OlivOS-Team/OlivaDiceCore/releases)  
 
+## 欢迎点击Star，这对我们将带来很大的支持！
+[![Star History Chart](https://api.star-history.com/svg?repos=OlivOS-Team/OlivOS,OlivOS-Team/OlivaDiceCore&type=Date)](https://star-history.com/#OlivOS-Team/OlivOS&OlivOS-Team/OlivaDiceCore&Date)
+
+[前往项目主页](https://github.com/OlivOS-Team/OlivaDiceCore)
+
+[前往OlivOS项目主页](https://github.com/OlivOS-Team/OlivOS)
+
 ## 开发者
 
 维护者: 仑质
