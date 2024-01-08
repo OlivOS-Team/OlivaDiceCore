@@ -30,6 +30,7 @@ dictHelpDocTemp = {
 (如群内有多个骰子,请在@后追加指令)
 [.help指令] 查看指令列表
 [.help管理] 查看管理指令
+[.help手册] 查看完整手册
 [.help链接] 查看源码文档
 [.help更新] 查看更新日志
 有问题请联系(请优先加群)
@@ -127,6 +128,9 @@ OlivaDice核心模块
 .helpdoc [帮助名称] [帮助内容]  设置帮助文档
 .helpdoc [帮助名称]  删除帮助文档
 .censor [add/del/+/-] [敏感词]  新增/删除敏感词''',
+
+    '手册': '''查看手册:
+https://wiki.dice.center''',
 
     '链接': '''查看源码: https://github.com/OlivOS-Team/OlivaDiceCore
 OneDice标准: https://github.com/OlivOS-Team/onedice
