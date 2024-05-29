@@ -336,7 +336,11 @@ dictAdapterMapper = {
             'opqbot_default': 'OPQBot',
             'opqbot_auto': 'OPQBot',
             'opqbot_port': 'OPQBot',
-            'opqbot_port_old': 'OPQBot'
+            'opqbot_port_old': 'OPQBot',
+            'napcat': 'NapCat',
+            'napcat_hide': 'NapCat',
+            'napcat_show': 'NapCat',
+            'napcat_show_old': 'NapCat'
         }
     },
     'kaiheila': {
