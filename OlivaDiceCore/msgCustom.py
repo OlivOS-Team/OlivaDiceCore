@@ -340,6 +340,7 @@ dictAdapterMapper = {
             'napcat': 'NapCat',
             'napcat_hide': 'NapCat',
             'napcat_show': 'NapCat',
+            'napcat_show_new': 'NapCat',
             'napcat_show_old': 'NapCat'
         }
     },
