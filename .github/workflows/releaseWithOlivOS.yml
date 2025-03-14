@@ -109,15 +109,15 @@ jobs:
           cp ./unpack/*.opk ./release/OlivOS-Win-32-old/plugin/app
           cp ./unpack/*.opk ./release/OlivOS-Linux/plugin/app
           echo "Setup OlivaDice Done"
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: OlivaDice-OlivOS-Win
           path: ./release/OlivOS
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: OlivaDice-OlivOS-Win-32-old
           path: ./release/OlivOS-Win-32-old
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: OlivaDice-OlivOS-Linux
           path: ./release/OlivOS-Linux
