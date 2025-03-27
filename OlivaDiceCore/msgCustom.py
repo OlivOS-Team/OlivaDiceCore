@@ -213,6 +213,7 @@ dictStrConst = {
     'strToBeMaster' : '请使用[{tInitMasterKey}]指令以获取Master权限',
     'strInitTempDataError' : '加载人物卡模板文件[{tInitDataName}]至[{tName}]时出错，请检查文件格式或软件版本！',
     'strInitData' : '[{tInitDataCount}]条[{tInitDataType}]数据已加载',
+    'strInitDataError' : '[{tInitDataType}]数据[{tInitDataName}]加载时出错，正在尝试兼容，错误原因：{tResult}',
     'strInitDeckData' : '[{tInitDataCount}]个牌堆已加载至[{tName}]，共[{tInitDataCount01}]个牌堆',
     'strInitDeckDataError' : '加载牌堆文件[{tInitDataName}]至[{tName}]时出错，请检查文件格式或软件版本！',
     'strInitCensor' : '已生成敏感词检测模型至[{tName}]，耗时[{tInitDataTimeCost}]，包含[{tInitDataCount}]条',

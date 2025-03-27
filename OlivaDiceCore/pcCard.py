@@ -159,13 +159,33 @@ def dataPcCardLoad(hostKey, pcHash):
         dictPcCardTemplate[hostKey][pcHash] = {}
     if os.path.exists(pcCardDataPath):
         with open(pcCardDataPath, 'r', encoding = 'utf-8') as pcCardDataPath_f:
-            dictPcCardData[hostKey][pcHash] = json.loads(pcCardDataPath_f.read())
+            dictPcCardData[hostKey][pcHash] = jsonDataLoadSafe(pcCardDataPath_f, "人物卡", f"{hostKey}/{pcHash}")
     if os.path.exists(pcCardSelectionPath):
         with open(pcCardSelectionPath, 'r', encoding = 'utf-8') as pcCardSelectionPath_f:
-            dictPcCardSelection[hostKey][pcHash] = json.loads(pcCardSelectionPath_f.read())
+            dictPcCardSelection[hostKey][pcHash] = jsonDataLoadSafe(pcCardSelectionPath_f, "人物卡", f"{hostKey}/{pcHash}")
     if os.path.exists(pcCardTemplatePath):
         with open(pcCardTemplatePath, 'r', encoding = 'utf-8') as pcCardTemplatePath_f:
-            dictPcCardTemplate[hostKey][pcHash] = json.loads(pcCardTemplatePath_f.read())
+            dictPcCardTemplate[hostKey][pcHash] = jsonDataLoadSafe(pcCardTemplatePath_f, "人物卡", f"{hostKey}/{pcHash}")
+
+def jsonDataLoadSafe(data_f, dataType, dataName):
+    tmp_userConfigData = {}
+    try:
+        tmp_userConfigData = json.loads(data_f.read())
+    except Exception as e:
+        tmp_log_str =  OlivaDiceCore.msgCustomManager.formatReplySTRConst(
+            OlivaDiceCore.msgCustom.dictStrConst['strInitDataError'],
+            {
+                "tInitDataType": dataType,
+                "tInitDataName": dataName,
+                "tResult": str(e)
+            }
+        )
+        OlivaDiceCore.msgReply.globalLog(3, tmp_log_str, [
+            ('OlivaDice', 'default'),
+            ('Init', 'default')
+        ])
+        tmp_userConfigData = {}
+    return tmp_userConfigData
 
 def dataPcCardLoadAll():
     dataDirRoot_this = OlivaDiceCore.data.dataDirRoot

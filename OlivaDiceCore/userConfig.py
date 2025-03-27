@@ -238,7 +238,27 @@ def readUserConfig():
             if userHash not in dictUserConfigData:
                 dictUserConfigData[userHash] = {}
             with open(userConfigDataPath, 'r', encoding = 'utf-8') as userConfigDataPath_f:
-                dictUserConfigData[userHash] = json.loads(userConfigDataPath_f.read())
+                dictUserConfigData[userHash] = jsonDataLoadSafe(userConfigDataPath_f, "用户记录", f"{botHash}/{userConfigDataFile}")
+
+def jsonDataLoadSafe(data_f, dataType, dataName):
+    tmp_userConfigData = {}
+    try:
+        tmp_userConfigData = json.loads(data_f.read())
+    except Exception as e:
+        tmp_log_str =  OlivaDiceCore.msgCustomManager.formatReplySTRConst(
+            OlivaDiceCore.msgCustom.dictStrConst['strInitDataError'],
+            {
+                "tInitDataType": dataType,
+                "tInitDataName": dataName,
+                "tResult": str(e)
+            }
+        )
+        OlivaDiceCore.msgReply.globalLog(3, tmp_log_str, [
+            ('OlivaDice', 'default'),
+            ('Init', 'default')
+        ])
+        tmp_userConfigData = {}
+    return tmp_userConfigData
 
 def dataUserConfigLoadAll():
     global gMsgCount
