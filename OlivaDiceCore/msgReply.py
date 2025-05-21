@@ -2029,13 +2029,13 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnPcCardNone'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
             return
-        elif isMatchWordStart(tmp_reast_str, 'st', isCommand = True):
+        elif isMatchWordStart(tmp_reast_str, ['st','pc'], isCommand = True):
             tmp_pc_name = None
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
             tmp_reply_str_1 = ''
-            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'st')
+            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['st','pc'])
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             tmp_skill_name = None
             tmp_skill_value = None
@@ -2992,14 +2992,14 @@ def unity_reply(plugin_event, Proc):
                 tmp_switch_setcoc = None
                 if tmp_reast_str.isdecimal():
                     tmp_switch_setcoc = int(tmp_reast_str)
-                    if tmp_switch_setcoc not in [0, 1, 2, 3, 4, 5, 6]:
+                    if tmp_switch_setcoc not in [0, 1, 2, 3, 4, 5, 6, 7]:
                         tmp_switch_setcoc = None
                 if tmp_switch_setcoc != None:
                     tmp_templateName = 'COC7'
                     tmp_templateRuleName = 'default'
-                    if tmp_switch_setcoc in [0, 1, 2, 3, 4, 5]:
+                    if tmp_switch_setcoc in [0, 1, 2, 3, 4, 5, 6]:
                         tmp_templateRuleName = 'C%s' % str(tmp_switch_setcoc)
-                    elif tmp_switch_setcoc == 6:
+                    elif tmp_switch_setcoc == 7:
                         tmp_templateRuleName = 'DeltaGreen'
                     OlivaDiceCore.userConfig.setUserConfigByKey(
                         userConfigKey = 'groupTemplate',
@@ -3735,7 +3735,7 @@ def unity_reply(plugin_event, Proc):
                 return
         elif isMatchWordStart(tmp_reast_str, 'rav', isCommand = True):
             OlivaDiceCore.msgReplyModel.replyRAV_command(plugin_event, Proc, valDict)
-        elif isMatchWordStart(tmp_reast_str, 'ra', isCommand = True) or isMatchWordStart(tmp_reast_str, 'rc', isCommand = True):
+        elif isMatchWordStart(tmp_reast_str, ['ra','rc'], isCommand = True):
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
@@ -3756,10 +3756,8 @@ def unity_reply(plugin_event, Proc):
                 userConfigKey = 'groupTemplateRule',
                 botHash = plugin_event.bot_info.hash
             )
-            if isMatchWordStart(tmp_reast_str, 'ra'):
-                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'ra')
-            elif isMatchWordStart(tmp_reast_str, 'rc'):
-                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rc')
+            if isMatchWordStart(tmp_reast_str, ['ra','rc']):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['ra','rc'])
             else:
                 return
             tmp_skill_name = None
@@ -5346,37 +5344,51 @@ def getToNumberPara(data):
             tmp_output_str_2 = data
     return [tmp_output_str_1, tmp_output_str_2]
 
-def isMatchWordStart(data, key, ignoreCase = True, fullMatch = False, isCommand = False):
+def isMatchWordStart(data, key, ignoreCase=True, fullMatch=False, isCommand=False):
     tmp_output = False
     flag_skip = False
     tmp_data = data
-    tmp_key = key
-    if isCommand == True:
+    tmp_keys = [key] if isinstance(key, str) else key  # 统一处理为列表
+
+    if isCommand:
         if 'replyContextFliter' in OlivaDiceCore.crossHook.dictHookList:
-            if tmp_key in OlivaDiceCore.crossHook.dictHookList['replyContextFliter']:
-                tmp_output = False
-                flag_skip = True
+            for k in tmp_keys:
+                if k in OlivaDiceCore.crossHook.dictHookList['replyContextFliter']:
+                    tmp_output = False
+                    flag_skip = True
+                    break  # 只要有一个命中过滤规则，就跳过匹配
+
     if not flag_skip:
         if ignoreCase:
             tmp_data = tmp_data.lower()
-            tmp_key = tmp_key.lower()
-        if not fullMatch and len(tmp_data) >= len(tmp_key):
-            if tmp_data[:len(tmp_key)] == tmp_key:
+            tmp_keys = [k.lower() for k in tmp_keys]  # 全部转为小写
+
+        for tmp_key in tmp_keys:
+            if not fullMatch and len(tmp_data) >= len(tmp_key):
+                if tmp_data[:len(tmp_key)] == tmp_key:
+                    tmp_output = True
+                    break  # 只要有一个匹配成功，就返回 True
+            elif fullMatch and tmp_data == tmp_key:
                 tmp_output = True
-        elif fullMatch and tmp_data == tmp_key:
-            tmp_output = True
+                break  # 完全匹配同理
+
     return tmp_output
 
-def getMatchWordStartRight(data, key, ignoreCase = True):
+def getMatchWordStartRight(data, key, ignoreCase=True):
     tmp_output_str = ''
     tmp_data = data
-    tmp_key = key
+    tmp_keys = [key] if isinstance(key, str) else key  # 统一处理为列表
+
     if ignoreCase:
         tmp_data = tmp_data.lower()
-        tmp_key = tmp_key.lower()
-    if len(tmp_data) > len(tmp_key):
-        if tmp_data[:len(tmp_key)] == tmp_key:
-            tmp_output_str = data[len(key):]
+        tmp_keys = [k.lower() for k in tmp_keys]  # 全部转为小写
+
+    for tmp_key in tmp_keys:
+        if len(tmp_data) > len(tmp_key):
+            if tmp_data[:len(tmp_key)] == tmp_key:
+                tmp_output_str = data[len(tmp_key):]  # 返回匹配后的剩余部分
+                break  # 只要有一个匹配成功，就返回结果
+
     return tmp_output_str
 
 def isdigitSafe(data):
