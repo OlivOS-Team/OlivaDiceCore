@@ -362,11 +362,14 @@ def replyRAV_command(plugin_event, Proc, valDict):
         ):
             tmp_skill_name = tmp_reast_str_para.data[0].data['text'].strip(' ')
             tmp_userID_1 = tmp_reast_str_para.data[1].data['id']
-            plres_1 = plugin_event.get_stranger_info(tmp_userID_1)
-            if plres_1['active']:
-                dictTValue['tUserName01'] = res_1['data']['name']
-            else:
-                dictTValue['tUserName01'] = tmp_userID_1
+            tmp_userName01 = OlivaDiceCore.userConfig.getUserConfigByKey(
+                userId = tmp_userID_1,
+                userType = 'user',
+                platform = plugin_event.platform['platform'],
+                userConfigKey = 'userName',
+                botHash = plugin_event.bot_info.hash
+            )
+            dictTValue['tUserName01'] = tmp_userName01
             flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
                 userId = tmp_hagID,
                 userType = 'group',
@@ -508,7 +511,7 @@ def replyRAV_command(plugin_event, Proc, valDict):
                 if res_1['active']:
                     dictTValue['tName01'] = res_1['data']['name']
                 else:
-                    dictTValue['tName01'] = "对方"
+                    dictTValue['tName01'] = tmp_userName01
             dictTValue['tSkillName'] = tmp_skill_name
             if flag_rav_type == '0':
                 dictTValue['tRAVResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRAVResult01'], dictTValue)
