@@ -369,7 +369,11 @@ def replyRAV_command(plugin_event, Proc, valDict):
                 userConfigKey = 'userName',
                 botHash = plugin_event.bot_info.hash
             )
-            dictTValue['tUserName01'] = tmp_userName01
+            plres_1 = plugin_event.get_stranger_info(tmp_userID_1)
+            if plres_1['active']:
+                dictTValue['tUserName01'] = res_1['data']['name']
+            else:
+                dictTValue['tUserName01'] = tmp_userName01
             flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
                 userId = tmp_hagID,
                 userType = 'group',
