@@ -191,7 +191,7 @@ dictStrCustom = {
     'strPcSkillCheckFate11' : '[+8 传奇]',
     'strPcSkillCheckNope' : '需要解释',
     'strPcSkillCheckError' : '发生错误',
-    'strRAVShow' : '[{tName}]与[{tName01}]进行技能[{tSkillName}]对抗:\n[{tSkillValue} - {tSkillValue01}]\n[{tName}]: {tRollResult} {tSkillCheckReasult}\n[{tName01}]: {tRollResult01} {tSkillCheckReasult01}\n{tRAVResult}',
+    'strRAVShow' : '[{tName}]与[{tName01}]进行技能[{tSkillName}]和技能[{tSkillName01}]的对抗:\n[{tSkillValue} - {tSkillValue01}]\n[{tName}]: {tRollResult} {tSkillCheckReasult}\n[{tName01}]: {tRollResult01} {tSkillCheckReasult01}\n{tRAVResult}',
     'strRAVResult01' : '前者，[{tName}]获胜',
     'strRAVResult02' : '后者，[{tName01}]获胜',
     'strRAVResult03' : '平手',

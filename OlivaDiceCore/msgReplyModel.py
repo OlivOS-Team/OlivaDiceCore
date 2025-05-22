@@ -345,7 +345,8 @@ def replyRAV_command(plugin_event, Proc, valDict):
     tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'rav')
     tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
     tmp_reast_str = tmp_reast_str.rstrip(' ')
-    tmp_skill_name = None
+    tmp_skill_name_0 = None
+    tmp_skill_name_1 = None
     tmp_skill_value_0 = None
     tmp_skill_value_1 = None
     tmp_userID_1 = None
@@ -354,79 +355,74 @@ def replyRAV_command(plugin_event, Proc, valDict):
     tmp_Template = None
     tmp_TemplateRuleName = 'default'
     tmp_reast_str_para = OlivOS.messageAPI.Message_templet('old_string', tmp_reast_str)
+    
     if len(tmp_reast_str_para.data) >= 2:
         if (
             type(tmp_reast_str_para.data[0]) == OlivOS.messageAPI.PARA.text
         ) and (
-            type(tmp_reast_str_para.data[1]) == OlivOS.messageAPI.PARA.at
+            type(tmp_reast_str_para.data[-1]) == OlivOS.messageAPI.PARA.at
         ):
-            tmp_skill_name = tmp_reast_str_para.data[0].data['text'].strip(' ')
-            tmp_userID_1 = tmp_reast_str_para.data[1].data['id']
+            tmp_userID_1 = tmp_reast_str_para.data[-1].data['id']
             tmp_userName01 = OlivaDiceCore.userConfig.getUserConfigByKey(
-                userId = tmp_userID_1,
-                userType = 'user',
-                platform = plugin_event.platform['platform'],
-                userConfigKey = 'userName',
-                botHash = plugin_event.bot_info.hash
+                userId=tmp_userID_1,
+                userType='user',
+                platform=plugin_event.platform['platform'],
+                userConfigKey='userName',
+                botHash=plugin_event.bot_info.hash
             )
             plres_1 = plugin_event.get_stranger_info(tmp_userID_1)
             if plres_1['active']:
-                dictTValue['tUserName01'] = res_1['data']['name']
+                dictTValue['tUserName01'] = plres_1['data']['name']
             else:
                 dictTValue['tUserName01'] = tmp_userName01
+            
+            # 解析技能名
+            text_parts = tmp_reast_str_para.data[0].data['text'].strip().split()
+            if len(text_parts) >= 2:
+                # 格式1: .rav 技能名1 技能名2 @别人
+                tmp_skill_name_0 = text_parts[0]
+                tmp_skill_name_1 = text_parts[1]
+            else:
+                # 格式2: .rav 技能名 @别人
+                tmp_skill_name_0 = text_parts[0]
+                tmp_skill_name_1 = text_parts[0]
+            
             flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
-                userId = tmp_hagID,
-                userType = 'group',
-                platform = tmp_platform,
-                userConfigKey = 'groupTemplate',
-                botHash = plugin_event.bot_info.hash
+                userId=tmp_hagID,
+                userType='group',
+                platform=tmp_platform,
+                userConfigKey='groupTemplate',
+                botHash=plugin_event.bot_info.hash
             )
             flag_groupTemplateRule = OlivaDiceCore.userConfig.getUserConfigByKey(
-                userId = tmp_hagID,
-                userType = 'group',
-                platform = tmp_platform,
-                userConfigKey = 'groupTemplateRule',
-                botHash = plugin_event.bot_info.hash
+                userId=tmp_hagID,
+                userType='group',
+                platform=tmp_platform,
+                userConfigKey='groupTemplateRule',
+                botHash=plugin_event.bot_info.hash
             )
-            tmp_pcHash_0 = OlivaDiceCore.pcCard.getPcHash(
-                tmp_userID,
-                tmp_platform
-            )
-            tmp_pcHash_1 = OlivaDiceCore.pcCard.getPcHash(
-                tmp_userID_1,
-                tmp_platform
-            )
+            
+            tmp_pcHash_0 = OlivaDiceCore.pcCard.getPcHash(tmp_userID, tmp_platform)
+            tmp_pcHash_1 = OlivaDiceCore.pcCard.getPcHash(tmp_userID_1, tmp_platform)
+            
             tmp_skill_value_0 = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
-                tmp_pcHash_0,
-                tmp_skill_name,
-                hagId = tmp_hagID
+                tmp_pcHash_0, tmp_skill_name_0, hagId=tmp_hagID
             )
-            tmp_pc_name_0 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
-                tmp_pcHash_0,
-                tmp_hagID
-            )
+            tmp_pc_name_0 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash_0, tmp_hagID)
+            
             tmp_skill_value_1 = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
-                tmp_pcHash_1,
-                tmp_skill_name,
-                hagId = tmp_hagID
+                tmp_pcHash_1, tmp_skill_name_1, hagId=tmp_hagID
             )
-            tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
-                tmp_pcHash_1,
-                tmp_hagID
-            )
+            tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash_1, tmp_hagID)
             if tmp_pc_name_0 != None:
                 dictTValue['tName'] = tmp_pc_name_0
-                tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
-                    tmp_pcHash_0,
-                    tmp_pc_name_0
-                )
+                tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash_0, tmp_pc_name_0)
                 if flag_groupTemplate != None:
                     tmp_template_name = flag_groupTemplate
                 if tmp_template_name != None:
                     tmp_Template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
                 tmp_template_rule_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateRuleKey(
-                    tmp_pcHash_0,
-                    tmp_pc_name_0
+                    tmp_pcHash_0, tmp_pc_name_0
                 )
                 if flag_groupTemplateRule != None:
                     tmp_template_rule_name = flag_groupTemplateRule
@@ -435,7 +431,7 @@ def replyRAV_command(plugin_event, Proc, valDict):
             
             if tmp_pc_name_1 != None:
                 dictTValue['tName01'] = tmp_pc_name_1
-            
+                
             rd_para_str = '1D100'
             tmp_customDefault = None
             if tmp_Template != None:
@@ -443,7 +439,7 @@ def replyRAV_command(plugin_event, Proc, valDict):
                     rd_para_str = tmp_Template['mainDice']
                 if 'customDefault' in tmp_Template:
                     tmp_customDefault = tmp_Template['customDefault']
-            
+                    
             rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_customDefault)
             rd_para.roll()
             tmpSkillCheckType = None
@@ -452,20 +448,17 @@ def replyRAV_command(plugin_event, Proc, valDict):
                 'skill': tmp_skill_value_0
             }
             if rd_para.resError == None:
-                if rd_para.resError == None:
-                    if rd_para.resDetail == None or rd_para.resDetail == '':
-                        dictTValue['tRollResult'] = '%s=%d' % (rd_para_str, rd_para.resInt)
-                    else:
-                        dictTValue['tRollResult'] = '%s=%s=%d' % (rd_para_str, rd_para.resDetail, rd_para.resInt)
+                if rd_para.resDetail == None or rd_para.resDetail == '':
+                    dictTValue['tRollResult'] = '%s=%d' % (rd_para_str, rd_para.resInt)
+                else:
+                    dictTValue['tRollResult'] = '%s=%s=%d' % (rd_para_str, rd_para.resDetail, rd_para.resInt)
                 dictTValue['tSkillValue'] = str(tmp_skill_value_0)
                 dictRuleTempData = {
                     'roll': rd_para.resInt,
                     'skill': tmp_skill_value_0
                 }
                 tmpSkillCheckType = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
-                    dictRuleTempData,
-                    tmp_Template,
-                    tmp_TemplateRuleName
+                    dictRuleTempData, tmp_Template, tmp_TemplateRuleName
                 )
             rd_para_1 = OlivaDiceCore.onedice.RD(rd_para_str, tmp_customDefault)
             rd_para_1.roll()
@@ -475,20 +468,17 @@ def replyRAV_command(plugin_event, Proc, valDict):
                 'skill': tmp_skill_value_1
             }
             if rd_para_1.resError == None:
-                if rd_para_1.resError == None:
-                    if rd_para_1.resDetail == None or rd_para_1.resDetail == '':
-                        dictTValue['tRollResult01'] = '%s=%d' % (rd_para_str, rd_para_1.resInt)
-                    else:
-                        dictTValue['tRollResult01'] = '%s=%s=%d' % (rd_para_str, rd_para_1.resDetail, rd_para_1.resInt)
+                if rd_para_1.resDetail == None or rd_para_1.resDetail == '':
+                    dictTValue['tRollResult01'] = '%s=%d' % (rd_para_str, rd_para_1.resInt)
+                else:
+                    dictTValue['tRollResult01'] = '%s=%s=%d' % (rd_para_str, rd_para_1.resDetail, rd_para_1.resInt)
                 dictTValue['tSkillValue01'] = str(tmp_skill_value_1)
                 dictRuleTempData_1 = {
                     'roll': rd_para_1.resInt,
                     'skill': tmp_skill_value_1
                 }
                 tmpSkillCheckType_1 = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
-                    dictRuleTempData_1,
-                    tmp_Template,
-                    tmp_TemplateRuleName
+                    dictRuleTempData_1, tmp_Template, tmp_TemplateRuleName
                 )
             flag_rav_type = 'x'
             if tmpSkillCheckType in dictSkillCheckRank and tmpSkillCheckType_1 in dictSkillCheckRank:
@@ -516,7 +506,8 @@ def replyRAV_command(plugin_event, Proc, valDict):
                     dictTValue['tName01'] = res_1['data']['name']
                 else:
                     dictTValue['tName01'] = tmp_userName01
-            dictTValue['tSkillName'] = tmp_skill_name
+            dictTValue['tSkillName'] = tmp_skill_name_0
+            dictTValue['tSkillName01'] = tmp_skill_name_1
             if flag_rav_type == '0':
                 dictTValue['tRAVResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRAVResult01'], dictTValue)
             elif flag_rav_type == '1':
