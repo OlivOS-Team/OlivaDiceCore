@@ -284,46 +284,46 @@ dictSkillCheckRank = {
     OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_FAIL: 0
 }
 
-def get_SkillCheckReasult(tmpSkillCheckType, dictStrCustom):
+def get_SkillCheckResult(tmpSkillCheckType, dictStrCustom, dictTValue):
     res = dictStrCustom['strPcSkillCheckError']
     if tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS:
-        res = dictStrCustom['strPcSkillCheckSucceed']
+        res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckSucceed'], dictTValue)
     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_HARD_SUCCESS:
-        res = dictStrCustom['strPcSkillCheckHardSucceed']
+        res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckHardSucceed'], dictTValue)
     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_EXTREME_HARD_SUCCESS:
-        res = dictStrCustom['strPcSkillCheckExtremeHardSucceed']
+        res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckExtremeHardSucceed'], dictTValue)
     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_SUCCESS:
-        res = dictStrCustom['strPcSkillCheckGreatSucceed']
+        res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckGreatSucceed'], dictTValue)
     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FAIL:
-        res = dictStrCustom['strPcSkillCheckFailed']
+        res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckFailed'], dictTValue)
     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_FAIL:
-        res = dictStrCustom['strPcSkillCheckGreatFailed']
+        res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckGreatFailed'], dictTValue)
     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_01:
-        res = dictStrCustom['strPcSkillCheckFate01']
+        res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckFate01'], dictTValue)
     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_02:
-        res = dictStrCustom['strPcSkillCheckFate02']
+        res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckFate02'], dictTValue)
     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_03:
-        res = dictStrCustom['strPcSkillCheckFate03']
+        res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckFate03'], dictTValue)
     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_04:
-        res = dictStrCustom['strPcSkillCheckFate04']
+        res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckFate04'], dictTValue)
     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_05:
-        res = dictStrCustom['strPcSkillCheckFate05']
+        res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckFate05'], dictTValue)
     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_06:
-        res = dictStrCustom['strPcSkillCheckFate06']
+        res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckFate06'], dictTValue)
     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_07:
-        res = dictStrCustom['strPcSkillCheckFate07']
+        res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckFate07'], dictTValue)
     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_08:
-        res = dictStrCustom['strPcSkillCheckFate08']
+        res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckFate08'], dictTValue)
     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_09:
-        res = dictStrCustom['strPcSkillCheckFate09']
+        res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckFate09'], dictTValue)
     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_10:
-        res = dictStrCustom['strPcSkillCheckFate10']
+        res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckFate10'], dictTValue)
     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FATE_11:
-        res = dictStrCustom['strPcSkillCheckFate11']
+        res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckFate11'], dictTValue)
     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_NOPE:
-        res = dictStrCustom['strPcSkillCheckNope']
+        res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckNope'], dictTValue)
     else:
-        res = dictStrCustom['strPcSkillCheckError']
+        res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckError'], dictTValue)
     return res
 
 
@@ -335,6 +335,8 @@ def replyRAV_command(plugin_event, Proc, valDict):
     tmp_platform = valDict['tmp_platform']
     dictTValue = valDict['dictTValue']
     dictStrCustom = valDict['dictStrCustom']
+    dictTValue['tUserName'] = plugin_event.data.sender['name']
+    dictTValue['tUserName01'] = "对方"
     replyMsg = OlivaDiceCore.msgReply.replyMsg
 
     if tmp_hagID == None:
@@ -360,6 +362,11 @@ def replyRAV_command(plugin_event, Proc, valDict):
         ):
             tmp_skill_name = tmp_reast_str_para.data[0].data['text'].strip(' ')
             tmp_userID_1 = tmp_reast_str_para.data[1].data['id']
+            plres_1 = plugin_event.get_stranger_info(tmp_userID_1)
+            if plres_1['active']:
+                dictTValue['tUserName01'] = res_1['data']['name']
+            else:
+                dictTValue['tUserName01'] = tmp_userID_1
             flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
                 userId = tmp_hagID,
                 userType = 'group',
@@ -478,8 +485,8 @@ def replyRAV_command(plugin_event, Proc, valDict):
                 )
             flag_rav_type = 'x'
             if tmpSkillCheckType in dictSkillCheckRank and tmpSkillCheckType_1 in dictSkillCheckRank:
-                dictTValue['tSkillCheckReasult'] = get_SkillCheckReasult(tmpSkillCheckType, dictStrCustom)
-                dictTValue['tSkillCheckReasult01'] = get_SkillCheckReasult(tmpSkillCheckType_1, dictStrCustom)
+                dictTValue['tSkillCheckReasult'] = get_SkillCheckResult(tmpSkillCheckType, dictStrCustom, dictTValue)
+                dictTValue['tSkillCheckReasult01'] = get_SkillCheckResult(tmpSkillCheckType_1, dictStrCustom, dictTValue)
                 if dictSkillCheckRank[tmpSkillCheckType] > dictSkillCheckRank[tmpSkillCheckType_1]:
                     flag_rav_type = '0'
                 elif dictSkillCheckRank[tmpSkillCheckType] < dictSkillCheckRank[tmpSkillCheckType_1]:
@@ -500,6 +507,8 @@ def replyRAV_command(plugin_event, Proc, valDict):
                 res_1 = plugin_event.get_stranger_info(tmp_userID_1)
                 if res_1['active']:
                     dictTValue['tName01'] = res_1['data']['name']
+                else:
+                    dictTValue['tName01'] = "对方"
             dictTValue['tSkillName'] = tmp_skill_name
             if flag_rav_type == '0':
                 dictTValue['tRAVResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRAVResult01'], dictTValue)

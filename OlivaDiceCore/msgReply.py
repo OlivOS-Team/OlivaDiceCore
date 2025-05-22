@@ -151,6 +151,7 @@ def unity_reply(plugin_event, Proc):
     OlivaDiceCore.userConfig.setMsgCount()
     dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
+    dictTValue['tUserName'] = plugin_event.data.sender['name']
     dictTValue['tName'] = plugin_event.data.sender['name']
     dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]
     dictGValue = OlivaDiceCore.msgCustom.dictGValue
@@ -394,7 +395,7 @@ def unity_reply(plugin_event, Proc):
                     tmp_user_platform = plugin_event.platform['platform']
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'remote')
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
-                    if isMatchWordStart(tmp_reast_str, 'on') or isMatchWordStart(tmp_reast_str, 'off'):
+                    if isMatchWordStart(tmp_reast_str, ['on', 'off']):
                         flag_will_enable = None
                         flag_now_enable = None
                         tmp_userId_in = None
@@ -681,7 +682,7 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleAppend'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                     return
-                elif isMatchWordStart(tmp_reast_str, 'notice') or isMatchWordStart(tmp_reast_str, 'master'):
+                elif isMatchWordStart(tmp_reast_str, ['notice', 'master']):
                     tmp_editKey = None
                     if isMatchWordStart(tmp_reast_str, 'notice'):
                         tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'notice')
@@ -968,7 +969,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 tmp_reast_str = tmp_reast_str.strip(' ')
                 bot_hash = plugin_event.bot_info.hash
-                if isMatchWordStart(tmp_reast_str, 'add') or isMatchWordStart(tmp_reast_str, '+'):
+                if isMatchWordStart(tmp_reast_str, ['add', '+']):
                     if isMatchWordStart(tmp_reast_str, 'add'):
                         tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'add')
                     elif isMatchWordStart(tmp_reast_str, '+'):
@@ -988,7 +989,7 @@ def unity_reply(plugin_event, Proc):
                     OlivaDiceCore.censorAPI.patchCensorByHash(bot_hash, tmp_censor_list)
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strAddCensor'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
-                elif isMatchWordStart(tmp_reast_str, 'del') or isMatchWordStart(tmp_reast_str, '-'):
+                elif isMatchWordStart(tmp_reast_str, ['del', '-']):
                     if isMatchWordStart(tmp_reast_str, 'del'):
                         tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'del')
                     elif isMatchWordStart(tmp_reast_str, '-'):
@@ -1514,7 +1515,7 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strObListNone'], dictTValue)
                     if tmp_reply_str != None:
                         replyMsg(plugin_event, tmp_reply_str)
-            elif flag_solo or isMatchWordStart(tmp_reast_str, 'exit', fullMatch = True) or isMatchWordStart(tmp_reast_str, 'join', fullMatch = True):
+            elif flag_solo or isMatchWordStart(tmp_reast_str, ['exit', 'join'], fullMatch = True):
                 if flag_is_from_group:
                     flag_ob_will_enable = None
                     if isMatchWordStart(tmp_reast_str, 'exit', fullMatch = True):
@@ -2688,7 +2689,7 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcTempRuleError'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
-            elif isMatchWordStart(tmp_reast_str, 'note') or isMatchWordStart(tmp_reast_str, 'rec'):
+            elif isMatchWordStart(tmp_reast_str, ['note', 'rec']):
                 flag_mode = 'note'
                 keyName = 'noteRecord'
                 if isMatchWordStart(tmp_reast_str, 'note'):
@@ -3121,7 +3122,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
             return
-        elif isMatchWordStart(tmp_reast_str, 'settemp', isCommand = True) or isMatchWordStart(tmp_reast_str, 'setrule', isCommand = True):
+        elif isMatchWordStart(tmp_reast_str, ['settemp','setrule'], isCommand = True):
             if flag_is_from_group:
                 flag_settemp_mode = 'settemp'
                 tmp_templateName_input = 'default'
@@ -3220,8 +3221,7 @@ def unity_reply(plugin_event, Proc):
             return
         elif isMatchWordStart(tmp_reast_str, 'set', isCommand = True):
             OlivaDiceCore.msgReplyModel.replySET_command(plugin_event, Proc, valDict)
-        elif isMatchWordStart(tmp_reast_str, 'coc6', isCommand = True) \
-        or isMatchWordStart(tmp_reast_str, 'coc', isCommand = True) \
+        elif isMatchWordStart(tmp_reast_str, ['coc6','coc'], isCommand = True) \
         or (False and isMatchWordStart(tmp_reast_str, 'dnd', isCommand = True)):
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
@@ -4308,12 +4308,7 @@ def unity_reply(plugin_event, Proc):
         #    return
         elif isMatchWordStart(tmp_reast_str, 'rr', isCommand = True):
             OlivaDiceCore.msgReplyModel.replyRR_command(plugin_event, Proc, valDict)
-        elif isMatchWordStart(tmp_reast_str, 'rx', isCommand = True) \
-        or isMatchWordStart(tmp_reast_str, 'r', isCommand = True) \
-        or isMatchWordStart(tmp_reast_str, 'ww', isCommand = True) \
-        or isMatchWordStart(tmp_reast_str, 'w', isCommand = True) \
-        or isMatchWordStart(tmp_reast_str, 'dxx', isCommand = True) \
-        or isMatchWordStart(tmp_reast_str, 'dx', isCommand = True):
+        elif isMatchWordStart(tmp_reast_str, ['rx', 'r', 'ww', 'w', 'dxx', 'dx'], isCommand = True):
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
@@ -5348,7 +5343,7 @@ def isMatchWordStart(data, key, ignoreCase=True, fullMatch=False, isCommand=Fals
     tmp_output = False
     flag_skip = False
     tmp_data = data
-    tmp_keys = [key] if isinstance(key, str) else key  # 统一处理为列表
+    tmp_keys = [key] if isinstance(key, str) else key
 
     if isCommand:
         if 'replyContextFliter' in OlivaDiceCore.crossHook.dictHookList:
@@ -5356,38 +5351,38 @@ def isMatchWordStart(data, key, ignoreCase=True, fullMatch=False, isCommand=Fals
                 if k in OlivaDiceCore.crossHook.dictHookList['replyContextFliter']:
                     tmp_output = False
                     flag_skip = True
-                    break  # 只要有一个命中过滤规则，就跳过匹配
+                    break
 
     if not flag_skip:
         if ignoreCase:
             tmp_data = tmp_data.lower()
-            tmp_keys = [k.lower() for k in tmp_keys]  # 全部转为小写
+            tmp_keys = [k.lower() for k in tmp_keys]
 
         for tmp_key in tmp_keys:
             if not fullMatch and len(tmp_data) >= len(tmp_key):
                 if tmp_data[:len(tmp_key)] == tmp_key:
                     tmp_output = True
-                    break  # 只要有一个匹配成功，就返回 True
+                    break
             elif fullMatch and tmp_data == tmp_key:
                 tmp_output = True
-                break  # 完全匹配同理
+                break
 
     return tmp_output
 
 def getMatchWordStartRight(data, key, ignoreCase=True):
     tmp_output_str = ''
     tmp_data = data
-    tmp_keys = [key] if isinstance(key, str) else key  # 统一处理为列表
+    tmp_keys = [key] if isinstance(key, str) else key
 
     if ignoreCase:
         tmp_data = tmp_data.lower()
-        tmp_keys = [k.lower() for k in tmp_keys]  # 全部转为小写
+        tmp_keys = [k.lower() for k in tmp_keys]
 
     for tmp_key in tmp_keys:
         if len(tmp_data) > len(tmp_key):
             if tmp_data[:len(tmp_key)] == tmp_key:
-                tmp_output_str = data[len(tmp_key):]  # 返回匹配后的剩余部分
-                break  # 只要有一个匹配成功，就返回结果
+                tmp_output_str = data[len(tmp_key):]
+                break
 
     return tmp_output_str
 
