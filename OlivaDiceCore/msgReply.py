@@ -365,6 +365,19 @@ def unity_reply(plugin_event, Proc):
         elif flag_messageFliterMode == 3 and flag_is_from_group:
             flag_messageFliterModeDisabled = True
         valDict['tmp_reast_str'] = tmp_reast_str
+        # 默认tName是人物卡名
+        tmp_pc_id = plugin_event.data.user_id
+        tmp_pc_platform = plugin_event.platform['platform']
+        tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
+            tmp_pc_id,
+            tmp_pc_platform
+        )
+        tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
+            tmp_pcHash,
+            tmp_hagID
+        )
+        if tmp_pc_name_1 != None:
+            dictTValue['tName'] = tmp_pc_name_1
         if flag_is_from_master:
             if isMatchWordStart(tmp_reast_str, 'master'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'master')
