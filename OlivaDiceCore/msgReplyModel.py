@@ -357,11 +357,7 @@ def replyRAV_command(plugin_event, Proc, valDict):
     tmp_reast_str_para = OlivOS.messageAPI.Message_templet('old_string', tmp_reast_str)
     
     if len(tmp_reast_str_para.data) >= 2:
-        if (
-            type(tmp_reast_str_para.data[0]) == OlivOS.messageAPI.PARA.text
-        ) and (
-            type(tmp_reast_str_para.data[-1]) == OlivOS.messageAPI.PARA.at
-        ):
+        if type(tmp_reast_str_para.data[-1]) == OlivOS.messageAPI.PARA.at:
             tmp_userID_1 = tmp_reast_str_para.data[-1].data['id']
             tmp_userName01 = OlivaDiceCore.userConfig.getUserConfigByKey(
                 userId=tmp_userID_1,
@@ -376,16 +372,68 @@ def replyRAV_command(plugin_event, Proc, valDict):
             else:
                 dictTValue['tUserName01'] = tmp_userName01
             
-            # 解析技能名
-            text_parts = tmp_reast_str_para.data[0].data['text'].strip().split()
-            if len(text_parts) >= 2:
-                # 格式1: .rav 技能名1 技能名2 @别人
-                tmp_skill_name_0 = text_parts[0]
-                tmp_skill_name_1 = text_parts[1]
-            else:
-                # 格式2: .rav 技能名 @别人
-                tmp_skill_name_0 = text_parts[0]
-                tmp_skill_name_1 = text_parts[0]
+            # 收集所有文本部分
+            text_parts = []
+            for item in tmp_reast_str_para.data:
+                if type(item) == OlivOS.messageAPI.PARA.text:
+                    text_parts.extend(item.data['text'].strip().split())
+            
+            # 解析技能名和数值
+            if len(text_parts) > 0:
+                # 支持以下格式:
+                # 1. .rav 技能名1 数值1 技能名2 数值1 @其他人
+                # 2. .rav 技能名1 数值1 技能名2 @其他人
+                # 3. .rav 技能名1 技能名2 数值2 @其他人
+                # 4. .rav 技能名1 技能名2 @其他人
+                # 5. .rav 技能名1 @其他人
+                
+                # 先尝试提取所有数字
+                numbers = []
+                words = []
+                for part in text_parts:
+                    if part.isdigit():
+                        numbers.append(int(part))
+                    else:
+                        words.append(part)
+                
+                # 根据数字数量决定解析方式
+                if len(numbers) == 2:
+                    # 格式1
+                    if len(words) == 2:
+                        tmp_skill_name_0 = words[0]
+                        tmp_skill_value_0 = numbers[0]
+                        tmp_skill_name_1 = words[1]
+                        tmp_skill_value_1 = numbers[1]
+                elif len(numbers) == 1:
+                    # 格式2、3或6
+                    if len(words) == 2:
+                        # 检查数字位置
+                        num_pos = text_parts.index(str(numbers[0]))
+                        if num_pos == 1:
+                            # 格式2
+                            tmp_skill_name_0 = words[0]
+                            tmp_skill_value_0 = numbers[0]
+                            tmp_skill_name_1 = words[1]
+                        elif num_pos == 2:
+                            # 格式3
+                            tmp_skill_name_0 = words[0]
+                            tmp_skill_name_1 = words[1]
+                            tmp_skill_value_1 = numbers[0]
+                    elif len(words) == 1:
+                        # 格式6
+                        tmp_skill_name_0 = words[0]
+                        tmp_skill_name_1 = words[0]
+                        tmp_skill_value_0 = numbers[0]
+                else:
+                    # 格式4或5
+                    if len(words) == 2:
+                        # 格式4
+                        tmp_skill_name_0 = words[0]
+                        tmp_skill_name_1 = words[1]
+                    elif len(words) == 1:
+                        # 格式5
+                        tmp_skill_name_0 = words[0]
+                        tmp_skill_name_1 = words[0]
             
             flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
                 userId=tmp_hagID,
@@ -405,15 +453,19 @@ def replyRAV_command(plugin_event, Proc, valDict):
             tmp_pcHash_0 = OlivaDiceCore.pcCard.getPcHash(tmp_userID, tmp_platform)
             tmp_pcHash_1 = OlivaDiceCore.pcCard.getPcHash(tmp_userID_1, tmp_platform)
             
-            tmp_skill_value_0 = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
-                tmp_pcHash_0, tmp_skill_name_0, hagId=tmp_hagID
-            )
+            # 如果未从命令中获取数值，则从角色卡中获取
+            if tmp_skill_value_0 is None:
+                tmp_skill_value_0 = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
+                    tmp_pcHash_0, tmp_skill_name_0, hagId=tmp_hagID
+                )
             tmp_pc_name_0 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash_0, tmp_hagID)
             
-            tmp_skill_value_1 = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
-                tmp_pcHash_1, tmp_skill_name_1, hagId=tmp_hagID
-            )
+            if tmp_skill_value_1 is None:
+                tmp_skill_value_1 = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
+                    tmp_pcHash_1, tmp_skill_name_1, hagId=tmp_hagID
+                )
             tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash_1, tmp_hagID)
+            
             if tmp_pc_name_0 != None:
                 dictTValue['tName'] = tmp_pc_name_0
                 tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash_0, tmp_pc_name_0)
