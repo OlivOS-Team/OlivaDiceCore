@@ -386,10 +386,12 @@ def replyRAV_command(plugin_event, Proc, valDict):
                 # 3. .rav 技能名1 技能名2 数值2 @其他人
                 # 4. .rav 技能名1 技能名2 @其他人
                 # 5. .rav 技能名1 @其他人
+                # 6: .rav 技能名1 数值1 @其他人
                 
                 # 先尝试提取所有数字
                 numbers = []
                 words = []
+                is_rav = False
                 for part in text_parts:
                     if part.isdigit():
                         numbers.append(int(part))
@@ -404,6 +406,7 @@ def replyRAV_command(plugin_event, Proc, valDict):
                         tmp_skill_value_0 = numbers[0]
                         tmp_skill_name_1 = words[1]
                         tmp_skill_value_1 = numbers[1]
+                        is_rav = True
                 elif len(numbers) == 1:
                     # 格式2、3或6
                     if len(words) == 2:
@@ -414,160 +417,168 @@ def replyRAV_command(plugin_event, Proc, valDict):
                             tmp_skill_name_0 = words[0]
                             tmp_skill_value_0 = numbers[0]
                             tmp_skill_name_1 = words[1]
+                            is_rav = True
                         elif num_pos == 2:
                             # 格式3
                             tmp_skill_name_0 = words[0]
                             tmp_skill_name_1 = words[1]
                             tmp_skill_value_1 = numbers[0]
+                            is_rav = True
                     elif len(words) == 1:
                         # 格式6
                         tmp_skill_name_0 = words[0]
                         tmp_skill_name_1 = words[0]
                         tmp_skill_value_0 = numbers[0]
+                        tmp_skill_value_1 = numbers[0]
+                        is_rav = True
                 else:
                     # 格式4或5
                     if len(words) == 2:
                         # 格式4
                         tmp_skill_name_0 = words[0]
                         tmp_skill_name_1 = words[1]
+                        is_rav = True
                     elif len(words) == 1:
                         # 格式5
                         tmp_skill_name_0 = words[0]
                         tmp_skill_name_1 = words[0]
-            
-            flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
-                userId=tmp_hagID,
-                userType='group',
-                platform=tmp_platform,
-                userConfigKey='groupTemplate',
-                botHash=plugin_event.bot_info.hash
-            )
-            flag_groupTemplateRule = OlivaDiceCore.userConfig.getUserConfigByKey(
-                userId=tmp_hagID,
-                userType='group',
-                platform=tmp_platform,
-                userConfigKey='groupTemplateRule',
-                botHash=plugin_event.bot_info.hash
-            )
-            
-            tmp_pcHash_0 = OlivaDiceCore.pcCard.getPcHash(tmp_userID, tmp_platform)
-            tmp_pcHash_1 = OlivaDiceCore.pcCard.getPcHash(tmp_userID_1, tmp_platform)
-            
-            # 如果未从命令中获取数值，则从角色卡中获取
-            if tmp_skill_value_0 is None:
-                tmp_skill_value_0 = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
-                    tmp_pcHash_0, tmp_skill_name_0, hagId=tmp_hagID
+                        is_rav = True
+            if is_rav:
+                flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId=tmp_hagID,
+                    userType='group',
+                    platform=tmp_platform,
+                    userConfigKey='groupTemplate',
+                    botHash=plugin_event.bot_info.hash
                 )
-            tmp_pc_name_0 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash_0, tmp_hagID)
-            
-            if tmp_skill_value_1 is None:
-                tmp_skill_value_1 = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
-                    tmp_pcHash_1, tmp_skill_name_1, hagId=tmp_hagID
+                flag_groupTemplateRule = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId=tmp_hagID,
+                    userType='group',
+                    platform=tmp_platform,
+                    userConfigKey='groupTemplateRule',
+                    botHash=plugin_event.bot_info.hash
                 )
-            tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash_1, tmp_hagID)
-            
-            if tmp_pc_name_0 != None:
-                dictTValue['tName'] = tmp_pc_name_0
-                tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash_0, tmp_pc_name_0)
-                if flag_groupTemplate != None:
-                    tmp_template_name = flag_groupTemplate
-                if tmp_template_name != None:
-                    tmp_Template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
-                tmp_template_rule_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateRuleKey(
-                    tmp_pcHash_0, tmp_pc_name_0
-                )
-                if flag_groupTemplateRule != None:
-                    tmp_template_rule_name = flag_groupTemplateRule
-                if tmp_template_rule_name != None:
-                    tmp_TemplateRuleName = tmp_template_rule_name
-            
-            if tmp_pc_name_1 != None:
-                dictTValue['tName01'] = tmp_pc_name_1
-                
-            rd_para_str = '1D100'
-            tmp_customDefault = None
-            if tmp_Template != None:
-                if 'mainDice' in tmp_Template:
-                    rd_para_str = tmp_Template['mainDice']
-                if 'customDefault' in tmp_Template:
-                    tmp_customDefault = tmp_Template['customDefault']
-                    
-            rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_customDefault)
-            rd_para.roll()
-            tmpSkillCheckType = None
-            dictRuleTempData = {
-                'roll': 0,
-                'skill': tmp_skill_value_0
-            }
-            if rd_para.resError == None:
-                if rd_para.resDetail == None or rd_para.resDetail == '':
-                    dictTValue['tRollResult'] = '%s=%d' % (rd_para_str, rd_para.resInt)
-                else:
-                    dictTValue['tRollResult'] = '%s=%s=%d' % (rd_para_str, rd_para.resDetail, rd_para.resInt)
-                dictTValue['tSkillValue'] = str(tmp_skill_value_0)
+
+                tmp_pcHash_0 = OlivaDiceCore.pcCard.getPcHash(tmp_userID, tmp_platform)
+                tmp_pcHash_1 = OlivaDiceCore.pcCard.getPcHash(tmp_userID_1, tmp_platform)
+
+                # 如果未从命令中获取数值，则从角色卡中获取
+                if tmp_skill_value_0 is None:
+                    tmp_skill_value_0 = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
+                        tmp_pcHash_0, tmp_skill_name_0, hagId=tmp_hagID
+                    )
+                tmp_pc_name_0 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash_0, tmp_hagID)
+
+                if tmp_skill_value_1 is None:
+                    tmp_skill_value_1 = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
+                        tmp_pcHash_1, tmp_skill_name_1, hagId=tmp_hagID
+                    )
+                tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash_1, tmp_hagID)
+
+                if tmp_pc_name_0 != None:
+                    dictTValue['tName'] = tmp_pc_name_0
+                    tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash_0, tmp_pc_name_0)
+                    if flag_groupTemplate != None:
+                        tmp_template_name = flag_groupTemplate
+                    if tmp_template_name != None:
+                        tmp_Template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
+                    tmp_template_rule_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateRuleKey(
+                        tmp_pcHash_0, tmp_pc_name_0
+                    )
+                    if flag_groupTemplateRule != None:
+                        tmp_template_rule_name = flag_groupTemplateRule
+                    if tmp_template_rule_name != None:
+                        tmp_TemplateRuleName = tmp_template_rule_name
+
+                if tmp_pc_name_1 != None:
+                    dictTValue['tName01'] = tmp_pc_name_1
+
+                rd_para_str = '1D100'
+                tmp_customDefault = None
+                if tmp_Template != None:
+                    if 'mainDice' in tmp_Template:
+                        rd_para_str = tmp_Template['mainDice']
+                    if 'customDefault' in tmp_Template:
+                        tmp_customDefault = tmp_Template['customDefault']
+
+                rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_customDefault)
+                rd_para.roll()
+                tmpSkillCheckType = None
                 dictRuleTempData = {
-                    'roll': rd_para.resInt,
+                    'roll': 0,
                     'skill': tmp_skill_value_0
                 }
-                tmpSkillCheckType = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
-                    dictRuleTempData, tmp_Template, tmp_TemplateRuleName
-                )
-            rd_para_1 = OlivaDiceCore.onedice.RD(rd_para_str, tmp_customDefault)
-            rd_para_1.roll()
-            tmpSkillCheckType_1 = None
-            dictRuleTempData_1 = {
-                'roll': 0,
-                'skill': tmp_skill_value_1
-            }
-            if rd_para_1.resError == None:
-                if rd_para_1.resDetail == None or rd_para_1.resDetail == '':
-                    dictTValue['tRollResult01'] = '%s=%d' % (rd_para_str, rd_para_1.resInt)
-                else:
-                    dictTValue['tRollResult01'] = '%s=%s=%d' % (rd_para_str, rd_para_1.resDetail, rd_para_1.resInt)
-                dictTValue['tSkillValue01'] = str(tmp_skill_value_1)
+                if rd_para.resError == None:
+                    if rd_para.resDetail == None or rd_para.resDetail == '':
+                        dictTValue['tRollResult'] = '%s=%d' % (rd_para_str, rd_para.resInt)
+                    else:
+                        dictTValue['tRollResult'] = '%s=%s=%d' % (rd_para_str, rd_para.resDetail, rd_para.resInt)
+                    dictTValue['tSkillValue'] = str(tmp_skill_value_0)
+                    dictRuleTempData = {
+                        'roll': rd_para.resInt,
+                        'skill': tmp_skill_value_0
+                    }
+                    tmpSkillCheckType = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
+                        dictRuleTempData, tmp_Template, tmp_TemplateRuleName
+                    )
+                rd_para_1 = OlivaDiceCore.onedice.RD(rd_para_str, tmp_customDefault)
+                rd_para_1.roll()
+                tmpSkillCheckType_1 = None
                 dictRuleTempData_1 = {
-                    'roll': rd_para_1.resInt,
+                    'roll': 0,
                     'skill': tmp_skill_value_1
                 }
-                tmpSkillCheckType_1 = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
-                    dictRuleTempData_1, tmp_Template, tmp_TemplateRuleName
-                )
-            flag_rav_type = 'x'
-            if tmpSkillCheckType in dictSkillCheckRank and tmpSkillCheckType_1 in dictSkillCheckRank:
-                dictTValue['tSkillCheckReasult'] = get_SkillCheckResult(tmpSkillCheckType, dictStrCustom, dictTValue)
-                dictTValue['tSkillCheckReasult01'] = get_SkillCheckResult(tmpSkillCheckType_1, dictStrCustom, dictTValue)
-                if dictSkillCheckRank[tmpSkillCheckType] > dictSkillCheckRank[tmpSkillCheckType_1]:
-                    flag_rav_type = '0'
-                elif dictSkillCheckRank[tmpSkillCheckType] < dictSkillCheckRank[tmpSkillCheckType_1]:
-                    flag_rav_type = '1'
-                elif dictSkillCheckRank[tmpSkillCheckType] == dictSkillCheckRank[tmpSkillCheckType_1]:
-                    if dictRuleTempData['roll'] < dictRuleTempData_1['roll']:
+                if rd_para_1.resError == None:
+                    if rd_para_1.resDetail == None or rd_para_1.resDetail == '':
+                        dictTValue['tRollResult01'] = '%s=%d' % (rd_para_str, rd_para_1.resInt)
+                    else:
+                        dictTValue['tRollResult01'] = '%s=%s=%d' % (rd_para_str, rd_para_1.resDetail, rd_para_1.resInt)
+                    dictTValue['tSkillValue01'] = str(tmp_skill_value_1)
+                    dictRuleTempData_1 = {
+                        'roll': rd_para_1.resInt,
+                        'skill': tmp_skill_value_1
+                    }
+                    tmpSkillCheckType_1 = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
+                        dictRuleTempData_1, tmp_Template, tmp_TemplateRuleName
+                    )
+                flag_rav_type = 'x'
+                if tmpSkillCheckType in dictSkillCheckRank and tmpSkillCheckType_1 in dictSkillCheckRank:
+                    dictTValue['tSkillCheckReasult'] = get_SkillCheckResult(tmpSkillCheckType, dictStrCustom, dictTValue)
+                    dictTValue['tSkillCheckReasult01'] = get_SkillCheckResult(tmpSkillCheckType_1, dictStrCustom, dictTValue)
+                    if dictSkillCheckRank[tmpSkillCheckType] > dictSkillCheckRank[tmpSkillCheckType_1]:
                         flag_rav_type = '0'
-                    elif dictRuleTempData['roll'] > dictRuleTempData_1['roll']:
+                    elif dictSkillCheckRank[tmpSkillCheckType] < dictSkillCheckRank[tmpSkillCheckType_1]:
                         flag_rav_type = '1'
-                    elif dictRuleTempData['roll'] == dictRuleTempData_1['roll']:
-                        if dictRuleTempData['skill'] > dictRuleTempData_1['skill']:
+                    elif dictSkillCheckRank[tmpSkillCheckType] == dictSkillCheckRank[tmpSkillCheckType_1]:
+                        if dictRuleTempData['roll'] < dictRuleTempData_1['roll']:
                             flag_rav_type = '0'
-                        elif dictRuleTempData['skill'] < dictRuleTempData_1['skill']:
+                        elif dictRuleTempData['roll'] > dictRuleTempData_1['roll']:
                             flag_rav_type = '1'
-                        elif dictRuleTempData['skill'] == dictRuleTempData_1['skill']:
-                            flag_rav_type = '-'
-            if tmp_pc_name_1 == None:
-                res_1 = plugin_event.get_stranger_info(tmp_userID_1)
-                if res_1['active']:
-                    dictTValue['tName01'] = res_1['data']['name']
-                else:
-                    dictTValue['tName01'] = tmp_userName01
-            dictTValue['tSkillName'] = tmp_skill_name_0
-            dictTValue['tSkillName01'] = tmp_skill_name_1
-            if flag_rav_type == '0':
-                dictTValue['tRAVResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRAVResult01'], dictTValue)
-            elif flag_rav_type == '1':
-                dictTValue['tRAVResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRAVResult02'], dictTValue)
-            elif flag_rav_type == '-':
-                dictTValue['tRAVResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRAVResult03'], dictTValue)
-            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRAVShow'], dictTValue)
-            replyMsg(plugin_event, tmp_reply_str)
+                        elif dictRuleTempData['roll'] == dictRuleTempData_1['roll']:
+                            if dictRuleTempData['skill'] > dictRuleTempData_1['skill']:
+                                flag_rav_type = '0'
+                            elif dictRuleTempData['skill'] < dictRuleTempData_1['skill']:
+                                flag_rav_type = '1'
+                            elif dictRuleTempData['skill'] == dictRuleTempData_1['skill']:
+                                flag_rav_type = '-'
+                if tmp_pc_name_1 == None:
+                    res_1 = plugin_event.get_stranger_info(tmp_userID_1)
+                    if res_1['active']:
+                        dictTValue['tName01'] = res_1['data']['name']
+                    else:
+                        dictTValue['tName01'] = tmp_userName01
+                dictTValue['tSkillName'] = tmp_skill_name_0
+                dictTValue['tSkillName01'] = tmp_skill_name_1
+                if flag_rav_type == '0':
+                    dictTValue['tRAVResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRAVResult01'], dictTValue)
+                elif flag_rav_type == '1':
+                    dictTValue['tRAVResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRAVResult02'], dictTValue)
+                elif flag_rav_type == '-':
+                    dictTValue['tRAVResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRAVResult03'], dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRAVShow'], dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
+            else:
+                OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'rav')
     else:
         OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'rav')
 
