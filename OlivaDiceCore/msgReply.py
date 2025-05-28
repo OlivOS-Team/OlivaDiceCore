@@ -2907,7 +2907,7 @@ def unity_reply(plugin_event, Proc):
                 if tmp_skill_name != None and tmp_skill_value != None:
                     tmp_skill_name = tmp_skill_name.strip()
                     tmp_skill_name = tmp_skill_name.upper()
-                    tmp_pc_id = at_user_id
+                    tmp_pc_id = at_user_id if at_user_id else plugin_event.data.user_id
                     tmp_pc_platform = plugin_event.platform['platform']
                     tmp_skill_value_old = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
                         OlivaDiceCore.pcCard.getPcHash(
