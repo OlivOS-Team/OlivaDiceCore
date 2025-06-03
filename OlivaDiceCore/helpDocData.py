@@ -173,9 +173,11 @@ He dismissed the dismiss as worthless.
 .st del [人物卡名]    删除人物卡
     默认删除当前人物卡
 .st clear    清空当前人物卡
-.st rm [技能名]    删除对应技能
+.st rm [技能名]([技能名2][技能名3]...)    删除对应的一些技能
 .st note [记录名] [内容]    添加人物卡记录
-.st rec [映射名] [表达式]    添加人物卡映射''',
+.st rec [映射名] [表达式]    添加人物卡映射
+.st note rm [记录名]    删除人物卡记录
+.st rec rm [映射名]    删除人物卡映射''',
 
     'r': '''通用掷骰指令
 表达式支持OneDice标准:

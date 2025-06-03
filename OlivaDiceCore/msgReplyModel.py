@@ -593,7 +593,8 @@ def setPcNoteOrRecData(
     tmp_key,
     tmp_value,
     flag_mode,
-    enableFalse:bool = True
+    enableFalse:bool = True,
+    is_remove:bool = False
 ):
     tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
         tmp_pc_id,
@@ -621,6 +622,38 @@ def setPcNoteOrRecData(
         dataKey = keyName,
         resDefault = {}
     )
+    
+    # 处理删除操作
+    if is_remove and tmp_key is not None:
+        if tmp_key in tmp_mappingRecord:
+            del tmp_mappingRecord[tmp_key]
+            OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
+                pcHash = tmp_pcHash,
+                pcCardName = tmp_pc_name,
+                dataKey = keyName,
+                dataContent = tmp_mappingRecord
+            )
+            if enableFalse:
+                if flag_mode == 'rec':
+                    dictTValue['tSkillName'] = tmp_key
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRecRm'], dictTValue)
+                    OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+                else:
+                    dictTValue['tSkillName'] = tmp_key
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcNoteRm'], dictTValue)
+                    OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+        else:
+            if enableFalse:
+                if flag_mode == 'rec':
+                    dictTValue['tSkillName'] = tmp_key
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRecError'], dictTValue)
+                    OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+                else:
+                    dictTValue['tSkillName'] = tmp_key
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcNoteError'], dictTValue)
+                    OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+        return
+    
     if tmp_key != None and tmp_value != None:
         if flag_mode == 'rec':
             tmp_rd = OlivaDiceCore.onedice.RD(tmp_value)
