@@ -283,6 +283,7 @@ https://wiki.dice.center/OlivOS_Login.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9B%9E%
 
     'sn': '''跑团名片：
 .sn  套用人物卡中的名片记录
+.sn auto 开启/关闭自动群名片功能
 .sn coc  套用coc跑团名片
 .sn dnd  套用dnd跑团名片
 .sn [自定义名片]  套用任意自定义名片''',
