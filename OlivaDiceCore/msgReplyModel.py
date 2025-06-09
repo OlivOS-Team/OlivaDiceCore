@@ -854,7 +854,7 @@ def getNoteFormat(
         )
     tmp_dict_pc_card = OlivaDiceCore.pcCard.pcCardDataGetByPcName(
         pcHash,
-        hagId = pcHash
+        hagId = hagID
     )
     for skill_name in tmp_dict_pc_card:
         res = res.replace(
