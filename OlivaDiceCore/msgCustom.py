@@ -120,6 +120,8 @@ dictStrCustom = {
     'strSnPcCardNone' : '[{tUserName}]未设置人物卡，无法进行名片设置',
     'strSnSetAtOther' : '已将[{tUserName01}]的群名片修改为[{tResult}]',
     'strSnPcCardNoneAtOther' : '[{tUserName01}]未设置人物卡，无法进行名片设置',
+    'strSnAutoOn' : "已开启自动群名片功能，人物卡数值变动时将自动更新群名片",
+    'strSnAutoOff' : "已关闭自动群名片功能",
     'strPcSetMapValueError' : '[{tResult}]不是合法的表达式',
     'strPcInitSet' : '先攻列表已设置:\n{tResult}',
     'strPcInitShow' : '当前先攻列表:\n{tResult}',

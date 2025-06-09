@@ -56,7 +56,8 @@ dictUserConfigNoteDefault = {
     'RDRecordSkillInt' : None,
     'userName' : '用户',
     'trustLevel' : 0,
-    'trustRank' : 1000
+    'trustRank' : 1000,
+    'autoSnEnabled' : False
 }
 
 dictUserConfigNoteMapping = {
@@ -105,18 +106,18 @@ def setUserConfigByKey(userId, userType, platform, userConfigKey, userConfigValu
         dictUserConfigData[userHash][botHash]['lastHit'] = dictUserConfigDefault['lastHit']
     dictUserConfigData[userHash][botHash][userConfigNoteKey][userConfigKey] = userConfigValue
 
-def getUserConfigByKey(userId, userType, platform, userConfigKey, botHash):
+def getUserConfigByKey(userId, userType, platform, userConfigKey, botHash, default=None):
     global dictUserConfigData
     global dictUserConfigNoteDefault
     userConfigNoteKey = 'configNote'
-    userConfigValue = False
+    userConfigValue = default if default is not None else False
+    if userConfigKey in dictUserConfigNoteDefault and default is None:
+        userConfigValue = dictUserConfigNoteDefault[userConfigKey]
     userHash = getUserHash(
         userId = userId,
         userType = userType,
         platform = platform
     )
-    if userConfigKey in dictUserConfigNoteDefault:
-        userConfigValue = dictUserConfigNoteDefault[userConfigKey]
     if userHash in dictUserConfigData:
         if botHash in dictUserConfigData[userHash]:
             if userConfigNoteKey in dictUserConfigData[userHash][botHash]:
