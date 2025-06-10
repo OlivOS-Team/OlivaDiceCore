@@ -4166,7 +4166,10 @@ def unity_reply(plugin_event, Proc):
                     [tmp_skill_value, tmp_reast_str] = getNumberPara(tmp_reast_str)
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
             if tmp_skill_value != None:
-                tmp_skill_value = int(tmp_skill_value)
+                try:
+                    tmp_skill_value = int(tmp_skill_value)
+                except ValueError:
+                    return
             if tmp_skill_name == '':
                 tmp_skill_name = None
             difficulty = None
