@@ -1957,6 +1957,7 @@ def unity_reply(plugin_event, Proc):
                     else:
                         dictTValue['tPcSelection'] = dictTValue['tName']
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRename'], dictTValue)
+                    trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
             else:
                 replyMsgLazyHelpByEvent(plugin_event, 'nn')
@@ -2015,6 +2016,38 @@ def unity_reply(plugin_event, Proc):
             if tmp_hagID == None:
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
                 OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+                return
+            if isMatchWordStart(tmp_reast_str, 'auto', fullMatch = True):
+                # 自动群名片功能
+                auto_sn_enabled = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_pc_id,
+                    userType = 'user',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'autoSnEnabled',
+                    botHash = plugin_event.bot_info.hash,
+                    default = False
+                )
+                new_auto_sn_enabled = not auto_sn_enabled
+                OlivaDiceCore.userConfig.setUserConfigByKey(
+                    userConfigKey = 'autoSnEnabled',
+                    userConfigValue = new_auto_sn_enabled,
+                    botHash = plugin_event.bot_info.hash,
+                    userId = tmp_pc_id,
+                    userType = 'user',
+                    platform = tmp_pc_platform
+                )
+                OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                    userHash = OlivaDiceCore.userConfig.getUserHash(
+                        userId = tmp_pc_id,
+                        userType = 'user',
+                        platform = tmp_pc_platform
+                    )
+                )
+                if new_auto_sn_enabled:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnAutoOn'], dictTValue)
+                else:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnAutoOff'], dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
                 return
             if '' == tmp_reast_str.lower():
                 flag_mode = 'coc'
@@ -2401,6 +2434,7 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSet'], dictTValue)
                     else:
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetError'], dictTValue)
+                    trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'init'):
@@ -3080,6 +3114,7 @@ def unity_reply(plugin_event, Proc):
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                                 dictStrCustom['strPcUpdateSkillValue'], dictTValue
                             )
+                        trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                     return
                 tmp_skill_name = None
@@ -3191,6 +3226,7 @@ def unity_reply(plugin_event, Proc):
                                 enableFalse = False
                             )
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetSkillValue'], dictTValue)
+                    trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
             else:
                 tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
@@ -3769,6 +3805,7 @@ def unity_reply(plugin_event, Proc):
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSanCheckGreatFailed'], dictTValue)
                             else:
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSanCheck'], dictTValue)
+                        trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                     else:
                         dictTValue['tName'] = tmp_pc_name
@@ -5118,6 +5155,43 @@ def unity_reply(plugin_event, Proc):
     nativeMsgBlocker(plugin_event, Proc)
     return
 
+def trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue):
+    auto_sn_enabled = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId = tmp_pc_id,
+        userType = 'user',
+        platform = tmp_pc_platform,
+        userConfigKey = 'autoSnEnabled',
+        botHash = plugin_event.bot_info.hash,
+        default = False
+    )
+    if not auto_sn_enabled:
+        return
+    tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+    tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
+    if not tmp_pc_name:
+        return
+    sn_title = None
+    tmp_Record = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+        pcHash = tmp_pcHash,
+        pcCardName = tmp_pc_name,
+        dataKey = 'noteRecord',
+        resDefault = {}
+    )
+    if '名片' in tmp_Record:
+        sn_title = tmp_Record['名片']
+    if not sn_title:
+        sn_title = '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}'
+    sn_title = OlivaDiceCore.msgReplyModel.getNoteFormat(
+        data = sn_title,
+        pcHash = tmp_pcHash,
+        hagID = tmp_hagID
+    )
+    plugin_event.set_group_card(
+        group_id = plugin_event.data.group_id,
+        user_id = tmp_pc_id,
+        card = sn_title,
+        host_id = plugin_event.data.host_id
+    )
 
 def replyMsg(plugin_event, message):
     host_id = None
