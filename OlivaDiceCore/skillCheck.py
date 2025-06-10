@@ -68,7 +68,7 @@ dictSkillCheckTemp = {
     'skill': 0
 }
 
-def getSkillCheckByTemplate(data, template = None, ruleKey = 'default'):
+def getSkillCheckByTemplate(data, template = None, ruleKey = 'default', difficulty_prefix = None):
     global dictSkillCheckTemp
     global dictSkillCheckResultRouter
     selection_key = 'checkRules'
@@ -89,19 +89,83 @@ def getSkillCheckByTemplate(data, template = None, ruleKey = 'default'):
             tmp_template_rule_dict.update(tmp_template_dict[selection_key][ruleKey])
     #处理临时参数
     tmp_data.update(data)
-    #处理检定逻辑
+    difficulty_mapping = {
+        '困难': 'hardSuccess',
+        '极难': 'extremeHardSuccess',
+        '极限': 'extremeHardSuccess',
+        '大成功': 'greatSuccess'
+    }
+    
+    difficulty_order = [
+        'greatSuccess',
+        'extremeHardSuccess',
+        'hardSuccess',
+        'success'
+    ]
+    
+    current_difficulty_key = difficulty_mapping.get(difficulty_prefix)
+    threshold_value = None
+    special_text = None
+    
     temp_result_enum = resultType.SKILLCHECK_NOPE
     if type(tmp_template_rule_dict) == dict:
-        if 'checkList' in tmp_template_rule_dict:
-            for dictSkillCheckResultRouter_this in tmp_template_rule_dict['checkList']:
-                if dictSkillCheckResultRouter_this in dictSkillCheckResultRouter:
-                    temp_result = False
-                    if dictSkillCheckResultRouter_this in tmp_template_rule_dict:
-                        temp_result = culRule('.node', tmp_template_rule_dict[dictSkillCheckResultRouter_this], tmp_data)
+        original_check_list = tmp_template_rule_dict.get('checkList', [])
+        modified_check_list = original_check_list.copy()
+        if difficulty_prefix:
+            if difficulty_prefix == '困难':
+                modified_check_list = [x for x in modified_check_list if x not in ['success']]
+            elif difficulty_prefix in ['极难', '极限']:
+                modified_check_list = [x for x in modified_check_list if x not in ['success', 'hardSuccess']]
+            elif difficulty_prefix == '大成功':
+                modified_check_list = [x for x in modified_check_list if x not in ['success', 'hardSuccess', 'extremeHardSuccess']]
+        
+        # DeltaGreen规则的特殊处理
+        if ruleKey == 'DeltaGreen' and current_difficulty_key == 'greatSuccess':
+            special_text = '结果为1或两骰相同'
+        
+        if not special_text and current_difficulty_key and current_difficulty_key in tmp_template_rule_dict:
+            threshold_value = calculateThreshold(tmp_template_rule_dict[current_difficulty_key], tmp_data)
+        
+        if 'greatFail' in tmp_template_rule_dict:
+            great_fail_result = culRule('.node', tmp_template_rule_dict['greatFail'], tmp_data)
+            if great_fail_result == True:
+                if special_text and difficulty_prefix == '大成功':
+                    threshold_value = special_text
+                return resultType.SKILLCHECK_GREAT_FAIL, threshold_value
+        
+        for difficulty in difficulty_order:
+            if difficulty in modified_check_list and difficulty in tmp_template_rule_dict:
+                temp_result = culRule('.node', tmp_template_rule_dict[difficulty], tmp_data)
+                if temp_result == True:
+                    temp_result_enum = dictSkillCheckResultRouter[difficulty]
+                    break
+        
+        if temp_result_enum == resultType.SKILLCHECK_NOPE:
+            if 'fail' in tmp_template_rule_dict:
+                fail_result = culRule('.node', tmp_template_rule_dict['fail'], tmp_data)
+                if fail_result == True:
+                    temp_result_enum = resultType.SKILLCHECK_FAIL
+        
+        if temp_result_enum == resultType.SKILLCHECK_NOPE:
+            for difficulty in original_check_list:
+                if difficulty in tmp_template_rule_dict:
+                    temp_result = culRule('.node', tmp_template_rule_dict[difficulty], tmp_data)
                     if temp_result == True:
-                        temp_result_enum = dictSkillCheckResultRouter[dictSkillCheckResultRouter_this]
-    return temp_result_enum
+                        temp_result_enum = resultType.SKILLCHECK_FAIL
+                        break
+                    
+        if special_text and difficulty_prefix == '大成功':
+            threshold_value = special_text
+            
+    return temp_result_enum, threshold_value
 
+def calculateThreshold(ruleNode, tmp_data):
+    threshold_data = tmp_data.copy()
+    for i in range(tmp_data['skill'], 0, -1): # 以skill为最大值开始尝试
+        threshold_data['roll'] = i
+        if culRule('.node', ruleNode, threshold_data):
+            return i
+    return 0
 
 def culRule(nodeKey, nodeData, tempData):
     temp_result = False

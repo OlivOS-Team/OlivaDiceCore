@@ -349,6 +349,8 @@ def replyRAV_command(plugin_event, Proc, valDict):
     tmp_skill_name_1 = None
     tmp_skill_value_0 = None
     tmp_skill_value_1 = None
+    difficulty_0 = None
+    difficulty_1 = None
     tmp_userID_1 = None
     tmp_pc_name_0 = '用户'
     tmp_pc_name_1 = '用户'
@@ -397,7 +399,30 @@ def replyRAV_command(plugin_event, Proc, valDict):
                         numbers.append(int(part))
                     else:
                         words.append(part)
+
+                # 处理第一个技能名
+                if OlivaDiceCore.msgReply.isMatchWordStart(words[0], '困难'):
+                    difficulty_0 = '困难'
+                    words[0] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[0], '困难').strip()
+                elif OlivaDiceCore.msgReply.isMatchWordStart(words[0], ['极难', '极限']):
+                    difficulty_0 = '极难'
+                    words[0] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[0], ['极难', '极限']).strip()
+                elif OlivaDiceCore.msgReply.isMatchWordStart(words[0], '大成功'):
+                    difficulty_0 = '大成功'
+                    words[0] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[0], '大成功').strip()
                 
+                # 处理第二个技能名
+                if len(words) > 1:
+                    if OlivaDiceCore.msgReply.isMatchWordStart(words[1], '困难'):
+                        difficulty_1 = '困难'
+                        words[1] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[1], '困难').strip()
+                    elif OlivaDiceCore.msgReply.isMatchWordStart(words[1], ['极难', '极限']):
+                        difficulty_1 = '极难'
+                        words[1] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[1], ['极难', '极限']).strip()
+                    elif OlivaDiceCore.msgReply.isMatchWordStart(words[1], '大成功'):
+                        difficulty_1 = '大成功'
+                        words[1] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[1], '大成功').strip()
+
                 # 根据数字数量决定解析方式
                 if len(numbers) == 2:
                     # 格式1
@@ -443,6 +468,9 @@ def replyRAV_command(plugin_event, Proc, valDict):
                         tmp_skill_name_0 = words[0]
                         tmp_skill_name_1 = words[0]
                         is_rav = True
+            
+            difficulty_1 = difficulty_0 if not difficulty_1 else difficulty_1
+            
             if is_rav:
                 flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
                     userId=tmp_hagID,
@@ -513,14 +541,14 @@ def replyRAV_command(plugin_event, Proc, valDict):
                         dictTValue['tRollResult'] = '%s=%d' % (rd_para_str, rd_para.resInt)
                     else:
                         dictTValue['tRollResult'] = '%s=%s=%d' % (rd_para_str, rd_para.resDetail, rd_para.resInt)
-                    dictTValue['tSkillValue'] = str(tmp_skill_value_0)
                     dictRuleTempData = {
                         'roll': rd_para.resInt,
                         'skill': tmp_skill_value_0
                     }
-                    tmpSkillCheckType = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
-                        dictRuleTempData, tmp_Template, tmp_TemplateRuleName
+                    tmpSkillCheckType, tmpSkillThreshold = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
+                        dictRuleTempData, tmp_Template, tmp_TemplateRuleName, difficulty_0
                     )
+                    dictTValue['tSkillValue'] = str(tmp_skill_value_0) if not difficulty_0 else f'{tmpSkillThreshold}({str(tmp_skill_value_0)})'
                 rd_para_1 = OlivaDiceCore.onedice.RD(rd_para_str, tmp_customDefault)
                 rd_para_1.roll()
                 tmpSkillCheckType_1 = None
@@ -533,14 +561,14 @@ def replyRAV_command(plugin_event, Proc, valDict):
                         dictTValue['tRollResult01'] = '%s=%d' % (rd_para_str, rd_para_1.resInt)
                     else:
                         dictTValue['tRollResult01'] = '%s=%s=%d' % (rd_para_str, rd_para_1.resDetail, rd_para_1.resInt)
-                    dictTValue['tSkillValue01'] = str(tmp_skill_value_1)
                     dictRuleTempData_1 = {
                         'roll': rd_para_1.resInt,
                         'skill': tmp_skill_value_1
                     }
-                    tmpSkillCheckType_1 = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
-                        dictRuleTempData_1, tmp_Template, tmp_TemplateRuleName
+                    tmpSkillCheckType_1, tmpSkillThreshold_1 = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
+                        dictRuleTempData_1, tmp_Template, tmp_TemplateRuleName, difficulty_1
                     )
+                    dictTValue['tSkillValue01'] = str(tmp_skill_value_1) if not difficulty_1 else f'{tmpSkillThreshold_1}({str(tmp_skill_value_1)})'
                 flag_rav_type = 'x'
                 if tmpSkillCheckType in dictSkillCheckRank and tmpSkillCheckType_1 in dictSkillCheckRank:
                     dictTValue['tSkillCheckReasult'] = get_SkillCheckResult(tmpSkillCheckType, dictStrCustom, dictTValue)
@@ -567,8 +595,8 @@ def replyRAV_command(plugin_event, Proc, valDict):
                         dictTValue['tName01'] = res_1['data']['name']
                     else:
                         dictTValue['tName01'] = tmp_userName01
-                dictTValue['tSkillName'] = tmp_skill_name_0
-                dictTValue['tSkillName01'] = tmp_skill_name_1
+                dictTValue['tSkillName'] = tmp_skill_name_0 if not difficulty_0 else f'{tmp_skill_name_0}({difficulty_0})'
+                dictTValue['tSkillName01'] = tmp_skill_name_1 if not difficulty_1 else f'{tmp_skill_name_1}({difficulty_1})'
                 if flag_rav_type == '0':
                     dictTValue['tRAVResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRAVResult01'], dictTValue)
                 elif flag_rav_type == '1':
