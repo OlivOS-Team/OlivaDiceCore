@@ -3733,7 +3733,7 @@ def unity_reply(plugin_event, Proc):
                         tmp_template_name = flag_groupTemplate
                         if flag_groupTemplateRule != None:
                             tmp_template_rule_name = flag_groupTemplateRule
-                    tmpSkillCheckType = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
+                    tmpSkillCheckType, _ = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
                         dictRuleTempData,
                         OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name),
                         tmp_template_rule_name
@@ -4166,9 +4166,25 @@ def unity_reply(plugin_event, Proc):
                     [tmp_skill_value, tmp_reast_str] = getNumberPara(tmp_reast_str)
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
             if tmp_skill_value != None:
-                tmp_skill_value = int(tmp_skill_value)
+                try:
+                    tmp_skill_value = int(tmp_skill_value)
+                except ValueError:
+                    return
             if tmp_skill_name == '':
                 tmp_skill_name = None
+            difficulty = None
+            actual_skill_name = tmp_skill_name
+            if tmp_skill_name:
+                if isMatchWordStart(tmp_skill_name, ['困难成功', '困难']):
+                    difficulty = '困难'
+                    actual_skill_name = getMatchWordStartRight(tmp_skill_name, ['困难成功', '困难']).strip()
+                elif isMatchWordStart(tmp_skill_name, ['极难成功', '极限成功', '极难', '极限']):
+                    difficulty = '极难'
+                    actual_skill_name = getMatchWordStartRight(tmp_skill_name, ['极难成功', '极限成功', '极难', '极限']).strip()
+                elif isMatchWordStart(tmp_skill_name, '大成功'):
+                    difficulty = '大成功'
+                    actual_skill_name = getMatchWordStartRight(tmp_skill_name, '大成功').strip()
+            tmp_skill_name = actual_skill_name
             flag_op = None
             tmp_op_value = None
             tmp_skill_value_str = None
@@ -4266,7 +4282,6 @@ def unity_reply(plugin_event, Proc):
                             dictTValue['tRollResult'] = '%s=%d' % (rd_para_str, rd_para.resInt)
                         else:
                             dictTValue['tRollResult'] = '%s=%s=%d' % (rd_para_str, rd_para.resDetail, rd_para.resInt)
-                        dictTValue['tSkillValue'] = tmp_skill_value_str
                         dictRuleTempData = {
                             'roll': rd_para.resInt,
                             'skill': tmp_skill_value
@@ -4278,11 +4293,14 @@ def unity_reply(plugin_event, Proc):
                             platform = tmp_pc_platform,
                             skillValue = tmp_skill_value
                         )
-                        tmpSkillCheckType = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
+                        tmpSkillCheckType, tmpSkillThreshold = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
                             dictRuleTempData,
                             tmp_Template,
-                            tmp_TemplateRuleName
+                            tmp_TemplateRuleName,
+                            difficulty_prefix=difficulty
                         )
+                        dictTValue['tSkillValue'] = tmp_skill_value_str if not difficulty else f'{tmpSkillThreshold}({tmp_skill_value_str})'
+                        if tmpSkillThreshold == None: dictTValue['tSkillValue'] = tmp_skill_value_str
                         if tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS:
                             dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckSucceed'], dictTValue)
                             flag_check_success = True
@@ -4338,16 +4356,18 @@ def unity_reply(plugin_event, Proc):
                                 tmp_tSkillCheckReasult += '%s=%d ' % (rd_para_str, rd_para.resInt)
                             else:
                                 tmp_tSkillCheckReasult += '%s=%s=%d ' % (rd_para_str, rd_para.resDetail, rd_para.resInt)
-                            dictTValue['tSkillValue'] = tmp_skill_value_str
                             dictRuleTempData = {
                                 'roll': rd_para.resInt,
                                 'skill': tmp_skill_value
                             }
-                            tmpSkillCheckType = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
+                            tmpSkillCheckType, tmpSkillThreshold = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
                                 dictRuleTempData,
                                 tmp_Template,
-                                tmp_TemplateRuleName
+                                tmp_TemplateRuleName,
+                                difficulty_prefix=difficulty
                             )
+                            dictTValue['tSkillValue'] = tmp_skill_value_str if not difficulty else f'{tmpSkillThreshold}({tmp_skill_value_str})'
+                            if tmpSkillThreshold == None: dictTValue['tSkillValue'] = tmp_skill_value_str
                             if tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS:
                                 tmp_tSkillCheckReasult += OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckSucceed'], dictTValue)
                                 flag_check_success = True
@@ -4436,7 +4456,8 @@ def unity_reply(plugin_event, Proc):
                 if flag_need_reply:
                     if is_at:
                         if tmp_skill_name != None:
-                            dictTValue['tSkillName'] = tmp_skill_name
+                            dictTValue['tSkillName'] = tmp_skill_name if not difficulty else f'{tmp_skill_name}({difficulty})'
+                            if tmpSkillThreshold == None: dictTValue['tSkillName'] = tmp_skill_name
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckWithSkillNameAtOther'], dictTValue)
                             tmp_reply_str_show = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckHideShowWithSkillNameAtOther'], dictTValue)
                             if flag_hide_roll and flag_is_from_group:
@@ -4455,7 +4476,8 @@ def unity_reply(plugin_event, Proc):
                             replyMsg(plugin_event, tmp_reply_str)
                     else:
                         if tmp_skill_name != None:
-                            dictTValue['tSkillName'] = tmp_skill_name
+                            dictTValue['tSkillName'] = tmp_skill_name if not difficulty else f'{tmp_skill_name}({difficulty})'
+                            if tmpSkillThreshold == None: dictTValue['tSkillName'] = tmp_skill_name
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckWithSkillName'], dictTValue)
                             tmp_reply_str_show = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckHideShowWithSkillName'], dictTValue)
                             if flag_hide_roll and flag_is_from_group:
