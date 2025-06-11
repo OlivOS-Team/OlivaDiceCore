@@ -4300,6 +4300,7 @@ def unity_reply(plugin_event, Proc):
                             difficulty_prefix=difficulty
                         )
                         dictTValue['tSkillValue'] = tmp_skill_value_str if not difficulty else f'{tmpSkillThreshold}({tmp_skill_value_str})'
+                        if tmpSkillThreshold == None: dictTValue['tSkillValue'] = tmp_skill_value_str
                         if tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS:
                             dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckSucceed'], dictTValue)
                             flag_check_success = True
@@ -4366,6 +4367,7 @@ def unity_reply(plugin_event, Proc):
                                 difficulty_prefix=difficulty
                             )
                             dictTValue['tSkillValue'] = tmp_skill_value_str if not difficulty else f'{tmpSkillThreshold}({tmp_skill_value_str})'
+                            if tmpSkillThreshold == None: dictTValue['tSkillValue'] = tmp_skill_value_str
                             if tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS:
                                 tmp_tSkillCheckReasult += OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckSucceed'], dictTValue)
                                 flag_check_success = True
@@ -4455,6 +4457,7 @@ def unity_reply(plugin_event, Proc):
                     if is_at:
                         if tmp_skill_name != None:
                             dictTValue['tSkillName'] = tmp_skill_name if not difficulty else f'{tmp_skill_name}({difficulty})'
+                            if tmpSkillThreshold == None: dictTValue['tSkillName'] = tmp_skill_name
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckWithSkillNameAtOther'], dictTValue)
                             tmp_reply_str_show = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckHideShowWithSkillNameAtOther'], dictTValue)
                             if flag_hide_roll and flag_is_from_group:
@@ -4474,6 +4477,7 @@ def unity_reply(plugin_event, Proc):
                     else:
                         if tmp_skill_name != None:
                             dictTValue['tSkillName'] = tmp_skill_name if not difficulty else f'{tmp_skill_name}({difficulty})'
+                            if tmpSkillThreshold == None: dictTValue['tSkillName'] = tmp_skill_name
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckWithSkillName'], dictTValue)
                             tmp_reply_str_show = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckHideShowWithSkillName'], dictTValue)
                             if flag_hide_roll and flag_is_from_group:
