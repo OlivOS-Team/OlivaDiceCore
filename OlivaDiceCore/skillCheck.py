@@ -161,7 +161,14 @@ def getSkillCheckByTemplate(data, template = None, ruleKey = 'default', difficul
 
 def calculateThreshold(ruleNode, tmp_data):
     threshold_data = tmp_data.copy()
-    for i in range(tmp_data['skill'], 0, -1): # 以skill为最大值开始尝试
+    skill_value = tmp_data['skill']
+    # 正向查找
+    for i in range(skill_value, 0, -1):
+        threshold_data['roll'] = i
+        if culRule('.node', ruleNode, threshold_data):
+            return i
+    # 反向查找（最大100）
+    for i in range(skill_value + 1, 101):
         threshold_data['roll'] = i
         if culRule('.node', ruleNode, threshold_data):
             return i
