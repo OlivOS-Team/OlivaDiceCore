@@ -125,6 +125,15 @@ def getSkillCheckByTemplate(data, template = None, ruleKey = 'default', difficul
         
         if not special_text and current_difficulty_key and current_difficulty_key in tmp_template_rule_dict:
             threshold_value = calculateThreshold(tmp_template_rule_dict[current_difficulty_key], tmp_data)
+            if threshold_value == 0:
+                if difficulty_prefix == '困难':
+                    if 'extremeHardSuccess' in tmp_template_rule_dict:
+                        threshold_value = calculateThreshold(tmp_template_rule_dict['extremeHardSuccess'], tmp_data)
+                    if threshold_value == 0 and 'greatSuccess' in tmp_template_rule_dict:
+                        threshold_value = calculateThreshold(tmp_template_rule_dict['greatSuccess'], tmp_data)
+                elif difficulty_prefix in ['极难', '极限']:
+                    if 'greatSuccess' in tmp_template_rule_dict:
+                        threshold_value = calculateThreshold(tmp_template_rule_dict['greatSuccess'], tmp_data)
         
         if 'greatFail' in tmp_template_rule_dict:
             great_fail_result = culRule('.node', tmp_template_rule_dict['greatFail'], tmp_data)
@@ -162,17 +171,22 @@ def getSkillCheckByTemplate(data, template = None, ruleKey = 'default', difficul
 def calculateThreshold(ruleNode, tmp_data):
     threshold_data = tmp_data.copy()
     skill_value = tmp_data['skill']
-    # 正向查找
+    threshold = 0
+    threshold_a = 0
+    threshold_b = 0
     for i in range(skill_value, 0, -1):
         threshold_data['roll'] = i
         if culRule('.node', ruleNode, threshold_data):
-            return i
-    # 反向查找（最大100）
-    for i in range(skill_value + 1, 101):
+            threshold_a = i
+            break
+    # dnd大成功显示：20
+    for i in range(20, 0, -1):
         threshold_data['roll'] = i
         if culRule('.node', ruleNode, threshold_data):
-            return i
-    return 0
+            threshold_b = i
+            break
+    threshold = max(threshold_a, threshold_b)
+    return threshold
 
 def culRule(nodeKey, nodeData, tempData):
     temp_result = False
