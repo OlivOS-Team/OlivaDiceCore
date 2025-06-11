@@ -401,24 +401,24 @@ def replyRAV_command(plugin_event, Proc, valDict):
                         words.append(part)
 
                 # 处理第一个技能名
-                if OlivaDiceCore.msgReply.isMatchWordStart(words[0], '困难'):
+                if OlivaDiceCore.msgReply.isMatchWordStart(words[0], ['困难成功', '困难']):
                     difficulty_0 = '困难'
-                    words[0] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[0], '困难').strip()
-                elif OlivaDiceCore.msgReply.isMatchWordStart(words[0], ['极难', '极限']):
+                    words[0] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[0], ['困难成功', '困难']).strip()
+                elif OlivaDiceCore.msgReply.isMatchWordStart(words[0], ['极难成功', '极限成功', '极难', '极限']):
                     difficulty_0 = '极难'
-                    words[0] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[0], ['极难', '极限']).strip()
+                    words[0] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[0], ['极难成功', '极限成功', '极难', '极限']).strip()
                 elif OlivaDiceCore.msgReply.isMatchWordStart(words[0], '大成功'):
                     difficulty_0 = '大成功'
                     words[0] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[0], '大成功').strip()
                 
                 # 处理第二个技能名
                 if len(words) > 1:
-                    if OlivaDiceCore.msgReply.isMatchWordStart(words[1], '困难'):
+                    if OlivaDiceCore.msgReply.isMatchWordStart(words[1], ['困难成功', '困难']):
                         difficulty_1 = '困难'
-                        words[1] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[1], '困难').strip()
-                    elif OlivaDiceCore.msgReply.isMatchWordStart(words[1], ['极难', '极限']):
+                        words[1] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[1], ['困难成功', '困难']).strip()
+                    elif OlivaDiceCore.msgReply.isMatchWordStart(words[1], ['极难成功', '极限成功', '极难', '极限']):
                         difficulty_1 = '极难'
-                        words[1] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[1], ['极难', '极限']).strip()
+                        words[1] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[1], ['极难成功', '极限成功', '极难', '极限']).strip()
                     elif OlivaDiceCore.msgReply.isMatchWordStart(words[1], '大成功'):
                         difficulty_1 = '大成功'
                         words[1] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[1], '大成功').strip()

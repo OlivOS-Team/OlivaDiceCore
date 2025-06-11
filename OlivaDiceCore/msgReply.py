@@ -4175,12 +4175,12 @@ def unity_reply(plugin_event, Proc):
             difficulty = None
             actual_skill_name = tmp_skill_name
             if tmp_skill_name:
-                if isMatchWordStart(tmp_skill_name, '困难'):
+                if isMatchWordStart(tmp_skill_name, ['困难成功', '困难']):
                     difficulty = '困难'
-                    actual_skill_name = getMatchWordStartRight(tmp_skill_name, '困难').strip()
-                elif isMatchWordStart(tmp_skill_name, ['极难', '极限']):
+                    actual_skill_name = getMatchWordStartRight(tmp_skill_name, ['困难成功', '困难']).strip()
+                elif isMatchWordStart(tmp_skill_name, ['极难成功', '极限成功', '极难', '极限']):
                     difficulty = '极难'
-                    actual_skill_name = getMatchWordStartRight(tmp_skill_name, ['极难', '极限']).strip()
+                    actual_skill_name = getMatchWordStartRight(tmp_skill_name, ['极难成功', '极限成功', '极难', '极限']).strip()
                 elif isMatchWordStart(tmp_skill_name, '大成功'):
                     difficulty = '大成功'
                     actual_skill_name = getMatchWordStartRight(tmp_skill_name, '大成功').strip()

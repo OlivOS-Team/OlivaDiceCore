@@ -92,7 +92,6 @@ def getSkillCheckByTemplate(data, template = None, ruleKey = 'default', difficul
     difficulty_mapping = {
         '困难': 'hardSuccess',
         '极难': 'extremeHardSuccess',
-        '极限': 'extremeHardSuccess',
         '大成功': 'greatSuccess'
     }
     
@@ -114,7 +113,7 @@ def getSkillCheckByTemplate(data, template = None, ruleKey = 'default', difficul
         if difficulty_prefix:
             if difficulty_prefix == '困难':
                 modified_check_list = [x for x in modified_check_list if x not in ['success']]
-            elif difficulty_prefix in ['极难', '极限']:
+            elif difficulty_prefix == '极难':
                 modified_check_list = [x for x in modified_check_list if x not in ['success', 'hardSuccess']]
             elif difficulty_prefix == '大成功':
                 modified_check_list = [x for x in modified_check_list if x not in ['success', 'hardSuccess', 'extremeHardSuccess']]
@@ -131,7 +130,7 @@ def getSkillCheckByTemplate(data, template = None, ruleKey = 'default', difficul
                         threshold_value = calculateThreshold(tmp_template_rule_dict['extremeHardSuccess'], tmp_data)
                     if threshold_value == 0 and 'greatSuccess' in tmp_template_rule_dict:
                         threshold_value = calculateThreshold(tmp_template_rule_dict['greatSuccess'], tmp_data)
-                elif difficulty_prefix in ['极难', '极限']:
+                elif difficulty_prefix == '极难':
                     if 'greatSuccess' in tmp_template_rule_dict:
                         threshold_value = calculateThreshold(tmp_template_rule_dict['greatSuccess'], tmp_data)
         
