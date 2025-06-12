@@ -161,6 +161,7 @@ He dismissed the dismiss as worthless.
 .st [技能名](+-*/)[掷骰表达式或数值]    单个技能修改
 .nn [人物卡名]    重命名人物卡
 .st list    显示人物卡列表
+.st new [人物卡名]    新建人物卡
 .st set [人物卡名]    切换人物卡
 .st lock/unlock    锁定/解锁人物卡
 .st show    显示人物卡

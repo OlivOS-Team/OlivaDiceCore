@@ -130,6 +130,7 @@ dictStrCustom = {
     'strPcInitShowNode' : '{tId}. [{tSubName}]: {tSubResult}',
     'strPcInitDel' : '已从先攻列表中删除[{tName}]',
     'strPcInit' : '[{tPcTempName}]人物卡作成:{tPcInitResult}',
+    'strPcInitErrorRange' : '[{tPcTempName}]人物卡作成失败:\n错误的人物卡作成范围(需为1-10)',
     'strPcUpdateSkillValue' : '[{tName}]的人物卡已更新:\n{tSkillUpdate}',
     'strPcUpdateSkillValueAtOther' : '[{tUserName}]帮[{tUserName01}]的人物卡[{tName}]的人物卡更新:\n{tSkillUpdate}',
     'strPcSetSkillValue' : '人物卡[{tName}]已保存',

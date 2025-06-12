@@ -1113,6 +1113,9 @@ def unity_reply(plugin_event, Proc):
                         else:
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAlreadyOn'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'off'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'off')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -1165,6 +1168,9 @@ def unity_reply(plugin_event, Proc):
                         else:
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAlreadyOff'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'host'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'host')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -1199,6 +1205,9 @@ def unity_reply(plugin_event, Proc):
                             else:
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotNotUnderHost'], dictTValue)
                                 replyMsg(plugin_event, tmp_reply_str)
+                        else:
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
+                            replyMsg(plugin_event, tmp_reply_str)
                 elif isMatchWordStart(tmp_reast_str, 'off'):
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'off')
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -1230,6 +1239,9 @@ def unity_reply(plugin_event, Proc):
                             else:
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotNotUnderHost'], dictTValue)
                                 replyMsg(plugin_event, tmp_reply_str)
+                        else:
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
+                            replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'exit'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'exit')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -1371,6 +1383,9 @@ def unity_reply(plugin_event, Proc):
             if tmp_reply_str != None:
                 replyMsg(plugin_event, tmp_reply_str)
             return
+        elif isMatchWordStart(tmp_reast_str, 'dismiss', isCommand = True):
+            tmp_reply_str = OlivaDiceCore.helpDoc.getHelp('dismiss', plugin_event.bot_info.hash)
+            replyMsg(plugin_event, tmp_reply_str)
         elif isMatchWordStart(tmp_reast_str, 'draw', isCommand = True):
             flag_hide = False
             tmp_card_count = 1
@@ -3549,6 +3564,9 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInit'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
             else:
+                dictTValue['tPcTempName'] = tmp_pcCardTemplateName
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitErrorRange'], dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
                 return
         elif isMatchWordStart(tmp_reast_str, 'dnd', isCommand = True):
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'dnd')
@@ -3577,13 +3595,18 @@ def unity_reply(plugin_event, Proc):
                             tmp_res_list_this.append('%2d' % rd_this.resInt)
                             tmp_sum += rd_this.resInt
                     tmp_res_list.append([tmp_res_list_this, '%3d' % tmp_sum])
-            dictTValue['tPcTempName'] = tmp_pcCardTemplateName
-            dictTValue['tPcInitResult'] = '\n' + '\n'.join([
-                '[%s] : %s' % (', '.join(tmp_res_list_this[0]), tmp_res_list_this[1])
-                for tmp_res_list_this in tmp_res_list
-            ])
-            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInit'], dictTValue)
-            replyMsg(plugin_event, tmp_reply_str)
+                dictTValue['tPcTempName'] = tmp_pcCardTemplateName
+                dictTValue['tPcInitResult'] = '\n' + '\n'.join([
+                    '[%s] : %s' % (', '.join(tmp_res_list_this[0]), tmp_res_list_this[1])
+                    for tmp_res_list_this in tmp_res_list
+                ])
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInit'], dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
+            else:
+                dictTValue['tPcTempName'] = tmp_pcCardTemplateName
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitErrorRange'], dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
+                return
         elif isMatchWordStart(tmp_reast_str, 'sc', isCommand = True):
             is_at = False
             # 解析@用户
@@ -4445,8 +4468,9 @@ def unity_reply(plugin_event, Proc):
                             if 'skipEnhance' in tmp_template['skillConfig']:
                                 if type(tmp_template['skillConfig']['skipEnhance']):
                                     tmp_skipEnhance_list = tmp_template['skillConfig']['skipEnhance']
-                        if tmp_skill_name_core not in tmp_enhanceList and tmp_skill_name_core not in tmp_skipEnhance_list:
-                            tmp_enhanceList.append(tmp_skill_name_core)
+                        if flag_bp_type != 1:
+                            if tmp_skill_name_core not in tmp_enhanceList and tmp_skill_name_core not in tmp_skipEnhance_list:
+                                tmp_enhanceList.append(tmp_skill_name_core)
                         OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
                             tmp_pcHash,
                             tmp_pc_name_1,
@@ -4775,6 +4799,10 @@ def unity_reply(plugin_event, Proc):
                         resDefault = {}
                     )
                 )
+                db_value = OlivaDiceCore.pcCard.getDBValue(tmp_pcHash, tmp_hagID)
+                skill_valueTable['DB'] = db_value
+                skill_valueTable['db'] = db_value
+                skill_valueTable['伤害加值'] = db_value
             if len(tmp_reast_str) > 0:
                 if isMatchWordStart(tmp_reast_str, 'h'):
                     flag_hide_roll = True
@@ -5782,7 +5810,7 @@ def getToNumberPara(data):
 def isMatchWordStart(data, key, ignoreCase=True, fullMatch=False, isCommand=False):
     tmp_output = False
     flag_skip = False
-    tmp_data = data
+    tmp_data = data.strip()
     tmp_keys = [key] if isinstance(key, str) else key
 
     if isCommand:
