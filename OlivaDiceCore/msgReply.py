@@ -4445,8 +4445,9 @@ def unity_reply(plugin_event, Proc):
                             if 'skipEnhance' in tmp_template['skillConfig']:
                                 if type(tmp_template['skillConfig']['skipEnhance']):
                                     tmp_skipEnhance_list = tmp_template['skillConfig']['skipEnhance']
-                        if tmp_skill_name_core not in tmp_enhanceList and tmp_skill_name_core not in tmp_skipEnhance_list:
-                            tmp_enhanceList.append(tmp_skill_name_core)
+                        if flag_bp_type != 1:
+                            if tmp_skill_name_core not in tmp_enhanceList and tmp_skill_name_core not in tmp_skipEnhance_list:
+                                tmp_enhanceList.append(tmp_skill_name_core)
                         OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
                             tmp_pcHash,
                             tmp_pc_name_1,
