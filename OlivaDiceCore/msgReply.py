@@ -1383,6 +1383,9 @@ def unity_reply(plugin_event, Proc):
             if tmp_reply_str != None:
                 replyMsg(plugin_event, tmp_reply_str)
             return
+        elif isMatchWordStart(tmp_reast_str, 'dismiss', isCommand = True):
+            tmp_reply_str = OlivaDiceCore.helpDoc.getHelp('dismiss', plugin_event.bot_info.hash)
+            replyMsg(plugin_event, tmp_reply_str)
         elif isMatchWordStart(tmp_reast_str, 'draw', isCommand = True):
             flag_hide = False
             tmp_card_count = 1

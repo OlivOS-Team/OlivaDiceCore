@@ -829,11 +829,11 @@ def setPcLockAPI(pcHash, hagId, setFlag:bool, pcName = '人物卡'):
 
 def getDBValue(pcHash, hagID=None):
     """
-    根据COC规则计算伤害加值(DB)
+    根据COC7th规则计算DB
     如果缺少任何属性或计算失败，返回0
     
-    COC规则:
-    STR + SIZ = 力量体型值
+    COC7th规则:
+    STR+SIZ的和为左侧，DB为右侧
     2-64: -2
     65-84: -1
     85-124: 0
@@ -846,8 +846,8 @@ def getDBValue(pcHash, hagID=None):
     """
     try:
         pc_data = OlivaDiceCore.pcCard.pcCardDataGetByPcName(pcHash, hagId=hagID)
-        str_val = int(pc_data.get('STR', 0))
-        siz_val = int(pc_data.get('SIZ', 0))
+        str_val = int(pc_data.get('STR'))
+        siz_val = int(pc_data.get('SIZ'))
         power_size = str_val + siz_val
         if power_size <= 64:
             return '-2'
@@ -868,11 +868,5 @@ def getDBValue(pcHash, hagID=None):
         else:
             additional_dice = (power_size - 445) // 80 + 1
             return f'{4 + additional_dice}d6'
-            
-    except Exception as e:
-        OlivaDiceCore.msgReply.globalLog(
-            3, 
-            f'计算伤害加值(DB)失败: {str(e)}', 
-            [('OlivaDice', 'pcCard'), ('DB', 'error')]
-        )
+    except:
         return '0'
