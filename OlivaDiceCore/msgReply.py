@@ -3549,6 +3549,9 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInit'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
             else:
+                dictTValue['tPcTempName'] = tmp_pcCardTemplateName
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitErrorRange'], dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
                 return
         elif isMatchWordStart(tmp_reast_str, 'dnd', isCommand = True):
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'dnd')
@@ -3577,13 +3580,18 @@ def unity_reply(plugin_event, Proc):
                             tmp_res_list_this.append('%2d' % rd_this.resInt)
                             tmp_sum += rd_this.resInt
                     tmp_res_list.append([tmp_res_list_this, '%3d' % tmp_sum])
-            dictTValue['tPcTempName'] = tmp_pcCardTemplateName
-            dictTValue['tPcInitResult'] = '\n' + '\n'.join([
-                '[%s] : %s' % (', '.join(tmp_res_list_this[0]), tmp_res_list_this[1])
-                for tmp_res_list_this in tmp_res_list
-            ])
-            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInit'], dictTValue)
-            replyMsg(plugin_event, tmp_reply_str)
+                dictTValue['tPcTempName'] = tmp_pcCardTemplateName
+                dictTValue['tPcInitResult'] = '\n' + '\n'.join([
+                    '[%s] : %s' % (', '.join(tmp_res_list_this[0]), tmp_res_list_this[1])
+                    for tmp_res_list_this in tmp_res_list
+                ])
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInit'], dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
+            else:
+                dictTValue['tPcTempName'] = tmp_pcCardTemplateName
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitErrorRange'], dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
+                return
         elif isMatchWordStart(tmp_reast_str, 'sc', isCommand = True):
             is_at = False
             # 解析@用户
