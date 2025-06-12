@@ -1113,6 +1113,9 @@ def unity_reply(plugin_event, Proc):
                         else:
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAlreadyOn'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'off'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'off')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -1165,6 +1168,9 @@ def unity_reply(plugin_event, Proc):
                         else:
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAlreadyOff'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'host'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'host')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -1199,6 +1205,9 @@ def unity_reply(plugin_event, Proc):
                             else:
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotNotUnderHost'], dictTValue)
                                 replyMsg(plugin_event, tmp_reply_str)
+                        else:
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
+                            replyMsg(plugin_event, tmp_reply_str)
                 elif isMatchWordStart(tmp_reast_str, 'off'):
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'off')
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -1230,6 +1239,9 @@ def unity_reply(plugin_event, Proc):
                             else:
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotNotUnderHost'], dictTValue)
                                 replyMsg(plugin_event, tmp_reply_str)
+                        else:
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
+                            replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'exit'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'exit')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
