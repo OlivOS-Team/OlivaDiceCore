@@ -5782,7 +5782,7 @@ def getToNumberPara(data):
 def isMatchWordStart(data, key, ignoreCase=True, fullMatch=False, isCommand=False):
     tmp_output = False
     flag_skip = False
-    tmp_data = data
+    tmp_data = data.strip()
     tmp_keys = [key] if isinstance(key, str) else key
 
     if isCommand:
