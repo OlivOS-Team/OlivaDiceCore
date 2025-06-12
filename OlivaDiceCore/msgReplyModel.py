@@ -589,6 +589,64 @@ def replyRAV_command(plugin_event, Proc, valDict):
                                 flag_rav_type = '1'
                             elif dictRuleTempData['skill'] == dictRuleTempData_1['skill']:
                                 flag_rav_type = '-'
+                if flag_rav_type == '0' and tmpSkillCheckType in [
+                    OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS,
+                    OlivaDiceCore.skillCheck.resultType.SKILLCHECK_HARD_SUCCESS,
+                    OlivaDiceCore.skillCheck.resultType.SKILLCHECK_EXTREME_HARD_SUCCESS,
+                    OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_SUCCESS
+                ]:
+                    tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_userID, tmp_platform)
+                    tmp_enhanceList = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                        tmp_pcHash,
+                        tmp_pc_name_0,
+                        'enhanceList',
+                        []
+                    )
+                    tmp_skipEnhance_list = []
+                    tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_pc_name_0)
+                    if tmp_template_name is not None:
+                        tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
+                        if 'skillConfig' in tmp_template and 'skipEnhance' in tmp_template['skillConfig']:
+                            if isinstance(tmp_template['skillConfig']['skipEnhance'], list):
+                                tmp_skipEnhance_list = tmp_template['skillConfig']['skipEnhance']
+                    if (tmp_skill_name_0.upper() not in tmp_enhanceList and 
+                        tmp_skill_name_0.upper() not in tmp_skipEnhance_list):
+                        tmp_enhanceList.append(tmp_skill_name_0.upper())
+                        OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
+                            tmp_pcHash,
+                            tmp_pc_name_0,
+                            'enhanceList',
+                            tmp_enhanceList
+                        )
+                elif flag_rav_type == '1' and tmpSkillCheckType_1 in [
+                    OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS,
+                    OlivaDiceCore.skillCheck.resultType.SKILLCHECK_HARD_SUCCESS,
+                    OlivaDiceCore.skillCheck.resultType.SKILLCHECK_EXTREME_HARD_SUCCESS,
+                    OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_SUCCESS
+                ]:
+                    tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_userID_1, tmp_platform)
+                    tmp_enhanceList = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                        tmp_pcHash,
+                        tmp_pc_name_1,
+                        'enhanceList',
+                        []
+                    )
+                    tmp_skipEnhance_list = []
+                    tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_pc_name_1)
+                    if tmp_template_name is not None:
+                        tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
+                        if 'skillConfig' in tmp_template and 'skipEnhance' in tmp_template['skillConfig']:
+                            if isinstance(tmp_template['skillConfig']['skipEnhance'], list):
+                                tmp_skipEnhance_list = tmp_template['skillConfig']['skipEnhance']
+                    if (tmp_skill_name_1.upper() not in tmp_enhanceList and 
+                        tmp_skill_name_1.upper() not in tmp_skipEnhance_list):
+                        tmp_enhanceList.append(tmp_skill_name_1.upper())
+                        OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
+                            tmp_pcHash,
+                            tmp_pc_name_1,
+                            'enhanceList',
+                            tmp_enhanceList
+                        )
                 if tmp_pc_name_1 == None:
                     res_1 = plugin_event.get_stranger_info(tmp_userID_1)
                     if res_1['active']:

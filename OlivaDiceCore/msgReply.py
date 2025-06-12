@@ -4796,6 +4796,10 @@ def unity_reply(plugin_event, Proc):
                         resDefault = {}
                     )
                 )
+                db_value = OlivaDiceCore.pcCard.getDBValue(tmp_pcHash, tmp_hagID)
+                skill_valueTable['DB'] = db_value
+                skill_valueTable['db'] = db_value
+                skill_valueTable['伤害加值'] = db_value
             if len(tmp_reast_str) > 0:
                 if isMatchWordStart(tmp_reast_str, 'h'):
                     flag_hide_roll = True
