@@ -2033,6 +2033,7 @@ def unity_reply(plugin_event, Proc):
                 OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
                 return
             if isMatchWordStart(tmp_reast_str, 'auto', fullMatch = True):
+                if is_at: return
                 # 自动群名片功能
                 auto_sn_enabled = OlivaDiceCore.userConfig.getUserConfigByKey(
                     userId = tmp_pc_id,
@@ -2195,7 +2196,6 @@ def unity_reply(plugin_event, Proc):
             tmp_skill_value_find = 0
             tmp_skill_pair_list = []
             if isMatchWordStart(tmp_reast_str, 'show', fullMatch = True):
-                if is_at: return
                 tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
                     tmp_pc_id,
                     tmp_pc_platform
@@ -2311,7 +2311,6 @@ def unity_reply(plugin_event, Proc):
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'show'):
-                if is_at: return
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'show')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 tmp_reast_str = tmp_reast_str.strip(' ')
