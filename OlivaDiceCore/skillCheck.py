@@ -178,11 +178,12 @@ def calculateThreshold(ruleNode, tmp_data):
         if culRule('.node', ruleNode, threshold_data):
             threshold_a = i
             break
-    # dnd大成功显示：20
-    if threshold_a == 0:
-        threshold_data['roll'] = 20
+    # dnd大成功显示兼1-5大成功显示
+    for i in range(20, 0, -1):
+        threshold_data['roll'] = i
         if culRule('.node', ruleNode, threshold_data):
-            threshold_b = 20
+            threshold_b = i
+            break
     threshold = max(threshold_a, threshold_b)
     return threshold
 
