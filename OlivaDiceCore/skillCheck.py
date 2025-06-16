@@ -119,8 +119,8 @@ def getSkillCheckByTemplate(data, template = None, ruleKey = 'default', difficul
                 modified_check_list = [x for x in modified_check_list if x not in ['success', 'hardSuccess', 'extremeHardSuccess']]
         
         # DeltaGreen规则的特殊处理
-        if ruleKey == 'DeltaGreen' and current_difficulty_key == 'greatSuccess':
-            special_text = '结果为1或两骰相同'
+        if ruleKey == 'DeltaGreen' and difficulty_prefix in ['困难','极难','大成功']:
+            special_text = '结果为1或小于技巧两骰相同'
         
         if not special_text and current_difficulty_key and current_difficulty_key in tmp_template_rule_dict:
             threshold_value = calculateThreshold(tmp_template_rule_dict[current_difficulty_key], tmp_data)
@@ -162,7 +162,7 @@ def getSkillCheckByTemplate(data, template = None, ruleKey = 'default', difficul
                         temp_result_enum = resultType.SKILLCHECK_FAIL
                         break
                     
-        if special_text and difficulty_prefix == '大成功':
+        if special_text:
             threshold_value = special_text
             
     return temp_result_enum, threshold_value
@@ -179,11 +179,10 @@ def calculateThreshold(ruleNode, tmp_data):
             threshold_a = i
             break
     # dnd大成功显示：20
-    for i in range(20, 0, -1):
-        threshold_data['roll'] = i
+    if threshold_a == 0:
+        threshold_data['roll'] = 20
         if culRule('.node', ruleNode, threshold_data):
-            threshold_b = i
-            break
+            threshold_b = 20
     threshold = max(threshold_a, threshold_b)
     return threshold
 
