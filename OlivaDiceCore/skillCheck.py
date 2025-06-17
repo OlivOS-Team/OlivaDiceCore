@@ -347,6 +347,22 @@ def getSpecialSkill(skillName:str, pcCardRule:str, pcCardData:dict):
             else:
                 res = -2
         elif skillName == 'DB':
+            """
+            根据COC7th规则计算DB
+            如果缺少任何属性或计算失败，返回0
+            
+            COC7th规则:
+            STR+SIZ的和为左侧，DB为右侧
+            2-64: -2
+            65-84: -1
+            85-124: 0
+            125-164: +1d4
+            165-204: +1d6
+            205-284: +2d6
+            285-364: +3d6
+            365-444: +4d6
+            之后每超过80，再加1d6
+            """
             if type(pcCardData) is dict \
             and 'STR' in pcCardData \
             and 'SIZ' in pcCardData:
@@ -368,5 +384,6 @@ def getSpecialSkill(skillName:str, pcCardRule:str, pcCardData:dict):
                     res = None
             else:
                 res = -2
+    res = f'({res})' if type(res) in (int,) and res < 0 else res
     res = res if res == None else str(res)
     return res
