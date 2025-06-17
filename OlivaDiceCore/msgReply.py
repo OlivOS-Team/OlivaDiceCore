@@ -4810,10 +4810,6 @@ def unity_reply(plugin_event, Proc):
                         resDefault = {}
                     )
                 )
-                db_value = OlivaDiceCore.pcCard.getDBValue(tmp_pcHash, tmp_hagID)
-                skill_valueTable['DB'] = db_value
-                skill_valueTable['db'] = db_value
-                skill_valueTable['伤害加值'] = db_value
             if len(tmp_reast_str) > 0:
                 if isMatchWordStart(tmp_reast_str, 'h'):
                     flag_hide_roll = True
@@ -5720,9 +5716,7 @@ def getExpression(
                 break
             else:
                 if flag_value:
-                    var_name = data[tmp_total_offset:tmp_total_offset + tmp_offset_len].upper()
-                    var_value = valueTable.get(var_name, 0)
-                    tmp_output_str_reg += '{%s(%s)}' % (var_name, str(var_value))
+                    tmp_output_str_reg += '{%s}' % data[tmp_total_offset:tmp_total_offset + tmp_offset_len].upper()
                 else:
                     tmp_output_str_reg += data[tmp_total_offset:tmp_total_offset + tmp_offset_len]
         if flag_have_para:
@@ -5735,13 +5729,21 @@ def getExpression(
                     for i in range(100):
                         tmp_output_str_1_old = tmp_output_str_1
                         for value_this in valueTable:
-                            if '{%s(' % value_this in tmp_output_str_1:
-                                # 负数自动加括号
-                                value = valueTable[value_this]
-                                replacement = f"({value})" if isinstance(value, int) and value < 0 else str(value)
+                            if '{%s}' % value_this in tmp_output_str_1:
+                                raw_value = valueTable[value_this]
+                                value_str = str(raw_value)
+                                # 负数加括号
+                                if isinstance(raw_value, int) and raw_value < 0:
+                                    value_str = f"({value_str})"
                                 tmp_output_str_1 = tmp_output_str_1.replace(
-                                    '{%s(%s)}' % (value_this, str(value)),
-                                    replacement
+                                    '{%s}' % value_this,
+                                    getExpression(
+                                        data=value_str,
+                                        reverse=reverse,
+                                        valueTable=valueTable,
+                                        pcCardRule=pcCardRule,
+                                        flagDynamic=False
+                                    )[0]
                                 )
                         tmp_output_str_1 = OlivaDiceCore.skillCheck.getSpecialSkillReplace(
                             tmp_output_str_1,
