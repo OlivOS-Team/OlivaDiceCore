@@ -5736,13 +5736,13 @@ def getExpression(
                                 if isinstance(raw_value, int) and raw_value < 0:
                                     value_str = f"({value_str})"
                                 tmp_output_str_1 = tmp_output_str_1.replace(
-                                    '{%s}' % value_this,
+                                    '{%s(%s)}' % (value_this, value_str),
                                     getExpression(
-                                        data=value_str,
-                                        reverse=reverse,
-                                        valueTable=valueTable,
-                                        pcCardRule=pcCardRule,
-                                        flagDynamic=False
+                                        data = value_str,
+                                        reverse = reverse,
+                                        valueTable = valueTable,
+                                        pcCardRule = pcCardRule,
+                                        flagDynamic = False
                                     )[0]
                                 )
                         tmp_output_str_1 = OlivaDiceCore.skillCheck.getSpecialSkillReplace(
