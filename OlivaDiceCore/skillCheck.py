@@ -68,6 +68,12 @@ dictSkillCheckTemp = {
     'skill': 0
 }
 
+# 这些人物卡模板规则下的这些技能需要进行特殊逻辑处理
+dictSpecialSkill = {
+    'default': ['体格', 'DB'],
+    'COC7': ['体格', 'DB']
+}
+
 def getSkillCheckByTemplate(data, template = None, ruleKey = 'default', difficulty_prefix = None):
     global dictSkillCheckTemp
     global dictSkillCheckResultRouter
@@ -311,6 +317,14 @@ def culRule(nodeKey, nodeData, tempData):
             temp_result = temp_result_1
     return temp_result
 
+def isSpecialSkill(skillName:str, pcCardRule:str):
+    global dictSpecialSkill
+    res = False
+    if pcCardRule in dictSpecialSkill \
+    and skillName in dictSpecialSkill[pcCardRule]:
+        res = True
+    return res
+
 def getSpecialSkillReplace(srcPara:str, pcCardRule:str, pcCardData:dict):
     res = srcPara
     if pcCardRule in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial:
@@ -323,7 +337,7 @@ def getSpecialSkillReplace(srcPara:str, pcCardRule:str, pcCardData:dict):
 
 def getSpecialSkill(skillName:str, pcCardRule:str, pcCardData:dict):
     res = None
-    if pcCardRule in ['default', 'COC7']:
+    if isSpecialSkill(skillName, pcCardRule):
         if skillName == '体格':
             if type(pcCardData) is dict \
             and 'STR' in pcCardData \
