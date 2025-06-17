@@ -5730,10 +5730,15 @@ def getExpression(
                         tmp_output_str_1_old = tmp_output_str_1
                         for value_this in valueTable:
                             if '{%s}' % value_this in tmp_output_str_1:
+                                raw_value = valueTable[value_this]
+                                value_str = str(raw_value)
+                                # 负数加括号
+                                if isinstance(raw_value, int) and raw_value < 0:
+                                    value_str = f"({value_str})"
                                 tmp_output_str_1 = tmp_output_str_1.replace(
-                                    '{%s}' % value_this,
+                                    '{%s(%s)}' % (value_this, value_str),
                                     getExpression(
-                                        data = str(valueTable[value_this]),
+                                        data = value_str,
                                         reverse = reverse,
                                         valueTable = valueTable,
                                         pcCardRule = pcCardRule,
