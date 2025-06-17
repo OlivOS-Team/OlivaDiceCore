@@ -850,11 +850,11 @@ def getDBValue(pcHash, hagID=None):
         siz_val = int(pc_data.get('SIZ'))
         power_size = str_val + siz_val
         if power_size <= 64:
-            return '-2'
+            return -2
         elif power_size <= 84:
-            return '-1'
+            return -1
         elif power_size <= 124:
-            return '0'
+            return 0
         elif power_size <= 164:
             return '1d4'
         elif power_size <= 204:

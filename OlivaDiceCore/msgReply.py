@@ -5720,7 +5720,9 @@ def getExpression(
                 break
             else:
                 if flag_value:
-                    tmp_output_str_reg += '{%s}' % data[tmp_total_offset:tmp_total_offset + tmp_offset_len].upper()
+                    var_name = data[tmp_total_offset:tmp_total_offset + tmp_offset_len].upper()
+                    var_value = valueTable.get(var_name, 0)
+                    tmp_output_str_reg += '{%s(%s)}' % (var_name, str(var_value))
                 else:
                     tmp_output_str_reg += data[tmp_total_offset:tmp_total_offset + tmp_offset_len]
         if flag_have_para:
@@ -5733,16 +5735,13 @@ def getExpression(
                     for i in range(100):
                         tmp_output_str_1_old = tmp_output_str_1
                         for value_this in valueTable:
-                            if '{%s}' % value_this in tmp_output_str_1:
+                            if '{%s(' % value_this in tmp_output_str_1:
+                                # 负数自动加括号
+                                value = valueTable[value_this]
+                                replacement = f"({value})" if isinstance(value, int) and value < 0 else str(value)
                                 tmp_output_str_1 = tmp_output_str_1.replace(
-                                    '{%s}' % value_this,
-                                    getExpression(
-                                        data = str(valueTable[value_this]),
-                                        reverse = reverse,
-                                        valueTable = valueTable,
-                                        pcCardRule = pcCardRule,
-                                        flagDynamic = False
-                                    )[0]
+                                    '{%s(%s)}' % (value_this, str(value)),
+                                    replacement
                                 )
                         tmp_output_str_1 = OlivaDiceCore.skillCheck.getSpecialSkillReplace(
                             tmp_output_str_1,
