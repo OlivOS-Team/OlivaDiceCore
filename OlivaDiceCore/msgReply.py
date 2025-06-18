@@ -5723,19 +5723,40 @@ def getExpression(
             tmp_output_str_1 = data[:tmp_total_offset]
             tmp_output_str_2 = data[tmp_total_offset:]
             if not reverse and valueTable != None:
-                tmp_output_str_1 = tmp_output_str_reg
-            if not reverse:
+                # 在显示时处理格式转换
+                tmp_display_str = tmp_output_str_reg
+                # 普通变量
+                for var_name in valueTable:
+                    var_value = valueTable[var_name]
+                    tmp_display_str = tmp_display_str.replace(
+                        '{%s}' % var_name,
+                        '%s(%s)' % (var_name, str(var_value))
+                    )
+                # special变量
+                potential_vars = re.findall(r'\{([^}]+)\}', tmp_display_str)
+                for var_name in potential_vars:
+                    if OlivaDiceCore.skillCheck.isSpecialSkill(var_name, pcCardRule):
+                        special_value = OlivaDiceCore.skillCheck.getSpecialSkill(var_name, pcCardRule, valueTable or {})
+                        if special_value is not None:
+                            tmp_display_str = tmp_display_str.replace(
+                                '{%s}' % var_name,
+                                '%s(%s)' % (var_name, str(special_value))
+                            )
+            
+                tmp_output_str_1 = tmp_display_str
                 if flagDynamic is True:
+                    # 动态解析时仍使用原始格式
+                    tmp_parse_str = tmp_output_str_reg
                     for i in range(100):
-                        tmp_output_str_1_old = tmp_output_str_1
+                        tmp_parse_str_old = tmp_parse_str
                         for value_this in valueTable:
-                            if '{%s}' % value_this in tmp_output_str_1:
+                            if '{%s}' % value_this in tmp_parse_str:
                                 raw_value = valueTable[value_this]
                                 value_str = str(raw_value)
                                 # 负数加括号
                                 if isinstance(raw_value, int) and raw_value < 0:
                                     value_str = f"({value_str})"
-                                tmp_output_str_1 = tmp_output_str_1.replace(
+                                tmp_parse_str = tmp_parse_str.replace(
                                     '{%s}' % value_this,
                                     getExpression(
                                         data = value_str,
@@ -5745,16 +5766,17 @@ def getExpression(
                                         flagDynamic = False
                                     )[0]
                                 )
-                        tmp_output_str_1 = OlivaDiceCore.skillCheck.getSpecialSkillReplace(
-                            tmp_output_str_1,
+                        tmp_parse_str = OlivaDiceCore.skillCheck.getSpecialSkillReplace(
+                            tmp_parse_str,
                             pcCardRule,
                             valueTable
                         )
-                        if tmp_output_str_1_old == tmp_output_str_1:
+                        if tmp_parse_str_old == tmp_parse_str:
                             break
+                    tmp_output_str_1 = tmp_parse_str
                 elif flagDynamic is False:
                     tmp_output_str_1 = OlivaDiceCore.skillCheck.getSpecialSkillReplace(
-                        tmp_output_str_1,
+                        tmp_output_str_reg,
                         pcCardRule,
                         valueTable
                     )
