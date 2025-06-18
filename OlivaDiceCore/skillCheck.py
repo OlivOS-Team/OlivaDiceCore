@@ -352,7 +352,7 @@ def getSpecialSkill(skillName:str, pcCardRule:str, pcCardData:dict):
                 except:
                     res = None
             else:
-                res = -2
+                res = 0
         elif skillName == 'DB':
             """
             根据COC7th规则计算DB
@@ -382,15 +382,15 @@ def getSpecialSkill(skillName:str, pcCardRule:str, pcCardData:dict):
                     elif tmp_sum <= 124:
                         res = 0
                     elif tmp_sum <= 164:
-                        res = '1d4'
+                        res = '1D4'
                     elif tmp_sum <= 204:
-                        res = '1d6'
+                        res = '1D6'
                     else:
-                        res = '%dd6' % (int((tmp_sum - 205) / 80) + 1)
+                        res = '%dD6' % (int((tmp_sum - 205) / 80) + 1)
                 except:
                     res = None
             else:
-                res = -2
+                res = 0
     res = f'({res})' if type(res) in (int,) and res < 0 else res
     res = res if res == None else str(res)
     return res
