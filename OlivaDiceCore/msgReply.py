@@ -5835,7 +5835,7 @@ def getExpression(
                                     value_str = f"({value_str})"
                                 tmp_parse_str = tmp_parse_str.replace(
                                     '{%s}' % value_this,
-                                    getExpression(
+                                    '(%s)' % getExpression(
                                         data = value_str,
                                         reverse = reverse,
                                         valueTable = valueTable,
