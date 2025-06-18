@@ -435,6 +435,8 @@ https://github.com/OlivOS-Team/onedice
     'pc': '&st',
     '人物卡扩展': '&stex',
     'pcex': '&stex',
+    'st ex': '&stex',
+    'pc ex': '&stex',
     '车卡coc': '&coc',
     '车卡dnd': '&dnd',
     '随机数': '&random',
