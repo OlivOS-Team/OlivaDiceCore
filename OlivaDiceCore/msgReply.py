@@ -2331,7 +2331,8 @@ def unity_reply(plugin_event, Proc):
                         tmp_hagID
                     )
                     tmp_pcCardRule_new = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_pc_name)
-                    tmp_pcCardRule = tmp_pcCardRule_new
+                    if tmp_pcCardRule_new:
+                        tmp_pcCardRule = tmp_pcCardRule_new
                     if OlivaDiceCore.skillCheck.isSpecialSkill(tmp_skill_name, tmp_pcCardRule):
                         # 特殊技能，使用getSpecialSkill获取值
                         tmp_skill_value_find = OlivaDiceCore.skillCheck.getSpecialSkill(
@@ -3094,10 +3095,12 @@ def unity_reply(plugin_event, Proc):
                         # 添加特殊技能检测提示
                         tmp_pcCardRule = 'default'
                         if tmp_pc_name_1 is not None:
-                            tmp_pcCardRule = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
+                            tmp_pcCardRule_new = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
                                 OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
                                 tmp_pc_name_1
                             )
+                            if tmp_pcCardRule_new:
+                                tmp_pcCardRule = tmp_pcCardRule_new
                         if tmp_pcCardRule in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial:
                             # 检查当前技能是否在特殊技能列表中
                             if tmp_skill_name in [skill for skill in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[tmp_pcCardRule]]:
@@ -3235,10 +3238,12 @@ def unity_reply(plugin_event, Proc):
                     # 添加特殊技能检测提示
                     tmp_pcCardRule = 'default'
                     if tmp_pc_name_1 is not None:
-                        tmp_pcCardRule = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
+                        tmp_pcCardRule_new = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
                             OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
                             tmp_pc_name_1
                         )
+                        if tmp_pcCardRule_new:
+                            tmp_pcCardRule = tmp_pcCardRule_new
                     if tmp_pcCardRule in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial:
                         if tmp_skill_name in [skill for skill in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[tmp_pcCardRule]]:
                             special_skills.append(tmp_skill_name)
@@ -3316,7 +3321,8 @@ def unity_reply(plugin_event, Proc):
                     tmp_hagID
                 )
                 tmp_pcCardRule_new = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_pc_name_1)
-                tmp_pcCardRule = tmp_pcCardRule_new
+                if tmp_pcCardRule_new:
+                    tmp_pcCardRule = tmp_pcCardRule_new
                 if OlivaDiceCore.skillCheck.isSpecialSkill(tmp_skill_name, tmp_pcCardRule):
                     # 特殊技能，使用getSpecialSkill获取值
                     tmp_skill_value_find = OlivaDiceCore.skillCheck.getSpecialSkill(
