@@ -135,6 +135,7 @@ dictStrCustom = {
     'strPcUpdateSkillValueAtOther' : '[{tUserName}]帮[{tUserName01}]的人物卡[{tName}]的人物卡更新:\n{tSkillUpdate}',
     'strPcSetSkillValue' : '[{tUserName}]的人物卡[{tName}]已保存',
     'strPcSetSkillValueAtOther' : '[{tUserName01}]的人物卡[{tName}]已保存',
+    'strPcSetSpecialSkills' : '\n\n检测到特殊属性{tSpecialSkills}，这些属性会根据相关属性的值进行自动计算。如果手动设置值将覆盖自动计算。若需要自动计算请删除这些属性。',
     'strPcGetSingleSkillValue' : '[{tName}]的[{tSkillName}]: {tSkillValue}',
     'strPcGetSingleSkillValueAtOther' : '[{tName}]的[{tSkillName}]: {tSkillValue}',
     'strPcShow' : '[{tUserName}]的人物卡[{tName}]:\n{tPcShow}',
@@ -316,6 +317,7 @@ dictTValue = {
     'tDrawDeckResult': 'N/A',
     'tConsoleKey': 'N/A',
     'tConsoleValue': 'N/A',
+    'tSpecialSkills': '',
     'tRAVResult': '未定义结果'
 }
 

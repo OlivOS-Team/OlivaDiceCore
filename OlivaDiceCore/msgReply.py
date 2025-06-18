@@ -2317,6 +2317,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'show')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 tmp_reast_str = tmp_reast_str.strip(' ')
+                tmp_pcCardRule = 'default'
                 tmp_skill_name = tmp_reast_str
                 if tmp_skill_name == '':
                     tmp_skill_name = None
@@ -2329,14 +2330,29 @@ def unity_reply(plugin_event, Proc):
                         ),
                         tmp_hagID
                     )
-                    tmp_skill_value_find = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
-                        OlivaDiceCore.pcCard.getPcHash(
-                            tmp_pc_id,
-                            tmp_pc_platform
-                        ),
-                        tmp_skill_name,
-                        hagId = tmp_hagID
-                    )
+                    tmp_pcCardRule_new = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_pc_name)
+                    tmp_pcCardRule = tmp_pcCardRule_new
+                    if OlivaDiceCore.skillCheck.isSpecialSkill(tmp_skill_name, tmp_pcCardRule):
+                        # 特殊技能，使用getSpecialSkill获取值
+                        tmp_skill_value_find = OlivaDiceCore.skillCheck.getSpecialSkill(
+                            tmp_skill_name,
+                            tmp_pcCardRule,
+                            OlivaDiceCore.pcCard.pcCardDataGetByPcName(
+                                OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
+                                hagId=tmp_hagID
+                            )
+                        )
+                        if tmp_skill_value_find is None:
+                            tmp_skill_value_find = "N/A"
+                    else:
+                        tmp_skill_value_find = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
+                            OlivaDiceCore.pcCard.getPcHash(
+                                tmp_pc_id,
+                                tmp_pc_platform
+                            ),
+                            tmp_skill_name,
+                            hagId = tmp_hagID
+                        )
                     if tmp_pc_name != None:
                         dictTValue['tName'] = tmp_pc_name
                     dictTValue['tSkillName'] = tmp_skill_name
@@ -2985,6 +3001,7 @@ def unity_reply(plugin_event, Proc):
                 # 支持连续多个技能更新
                 tmp_skill_updates = []
                 reply_messages = []
+                special_skills = []
                 op_list = ['+', '-', '*', '/']
                 assign_op = '='
                 
@@ -3073,6 +3090,19 @@ def unity_reply(plugin_event, Proc):
                         )
                         if tmp_pc_name_1:
                             dictTValue['tName'] = tmp_pc_name_1
+                            
+                        # 添加特殊技能检测提示
+                        tmp_pcCardRule = 'default'
+                        if tmp_pc_name_1 is not None:
+                            tmp_pcCardRule = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
+                                OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
+                                tmp_pc_name_1
+                            )
+                        if tmp_pcCardRule in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial:
+                            # 检查当前技能是否在特殊技能列表中
+                            if tmp_skill_name in [skill for skill in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[tmp_pcCardRule]]:
+                                special_skills.append(tmp_skill_name)
+                            
                         if tmp_skill_value:
                             # 处理直接赋值的情况
                             if tmp_skill_value.startswith('='):
@@ -3124,6 +3154,13 @@ def unity_reply(plugin_event, Proc):
                             # 不符合所有条件的直接记录
                             reply_messages.append(f"[{tmp_skill_name}]: {tmp_skill_value_old}")
                     if reply_messages:
+                        if special_skills:
+                            dictTValue['tSpecialSkills'] = '、'.join([f'[{skill}]' for skill in special_skills])
+                            tmp_notice = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                dictStrCustom['strPcSetSpecialSkills'], dictTValue
+                            )
+                        else:
+                            tmp_notice = ''
                         if is_at:
                             dictTValue['tSkillUpdate'] = '\n'.join(reply_messages)
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
@@ -3135,11 +3172,12 @@ def unity_reply(plugin_event, Proc):
                                 dictStrCustom['strPcUpdateSkillValue'], dictTValue
                             )
                         trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
-                        replyMsg(plugin_event, tmp_reply_str)
+                        replyMsg(plugin_event, tmp_reply_str + tmp_notice)
                     return
                 tmp_skill_name = None
                 tmp_skill_value = None
             if len(tmp_reast_str) > 0:
+                special_skills = []
                 tmp_reast_str_bak = tmp_reast_str
                 [tmp_pc_name, tmp_reast_str] = splitBy(tmp_reast_str, '-')
                 if tmp_reast_str == '-':
@@ -3194,6 +3232,16 @@ def unity_reply(plugin_event, Proc):
                             tmp_skill_name = tmp_skill_name[:-1]
                     tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name)
                     tmp_skill_name = tmp_skill_name.upper()
+                    # 添加特殊技能检测提示
+                    tmp_pcCardRule = 'default'
+                    if tmp_pc_name_1 is not None:
+                        tmp_pcCardRule = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
+                            OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
+                            tmp_pc_name_1
+                        )
+                    if tmp_pcCardRule in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial:
+                        if tmp_skill_name in [skill for skill in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[tmp_pcCardRule]]:
+                            special_skills.append(tmp_skill_name)
                     if len(tmp_skill_pair_list) == 0:
                         if tmp_skill_value != None:
                             tmp_skill_pair_list.append([tmp_skill_name, tmp_skill_value])
@@ -3245,13 +3293,21 @@ def unity_reply(plugin_event, Proc):
                                 flag_mode = 'rec',
                                 enableFalse = False
                             )
+                    if special_skills:
+                        dictTValue['tSpecialSkills'] = '、'.join([f'[{skill}]' for skill in special_skills])
+                        tmp_notice = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                            dictStrCustom['strPcSetSpecialSkills'], dictTValue
+                        )
+                    else:
+                        tmp_notice = ''
                     if is_at:
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetSkillValueAtOther'], dictTValue)
                     else:
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetSkillValue'], dictTValue)
                     trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
-                    replyMsg(plugin_event, tmp_reply_str)
+                    replyMsg(plugin_event, tmp_reply_str + tmp_notice)
             else:
+                tmp_pcCardRule = 'default'
                 tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
                     OlivaDiceCore.pcCard.getPcHash(
                         tmp_pc_id,
@@ -3259,14 +3315,29 @@ def unity_reply(plugin_event, Proc):
                     ),
                     tmp_hagID
                 )
-                tmp_skill_value_find = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
-                    OlivaDiceCore.pcCard.getPcHash(
-                        tmp_pc_id,
-                        tmp_pc_platform
-                    ),
-                    tmp_skill_name_find,
-                    hagId = tmp_hagID
-                )
+                tmp_pcCardRule_new = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_pc_name_1)
+                tmp_pcCardRule = tmp_pcCardRule_new
+                if OlivaDiceCore.skillCheck.isSpecialSkill(tmp_skill_name, tmp_pcCardRule):
+                    # 特殊技能，使用getSpecialSkill获取值
+                    tmp_skill_value_find = OlivaDiceCore.skillCheck.getSpecialSkill(
+                        tmp_skill_name,
+                        tmp_pcCardRule,
+                        OlivaDiceCore.pcCard.pcCardDataGetByPcName(
+                            OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
+                            hagId=tmp_hagID
+                        )
+                    )
+                    if tmp_skill_value_find is None:
+                        tmp_skill_value_find = "N/A"
+                else:
+                    tmp_skill_value_find = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
+                        OlivaDiceCore.pcCard.getPcHash(
+                            tmp_pc_id,
+                            tmp_pc_platform
+                        ),
+                        tmp_skill_name,
+                        hagId = tmp_hagID
+                    )
                 if tmp_pc_name_1 != None:
                     dictTValue['tName'] = tmp_pc_name_1
                 dictTValue['tSkillName'] = tmp_skill_name_find
