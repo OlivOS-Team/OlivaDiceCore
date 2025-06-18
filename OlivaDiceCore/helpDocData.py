@@ -170,7 +170,7 @@ He dismissed the dismiss as worthless.
 .st clear    清空当前人物卡
 .st rm [技能名]([技能名2][技能名3]...)    删除对应的一些技能
 
-st中的 属性录入、属性修改、人物卡录入、属性展示、人物卡展示 指令可由管理员及以上权限的人进行代骰。
+st中的 技能录入、技能修改、人物卡录入、技能展示、人物卡展示 指令可由管理员及以上权限的人进行代骰。
 代骰方式：在指令的末尾@目标用户
 
 st扩展命令请输入 .help stex 进行查询''',
@@ -435,8 +435,6 @@ https://github.com/OlivOS-Team/onedice
     'pc': '&st',
     '人物卡扩展': '&stex',
     'pcex': '&stex',
-    'st ex': '&stex',
-    'pc ex': '&stex',
     '车卡coc': '&coc',
     '车卡dnd': '&dnd',
     '随机数': '&random',
