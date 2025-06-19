@@ -2101,6 +2101,8 @@ def unity_reply(plugin_event, Proc):
             return
         elif isMatchWordStart(tmp_reast_str, ['st','pc'], isCommand = True):
             is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue)
+            if is_at:
+                dictTValue['tName'] = dictTValue['tUserName01']
             tmp_pc_id = at_user_id if at_user_id else plugin_event.data.user_id
             tmp_pc_name = None
             tmp_pc_platform = plugin_event.platform['platform']
@@ -3615,6 +3617,8 @@ def unity_reply(plugin_event, Proc):
                 return
         elif isMatchWordStart(tmp_reast_str, 'sc', isCommand = True):
             is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue)
+            if is_at:
+                dictTValue['tName'] = dictTValue['tUserName01']
             tmp_pc_id = at_user_id if at_user_id else plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'sc')
@@ -4044,6 +4048,8 @@ def unity_reply(plugin_event, Proc):
             OlivaDiceCore.msgReplyModel.replyRAV_command(plugin_event, Proc, valDict)
         elif isMatchWordStart(tmp_reast_str, ['ra','rc'], isCommand = True):
             is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue)
+            if is_at:
+                dictTValue['tName'] = dictTValue['tUserName01']
             tmp_pc_id = at_user_id if at_user_id else plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
@@ -5809,7 +5815,7 @@ def isdigitSafe(data):
 def parse_at_user(plugin_event, tmp_reast_str, dictTValue):
     """
     解析消息中的@用户并检查权限
-    返回: (is_at, at_user_id, cleaned_message_str)
+    返回: is_at, at_user_id, cleaned_message_str
     """
     # 解析@用户
     global dictStrCustom
