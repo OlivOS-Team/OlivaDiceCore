@@ -4,14 +4,14 @@
             "main": {
                 "command": "OlivaDiceCore",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceCore.opk",
-                "svn": 1077,
-                "version": "3.3.27"
+                "svn": 1080,
+                "version": "3.4.0"
             },
             "github": {
                 "command": "OlivaDiceCore",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceCore/releases/latest/download/OlivaDiceCore.opk",
-                "svn": 1077,
-                "version": "3.3.27"
+                "svn": 1080,
+                "version": "3.4.0"
             }
         },
         "OlivaDiceJoy": {
@@ -46,28 +46,28 @@
             "main": {
                 "command": "OlivaDiceLogger",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceLogger.opk",
-                "svn": 18,
-                "version": "3.0.10"
+                "svn": 20,
+                "version": "3.0.12"
             },
             "github": {
                 "command": "OlivaDiceLogger",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceLogger/releases/latest/download/OlivaDiceLogger.opk",
-                "svn": 18,
-                "version": "3.0.10"
+                "svn": 20,
+                "version": "3.0.12"
             }
         },
         "OlivaDiceOdyssey": {
             "main": {
                 "command": "OlivaDiceOdyssey",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceOdyssey.opk",
-                "svn": 13,
-                "version": "3.0.12"
+                "svn": 14,
+                "version": "3.0.13"
             },
             "github": {
                 "command": "OlivaDiceOdyssey",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceOdyssey/releases/latest/download/OlivaDiceOdyssey.opk",
-                "svn": 13,
-                "version": "3.0.12"
+                "svn": 14,
+                "version": "3.0.13"
             }
         },
         "OlivaStoryCore": {
@@ -88,28 +88,28 @@
             "main": {
                 "command": "OlivaDiceNativeGUI",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceNativeGUI.opk",
-                "svn": 19,
-                "version": "3.0.18"
+                "svn": 20,
+                "version": "3.0.19"
             },
             "github": {
                 "command": "OlivaDiceNativeGUI",
                 "opk_path": "https://github.com/OlivOS-Team/OlivaDiceNativeGUI/releases/latest/download/OlivaDiceNativeGUI.opk",
-                "svn": 19,
-                "version": "3.0.18"
+                "svn": 20,
+                "version": "3.0.19"
             }
         },
         "ChanceCustom": {
             "main": {
                 "command": "ChanceCustom",
                 "opk_path": "https://api.dice.center/OlivaDiceVer/main/ChanceCustom.opk",
-                "svn": 28,
-                "version": "0.2.13"
+                "svn": 30,
+                "version": "0.2.15"
             },
             "github": {
                 "command": "ChanceCustom",
                 "opk_path": "https://github.com/OlivOS-Team/ChanceCustom/releases/latest/download/ChanceCustom.opk",
-                "svn": 28,
-                "version": "0.2.13"
+                "svn": 30,
+                "version": "0.2.15"
             }
         }
     }
