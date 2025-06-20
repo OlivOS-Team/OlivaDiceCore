@@ -1978,48 +1978,7 @@ def unity_reply(plugin_event, Proc):
                 replyMsgLazyHelpByEvent(plugin_event, 'nn')
             return
         elif isMatchWordStart(tmp_reast_str, 'sn', isCommand = True):
-            is_at = False
-            # 解析@用户
-            tmp_reast_str_para = OlivOS.messageAPI.Message_templet('old_string', tmp_reast_str)
-            at_user_id = None
-            new_tmp_reast_str_parts = []
-            for part in tmp_reast_str_para.data:
-                if isinstance(part, OlivOS.messageAPI.PARA.at):
-                    at_user_id = part.data['id']
-                    tmp_userName01 = OlivaDiceCore.userConfig.getUserConfigByKey(
-                        userId=at_user_id,
-                        userType='user',
-                        platform=plugin_event.platform['platform'],
-                        userConfigKey='userName',
-                        botHash=plugin_event.bot_info.hash
-                    )
-                    plres = plugin_event.get_stranger_info(at_user_id)
-                    if plres['active']:
-                        dictTValue['tUserName01'] = plres['data']['name']
-                    else:
-                        dictTValue['tUserName01'] = tmp_userName01
-                    is_at = True
-                else:
-                    if isinstance(part, OlivOS.messageAPI.PARA.text):
-                        new_tmp_reast_str_parts.append(part.data['text'])
-            if is_at:
-                # 检查发送者是否为管理员或群主
-                sender_id = plugin_event.data.user_id
-                group_info = plugin_event.get_group_info(plugin_event.data.group_id)
-
-                is_admin_or_owner = False
-                if group_info['active']:
-                    member_info = plugin_event.get_group_member_info(plugin_event.data.group_id, sender_id)
-                    if member_info['active']:
-                        role = member_info['data'].get('role', 'member')
-                        is_admin_or_owner = role in ['admin', 'owner']
-
-                if not is_admin_or_owner:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strAtOtherPermissionDenied'], dictTValue)
-                    replyMsg(plugin_event, tmp_reply_str)
-                    return
-    
-            tmp_reast_str = ''.join(new_tmp_reast_str_parts).strip()
+            is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue)
             tmp_pc_id = at_user_id if at_user_id else plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'sn')
@@ -2141,48 +2100,9 @@ def unity_reply(plugin_event, Proc):
                 replyMsg(plugin_event, tmp_reply_str)
             return
         elif isMatchWordStart(tmp_reast_str, ['st','pc'], isCommand = True):
-            is_at = False
-            # 解析@用户
-            tmp_reast_str_para = OlivOS.messageAPI.Message_templet('old_string', tmp_reast_str)
-            at_user_id = None
-            new_tmp_reast_str_parts = []
-            for part in tmp_reast_str_para.data:
-                if isinstance(part, OlivOS.messageAPI.PARA.at):
-                    at_user_id = part.data['id']
-                    tmp_userName01 = OlivaDiceCore.userConfig.getUserConfigByKey(
-                        userId=at_user_id,
-                        userType='user',
-                        platform=plugin_event.platform['platform'],
-                        userConfigKey='userName',
-                        botHash=plugin_event.bot_info.hash
-                    )
-                    plres = plugin_event.get_stranger_info(at_user_id)
-                    if plres['active']:
-                        dictTValue['tUserName01'] = plres['data']['name']
-                    else:
-                        dictTValue['tUserName01'] = tmp_userName01
-                    is_at = True
-                else:
-                    if isinstance(part, OlivOS.messageAPI.PARA.text):
-                        new_tmp_reast_str_parts.append(part.data['text'])
+            is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue)
             if is_at:
-                # 检查发送者是否为管理员或群主
-                sender_id = plugin_event.data.user_id
-                group_info = plugin_event.get_group_info(plugin_event.data.group_id)
-
-                is_admin_or_owner = False
-                if group_info['active']:
-                    member_info = plugin_event.get_group_member_info(plugin_event.data.group_id, sender_id)
-                    if member_info['active']:
-                        role = member_info['data'].get('role', 'member')
-                        is_admin_or_owner = role in ['admin', 'owner']
-
-                if not is_admin_or_owner:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strAtOtherPermissionDenied'], dictTValue)
-                    replyMsg(plugin_event, tmp_reply_str)
-                    return
-    
-            tmp_reast_str = ''.join(new_tmp_reast_str_parts).strip()
+                dictTValue['tName'] = dictTValue['tUserName01']
             tmp_pc_id = at_user_id if at_user_id else plugin_event.data.user_id
             tmp_pc_name = None
             tmp_pc_platform = plugin_event.platform['platform']
@@ -2549,7 +2469,6 @@ def unity_reply(plugin_event, Proc):
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'new'):
-                if is_at: return
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'new')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 tmp_reast_str = tmp_reast_str.rstrip('')
@@ -2580,7 +2499,10 @@ def unity_reply(plugin_event, Proc):
                             tmp_pc_name
                         )
                         dictTValue['tPcSelection'] = tmp_pc_name
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcNew'], dictTValue)
+                        if is_at:
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcNewAtOther'], dictTValue)
+                        else:
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcNew'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'del'):
@@ -3696,48 +3618,9 @@ def unity_reply(plugin_event, Proc):
                 replyMsg(plugin_event, tmp_reply_str)
                 return
         elif isMatchWordStart(tmp_reast_str, 'sc', isCommand = True):
-            is_at = False
-            # 解析@用户
-            tmp_reast_str_para = OlivOS.messageAPI.Message_templet('old_string', tmp_reast_str)
-            at_user_id = None
-            new_tmp_reast_str_parts = []
-            for part in tmp_reast_str_para.data:
-                if isinstance(part, OlivOS.messageAPI.PARA.at):
-                    at_user_id = part.data['id']
-                    tmp_userName01 = OlivaDiceCore.userConfig.getUserConfigByKey(
-                        userId=at_user_id,
-                        userType='user',
-                        platform=plugin_event.platform['platform'],
-                        userConfigKey='userName',
-                        botHash=plugin_event.bot_info.hash
-                    )
-                    plres = plugin_event.get_stranger_info(at_user_id)
-                    if plres['active']:
-                        dictTValue['tUserName01'] = plres['data']['name']
-                    else:
-                        dictTValue['tUserName01'] = tmp_userName01
-                    is_at = True
-                else:
-                    if isinstance(part, OlivOS.messageAPI.PARA.text):
-                        new_tmp_reast_str_parts.append(part.data['text'])
+            is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue)
             if is_at:
-                # 检查发送者是否为管理员或群主
-                sender_id = plugin_event.data.user_id
-                group_info = plugin_event.get_group_info(plugin_event.data.group_id)
-
-                is_admin_or_owner = False
-                if group_info['active']:
-                    member_info = plugin_event.get_group_member_info(plugin_event.data.group_id, sender_id)
-                    if member_info['active']:
-                        role = member_info['data'].get('role', 'member')
-                        is_admin_or_owner = role in ['admin', 'owner']
-
-                if not is_admin_or_owner:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strAtOtherPermissionDenied'], dictTValue)
-                    replyMsg(plugin_event, tmp_reply_str)
-                    return
-    
-            tmp_reast_str = ''.join(new_tmp_reast_str_parts).strip()
+                dictTValue['tName'] = dictTValue['tUserName01']
             tmp_pc_id = at_user_id if at_user_id else plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'sc')
@@ -4166,48 +4049,9 @@ def unity_reply(plugin_event, Proc):
         elif isMatchWordStart(tmp_reast_str, 'rav', isCommand = True):
             OlivaDiceCore.msgReplyModel.replyRAV_command(plugin_event, Proc, valDict)
         elif isMatchWordStart(tmp_reast_str, ['ra','rc'], isCommand = True):
-            is_at = False
-            # 解析@用户
-            tmp_reast_str_para = OlivOS.messageAPI.Message_templet('old_string', tmp_reast_str)
-            at_user_id = None
-            new_tmp_reast_str_parts = []
-            for part in tmp_reast_str_para.data:
-                if isinstance(part, OlivOS.messageAPI.PARA.at):
-                    at_user_id = part.data['id']
-                    tmp_userName01 = OlivaDiceCore.userConfig.getUserConfigByKey(
-                        userId=at_user_id,
-                        userType='user',
-                        platform=plugin_event.platform['platform'],
-                        userConfigKey='userName',
-                        botHash=plugin_event.bot_info.hash
-                    )
-                    plres = plugin_event.get_stranger_info(at_user_id)
-                    if plres['active']:
-                        dictTValue['tUserName01'] = plres['data']['name']
-                    else:
-                        dictTValue['tUserName01'] = tmp_userName01
-                    is_at = True
-                else:
-                    if isinstance(part, OlivOS.messageAPI.PARA.text):
-                        new_tmp_reast_str_parts.append(part.data['text'])
+            is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue)
             if is_at:
-                # 检查发送者是否为管理员或群主
-                sender_id = plugin_event.data.user_id
-                group_info = plugin_event.get_group_info(plugin_event.data.group_id)
-
-                is_admin_or_owner = False
-                if group_info['active']:
-                    member_info = plugin_event.get_group_member_info(plugin_event.data.group_id, sender_id)
-                    if member_info['active']:
-                        role = member_info['data'].get('role', 'member')
-                        is_admin_or_owner = role in ['admin', 'owner']
-
-                if not is_admin_or_owner:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strAtOtherPermissionDenied'], dictTValue)
-                    replyMsg(plugin_event, tmp_reply_str)
-                    return
-    
-            tmp_reast_str = ''.join(new_tmp_reast_str_parts).strip()
+                dictTValue['tName'] = dictTValue['tUserName01']
             tmp_pc_id = at_user_id if at_user_id else plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
@@ -5969,3 +5813,59 @@ def isdigitSafe(data):
     if data in '0123456789':
         return True
     return False
+
+def parse_at_user(plugin_event, tmp_reast_str, dictTValue):
+    """
+    解析消息中的@用户并检查权限
+    返回: is_at, at_user_id, cleaned_message_str
+    """
+    # 解析@用户
+    global dictStrCustom
+    tmp_reast_str_para = OlivOS.messageAPI.Message_templet('old_string', tmp_reast_str)
+    at_user_id = None
+    new_tmp_reast_str_parts = []
+    is_at = False
+    
+    for part in tmp_reast_str_para.data:
+        if isinstance(part, OlivOS.messageAPI.PARA.at):
+            at_user_id = part.data['id']
+            tmp_userName01 = OlivaDiceCore.userConfig.getUserConfigByKey(
+                userId=at_user_id,
+                userType='user',
+                platform=plugin_event.platform['platform'],
+                userConfigKey='userName',
+                botHash=plugin_event.bot_info.hash
+            )
+            plres = plugin_event.get_stranger_info(at_user_id)
+            if plres['active']:
+                dictTValue['tUserName01'] = plres['data']['name']
+            else:
+                dictTValue['tUserName01'] = tmp_userName01
+            is_at = True
+        else:
+            if isinstance(part, OlivOS.messageAPI.PARA.text):
+                new_tmp_reast_str_parts.append(part.data['text'])
+    
+    if is_at:
+        # 检查发送者是否为管理员或群主
+        sender_id = plugin_event.data.user_id
+        group_info = plugin_event.get_group_info(plugin_event.data.group_id)
+
+        is_admin_or_owner = False
+        if group_info['active']:
+            member_info = plugin_event.get_group_member_info(plugin_event.data.group_id, sender_id)
+            if member_info['active']:
+                role = member_info['data'].get('role', 'member')
+                is_admin_or_owner = role in ['admin', 'owner']
+
+        if not is_admin_or_owner:
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                dictStrCustom['strAtOtherPermissionDenied'], 
+                dictTValue
+            )
+            replyMsg(plugin_event, tmp_reply_str)
+            return (True, None, None)  # 表示权限不足
+    
+    # 返回解析结果
+    cleaned_message = ''.join(new_tmp_reast_str_parts).strip()
+    return is_at, at_user_id, cleaned_message
