@@ -2469,7 +2469,6 @@ def unity_reply(plugin_event, Proc):
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'new'):
-                if is_at: return
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'new')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 tmp_reast_str = tmp_reast_str.rstrip('')
@@ -2500,7 +2499,10 @@ def unity_reply(plugin_event, Proc):
                             tmp_pc_name
                         )
                         dictTValue['tPcSelection'] = tmp_pc_name
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcNew'], dictTValue)
+                        if is_at:
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcNewAtOther'], dictTValue)
+                        else:
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcNew'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'del'):
