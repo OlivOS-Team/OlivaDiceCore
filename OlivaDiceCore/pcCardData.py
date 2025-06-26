@@ -73,7 +73,9 @@ dictPcCardTemplateDefaultTemp = {
                 'HP',
                 'HPMAX',
                 'MP',
-                'MPMAX'
+                'MPMAX',
+                'IDEA',
+                'KNOW'
             ],
             '技能': [
                 '会计',
@@ -178,7 +180,9 @@ dictPcCardTemplateDefaultTemp = {
                 '密码学',
                 '工程学',
                 '气象学',
-                '司法科学'
+                '司法科学',
+                '斗殴',
+                '生存'
             ]
         },
         'skillConfig': {
@@ -198,6 +202,8 @@ dictPcCardTemplateDefaultTemp = {
                 'HPMAX',
                 'MP',
                 'MPMAX',
+                'IDEA',
+                'KNOW',
                 '克苏鲁神话',
                 '信用'
             ],
@@ -236,14 +242,16 @@ dictPcCardTemplateDefaultTemp = {
             'APP': ['外貌', 'APP'],
             'INT': ['智力', 'INT'],
             'POW': ['意志', 'POW'],
-            'EDU': ['教育', '知识' ,'EDU'],
+            'EDU': ['教育', 'EDU'],
             'LUC': ['幸运', 'LUC', '运气'],
             'SAN': ['理智', 'SAN','Sanity','SAN值','理智值'],
             'SANMAX': ['理智上限', 'SANMAX','SanityMAX'],
-            'HP': ['生命值','HP','HitPoints'],
+            'HP': ['生命值','体力','HP','HitPoints'],
             'HPMAX': ['生命值上限','HPMAX','HitPointsMAX'],
             'MP': ['魔法','MP','MagicPoints'],
             'MPMAX': ['魔法上限','MPMAX','MagicPointsMAX'],
+            'IDEA': ['灵感', 'IDEA'],
+            'KNOW': ['知识', 'KNOW'],
             'MOV': ['移动力','MOV'],
             '会计': ['会计','Accounting'],
             '人类学': ['人类学','Anthropology'],
@@ -256,7 +264,7 @@ dictPcCardTemplateDefaultTemp = {
             '克苏鲁神话': ['克苏鲁神话','CM','克苏鲁','Cthulhu_Mythos'],
             '乔装': ['乔装','Disguise'],
             '闪避': ['闪避','Dodge'],
-            '汽车驾驶': ['汽车驾驶','驾驶','Drive_Auto'],
+            '汽车驾驶': ['汽车驾驶','驾驶','汽车','Drive_Auto'],
             '电气维修': ['电气维修','电器维修','Electical_Repair'],
             '电子学': ['电子学','Electronics'],
             '话术': ['话术','快速交谈','Fast_Talk'],
@@ -347,7 +355,9 @@ dictPcCardTemplateDefaultTemp = {
             '密码学': ['密码学', 'Cryptography'],
             '工程学': ['工程学', 'Engineering'],
             '气象学': ['气象学', 'Meteorology'],
-            '司法科学': ['司法科学', 'Forensic_Science']
+            '司法科学': ['司法科学', 'Forensic_Science'],
+            '斗殴': ['斗殴', 'Brawl'],  
+            '生存': ['生存', 'Survival']  
         },
         'redirect': {
             '力量': 'STR',
@@ -360,6 +370,8 @@ dictPcCardTemplateDefaultTemp = {
             '教育': 'EDU',
             '幸运': 'LUC',
             '理智': 'SAN',
+            '灵感': 'IDEA',
+            '知识': 'KNOW'
         },
         'showName': {
             'STR': '力量',
@@ -370,7 +382,9 @@ dictPcCardTemplateDefaultTemp = {
             'INT': '智力',
             'POW': '意志',
             'EDU': '教育',
-            'LUC': '幸运'
+            'LUC': '幸运',
+            'IDEA': '灵感',
+            'KNOW': '知识'
         },
         'defaultSkillValue': {
             '会计': 5,
@@ -418,7 +432,8 @@ dictPcCardTemplateDefaultTemp = {
             '催眠': 1,
             '炮术': 1,
             '手枪': 20,
-            '步霰': 25
+            '步霰': 25,
+            '斗殴': 20
         },
         'checkRules': {
             'default': {
@@ -519,7 +534,9 @@ dictPcCardTemplateDefaultTemp = {
                 'HP',
                 'HPMAX',
                 'MP',
-                'MPMAX'
+                'MPMAX',
+                'IDEA',
+                'KNOW'
             ],
             '技能': [
                 '会计',
@@ -624,7 +641,9 @@ dictPcCardTemplateDefaultTemp = {
                 '密码学',
                 '工程学',
                 '气象学',
-                '司法科学'
+                '司法科学',
+                '斗殴',
+                '生存'
             ]
         },
         'skillConfig': {
@@ -644,6 +663,8 @@ dictPcCardTemplateDefaultTemp = {
                 'HPMAX',
                 'MP',
                 'MPMAX',
+                'IDEA',
+                'KNOW',
                 '克苏鲁神话',
                 '信用'
             ],
@@ -682,14 +703,16 @@ dictPcCardTemplateDefaultTemp = {
             'APP': ['外貌', 'APP'],
             'INT': ['智力', 'INT'],
             'POW': ['意志', 'POW'],
-            'EDU': ['教育', '知识' ,'EDU'],
+            'EDU': ['教育', 'EDU'],
             'LUC': ['幸运', 'LUC', '运气'],
             'SAN': ['理智', 'SAN','Sanity','SAN值','理智值'],
             'SANMAX': ['理智上限', 'SANMAX','SanityMAX'],
-            'HP': ['生命值','HP','HitPoints'],
+            'HP': ['生命值','体力','HP','HitPoints'],
             'HPMAX': ['生命值上限','HPMAX','HitPointsMAX'],
             'MP': ['魔法','MP','MagicPoints'],
             'MPMAX': ['魔法上限','MPMAX','MagicPointsMAX'],
+            'IDEA': ['灵感', 'IDEA'],
+            'KNOW': ['知识', 'KNOW'],
             'MOV': ['移动力','MOV'],
             '会计': ['会计','Accounting'],
             '人类学': ['人类学','Anthropology'],
@@ -702,7 +725,7 @@ dictPcCardTemplateDefaultTemp = {
             '克苏鲁神话': ['克苏鲁神话','CM','克苏鲁','Cthulhu_Mythos'],
             '乔装': ['乔装','Disguise'],
             '闪避': ['闪避','Dodge'],
-            '汽车驾驶': ['汽车驾驶','驾驶','Drive_Auto'],
+            '汽车驾驶': ['汽车驾驶','驾驶','汽车','Drive_Auto'],
             '电气维修': ['电气维修','电器维修','Electical_Repair'],
             '电子学': ['电子学','Electronics'],
             '话术': ['话术','快速交谈','Fast_Talk'],
@@ -735,7 +758,7 @@ dictPcCardTemplateDefaultTemp = {
             '爆破': ['爆破','Demolitions'],
             '读唇': ['读唇','Read_Lips'],
             '催眠': ['催眠','Hypnosis'],
-                        '炮术': ['炮术','Artillery'],
+            '炮术': ['炮术','Artillery'],
             '母语': ['母语', 'Own_Language'],
             '鞭子': ['鞭子', 'Whip'],
             '电锯': ['电锯', 'Chainsaw'],
@@ -793,7 +816,9 @@ dictPcCardTemplateDefaultTemp = {
             '密码学': ['密码学', 'Cryptography'],
             '工程学': ['工程学', 'Engineering'],
             '气象学': ['气象学', 'Meteorology'],
-            '司法科学': ['司法科学', 'Forensic_Science']
+            '司法科学': ['司法科学', 'Forensic_Science'],
+            '斗殴': ['斗殴', 'Brawl'],  
+            '生存': ['生存', 'Survival']  
         },
         'redirect': {
             '力量': 'STR',
@@ -806,6 +831,8 @@ dictPcCardTemplateDefaultTemp = {
             '教育': 'EDU',
             '幸运': 'LUC',
             '理智': 'SAN',
+            '灵感': 'IDEA',
+            '知识': 'KNOW'
         },
         'showName': {
             'STR': '力量',
@@ -816,7 +843,9 @@ dictPcCardTemplateDefaultTemp = {
             'INT': '智力',
             'POW': '意志',
             'EDU': '教育',
-            'LUC': '幸运'
+            'LUC': '幸运',
+            'IDEA': '灵感',
+            'KNOW': '知识'
         },
         'defaultSkillValue': {
             '会计': 5,
@@ -864,7 +893,8 @@ dictPcCardTemplateDefaultTemp = {
             '催眠': 1,
             '炮术': 1,
             '手枪': 20,
-            '步霰': 25
+            '步霰': 25,
+            '斗殴': 20
         },
         'checkRules': {
             'default': {
@@ -1283,7 +1313,9 @@ dictPcCardTemplateDefaultTemp = {
                 'HP',
                 'HPMAX',
                 'MP',
-                'MPMAX'
+                'MPMAX',
+                'IDEA',
+                'KNOW'
             ],
             '技能': [
                 '会计',
@@ -1388,7 +1420,9 @@ dictPcCardTemplateDefaultTemp = {
                 '密码学',
                 '工程学',
                 '气象学',
-                '司法科学'
+                '司法科学',
+                '斗殴',
+                '生存'
             ]
         },
         'skillConfig': {
@@ -1408,6 +1442,8 @@ dictPcCardTemplateDefaultTemp = {
                 'HPMAX',
                 'MP',
                 'MPMAX',
+                'IDEA',
+                'KNOW',
                 '克苏鲁神话',
                 '信用'
             ],
@@ -1444,14 +1480,16 @@ dictPcCardTemplateDefaultTemp = {
             'APP': ['外貌', 'APP'],
             'INT': ['智力', 'INT'],
             'POW': ['意志', 'POW'],
-            'EDU': ['教育', '知识' ,'EDU'],
+            'EDU': ['教育', 'EDU'],
             'LUC': ['幸运', 'LUC', '运气'],
             'SAN': ['理智', 'SAN','Sanity','SAN值','理智值'],
             'SANMAX': ['理智上限', 'SANMAX','SanityMAX'],
-            'HP': ['生命值','HP','HitPoints'],
+            'HP': ['生命值','体力','HP','HitPoints'],
             'HPMAX': ['生命值上限','HPMAX','HitPointsMAX'],
             'MP': ['魔法','MP','MagicPoints'],
             'MPMAX': ['魔法上限','MPMAX','MagicPointsMAX'],
+            'IDEA': ['灵感', 'IDEA'],
+            'KNOW': ['知识', 'KNOW'],
             'MOV': ['移动力','MOV'],
             '会计': ['会计','Accounting'],
             '人类学': ['人类学','Anthropology'],
@@ -1464,7 +1502,7 @@ dictPcCardTemplateDefaultTemp = {
             '克苏鲁神话': ['克苏鲁神话','CM','克苏鲁','Cthulhu_Mythos'],
             '乔装': ['乔装','Disguise'],
             '闪避': ['闪避','Dodge'],
-            '汽车驾驶': ['汽车驾驶','驾驶','Drive_Auto'],
+            '汽车驾驶': ['汽车驾驶','驾驶','汽车','Drive_Auto'],
             '电气维修': ['电气维修','电器维修','Electical_Repair'],
             '电子学': ['电子学','Electronics'],
             '话术': ['话术','快速交谈','Fast_Talk'],
@@ -1555,7 +1593,9 @@ dictPcCardTemplateDefaultTemp = {
             '密码学': ['密码学', 'Cryptography'],
             '工程学': ['工程学', 'Engineering'],
             '气象学': ['气象学', 'Meteorology'],
-            '司法科学': ['司法科学', 'Forensic_Science']
+            '司法科学': ['司法科学', 'Forensic_Science'],
+            '斗殴': ['斗殴', 'Brawl'],  
+            '生存': ['生存', 'Survival']  
         },
         'redirect': {
             '力量': 'STR',
@@ -1568,6 +1608,8 @@ dictPcCardTemplateDefaultTemp = {
             '教育': 'EDU',
             '幸运': 'LUC',
             '理智': 'SAN',
+            '灵感': 'IDEA',
+            '知识': 'KNOW'
         },
         'showName': {
             'STR': '力量',
@@ -1578,7 +1620,9 @@ dictPcCardTemplateDefaultTemp = {
             'INT': '智力',
             'POW': '意志',
             'EDU': '教育',
-            'LUC': '幸运'
+            'LUC': '幸运',
+            'IDEA': '灵感',
+            'KNOW': '知识'
         },
         'defaultSkillValue': {},
         'checkRules': {
@@ -2105,7 +2149,9 @@ dictPcCardTemplateDefaultTemp = {
                 '密码学',
                 '工程学',
                 '气象学',
-                '司法科学'
+                '司法科学',
+                '斗殴',
+                '生存'
             ]
         },
         'skillConfig': {
@@ -2125,6 +2171,8 @@ dictPcCardTemplateDefaultTemp = {
                 'HPMAX',
                 'MP',
                 'MPMAX',
+                'IDEA',
+                'KNOW',
                 '克苏鲁神话',
                 '信用'
             ],
@@ -2162,14 +2210,14 @@ dictPcCardTemplateDefaultTemp = {
             'APP': ['外貌', 'APP'],
             'INT': ['智力', 'INT'],
             'POW': ['意志', 'POW'],
-            'EDU': ['教育', '知识' ,'EDU'],
+            'EDU': ['教育', 'EDU'],
             'LUC': ['幸运', 'LUC', '运气'],
-            'SAN': ['理智', 'SAN', 'Sanity'],
-            'SANMAX': ['理智上限', 'SANMAX', 'SanityMAX'],
-            'HP': ['生命值','HP', 'HitPoints'],
-            'HPMAX': ['生命值上限','HPMAX', 'HitPointsMAX'],
-            'MP': ['魔法','MP', 'MagicPoints'],
-            'MPMAX': ['魔法上限','MPMAX', 'MagicPointsMAX'],
+            'SAN': ['理智', 'SAN','Sanity','SAN值','理智值'],
+            'SANMAX': ['理智上限', 'SANMAX','SanityMAX'],
+            'HP': ['生命值','体力','HP','HitPoints'],
+            'HPMAX': ['生命值上限','HPMAX','HitPointsMAX'],
+            'MP': ['魔法','MP','MagicPoints'],
+            'MPMAX': ['魔法上限','MPMAX','MagicPointsMAX'],
             'IDEA': ['灵感', 'IDEA'],
             'KNOW': ['知识', 'KNOW'],
             'MOV': ['移动力','MOV'],
@@ -2184,7 +2232,7 @@ dictPcCardTemplateDefaultTemp = {
             '克苏鲁神话': ['克苏鲁神话','CM','克苏鲁','Cthulhu_Mythos'],
             '乔装': ['乔装','Disguise'],
             '闪避': ['闪避','Dodge'],
-            '汽车驾驶': ['汽车驾驶','驾驶','Drive_Auto'],
+            '汽车驾驶': ['汽车驾驶','驾驶','汽车','Drive_Auto'],
             '电气维修': ['电气维修','电器维修','Electical_Repair'],
             '电子学': ['电子学','Electronics'],
             '话术': ['话术','快速交谈','Fast_Talk'],
@@ -2275,7 +2323,9 @@ dictPcCardTemplateDefaultTemp = {
             '密码学': ['密码学', 'Cryptography'],
             '工程学': ['工程学', 'Engineering'],
             '气象学': ['气象学', 'Meteorology'],
-            '司法科学': ['司法科学', 'Forensic_Science']
+            '司法科学': ['司法科学', 'Forensic_Science'],
+            '斗殴': ['斗殴', 'Brawl'],  
+            '生存': ['生存', 'Survival']  
         },
         'redirect': {
             '力量': 'STR',
