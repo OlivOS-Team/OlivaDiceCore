@@ -5134,6 +5134,10 @@ def unity_reply(plugin_event, Proc):
     return
 
 def trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue):
+    # 如果是私聊消息，直接返回不执行自动群名片更新
+    if plugin_event.plugin_info['func_type'] == 'private_message':
+        return
+    
     auto_sn_enabled = OlivaDiceCore.userConfig.getUserConfigByKey(
         userId = tmp_pc_id,
         userType = 'user',
