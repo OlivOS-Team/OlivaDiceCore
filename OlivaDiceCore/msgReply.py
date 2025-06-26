@@ -2994,7 +2994,8 @@ def unity_reply(plugin_event, Proc):
                         dictTValue['tBlockList'] = '\n'.join([f'- {block}' for block in block_list])
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcBlockList'], dictTValue)
                     else:
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcBlockList'], {'tName': tmp_pc_name, 'tBlockList': '无可用块'})
+                        dictTValue['tBlockList'] = "无技能块"
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcBlockList'], dictTValue)
 
                     replyMsg(plugin_event, tmp_reply_str)
                     return
