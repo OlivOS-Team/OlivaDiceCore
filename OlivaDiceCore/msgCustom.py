@@ -309,6 +309,7 @@ dictTValue = {
     'tPcTempName' : '',
     'tPcTempRuleName' : '',
     'tBlockList': '无技能块',
+    'tBlockName': 'N/A',
     'tSkillEnhanceCount' : 'N/A',
     'tSkillEnhanceSucceedCount' : 'N/A',
     'tSkillEnhanceSucceedList' : 'N/A',
