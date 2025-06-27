@@ -2918,7 +2918,172 @@ def unity_reply(plugin_event, Proc):
                     is_remove = is_remove
                 )
                 return
-            
+            elif isMatchWordStart(tmp_reast_str, 'blockrm'):
+                if is_at: return
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'blockrm')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_block_name = tmp_reast_str.strip()
+                if not tmp_block_name:
+                    tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+                    tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
+
+                    if tmp_pc_name is None:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRmCardNone'], dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
+                        return
+                    
+                    tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_pc_name)
+                    tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name or 'default')
+                    pc_data = OlivaDiceCore.pcCard.pcCardDataGetByPcName(tmp_pcHash, hagId=tmp_hagID)
+                    
+                    block_list = []
+                    template_blocks = {}
+
+                    # 处理模板定义的块
+                    if 'skill' in tmp_template:
+                        for block_name in tmp_template['skill']:
+                            if isinstance(tmp_template['skill'][block_name], list):
+                                has_skill = False
+                                block_skills = []
+                                for skill_name in tmp_template['skill'][block_name]:
+                                    skill_core_name = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
+                                        tmp_pcHash, skill_name, hagId=tmp_hagID)
+                                    if skill_core_name in pc_data:
+                                        has_skill = True
+                                        block_skills.append(skill_core_name)
+
+                                if has_skill:
+                                    block_list.append(block_name)
+                                    template_blocks[block_name] = block_skills
+
+                    # 检查并添加有内容的固定块
+                    mapping_record = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                        tmp_pcHash, tmp_pc_name, 'mappingRecord', {})
+                    if mapping_record:
+                        block_list.append('映射')
+
+                    note_record = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                        tmp_pcHash, tmp_pc_name, 'noteRecord', {})
+                    if note_record:
+                        block_list.append('记录')
+
+                    # 检查是否有"其它"内容
+                    tmp_enhanceList = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                        tmp_pcHash, tmp_pc_name, 'enhanceList', [])
+
+                    has_other = False
+                    all_template_skills = set()
+                    for block_skills in template_blocks.values():
+                        all_template_skills.update(block_skills)
+
+                    for skill_key in pc_data:
+                        if skill_key.startswith('__') or skill_key == 'template':
+                            continue
+
+                        skill_core_name = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
+                            tmp_pcHash, skill_key, hagId=tmp_hagID)
+
+                        if skill_core_name not in all_template_skills:
+                            has_other = True
+                            break
+                        
+                    if has_other:
+                        block_list.append('其它')
+
+                    if block_list:
+                        dictTValue['tBlockList'] = '\n'.join([f'- {block}' for block in block_list])
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcBlockList'], dictTValue)
+                    else:
+                        dictTValue['tBlockList'] = "无技能块"
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcBlockList'], dictTValue)
+
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
+
+                tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+                tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
+
+                if tmp_pc_name is None:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRmCardNone'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
+
+                tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_pc_name)
+                tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name or 'default')
+                pc_data = OlivaDiceCore.pcCard.pcCardDataGetByPcName(tmp_pcHash, hagId=tmp_hagID)
+
+                deleted = False
+
+                # 处理映射块
+                if tmp_block_name == '映射':
+                    mapping_record = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                        tmp_pcHash, tmp_pc_name, 'mappingRecord', {})
+                    if mapping_record:
+                        OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
+                            tmp_pcHash, tmp_pc_name, 'mappingRecord', {})
+                        deleted = True
+
+                # 处理记录块
+                elif tmp_block_name == '记录':
+                    note_record = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                        tmp_pcHash, tmp_pc_name, 'noteRecord', {})
+                    if note_record:
+                        OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
+                            tmp_pcHash, tmp_pc_name, 'noteRecord', {})
+                        deleted = True
+                        trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
+
+                # 处理其它块
+                elif tmp_block_name == '其它':
+                    all_template_skills = set()
+                    if 'skill' in tmp_template:
+                        for block_name in tmp_template['skill']:
+                            if isinstance(tmp_template['skill'][block_name], list):
+                                for skill_name in tmp_template['skill'][block_name]:
+                                    skill_core_name = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
+                                        tmp_pcHash, skill_name, hagId=tmp_hagID)
+                                    all_template_skills.add(skill_core_name)
+                    other_skills = []
+                    for skill_key in pc_data:
+                        if skill_key.startswith('__') or skill_key == 'template':
+                            continue
+
+                        skill_core_name = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
+                            tmp_pcHash, skill_key, hagId=tmp_hagID)
+
+                        if skill_core_name not in all_template_skills:
+                            other_skills.append(skill_key)
+                    if other_skills:
+                        for skill_name in other_skills:
+                            OlivaDiceCore.pcCard.pcCardDataDelBySkillName(
+                                tmp_pcHash, skill_name, tmp_pc_name)
+                        deleted = True
+
+                # 处理模板定义的块
+                elif 'skill' in tmp_template and tmp_block_name in tmp_template['skill']:
+                    if isinstance(tmp_template['skill'][tmp_block_name], list):
+                        skills_to_delete = []
+                        for skill_name in tmp_template['skill'][tmp_block_name]:
+                            skill_core_name = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
+                                tmp_pcHash, skill_name, hagId=tmp_hagID)
+                            if skill_core_name in pc_data:
+                                skills_to_delete.append(skill_core_name)
+
+                        if skills_to_delete:
+                            for skill_name in skills_to_delete:
+                                OlivaDiceCore.pcCard.pcCardDataDelBySkillName(
+                                    tmp_pcHash, skill_name, tmp_pc_name)
+                            deleted = True
+
+                if deleted:
+                    dictTValue['tBlockName'] = tmp_block_name
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcBlockRm'], dictTValue)
+                else:
+                    dictTValue['tBlockName'] = tmp_block_name
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcBlockRmNone'], dictTValue)
+
+                replyMsg(plugin_event, tmp_reply_str)
+                return
             tmp_reast_str_new = tmp_reast_str
             if len(tmp_reast_str_new) > 0:
                 # 支持连续多个技能更新
