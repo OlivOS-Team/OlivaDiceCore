@@ -3088,6 +3088,76 @@ def unity_reply(plugin_event, Proc):
 
                 replyMsg(plugin_event, tmp_reply_str)
                 return
+            elif isMatchWordStart(tmp_reast_str, 'export'):
+                if is_at: return
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'export')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_pc_name = tmp_reast_str.strip()
+
+                tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
+                    tmp_pc_id,
+                    tmp_pc_platform
+                )
+
+                # 没有指定人物卡，使用当前人物卡
+                if not tmp_pc_name:
+                    tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
+                        tmp_pcHash,
+                        tmp_hagID
+                    )
+                if not tmp_pc_name:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRmCardNone'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
+                tmp_dict_pc_card = OlivaDiceCore.pcCard.pcCardDataGetUserAll(tmp_pcHash).get(tmp_pc_name, {})
+                if not tmp_dict_pc_card:
+                    dictTValue['tPcInputCard'] = tmp_pc_name
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNoPcInputCard'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
+                tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_pc_name)
+                tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name or 'default')
+
+                primary_skills = set()
+                if 'synonyms' in tmp_template:
+                    primary_skills.update(tmp_template['synonyms'].keys())
+                skill_pairs = []
+                processed_skills = set()
+                for skill_key in tmp_dict_pc_card:
+                    if skill_key.startswith('__') or skill_key == 'template':
+                        continue
+                    # 主技能
+                    if skill_key in primary_skills:
+                        skill_value = tmp_dict_pc_card[skill_key]
+                        skill_pairs.append(f"{skill_key}{skill_value}")
+                        processed_skills.add(skill_key)
+                    # 别名删掉
+                    else:
+                        is_alias = False
+                        for main_key in primary_skills:
+                            if skill_key in tmp_template['synonyms'].get(main_key, []):
+                                if main_key not in processed_skills:
+                                    skill_value = tmp_dict_pc_card[skill_key]
+                                    skill_pairs.append(f"{main_key}{skill_value}")
+                                    processed_skills.add(main_key)
+                                is_alias = True
+                                break
+                        # 其它技能
+                        if not is_alias and skill_key not in processed_skills:
+                            skill_value = tmp_dict_pc_card[skill_key]
+                            skill_pairs.append(f"{skill_key}{skill_value}")
+                            processed_skills.add(skill_key)
+                if not skill_pairs:
+                    dictTValue['tPcInputCard'] = tmp_pc_name
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcCardNoSkill'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
+                export_str = f"{tmp_pc_name}-" + "".join(skill_pairs)
+                dictTValue['tPcInputCard'] = tmp_pc_name
+                dictTValue['tExport'] = export_str
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcCardExport'], dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
+                return
             tmp_reast_str_new = tmp_reast_str
             if len(tmp_reast_str_new) > 0:
                 # 支持连续多个技能更新
