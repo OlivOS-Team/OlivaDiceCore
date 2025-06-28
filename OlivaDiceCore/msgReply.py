@@ -3106,7 +3106,7 @@ def unity_reply(plugin_event, Proc):
                         tmp_hagID
                     )
                 if not tmp_pc_name:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRmCardNone'], dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcExportCardNone'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
                 tmp_dict_pc_card = OlivaDiceCore.pcCard.pcCardDataGetUserAll(tmp_pcHash).get(tmp_pc_name, {})
