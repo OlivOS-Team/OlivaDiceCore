@@ -1328,8 +1328,8 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
             return
-        elif isMatchWordStart(tmp_reast_str, 'help', isCommand = True):
-            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'help')
+        elif isMatchWordStart(tmp_reast_str, ['help', 'find'], isCommand = True):
+            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['help', 'find'])
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             tmp_reast_str = tmp_reast_str.rstrip(' ')
             tmp_reply_str = None
