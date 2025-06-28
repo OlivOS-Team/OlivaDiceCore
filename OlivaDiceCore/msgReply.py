@@ -1328,8 +1328,8 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
             return
-        elif isMatchWordStart(tmp_reast_str, 'help', isCommand = True):
-            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'help')
+        elif isMatchWordStart(tmp_reast_str, ['help', 'find'], isCommand = True):
+            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['help', 'find'])
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             tmp_reast_str = tmp_reast_str.rstrip(' ')
             tmp_reply_str = None
@@ -1978,7 +1978,9 @@ def unity_reply(plugin_event, Proc):
                 replyMsgLazyHelpByEvent(plugin_event, 'nn')
             return
         elif isMatchWordStart(tmp_reast_str, 'sn', isCommand = True):
-            is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue)
+            is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue, dictStrCustom)
+            if is_at and not at_user_id:
+                return
             tmp_pc_id = at_user_id if at_user_id else plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'sn')
@@ -2100,8 +2102,10 @@ def unity_reply(plugin_event, Proc):
                 replyMsg(plugin_event, tmp_reply_str)
             return
         elif isMatchWordStart(tmp_reast_str, ['st','pc'], isCommand = True):
-            is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue)
+            is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue, dictStrCustom)
             if is_at:
+                if not at_user_id:
+                    return
                 dictTValue['tName'] = dictTValue['tUserName01']
             tmp_pc_id = at_user_id if at_user_id else plugin_event.data.user_id
             tmp_pc_name = None
@@ -3783,8 +3787,10 @@ def unity_reply(plugin_event, Proc):
                 replyMsg(plugin_event, tmp_reply_str)
                 return
         elif isMatchWordStart(tmp_reast_str, 'sc', isCommand = True):
-            is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue)
+            is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue, dictStrCustom)
             if is_at:
+                if not at_user_id:
+                    return
                 dictTValue['tName'] = dictTValue['tUserName01']
             tmp_pc_id = at_user_id if at_user_id else plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
@@ -4214,8 +4220,10 @@ def unity_reply(plugin_event, Proc):
         elif isMatchWordStart(tmp_reast_str, 'rav', isCommand = True):
             OlivaDiceCore.msgReplyModel.replyRAV_command(plugin_event, Proc, valDict)
         elif isMatchWordStart(tmp_reast_str, ['ra','rc'], isCommand = True):
-            is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue)
+            is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue, dictStrCustom)
             if is_at:
+                if not at_user_id:
+                    return
                 dictTValue['tName'] = dictTValue['tUserName01']
             tmp_pc_id = at_user_id if at_user_id else plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
@@ -5983,13 +5991,11 @@ def isdigitSafe(data):
         return True
     return False
 
-def parse_at_user(plugin_event, tmp_reast_str, dictTValue):
+def parse_at_user(plugin_event, tmp_reast_str, dictTValue, dictStrCustom):
     """
     解析消息中的@用户并检查权限
     返回: is_at, at_user_id, cleaned_message_str
     """
-    # 解析@用户
-    global dictStrCustom
     tmp_reast_str_para = OlivOS.messageAPI.Message_templet('old_string', tmp_reast_str)
     at_user_id = None
     new_tmp_reast_str_parts = []
@@ -6033,7 +6039,7 @@ def parse_at_user(plugin_event, tmp_reast_str, dictTValue):
                 dictTValue
             )
             replyMsg(plugin_event, tmp_reply_str)
-            return (True, None, None)  # 表示权限不足
+            return (True, None, None)  # 权限不足
     
     # 返回解析结果
     cleaned_message = ''.join(new_tmp_reast_str_parts).strip()
