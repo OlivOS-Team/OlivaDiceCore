@@ -4567,7 +4567,7 @@ def unity_reply(plugin_event, Proc):
                             )
                             dictTValue['tSkillValue'] = tmp_skill_value_str if not difficulty else f'{tmpSkillThreshold}({tmp_skill_value_str})'
                             if tmpSkillThreshold == None: dictTValue['tSkillValue'] = tmp_skill_value_str
-                            tmp_tSkillCheckReasult = '%s/%s' % (tmp_tSkillCheckReasult, dictTValue['tSkillValue'])
+                            tmp_tSkillCheckReasult = '%s/%s ' % (tmp_tSkillCheckReasult.strip(), dictTValue['tSkillValue'])
                             if tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS:
                                 tmp_tSkillCheckReasult += OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckSucceed'], dictTValue)
                                 flag_check_success = True
