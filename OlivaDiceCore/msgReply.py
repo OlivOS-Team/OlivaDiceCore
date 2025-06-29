@@ -2102,6 +2102,7 @@ def unity_reply(plugin_event, Proc):
                 replyMsg(plugin_event, tmp_reply_str)
             return
         elif isMatchWordStart(tmp_reast_str, ['st','pc'], isCommand = True):
+            tmp_reply_str = ''
             is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue, dictStrCustom)
             if is_at:
                 if not at_user_id:
@@ -3479,6 +3480,7 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetSkillValue'], dictTValue)
                     trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                     replyMsg(plugin_event, tmp_reply_str + tmp_notice)
+                    return
             else:
                 tmp_pcCardRule = 'default'
                 tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
@@ -3521,6 +3523,11 @@ def unity_reply(plugin_event, Proc):
                 else:
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcGetSingleSkillValue'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
+                return
+            if not tmp_reply_str:
+                tmp_reply_str = OlivaDiceCore.helpDoc.getHelp('st', plugin_event.bot_info.hash)
+                replyMsg(plugin_event, tmp_reply_str)
+                return
         elif isMatchWordStart(tmp_reast_str, 'setcoc', isCommand = True):
             if flag_is_from_group:
                 tmp_user_platform = plugin_event.platform['platform']
