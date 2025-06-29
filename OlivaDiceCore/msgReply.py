@@ -3794,7 +3794,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str_1 = ''
                 dictTValue['tPcTempName'] = tmp_pcCardTemplateName
                 for tmp_res_list_this in tmp_res_list:
-                    tmp_reply_str_1 += '\n'
+                    tmp_reply_str_1 += '\n\n'
                     tmp_total_count_1 = 0
                     tmp_total_count_2 = 0
                     for tmp_res_list_this_this in tmp_res_list_this:
@@ -3806,9 +3806,9 @@ def unity_reply(plugin_event, Proc):
                         if tmp_res_list_this_this != 'LUC':
                             tmp_total_count_1 += tmp_res_list_this[tmp_res_list_this_this]
                     if tmp_pcCardTemplateName in ['COC7']:
-                        tmp_reply_str_1 += '共计:%d/%d %.2f%%' % (tmp_total_count_1, tmp_total_count_2, 100 * tmp_total_count_1 / tmp_total_count_2)
+                        tmp_reply_str_1 += '\n共计: %d/%d  %.2f%%' % (tmp_total_count_1, tmp_total_count_2, 100 * tmp_total_count_1 / tmp_total_count_2)
                     elif tmp_pcCardTemplateName in ['COC6', 'DND5E']:
-                        tmp_reply_str_1 += '共计:%d' % tmp_total_count_1
+                        tmp_reply_str_1 += '\n共计: %d' % tmp_total_count_1
                 dictTValue['tPcInitResult'] = tmp_reply_str_1
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInit'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
@@ -4552,9 +4552,9 @@ def unity_reply(plugin_event, Proc):
                         if rd_para.resError == None:
                             tmp_tSkillCheckReasult += '\n'
                             if flag_bp_type == 0:
-                                tmp_tSkillCheckReasult += '%s=%d ' % (rd_para_str, rd_para.resInt)
+                                tmp_tSkillCheckReasult += '%s=%d' % (rd_para_str, rd_para.resInt)
                             else:
-                                tmp_tSkillCheckReasult += '%s=%s=%d ' % (rd_para_str, rd_para.resDetail, rd_para.resInt)
+                                tmp_tSkillCheckReasult += '%s=%s=%d' % (rd_para_str, rd_para.resDetail, rd_para.resInt)
                             dictRuleTempData = {
                                 'roll': rd_para.resInt,
                                 'skill': tmp_skill_value
@@ -4567,7 +4567,7 @@ def unity_reply(plugin_event, Proc):
                             )
                             dictTValue['tSkillValue'] = tmp_skill_value_str if not difficulty else f'{tmpSkillThreshold}({tmp_skill_value_str})'
                             if tmpSkillThreshold == None: dictTValue['tSkillValue'] = tmp_skill_value_str
-                            tmp_tSkillCheckReasult = '%s/%s ' % (tmp_tSkillCheckReasult.strip(), dictTValue['tSkillValue'])
+                            tmp_tSkillCheckReasult = '%s/%s ' % (tmp_tSkillCheckReasult, dictTValue['tSkillValue'])
                             if tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS:
                                 tmp_tSkillCheckReasult += OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckSucceed'], dictTValue)
                                 flag_check_success = True
