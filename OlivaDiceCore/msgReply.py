@@ -2507,6 +2507,7 @@ def unity_reply(plugin_event, Proc):
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcNewAtOther'], dictTValue)
                         else:
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcNew'], dictTValue)
+                        trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'del'):
@@ -2541,6 +2542,7 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcDelError'], dictTValue)
                 else:
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcDelNone'], dictTValue)
+                trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, ['clear', 'clr'], fullMatch = True):
@@ -3126,25 +3128,27 @@ def unity_reply(plugin_event, Proc):
                 for skill_key in tmp_dict_pc_card:
                     if skill_key.startswith('__') or skill_key == 'template':
                         continue
+                    skill_value = tmp_dict_pc_card[skill_key]
+                    # 跳过值为0的技能
+                    if skill_value == 0:
+                        continue
                     # 主技能
                     if skill_key in primary_skills:
-                        skill_value = tmp_dict_pc_card[skill_key]
-                        skill_pairs.append(f"{skill_key}{skill_value}")
-                        processed_skills.add(skill_key)
-                    # 别名删掉
+                        if skill_key not in processed_skills:
+                            skill_pairs.append(f"{skill_key}{skill_value}")
+                            processed_skills.add(skill_key)
+                    # 别名处理
                     else:
                         is_alias = False
                         for main_key in primary_skills:
                             if skill_key in tmp_template['synonyms'].get(main_key, []):
                                 if main_key not in processed_skills:
-                                    skill_value = tmp_dict_pc_card[skill_key]
                                     skill_pairs.append(f"{main_key}{skill_value}")
                                     processed_skills.add(main_key)
                                 is_alias = True
                                 break
                         # 其它技能
                         if not is_alias and skill_key not in processed_skills:
-                            skill_value = tmp_dict_pc_card[skill_key]
                             skill_pairs.append(f"{skill_key}{skill_value}")
                             processed_skills.add(skill_key)
                 if not skill_pairs:
