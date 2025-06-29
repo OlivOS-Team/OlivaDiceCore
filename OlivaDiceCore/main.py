@@ -25,6 +25,13 @@ class Event(object):
         OlivaDiceCore.msgReply.unity_init_after(plugin_event, Proc)
 
     def private_message(plugin_event, Proc):
+        # 禁用私聊
+        if OlivaDiceCore.console.getConsoleSwitchByHash(
+            'disablePrivate',
+            plugin_event.bot_info.hash
+        ) == 1:
+            plugin_event.set_block()
+            return
         OlivaDiceCore.msgReply.unity_reply(plugin_event, Proc)
 
     def group_message(plugin_event, Proc):
