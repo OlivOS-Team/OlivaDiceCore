@@ -3128,6 +3128,9 @@ def unity_reply(plugin_event, Proc):
                 for skill_key in tmp_dict_pc_card:
                     if skill_key.startswith('__') or skill_key == 'template':
                         continue
+                    # 跳过以数字结尾的技能名
+                    if skill_key[-1].isdigit():
+                        continue
                     skill_value = tmp_dict_pc_card[skill_key]
                     # 跳过值为0的技能
                     if skill_value == 0:
