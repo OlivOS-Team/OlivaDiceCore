@@ -979,7 +979,7 @@ def replyTEAM_command(plugin_event, tmp_reast_str, flag_is_from_group, flag_is_f
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'del'):
         return team_delete(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin, 
                            flag_is_from_master, dictTValue, dictStrCustom)
-    elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'clear'):
+    elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, ['clear','clr']):
         return team_clear(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin, 
                           flag_is_from_master, dictTValue, dictStrCustom)
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'at'):
@@ -1399,7 +1399,7 @@ def team_clear(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin,
             dictStrCustom['strNeedAdmin'], dictTValue
         ))
         return
-    tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'clear')
+    tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, ['clear','clr'])
     tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
     team_name = tmp_reast_str.strip()
     team_config = OlivaDiceCore.userConfig.getUserConfigByKey(
