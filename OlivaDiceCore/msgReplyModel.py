@@ -991,9 +991,9 @@ def replyTEAM_command(plugin_event, Proc, valDict, flag_is_from_group_admin):
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'rename'):
         return team_rename(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, ['st','pc']):
-        return team_st_command(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
+        return team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, ['ra','rc']):
-        return team_ra_command(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
+        return team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
     else:
         return team_create(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
 
@@ -1126,6 +1126,12 @@ def team_show(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
     
     # 获取成员信息
     members = team_config[team_name]['members']
+    if not members:
+        dictTValue['tTeamName'] = team_name
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strTeamEmpty'], dictTValue
+        ))
+        return
     member_info = []
     
     for member_id in members:
@@ -1617,6 +1623,12 @@ def team_sort(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
     
     skill_name = skill_name.upper()
     members = team_config[team_name]['members']
+    if not members:
+        dictTValue['tTeamName'] = team_name
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strTeamEmpty'], dictTValue
+        ))
+        return
     
     # 收集成员信息并获取技能值
     member_info_list = []
@@ -1761,7 +1773,7 @@ def team_rename(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCusto
         dictStrCustom['strTeamRenamed'], dictTValue
     ))
 
-def team_st_command(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
+def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
     tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, ['st','pc'])
     tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
     
@@ -1972,7 +1984,7 @@ def team_st_command(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrC
     
     OlivaDiceCore.msgReply.replyMsg(plugin_event, reply_msg)
 
-def team_ra_command(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
+def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
     tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, ['ra','rc'])
     tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
 
