@@ -248,12 +248,17 @@ dictStrCustom = {
     'strTeamCleared': '已清空小队[{tTeamName}]的成员',
     'strTeamAt': '正在通知小队[{tTeamName}]成员: {tAtMembers}',
     'strTeamSetActive': '已设置[{tTeamName}]为当前活跃小队',
+    'strTeamSortResult': '小队[{tTeamName}]按技能[{tSkillName}]排序结果:\n{tSortResult}',
+    'strTeamSortNeedSkill': '请指定要排序的技能名称',
+    'strTeamRenamed': '已将小队[{tOldTeamName}]重命名为[{tNewTeamName}]',
+    'strTeamRenameNeedNewName': '请指定新的小队名称',
+    'strTeamNameExists': '小队名称[{tTeamName}]已存在',
     'strNoActiveTeam': '当前群组没有活跃小队',
     'strTeamNotFound': '小队[{tTeamName}]不存在',
     'strNoTeams': '当前群组没有创建任何小队',
     'strNoMembersRemoved': '没有移除任何成员',
     'strTeamEmpty': '小队[{tTeamName}]中没有成员',
-    'strForGroupOnly': '此功能仅对群聊开放'
+    'strForGroupOnly': '此功能仅对群聊开放',
 }
 
 dictStrConst = {
@@ -352,6 +357,9 @@ dictTValue = {
     'tAtMembers': '',
     'tRemovedCount': '',
     'tRemovedMembers': '',
+    'tSortResult': '',
+    'tOldTeamName': '',
+    'tNewTeamName': '',
 }
 
 dictSetCOCDetail = {
