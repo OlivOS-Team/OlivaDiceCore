@@ -960,14 +960,12 @@ def getNoteFormat(
 team指令部分
 '''
 
-def replyTEAM_command(plugin_event, tmp_reast_str, flag_is_from_group, flag_is_from_group_admin, 
-                      flag_is_from_master, tmp_hagID, dictTValue, dictStrCustom):
-    if not flag_is_from_group:
-        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
-            dictStrCustom['strForGroupOnly'], dictTValue
-        ))
-        return
-    
+def replyTEAM_command(plugin_event, Proc, valDict, flag_is_from_group_admin):
+    tmp_reast_str = valDict['tmp_reast_str']
+    flag_is_from_master = valDict['flag_is_from_master']
+    tmp_hagID = valDict['tmp_hagID']
+    dictTValue = valDict['dictTValue']
+    dictStrCustom = valDict['dictStrCustom']
     tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'team')
     tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
     

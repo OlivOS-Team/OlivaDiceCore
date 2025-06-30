@@ -1978,7 +1978,7 @@ def unity_reply(plugin_event, Proc):
                 replyMsgLazyHelpByEvent(plugin_event, 'nn')
             return
         elif isMatchWordStart(tmp_reast_str, 'sn', isCommand = True):
-            is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue, dictStrCustom)
+            is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, valDict, flag_is_from_group_admin)
             if is_at and not at_user_id:
                 return
             tmp_pc_id = at_user_id if at_user_id else plugin_event.data.user_id
@@ -2103,7 +2103,7 @@ def unity_reply(plugin_event, Proc):
             return
         elif isMatchWordStart(tmp_reast_str, ['st','pc'], isCommand = True):
             tmp_reply_str = ''
-            is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue, dictStrCustom)
+            is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, valDict, flag_is_from_group_admin)
             if is_at:
                 if not at_user_id:
                     return
@@ -3871,7 +3871,7 @@ def unity_reply(plugin_event, Proc):
                 replyMsg(plugin_event, tmp_reply_str)
                 return
         elif isMatchWordStart(tmp_reast_str, 'sc', isCommand = True):
-            is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue, dictStrCustom)
+            is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, valDict, flag_is_from_group_admin)
             if is_at:
                 if not at_user_id:
                     return
@@ -4304,7 +4304,7 @@ def unity_reply(plugin_event, Proc):
         elif isMatchWordStart(tmp_reast_str, 'rav', isCommand = True):
             OlivaDiceCore.msgReplyModel.replyRAV_command(plugin_event, Proc, valDict)
         elif isMatchWordStart(tmp_reast_str, ['ra','rc'], isCommand = True):
-            is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue, dictStrCustom)
+            is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, valDict, flag_is_from_group_admin)
             if is_at:
                 if not at_user_id:
                     return
@@ -4872,16 +4872,12 @@ def unity_reply(plugin_event, Proc):
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillEnhanceError'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
         elif isMatchWordStart(tmp_reast_str, 'team', isCommand = True):
-            OlivaDiceCore.msgReplyModel.replyTEAM_command(
-                plugin_event,
-                tmp_reast_str,
-                flag_is_from_group,
-                flag_is_from_group_admin,
-                flag_is_from_master,
-                tmp_hagID,
-                dictTValue,
-                dictStrCustom
-            )
+            if not flag_is_from_group:
+                OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+                    dictStrCustom['strForGroupOnly'], dictTValue
+                ))
+                return
+            OlivaDiceCore.msgReplyModel.replyTEAM_command(plugin_event, Proc, valDict, flag_is_from_group_admin)
         #关闭该调试性质指令
         elif False and isMatchWordStart(tmp_reast_str, 'rrange', isCommand = True):
             tmp_pc_id = plugin_event.data.user_id
@@ -6088,11 +6084,14 @@ def isdigitSafe(data):
         return True
     return False
 
-def parse_at_user(plugin_event, tmp_reast_str, dictTValue, dictStrCustom):
+def parse_at_user(plugin_event, tmp_reast_str, valDict, flag_is_from_group_admin):
     """
     解析消息中的@用户并检查权限
     返回: is_at, at_user_id, cleaned_message_str
     """
+    flag_is_from_master = valDict['flag_is_from_master']
+    dictTValue = valDict['dictTValue']
+    dictStrCustom = valDict['dictStrCustom']
     tmp_reast_str_para = OlivOS.messageAPI.Message_templet('old_string', tmp_reast_str)
     at_user_id = None
     new_tmp_reast_str_parts = []
@@ -6120,17 +6119,7 @@ def parse_at_user(plugin_event, tmp_reast_str, dictTValue, dictStrCustom):
     
     if is_at:
         # 检查发送者是否为管理员或群主
-        sender_id = plugin_event.data.user_id
-        group_info = plugin_event.get_group_info(plugin_event.data.group_id)
-
-        is_admin_or_owner = False
-        if group_info['active']:
-            member_info = plugin_event.get_group_member_info(plugin_event.data.group_id, sender_id)
-            if member_info['active']:
-                role = member_info['data'].get('role', 'member')
-                is_admin_or_owner = role in ['admin', 'owner']
-
-        if not is_admin_or_owner:
+        if not (flag_is_from_group_admin or flag_is_from_master):
             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                 dictStrCustom['strAtOtherPermissionDenied'], 
                 dictTValue
