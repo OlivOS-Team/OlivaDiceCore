@@ -243,7 +243,7 @@ dictStrCustom = {
     'strTeamCreated': '已创建/更新小队[{tTeamName}]，当前成员数: {tMemberCount}',
     'strTeamShow': '小队[{tTeamName}]成员列表 ({tMemberCount}人):\n{tMembers}',
     'strTeamList': '当前群组小队列表 ({tTeamCount}个小队):\n{tTeamList}',
-    'strMembersRemoved': '已从小队[{tTeamName}]中移除{tRemovedCount}名成员: {tRemovedMembers}',
+    'strMembersRemoved': '已从小队[{tTeamName}]中移除{tRemovedCount}名成员:\n{tRemovedMembers}',
     'strTeamDeleted': '已删除小队[{tTeamName}]',
     'strTeamCleared': '已清空小队[{tTeamName}]的成员',
     'strTeamAt': '正在通知小队[{tTeamName}]成员: {tAtMembers}',

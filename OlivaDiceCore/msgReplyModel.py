@@ -1149,7 +1149,7 @@ def team_show(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
         pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
         pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
         
-        member_info.append(f"成员: {user_name} - 人物卡: ({pc_name if pc_name else {user_name}})")
+        member_info.append(f"成员: [{user_name}] - 人物卡: [{pc_name if pc_name else {user_name}}]")
     
     # 构建回复
     dictTValue['tTeamName'] = team_name
@@ -1302,8 +1302,15 @@ def team_remove(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin
             botHash=plugin_event.bot_info.hash,
             default=f"用户{member_id}"
         )
-        # 显示昵称和QQ号
-        removed_names.append(f"[{user_name}({member_id})]")
+        
+        # 获取人物卡名
+        pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
+        pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
+        
+        # 格式化显示名称
+        display_name = f"[{user_name}] - [{pc_name}]" if pc_name else f"[{user_name}] - [{user_name}]"
+        
+        removed_names.append(display_name)
     
     dictTValue['tTeamName'] = team_name
     dictTValue['tRemovedCount'] = str(len(removed_members))
@@ -1664,7 +1671,7 @@ def team_sort(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
     member_info_list.sort(key=lambda x: (-x['skill_value'], x['original_index']))
     result_lines = []
     for index, member in enumerate(member_info_list, 1):
-        line = f"{index}. {member['name']} - {member['pc_name'] if member['pc_name'] else member['name']}({skill_name}: {member['skill_value']})"
+        line = f"{index}. [{member['name']}] - [{member['pc_name'] if member['pc_name'] else member['name']}]({skill_name}: {member['skill_value']})"
         result_lines.append(line)
     
     dictTValue['tTeamName'] = team_name
@@ -2003,6 +2010,8 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
         userConfigKey='activeTeam',
         botHash=plugin_event.bot_info.hash
     )
+    
+    # 解析小队名称
     team_name = None
     skill_expr = tmp_reast_str
     
@@ -2047,10 +2056,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
         while skill_expr and skill_expr[0].isdigit():
             bp_digits += skill_expr[0]
             skill_expr = skill_expr[1:]
-        if bp_digits:
-            bp_count = int(bp_digits)
-        else:
-            bp_count = 1  # 默认1个奖励骰
+        bp_count = int(bp_digits) if bp_digits else 1
     elif skill_expr.startswith('p') or skill_expr.startswith('P'):
         bp_type = 2
         skill_expr = skill_expr[1:]
@@ -2059,10 +2065,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
         while skill_expr and skill_expr[0].isdigit():
             bp_digits += skill_expr[0]
             skill_expr = skill_expr[1:]
-        if bp_digits:
-            bp_count = int(bp_digits)
-        else:
-            bp_count = 1  # 默认1个惩罚骰
+        bp_count = int(bp_digits) if bp_digits else 1
     
     skill_expr = OlivaDiceCore.msgReply.skipSpaceStart(skill_expr)
     
@@ -2144,7 +2147,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
     # 为每个成员进行检定
     results = []
     for member_id in members:
-        # 获取用户名称
+        # 获取用户信息
         user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
             userId=member_id,
             userType='user',
@@ -2156,9 +2159,11 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
         
         pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
         pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
-        display_name = user_name
+        
+        # 构建显示名称
+        display_name = f"[{user_name}]"
         if pc_name:
-            display_name = f"{user_name} - {pc_name}"
+            display_name += f" - [{pc_name}]"
         
         # 获取技能值
         current_skill_value = None
@@ -2185,7 +2190,8 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
         else:
             current_skill_value = 0
         
-        # 应用操作符到技能值
+        current_skill_value_show = current_skill_value
+        # 应用操作符
         if op and op_value is not None:
             if op == '+':
                 current_skill_value += op_value
@@ -2207,7 +2213,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
         if bp_count is not None:
             rd_para_str += str(bp_count)
         
-        # 获取模板和自定义默认值
+        # 获取模板配置
         template_name = flag_groupTemplate or 'default'
         template_rule_name = flag_groupTemplateRule or 'default'
         template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(template_name)
@@ -2242,14 +2248,35 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
             skill_check_data, template, template_rule_name, difficulty
         )
 
-        # 检查是否en
+        # 构建骰子详情
+        dice_detail = f"{rd_para_str}={roll_value}"
+        if rd_para.resDetail:
+            dice_detail = f"{rd_para_str}={rd_para.resDetail}={roll_value}"
+        
+        # 构建技能值显示
+        skill_value_str = str(current_skill_value_show)
+        if difficulty:
+            skill_value_str = f"{skill_threshold}({skill_value_str})"
+
+        # 构建操作符部分
+        op_display = ""
+        if op and op_value is not None:
+            op_display = f"{op}{op_value}"
+            if current_skill_value != roll_value:
+                op_display += f"={current_skill_value}"
+        
+        # 构建完整结果字符串
+        result_str = f"{display_name}({skill_name}: {skill_value_str}): {dice_detail}/{skill_value_str}{op_display} "
+        result_str += get_SkillCheckResult(skill_check_type, dictStrCustom, dictTValue)
+        
+        # 处理enhanceList
         if skill_check_type in [
             OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS,
             OlivaDiceCore.skillCheck.resultType.SKILLCHECK_HARD_SUCCESS,
             OlivaDiceCore.skillCheck.resultType.SKILLCHECK_EXTREME_HARD_SUCCESS,
             OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_SUCCESS
         ]:
-            if pc_name and skill_name and bp_type != 1:  # 奖励骰不加入
+            if pc_name and skill_name and bp_type != 1:
                 tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
                 tmp_enhanceList = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
                     tmp_pcHash,
@@ -2281,23 +2308,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
                         tmp_enhanceList
                     )
         
-        # 构建结果字符串
-        skill_value_str = str(current_skill_value)
-        if difficulty:
-            skill_value_str = f"{skill_threshold}({current_skill_value})"
-        
-        # 显示骰子详情 - 如果有详细结果就显示详细结果
-        dice_detail = f"{rd_para_str}={roll_value}"
-        if rd_para.resDetail:
-            dice_detail = f"{rd_para_str}={rd_para.resDetail}={roll_value}"
-        
-        result_str = f"{display_name}: {dice_detail}/{skill_value_str} "
-        
-        dictTValue['tRollResult'] = dice_detail
-        dictTValue['tSkillValue'] = skill_value_str
-        result_str += get_SkillCheckResult(skill_check_type, dictStrCustom, dictTValue)
-        
-        # 记录结果用于排序
+        # 记录结果
         success_level = 0
         if skill_check_type in [
             OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_SUCCESS,
@@ -2329,12 +2340,15 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
         x['roll_value'],     # roll值小在上
         -x['skill_value']    # 技能值大在上
     ))
+    
     if not dictTValue['tSkillName']:
         dictTValue['tSkillName'] = "未知技能"
+    
     # 构建最终输出
     result_lines = []
     for i, result in enumerate(results, 1):
         result_lines.append(f"{i}. {result['result_str']}")
+    
     dictTValue['tTeamName'] = team_name
     dictTValue['tResult'] = '\n'.join(result_lines)
     reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
