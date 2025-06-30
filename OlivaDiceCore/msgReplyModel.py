@@ -955,3 +955,989 @@ def getNoteFormat(
         '%d' % (tmp_value)
     )
     return res
+
+'''
+team指令部分
+'''
+
+def replyTEAM_command(plugin_event, tmp_reast_str, flag_is_from_group, flag_is_from_group_admin, 
+                      flag_is_from_master, tmp_hagID, dictTValue, dictStrCustom):
+    if not flag_is_from_group:
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strForGroupOnly'], dictTValue
+        ))
+        return
+    
+    tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'team')
+    tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
+    
+    if OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'show'):
+        return team_show(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
+    elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'list'):
+        return team_list(plugin_event, tmp_hagID, dictTValue, dictStrCustom)
+    elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'rm'):
+        return team_remove(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin, 
+                           flag_is_from_master, dictTValue, dictStrCustom)
+    elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'del'):
+        return team_delete(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin, 
+                           flag_is_from_master, dictTValue, dictStrCustom)
+    elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, ['clear','clr']):
+        return team_clear(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin, 
+                          flag_is_from_master, dictTValue, dictStrCustom)
+    elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'at'):
+        return team_at(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
+    elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'set'):
+        return team_set(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
+    elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, ['sort','arr']):
+        return team_sort(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
+    elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'rename'):
+        return team_rename(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
+    elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, ['st','pc']):
+        return team_st_command(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
+    else:
+        return team_create(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
+
+def team_create(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
+    tmp_reast_str_para = OlivOS.messageAPI.Message_templet('old_string', tmp_reast_str)
+    team_name = None
+    members = []
+    
+    # 解析小队名称
+    if len(tmp_reast_str_para.data) > 0 and isinstance(tmp_reast_str_para.data[0], OlivOS.messageAPI.PARA.text):
+        team_name = tmp_reast_str_para.data[0].data['text'].strip()
+        if team_name == '':
+            team_name = None
+    
+    # 解析成员
+    for part in tmp_reast_str_para.data:
+        if isinstance(part, OlivOS.messageAPI.PARA.at):
+            members.append(part.data['id'])
+            
+    if team_name is None and not members:
+        OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'team')
+        return
+            
+    team_config = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='teamConfig',
+        botHash=plugin_event.bot_info.hash,
+        default={}
+    )
+    active_team = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='activeTeam',
+        botHash=plugin_event.bot_info.hash
+    )
+    
+    # 处理默认小队名称
+    if team_name is None:
+        if active_team is None:
+            # 没有活跃小队，创建默认小队
+            team_name = 'default'
+        else:
+            # 使用当前活跃小队
+            team_name = active_team
+    
+    # 创建或更新小队
+    if team_name not in team_config:
+        # 新小队
+        team_config[team_name] = {
+            'members': list(set(members)),  # 去重
+            'created': int(time.time())
+        }
+        # 设置新小队为活跃小队
+        OlivaDiceCore.userConfig.setUserConfigByKey(
+            userConfigKey='activeTeam',
+            userConfigValue=team_name,
+            botHash=plugin_event.bot_info.hash,
+            userId=tmp_hagID,
+            userType='group',
+            platform=plugin_event.platform['platform']
+        )
+    else:
+        # 更新现有小队
+        existing_members = set(team_config[team_name]['members'])
+        new_members = set(members)
+        team_config[team_name]['members'] = list(existing_members | new_members)  # 合并并去重
+    
+    OlivaDiceCore.userConfig.setUserConfigByKey(
+        userConfigKey='teamConfig',
+        userConfigValue=team_config,
+        botHash=plugin_event.bot_info.hash,
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform']
+    )
+    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+        userHash=OlivaDiceCore.userConfig.getUserHash(
+            userId=tmp_hagID,
+            userType='group',
+            platform=plugin_event.platform['platform']
+        )
+    )
+    
+    # 回复消息
+    dictTValue['tTeamName'] = team_name
+    dictTValue['tMemberCount'] = str(len(team_config[team_name]['members']))
+    OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+        dictStrCustom['strTeamCreated'], dictTValue
+    ))
+
+def team_show(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
+    tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'show')
+    tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
+    team_name = tmp_reast_str.strip()
+    team_config = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='teamConfig',
+        botHash=plugin_event.bot_info.hash,
+        default={}
+    )
+    active_team = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='activeTeam',
+        botHash=plugin_event.bot_info.hash
+    )
+    
+    # 确定小队名称
+    if team_name == '':
+        if active_team is None:
+            OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+                dictStrCustom['strNoActiveTeam'], dictTValue
+            ))
+            return
+        team_name = active_team
+    
+    # 检查小队是否存在
+    if team_name not in team_config:
+        dictTValue['tTeamName'] = team_name
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strTeamNotFound'], dictTValue
+        ))
+        return
+    
+    # 获取成员信息
+    members = team_config[team_name]['members']
+    member_info = []
+    
+    for member_id in members:
+        # 获取用户名称
+        user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
+            userId=member_id,
+            userType='user',
+            platform=plugin_event.platform['platform'],
+            userConfigKey='userName',
+            botHash=plugin_event.bot_info.hash,
+            default=f"用户{member_id}"
+        )
+        
+        # 获取当前人物卡
+        pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
+        pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
+        
+        member_info.append(f"成员: {user_name} - 人物卡: ({pc_name if pc_name else {user_name}})")
+    
+    # 构建回复
+    dictTValue['tTeamName'] = team_name
+    dictTValue['tMemberCount'] = str(len(members))
+    dictTValue['tMembers'] = '\n'.join(member_info)
+    OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+        dictStrCustom['strTeamShow'], dictTValue
+    ))
+
+def team_list(plugin_event, tmp_hagID, dictTValue, dictStrCustom):
+    team_config = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='teamConfig',
+        botHash=plugin_event.bot_info.hash,
+        default={}
+    )
+    active_team = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='activeTeam',
+        botHash=plugin_event.bot_info.hash
+    )
+    
+    # 构建小队列表
+    team_list = []
+    for team_name, team_data in team_config.items():
+        member_count = len(team_data['members'])
+        active_indicator = " (活跃)" if team_name == active_team else ""
+        team_list.append(f"{team_name}{active_indicator} - {member_count}名成员")
+    
+    # 构建回复
+    if not team_list:
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strNoTeams'], dictTValue
+        ))
+        return
+    
+    dictTValue['tTeamCount'] = str(len(team_list))
+    dictTValue['tTeamList'] = '\n'.join(team_list)
+    OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+        dictStrCustom['strTeamList'], dictTValue
+    ))
+
+def team_remove(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin, 
+                flag_is_from_master, dictTValue, dictStrCustom):
+    if not (flag_is_from_group_admin or flag_is_from_master):
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strNeedAdmin'], dictTValue
+        ))
+        return
+    
+    tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'rm')
+    tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
+    
+    # 解析小队名称和成员
+    tmp_reast_str_para = OlivOS.messageAPI.Message_templet('old_string', tmp_reast_str)
+    team_name = None
+    members_to_remove = []
+    
+    # 解析小队名称
+    if len(tmp_reast_str_para.data) > 0 and isinstance(tmp_reast_str_para.data[0], OlivOS.messageAPI.PARA.text):
+        team_name = tmp_reast_str_para.data[0].data['text'].strip()
+        if team_name == '':
+            team_name = None
+    
+    # 解析要移除的成员
+    for part in tmp_reast_str_para.data:
+        if isinstance(part, OlivOS.messageAPI.PARA.at):
+            members_to_remove.append(part.data['id'])
+
+    if team_name is None and not members_to_remove:
+        OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'team')
+        return
+            
+    team_config = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='teamConfig',
+        botHash=plugin_event.bot_info.hash,
+        default={}
+    )
+    active_team = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='activeTeam',
+        botHash=plugin_event.bot_info.hash
+    )
+    
+    # 确定小队名称
+    if team_name is None:
+        if active_team is None:
+            OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+                dictStrCustom['strNoActiveTeam'], dictTValue
+            ))
+            return
+        team_name = active_team
+    
+    # 检查小队是否存在
+    if team_name not in team_config:
+        dictTValue['tTeamName'] = team_name
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strTeamNotFound'], dictTValue
+        ))
+        return
+    
+    # 移除成员
+    current_members = set(team_config[team_name]['members'])
+    removed_members = []
+    
+    for member_id in members_to_remove:
+        if member_id in current_members:
+            current_members.remove(member_id)
+            removed_members.append(member_id)
+    
+    team_config[team_name]['members'] = list(current_members)
+    OlivaDiceCore.userConfig.setUserConfigByKey(
+        userConfigKey='teamConfig',
+        userConfigValue=team_config,
+        botHash=plugin_event.bot_info.hash,
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform']
+    )
+    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+        userHash=OlivaDiceCore.userConfig.getUserHash(
+            userId=tmp_hagID,
+            userType='group',
+            platform=plugin_event.platform['platform']
+        )
+    )
+    if not removed_members:
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strNoMembersRemoved'], dictTValue
+        ))
+        return
+    
+    removed_names = []
+    for member_id in removed_members:
+        # 获取用户名称
+        user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
+            userId=member_id,
+            userType='user',
+            platform=plugin_event.platform['platform'],
+            userConfigKey='userName',
+            botHash=plugin_event.bot_info.hash,
+            default=f"用户{member_id}"
+        )
+        # 显示昵称和QQ号
+        removed_names.append(f"[{user_name}({member_id})]")
+    
+    dictTValue['tTeamName'] = team_name
+    dictTValue['tRemovedCount'] = str(len(removed_members))
+    dictTValue['tRemovedMembers'] = '、'.join(removed_names)
+    OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+        dictStrCustom['strMembersRemoved'], dictTValue
+    ))
+
+def team_delete(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin, 
+                flag_is_from_master, dictTValue, dictStrCustom):
+    if not (flag_is_from_group_admin or flag_is_from_master):
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strNeedAdmin'], dictTValue
+        ))
+        return
+    
+    tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'del')
+    tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
+    team_name = tmp_reast_str.strip()
+    team_config = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='teamConfig',
+        botHash=plugin_event.bot_info.hash,
+        default={}
+    )
+    active_team = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='activeTeam',
+        botHash=plugin_event.bot_info.hash
+    )
+    
+    # 确定小队名称
+    if team_name == '':
+        if active_team is None:
+            OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+                dictStrCustom['strNoActiveTeam'], dictTValue
+            ))
+            return
+        team_name = active_team
+    
+    # 检查小队是否存在
+    if team_name not in team_config:
+        dictTValue['tTeamName'] = team_name
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strTeamNotFound'], dictTValue
+        ))
+        return
+    
+    # 删除小队
+    del team_config[team_name]
+    
+    # 处理活跃小队
+    if active_team == team_name:
+        if team_config:
+            # 设置第一个小队为活跃小队
+            new_active_team = list(team_config.keys())[0]
+            OlivaDiceCore.userConfig.setUserConfigByKey(
+                userConfigKey='activeTeam',
+                userConfigValue=new_active_team,
+                botHash=plugin_event.bot_info.hash,
+                userId=tmp_hagID,
+                userType='group',
+                platform=plugin_event.platform['platform']
+            )
+        else:
+            # 没有其他小队，清除活跃小队
+            OlivaDiceCore.userConfig.setUserConfigByKey(
+                userConfigKey='activeTeam',
+                userConfigValue=None,
+                botHash=plugin_event.bot_info.hash,
+                userId=tmp_hagID,
+                userType='group',
+                platform=plugin_event.platform['platform']
+            )
+    
+    # 保存配置
+    OlivaDiceCore.userConfig.setUserConfigByKey(
+        userConfigKey='teamConfig',
+        userConfigValue=team_config,
+        botHash=plugin_event.bot_info.hash,
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform']
+    )
+    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+        userHash=OlivaDiceCore.userConfig.getUserHash(
+            userId=tmp_hagID,
+            userType='group',
+            platform=plugin_event.platform['platform']
+        )
+    )
+    dictTValue['tTeamName'] = team_name
+    OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+        dictStrCustom['strTeamDeleted'], dictTValue
+    ))
+
+def team_clear(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin, 
+               flag_is_from_master, dictTValue, dictStrCustom):
+    if not (flag_is_from_group_admin or flag_is_from_master):
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strNeedAdmin'], dictTValue
+        ))
+        return
+    tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, ['clear','clr'])
+    tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
+    team_name = tmp_reast_str.strip()
+    team_config = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='teamConfig',
+        botHash=plugin_event.bot_info.hash,
+        default={}
+    )
+    active_team = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='activeTeam',
+        botHash=plugin_event.bot_info.hash
+    )
+    
+    # 确定小队名称
+    if team_name == '':
+        if active_team is None:
+            OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+                dictStrCustom['strNoActiveTeam'], dictTValue
+            ))
+            return
+        team_name = active_team
+    
+    # 检查小队是否存在
+    if team_name not in team_config:
+        dictTValue['tTeamName'] = team_name
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strTeamNotFound'], dictTValue
+        ))
+        return
+    
+    # 清除成员
+    team_config[team_name]['members'] = []
+    OlivaDiceCore.userConfig.setUserConfigByKey(
+        userConfigKey='teamConfig',
+        userConfigValue=team_config,
+        botHash=plugin_event.bot_info.hash,
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform']
+    )
+    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+        userHash=OlivaDiceCore.userConfig.getUserHash(
+            userId=tmp_hagID,
+            userType='group',
+            platform=plugin_event.platform['platform']
+        )
+    )
+    dictTValue['tTeamName'] = team_name
+    OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+        dictStrCustom['strTeamCleared'], dictTValue
+    ))
+
+def team_at(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
+    tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'at')
+    tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
+    team_name = tmp_reast_str.strip()
+    team_config = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='teamConfig',
+        botHash=plugin_event.bot_info.hash,
+        default={}
+    )
+    active_team = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='activeTeam',
+        botHash=plugin_event.bot_info.hash
+    )
+    
+    # 确定小队名称
+    if team_name == '':
+        if active_team is None:
+            OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+                dictStrCustom['strNoActiveTeam'], dictTValue
+            ))
+            return
+        team_name = active_team
+    
+    # 检查小队是否存在
+    if team_name not in team_config:
+        dictTValue['tTeamName'] = team_name
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+                dictStrCustom['strTeamNotFound'], dictTValue
+            ))
+        return
+    members = team_config[team_name]['members']
+    if not members:
+        dictTValue['tTeamName'] = team_name
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+                dictStrCustom['strTeamEmpty'], dictTValue
+            ))
+        return
+    
+    # at实现
+    at_members_str = ""
+    for member_id in members:
+        at_para = OlivOS.messageAPI.PARA.at(str(member_id))
+        at_str = at_para.get_string_by_key('CQ')
+        at_members_str += at_str
+    dictTValue['tTeamName'] = team_name
+    dictTValue['tAtMembers'] = at_members_str
+    reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+        dictStrCustom['strTeamAt'], dictTValue
+    )
+    OlivaDiceCore.msgReply.replyMsg(plugin_event, reply_str)
+
+def team_set(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
+    tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'set')
+    tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
+    team_name = tmp_reast_str.strip()
+    team_config = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='teamConfig',
+        botHash=plugin_event.bot_info.hash,
+        default={}
+    )
+    
+    # 检查小队是否存在
+    if team_name not in team_config:
+        dictTValue['tTeamName'] = team_name
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strTeamNotFound'], dictTValue
+        ))
+        return
+    
+    # 设置活跃小队
+    OlivaDiceCore.userConfig.setUserConfigByKey(
+        userConfigKey='activeTeam',
+        userConfigValue=team_name,
+        botHash=plugin_event.bot_info.hash,
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform']
+    )
+    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+        userHash=OlivaDiceCore.userConfig.getUserHash(
+            userId=tmp_hagID,
+            userType='group',
+            platform=plugin_event.platform['platform']
+        )
+    )
+    
+    dictTValue['tTeamName'] = team_name
+    OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+        dictStrCustom['strTeamSetActive'], dictTValue
+    ))
+
+def team_sort(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
+    tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, ['sort','arr'])
+    tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
+
+    team_config = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='teamConfig',
+        botHash=plugin_event.bot_info.hash,
+        default={}
+    )
+    active_team = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='activeTeam',
+        botHash=plugin_event.bot_info.hash
+    )
+    
+    # 按名称长度降序排序，优先匹配更长的名称
+    sorted_team_names = sorted(team_config.keys(), key=lambda x: -len(x))
+    team_name = None
+    skill_name = None
+    
+    # 尝试匹配小队名称
+    for candidate in sorted_team_names:
+        if tmp_reast_str.startswith(candidate):
+            team_name = candidate
+            skill_name = tmp_reast_str[len(candidate):].strip()
+            break
+    
+    # 如果没有匹配到小队名称，那么使用活跃小队，整个字符串作为技能名
+    if team_name is None:
+        if active_team is None:
+            OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+                dictStrCustom['strNoActiveTeam'], dictTValue
+            ))
+            return
+        team_name = active_team
+        skill_name = tmp_reast_str.strip()
+
+    if not team_name and not skill_name:
+        OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'team')
+        return
+    
+    if not skill_name:
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strTeamSortNeedSkill'], dictTValue
+        ))
+        return
+    
+    skill_name = skill_name.upper()
+    members = team_config[team_name]['members']
+    
+    # 收集成员信息并获取技能值
+    member_info_list = []
+    for original_index, member_id in enumerate(members):
+        user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
+            userId=member_id,
+            userType='user',
+            platform=plugin_event.platform['platform'],
+            userConfigKey='userName',
+            botHash=plugin_event.bot_info.hash,
+            default=f"用户{member_id}"
+        )
+        
+        pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
+        pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
+        skill_value = 0
+        if pc_name:
+            skill_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
+                pc_hash, skill_name, hagId=tmp_hagID
+            )
+            if skill_value is None:
+                skill_value = 0
+        
+        member_info_list.append({
+            'id': member_id,
+            'name': user_name,
+            'pc_name': pc_name,
+            'skill_value': skill_value,
+            'original_index': original_index
+        })
+    
+    # 按技能值降序排序
+    member_info_list.sort(key=lambda x: (-x['skill_value'], x['original_index']))
+    result_lines = []
+    for index, member in enumerate(member_info_list, 1):
+        line = f"{index}. {member['name']} - {member['pc_name'] if member['pc_name'] else member['name']}({skill_name}: {member['skill_value']})"
+        result_lines.append(line)
+    
+    dictTValue['tTeamName'] = team_name
+    dictTValue['tSkillName'] = skill_name
+    dictTValue['tSortResult'] = '\n'.join(result_lines)
+    
+    reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+        dictStrCustom['strTeamSortResult'], dictTValue
+    )
+    OlivaDiceCore.msgReply.replyMsg(plugin_event, reply_str)
+
+def team_rename(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
+    tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'rename')
+    tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
+    
+    team_config = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='teamConfig',
+        botHash=plugin_event.bot_info.hash,
+        default={}
+    )
+    active_team = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='activeTeam',
+        botHash=plugin_event.bot_info.hash
+    )
+    old_name = None
+    new_name = None
+    
+    # 检查是否包含 '/' 分隔符
+    if '/' in tmp_reast_str:
+        # 新名字/旧名字
+        parts = tmp_reast_str.split('/', 1)
+        new_name = parts[0].strip()
+        old_name = parts[1].strip()
+    else:
+        # 新名字（重命名活跃小队）
+        new_name = tmp_reast_str.strip()
+        old_name = active_team
+    
+    # 检查参数有效性
+    if not new_name:
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strTeamRenameNeedNewName'], dictTValue
+        ))
+        return
+    
+    if not old_name:
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strNoActiveTeam'], dictTValue
+        ))
+        return
+    
+    # 检查旧小队是否存在
+    if old_name not in team_config:
+        dictTValue['tTeamName'] = old_name
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strTeamNotFound'], dictTValue
+        ))
+        return
+    
+    # 检查新名称是否已存在
+    if new_name in team_config:
+        dictTValue['tTeamName'] = new_name
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strTeamNameExists'], dictTValue
+        ))
+        return
+
+    team_config[new_name] = team_config.pop(old_name)
+    
+    # 更新活跃小队
+    if active_team == old_name:
+        OlivaDiceCore.userConfig.setUserConfigByKey(
+            userConfigKey='activeTeam',
+            userConfigValue=new_name,
+            botHash=plugin_event.bot_info.hash,
+            userId=tmp_hagID,
+            userType='group',
+            platform=plugin_event.platform['platform']
+        )
+    
+    OlivaDiceCore.userConfig.setUserConfigByKey(
+        userConfigKey='teamConfig',
+        userConfigValue=team_config,
+        botHash=plugin_event.bot_info.hash,
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform']
+    )
+    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+        userHash=OlivaDiceCore.userConfig.getUserHash(
+            userId=tmp_hagID,
+            userType='group',
+            platform=plugin_event.platform['platform']
+        )
+    )
+    
+    dictTValue['tOldTeamName'] = old_name
+    dictTValue['tNewTeamName'] = new_name
+    OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+        dictStrCustom['strTeamRenamed'], dictTValue
+    ))
+
+def team_st_command(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
+    tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, ['st','pc'])
+    tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
+    
+    # 获取小队配置和活跃小队
+    team_config = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='teamConfig',
+        botHash=plugin_event.bot_info.hash,
+        default={}
+    )
+    active_team = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='activeTeam',
+        botHash=plugin_event.bot_info.hash
+    )
+    
+    # 按名称长度降序排序，优先匹配更长的名称
+    sorted_team_names = sorted(team_config.keys(), key=lambda x: -len(x))
+    team_name = None
+    skill_operations = None
+    
+    # 尝试匹配小队名称
+    for candidate in sorted_team_names:
+        if tmp_reast_str.startswith(candidate):
+            team_name = candidate
+            skill_operations = tmp_reast_str[len(candidate):].strip()
+            break
+    
+    # 如果没有匹配到小队名称，使用活跃小队
+    if team_name is None:
+        if active_team is None:
+            OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+                dictStrCustom['strNoActiveTeam'], dictTValue
+            ))
+            return
+        team_name = active_team
+        skill_operations = tmp_reast_str.strip()
+    
+    if not skill_operations:
+        OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'team')
+        return
+    
+    # 检查小队是否存在
+    if team_name not in team_config:
+        dictTValue['tTeamName'] = team_name
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strTeamNotFound'], dictTValue
+        ))
+        return
+    
+    # 解析多项技能操作（不包含赋值）
+    op_list = ['+', '-', '*', '/']
+    skill_updates = []
+    
+    # 分割技能操作
+    current_pos = 0
+    while current_pos < len(skill_operations):
+        # 查找技能名结束位置（遇到操作符）
+        skill_end_pos = -1
+        for i in range(current_pos, len(skill_operations)):
+            if skill_operations[i] in op_list:
+                skill_end_pos = i
+                break
+        
+        if skill_end_pos == -1:
+            # 没有找到操作符，可能是无效格式
+            break
+        
+        skill_name = skill_operations[current_pos:skill_end_pos].strip()
+        if not skill_name:
+            current_pos = skill_end_pos + 1
+            continue
+        
+        op = skill_operations[skill_end_pos]
+        rest_str = skill_operations[skill_end_pos+1:]
+        
+        # 提取数值
+        num_str = ''
+        num_end_pos = 0
+        for i, char in enumerate(rest_str):
+            if char.isdigit() or (i == 0 and char in '+-'):
+                num_str += char
+                num_end_pos = i + 1
+            else:
+                break
+        
+        if not num_str:
+            current_pos = skill_end_pos + 1
+            continue
+        
+        try:
+            value = int(num_str)
+        except ValueError:
+            current_pos = skill_end_pos + num_end_pos + 1
+            continue
+        
+        skill_updates.append((skill_name.upper(), op, value))
+        current_pos = skill_end_pos + num_end_pos + 1
+    
+    if not skill_updates:
+        OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'team')
+        return
+    
+    members = team_config[team_name]['members']
+    results = []
+    
+    # 处理每个成员
+    for member_id in members:
+        tmp_pc_id = member_id
+        tmp_pc_platform = plugin_event.platform['platform']
+        tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+        tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
+        
+        if not tmp_pc_name:
+            # 如果没有人物卡，使用默认名称
+            tmp_pc_name = OlivaDiceCore.userConfig.getUserConfigByKey(
+                userId=tmp_pc_id,
+                userType='user',
+                platform=tmp_pc_platform,
+                userConfigKey='userName',
+                botHash=plugin_event.bot_info.hash,
+                default=f"用户{member_id}"
+            )
+        
+        member_results = []
+        for skill_name, op, value in skill_updates:
+            # 获取当前技能值
+            current_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
+                tmp_pcHash, skill_name, hagId=tmp_hagID
+            )
+            
+            if current_value is None:
+                current_value = 0
+            
+            new_value = current_value
+            
+            if op == '+':
+                new_value = current_value + value
+            elif op == '-':
+                new_value = current_value - value
+            elif op == '*':
+                new_value = current_value * value
+            elif op == '/':
+                if value != 0:
+                    new_value = current_value // value
+                else:
+                    new_value = current_value
+            
+            OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
+                tmp_pcHash, skill_name, new_value, tmp_pc_name, hagId=tmp_hagID
+            )
+            
+            # 记录操作结果
+            member_results.append(f"{skill_name} {current_value}{op}{value}={new_value}")
+            # 自动更新群名片
+            OlivaDiceCore.msgReply.trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
+        
+        user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
+            userId=tmp_pc_id,
+            userType='user',
+            platform=tmp_pc_platform,
+            userConfigKey='userName',
+            botHash=plugin_event.bot_info.hash,
+            default=f"用户{member_id}"
+        )
+        
+        if member_results:
+            results.append(f"{user_name}: {' '.join(member_results)}")
+    
+    dictTValue['tTeamName'] = team_name
+    dictTValue['tResults'] = '\n'.join(results)
+    reply_msg = OlivaDiceCore.msgCustomManager.formatReplySTR(
+        dictStrCustom['strTeamSkillUpdate'], dictTValue
+    )
+    OlivaDiceCore.msgReply.replyMsg(plugin_event, reply_msg)
