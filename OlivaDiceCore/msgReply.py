@@ -4871,6 +4871,17 @@ def unity_reply(plugin_event, Proc):
                 else:
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillEnhanceError'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
+        elif isMatchWordStart(tmp_reast_str, 'team', isCommand = True):
+            OlivaDiceCore.msgReplyModel.replyTEAM_command(
+                plugin_event,
+                tmp_reast_str,
+                flag_is_from_group,
+                flag_is_from_group_admin,
+                flag_is_from_master,
+                tmp_hagID,
+                dictTValue,
+                dictStrCustom
+            )
         #关闭该调试性质指令
         elif False and isMatchWordStart(tmp_reast_str, 'rrange', isCommand = True):
             tmp_pc_id = plugin_event.data.user_id

@@ -239,7 +239,21 @@ dictStrCustom = {
     'strObExit' : '[{tUserName}]现已退出旁观',
     'strObExitAlready' : '[{tUserName}]不在旁观中',
     'strObExitAll' : '[{tUserName}]现已退出所有旁观',
-    'strObClear' : '已清空旁观列表'
+    'strObClear' : '已清空旁观列表',
+    'strTeamCreated': '已创建/更新小队[{tTeamName}]，当前成员数: {tMemberCount}',
+    'strTeamShow': '小队[{tTeamName}]成员列表 ({tMemberCount}人):\n{tMembers}',
+    'strTeamList': '当前群组小队列表 ({tTeamCount}个小队):\n{tTeamList}',
+    'strMembersRemoved': '已从小队[{tTeamName}]中移除{tRemovedCount}名成员: {tRemovedMembers}',
+    'strTeamDeleted': '已删除小队[{tTeamName}]',
+    'strTeamCleared': '已清空小队[{tTeamName}]的成员',
+    'strTeamAt': '正在通知小队[{tTeamName}]成员: {tAtMembers}',
+    'strTeamSetActive': '已设置[{tTeamName}]为当前活跃小队',
+    'strNoActiveTeam': '当前群组没有活跃小队',
+    'strTeamNotFound': '小队[{tTeamName}]不存在',
+    'strNoTeams': '当前群组没有创建任何小队',
+    'strNoMembersRemoved': '没有移除任何成员',
+    'strTeamEmpty': '小队[{tTeamName}]中没有成员',
+    'strForGroupOnly': '此功能仅对群聊开放'
 }
 
 dictStrConst = {
@@ -330,7 +344,14 @@ dictTValue = {
     'tConsoleKey': 'N/A',
     'tConsoleValue': 'N/A',
     'tSpecialSkills': '',
-    'tRAVResult': '未定义结果'
+    'tRAVResult': '未定义结果',
+    'tTeamName': '',
+    'tMemberCount': '',
+    'tTeamCount': '',
+    'tMembers': '',
+    'tAtMembers': '',
+    'tRemovedCount': '',
+    'tRemovedMembers': '',
 }
 
 dictSetCOCDetail = {

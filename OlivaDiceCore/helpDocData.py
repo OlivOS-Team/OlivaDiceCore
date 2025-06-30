@@ -420,6 +420,22 @@ https://github.com/OlivOS-Team/onedice
 .welcome [欢迎词]  设置欢迎词
 .welcome  删除欢迎词''',
 
+    'team':'''.team (小队名称) [@成员1][@成员2]……    创建/更新小队
+.team show (小队名称)    展示小队成员
+.team list    列出所有小队
+.team rm (小队名称) [@成员1][@成员2]……    从小队中移除成员
+.team del (小队名称)    删除小队
+.team clear (小队名称)    清空小队成员
+.team at (小队名称)    使用'@'通知所有小队成员
+.team set (小队名称)   设置活跃小队
+
+其中 'rm' 'del' 'clear' 指令需要管理员权限
+不带小队名称时默认使用当前活跃小队
+创建新小队时会自动设置为活跃小队
+删除活跃小队时会自动选择第一个小队作为新活跃小队
+'''
+,
+
     'OlivaDiceCore更新': '&更新',
     'ww': '&r',
     'dx': '&r',
@@ -463,5 +479,7 @@ https://github.com/OlivOS-Team/onedice
     'setrule': '&settemp',
     'setdnd': '&settemp',
     '房规设置': '&settemp',
-    '欢迎词': '&welcome'
+    '欢迎词': '&welcome',
+    '小队': '&team',
+    '组队': '&team',
 }

@@ -57,7 +57,9 @@ dictUserConfigNoteDefault = {
     'userName' : '用户',
     'trustLevel' : 0,
     'trustRank' : 1000,
-    'autoSnEnabled' : False
+    'autoSnEnabled' : False,
+    'teamConfig': {},
+    'activeTeam': None,
 }
 
 dictUserConfigNoteMapping = {
