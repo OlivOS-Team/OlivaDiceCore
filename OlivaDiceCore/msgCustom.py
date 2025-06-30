@@ -239,7 +239,27 @@ dictStrCustom = {
     'strObExit' : '[{tUserName}]现已退出旁观',
     'strObExitAlready' : '[{tUserName}]不在旁观中',
     'strObExitAll' : '[{tUserName}]现已退出所有旁观',
-    'strObClear' : '已清空旁观列表'
+    'strObClear' : '已清空旁观列表',
+    'strTeamCreated': '已创建/更新小队[{tTeamName}]，当前成员数: {tMemberCount}',
+    'strTeamShow': '小队[{tTeamName}]成员列表 ({tMemberCount}人):\n{tMembers}',
+    'strTeamList': '当前群组小队列表 ({tTeamCount}个小队):\n{tTeamList}',
+    'strMembersRemoved': '已从小队[{tTeamName}]中移除{tRemovedCount}名成员: {tRemovedMembers}',
+    'strTeamDeleted': '已删除小队[{tTeamName}]',
+    'strTeamCleared': '已清空小队[{tTeamName}]的成员',
+    'strTeamAt': '正在通知小队[{tTeamName}]成员: {tAtMembers}',
+    'strTeamSetActive': '已设置[{tTeamName}]为当前活跃小队',
+    'strTeamSortResult': '小队[{tTeamName}]按技能[{tSkillName}]排序结果:\n{tSortResult}',
+    'strTeamSortNeedSkill': '请指定要排序的技能名称',
+    'strTeamRenamed': '已将小队[{tOldTeamName}]重命名为[{tNewTeamName}]',
+    'strTeamRenameNeedNewName': '请指定新的小队名称',
+    'strTeamNameExists': '小队名称[{tTeamName}]已存在',
+    'strTeamSkillUpdate': "小队[{tTeamName}]的技能更新:\n{tResults}",
+    'strTeamCheckResult': '小队[{tTeamName}]进行技能[{tSkillName}]检定:\n{tResult}',
+    'strNoActiveTeam': '当前群组没有活跃小队',
+    'strTeamNotFound': '小队[{tTeamName}]不存在',
+    'strNoTeams': '当前群组没有创建任何小队',
+    'strNoMembersRemoved': '没有移除任何成员',
+    'strTeamEmpty': '小队[{tTeamName}]中没有成员',
 }
 
 dictStrConst = {
@@ -330,7 +350,18 @@ dictTValue = {
     'tConsoleKey': 'N/A',
     'tConsoleValue': 'N/A',
     'tSpecialSkills': '',
-    'tRAVResult': '未定义结果'
+    'tRAVResult': '未定义结果',
+    'tTeamName': '',
+    'tMemberCount': '',
+    'tTeamCount': '',
+    'tMembers': '',
+    'tAtMembers': '',
+    'tRemovedCount': '',
+    'tRemovedMembers': '',
+    'tSortResult': '',
+    'tOldTeamName': '',
+    'tNewTeamName': '',
+    'strTeamSkillUpdate': '',
 }
 
 dictSetCOCDetail = {

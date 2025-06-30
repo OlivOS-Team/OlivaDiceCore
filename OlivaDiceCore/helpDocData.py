@@ -420,6 +420,23 @@ https://github.com/OlivOS-Team/onedice
 .welcome [欢迎词]  设置欢迎词
 .welcome  删除欢迎词''',
 
+    'team':'''.team (小队名称) [@成员1][@成员2]…… 创建/更新小队
+.team show (小队名称) 展示小队成员
+.team list 列出所有小队
+.team st (小队名称) [技能名][+-*/][数值]…… 小队全体更新技能
+.team ra (小队名称) [技能名](b/p)(+-*/)[运算数] [技能值] 小队检定
+.team rm (小队名称) [@成员1][@成员2]…… 从小队中移除成员
+.team del (小队名称) 删除小队
+.team clear (小队名称) 清空小队成员
+.team at (小队名称) 使用'@'通知所有小队成员
+.team set (小队名称) 设置活跃小队
+.team sort (小队名称) [技能名] 按照技能数值排序小队成员
+.team rename [新名字](/旧名字) 重命名活跃小队或指定小队
+    若重命名指定小队，新旧名字用 '/' 分隔
+
+其中 'rm' 'del' 'clear' 指令需要管理员权限
+不带小队名称时默认使用当前活跃小队''',
+
     'OlivaDiceCore更新': '&更新',
     'ww': '&r',
     'dx': '&r',
@@ -463,5 +480,7 @@ https://github.com/OlivOS-Team/onedice
     'setrule': '&settemp',
     'setdnd': '&settemp',
     '房规设置': '&settemp',
-    '欢迎词': '&welcome'
+    '欢迎词': '&welcome',
+    '小队': '&team',
+    '组队': '&team',
 }
