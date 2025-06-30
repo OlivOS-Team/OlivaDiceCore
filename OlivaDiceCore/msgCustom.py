@@ -253,7 +253,7 @@ dictStrCustom = {
     'strTeamRenamed': '已将小队[{tOldTeamName}]重命名为[{tNewTeamName}]',
     'strTeamRenameNeedNewName': '请指定新的小队名称',
     'strTeamNameExists': '小队名称[{tTeamName}]已存在',
-    'strTeamSkillUpdate': "小队[{tTeamName}]的技能[{tSkillName}]更新结果:\n{tResults}",
+    'strTeamSkillUpdate': "小队[{tTeamName}]的技能更新结果:\n{tResults}",
     'strNoActiveTeam': '当前群组没有活跃小队',
     'strTeamNotFound': '小队[{tTeamName}]不存在',
     'strNoTeams': '当前群组没有创建任何小队',

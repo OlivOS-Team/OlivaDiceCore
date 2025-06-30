@@ -423,6 +423,7 @@ https://github.com/OlivOS-Team/onedice
     'team':'''.team (小队名称) [@成员1][@成员2]…… 创建/更新小队
 .team show (小队名称) 展示小队成员
 .team list 列出所有小队
+.team st (小队名称) [技能名][+-*/][数值]…… 小队全体更新技能
 .team rm (小队名称) [@成员1][@成员2]…… 从小队中移除成员
 .team del (小队名称) 删除小队
 .team clear (小队名称) 清空小队成员

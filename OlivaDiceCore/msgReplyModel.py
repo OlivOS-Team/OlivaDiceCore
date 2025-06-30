@@ -1842,28 +1842,28 @@ def team_st_command(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrC
         op = skill_operations[skill_end_pos]
         rest_str = skill_operations[skill_end_pos+1:]
         
-        # 提取数值
-        num_str = ''
-        num_end_pos = 0
-        for i, char in enumerate(rest_str):
-            if char.isdigit() or (i == 0 and char in '+-'):
-                num_str += char
-                num_end_pos = i + 1
+        # 提取表达式
+        expr_end_pos = 0
+        in_dice_expr = False
+        for i in range(len(rest_str)):
+            char = rest_str[i]
+            if char.upper() == 'D':
+                in_dice_expr = True
+            if char.isdigit() or (in_dice_expr and char in op_list) or char.upper() == 'D':
+                expr_end_pos = i + 1
             else:
+                if i > 0:
+                    expr_end_pos = i
                 break
         
-        if not num_str:
-            current_pos = skill_end_pos + 1
-            continue
+        if expr_end_pos == 0 and len(rest_str) > 0:
+            expr_end_pos = 1
         
-        try:
-            value = int(num_str)
-        except ValueError:
-            current_pos = skill_end_pos + num_end_pos + 1
-            continue
+        expr_str = rest_str[:expr_end_pos]
+        current_pos = skill_end_pos + expr_end_pos + 1
         
-        skill_updates.append((skill_name.upper(), op, value))
-        current_pos = skill_end_pos + num_end_pos + 1
+        if skill_name and expr_str:
+            skill_updates.append((skill_name.upper(), op, expr_str))
     
     if not skill_updates:
         OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'team')
@@ -1871,6 +1871,7 @@ def team_st_command(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrC
     
     members = team_config[team_name]['members']
     results = []
+    special_skills = []
     
     # 处理每个成员
     for member_id in members:
@@ -1891,7 +1892,7 @@ def team_st_command(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrC
             )
         
         member_results = []
-        for skill_name, op, value in skill_updates:
+        for skill_name, op, expr_str in skill_updates:
             # 获取当前技能值
             current_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
                 tmp_pcHash, skill_name, hagId=tmp_hagID
@@ -1900,26 +1901,44 @@ def team_st_command(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrC
             if current_value is None:
                 current_value = 0
             
-            new_value = current_value
-            
-            if op == '+':
-                new_value = current_value + value
-            elif op == '-':
-                new_value = current_value - value
-            elif op == '*':
-                new_value = current_value * value
-            elif op == '/':
-                if value != 0:
-                    new_value = current_value // value
-                else:
-                    new_value = current_value
-            
-            OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
-                tmp_pcHash, skill_name, new_value, tmp_pc_name, hagId=tmp_hagID
+            # 处理表达式
+            rd_para_str = str(current_value) + op + expr_str
+            tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
+                tmp_pcHash, tmp_pc_name
             )
+            tmp_template_customDefault = None
+            if tmp_template_name:
+                tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
+                if 'customDefault' in tmp_template:
+                    tmp_template_customDefault = tmp_template['customDefault']
             
-            # 记录操作结果
-            member_results.append(f"{skill_name} {current_value}{op}{value}={new_value}")
+            rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_template_customDefault)
+            rd_para.roll()
+            
+            if rd_para.resError is None:
+                new_value = rd_para.resInt
+                OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
+                    tmp_pcHash, skill_name, new_value, tmp_pc_name, hagId=tmp_hagID
+                )
+                
+                # 检查是否为特殊技能
+                tmp_pcCardRule = 'default'
+                if tmp_pc_name is not None:
+                    tmp_pcCardRule_new = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_pc_name)
+                    if tmp_pcCardRule_new:
+                        tmp_pcCardRule = tmp_pcCardRule_new
+                if tmp_pcCardRule in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial:
+                    if skill_name in [skill for skill in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[tmp_pcCardRule]]:
+                        special_skills.append(skill_name)
+                
+                # 记录操作结果
+                if 'D' in expr_str.upper():
+                    member_results.append(f"{skill_name}({current_value}){op}{expr_str}={rd_para.resDetail}={new_value}")
+                else:
+                    member_results.append(f"{skill_name}({current_value}){op}{expr_str}={new_value}")
+            else:
+                member_results.append(f"{skill_name}: 表达式错误 '{op}{expr_str}'")
+            
             # 自动更新群名片
             OlivaDiceCore.msgReply.trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
         
@@ -1937,7 +1956,18 @@ def team_st_command(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrC
     
     dictTValue['tTeamName'] = team_name
     dictTValue['tResults'] = '\n'.join(results)
+    
+    # 特殊技能提示
+    if special_skills:
+        dictTValue['tSpecialSkills'] = '、'.join([f'[{skill}]' for skill in set(special_skills)])
+        special_notice = OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strPcSetSpecialSkills'], dictTValue
+        )
+    else:
+        special_notice = ''
+    
     reply_msg = OlivaDiceCore.msgCustomManager.formatReplySTR(
         dictStrCustom['strTeamSkillUpdate'], dictTValue
-    )
+    ) + special_notice
+    
     OlivaDiceCore.msgReply.replyMsg(plugin_event, reply_msg)
