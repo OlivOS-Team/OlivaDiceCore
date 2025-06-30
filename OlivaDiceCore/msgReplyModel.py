@@ -956,7 +956,9 @@ def getNoteFormat(
     )
     return res
 
-# team指令部分
+'''
+team指令部分
+'''
 
 def replyTEAM_command(plugin_event, tmp_reast_str, flag_is_from_group, flag_is_from_group_admin, 
                       flag_is_from_master, tmp_hagID, dictTValue, dictStrCustom):
@@ -990,6 +992,8 @@ def replyTEAM_command(plugin_event, tmp_reast_str, flag_is_from_group, flag_is_f
         return team_sort(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'rename'):
         return team_rename(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
+    elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, ['st','pc']):
+        return team_st_command(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
     else:
         return team_create(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
 
@@ -1756,3 +1760,184 @@ def team_rename(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCusto
     OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
         dictStrCustom['strTeamRenamed'], dictTValue
     ))
+
+def team_st_command(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
+    tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, ['st','pc'])
+    tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
+    
+    # 获取小队配置和活跃小队
+    team_config = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='teamConfig',
+        botHash=plugin_event.bot_info.hash,
+        default={}
+    )
+    active_team = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='activeTeam',
+        botHash=plugin_event.bot_info.hash
+    )
+    
+    # 按名称长度降序排序，优先匹配更长的名称
+    sorted_team_names = sorted(team_config.keys(), key=lambda x: -len(x))
+    team_name = None
+    skill_operations = None
+    
+    # 尝试匹配小队名称
+    for candidate in sorted_team_names:
+        if tmp_reast_str.startswith(candidate):
+            team_name = candidate
+            skill_operations = tmp_reast_str[len(candidate):].strip()
+            break
+    
+    # 如果没有匹配到小队名称，使用活跃小队
+    if team_name is None:
+        if active_team is None:
+            OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+                dictStrCustom['strNoActiveTeam'], dictTValue
+            ))
+            return
+        team_name = active_team
+        skill_operations = tmp_reast_str.strip()
+    
+    if not skill_operations:
+        OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'team')
+        return
+    
+    # 检查小队是否存在
+    if team_name not in team_config:
+        dictTValue['tTeamName'] = team_name
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strTeamNotFound'], dictTValue
+        ))
+        return
+    
+    # 解析多项技能操作（不包含赋值）
+    op_list = ['+', '-', '*', '/']
+    skill_updates = []
+    
+    # 分割技能操作
+    current_pos = 0
+    while current_pos < len(skill_operations):
+        # 查找技能名结束位置（遇到操作符）
+        skill_end_pos = -1
+        for i in range(current_pos, len(skill_operations)):
+            if skill_operations[i] in op_list:
+                skill_end_pos = i
+                break
+        
+        if skill_end_pos == -1:
+            # 没有找到操作符，可能是无效格式
+            break
+        
+        skill_name = skill_operations[current_pos:skill_end_pos].strip()
+        if not skill_name:
+            current_pos = skill_end_pos + 1
+            continue
+        
+        op = skill_operations[skill_end_pos]
+        rest_str = skill_operations[skill_end_pos+1:]
+        
+        # 提取数值
+        num_str = ''
+        num_end_pos = 0
+        for i, char in enumerate(rest_str):
+            if char.isdigit() or (i == 0 and char in '+-'):
+                num_str += char
+                num_end_pos = i + 1
+            else:
+                break
+        
+        if not num_str:
+            current_pos = skill_end_pos + 1
+            continue
+        
+        try:
+            value = int(num_str)
+        except ValueError:
+            current_pos = skill_end_pos + num_end_pos + 1
+            continue
+        
+        skill_updates.append((skill_name.upper(), op, value))
+        current_pos = skill_end_pos + num_end_pos + 1
+    
+    if not skill_updates:
+        OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'team')
+        return
+    
+    members = team_config[team_name]['members']
+    results = []
+    
+    # 处理每个成员
+    for member_id in members:
+        tmp_pc_id = member_id
+        tmp_pc_platform = plugin_event.platform['platform']
+        tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+        tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
+        
+        if not tmp_pc_name:
+            # 如果没有人物卡，使用默认名称
+            tmp_pc_name = OlivaDiceCore.userConfig.getUserConfigByKey(
+                userId=tmp_pc_id,
+                userType='user',
+                platform=tmp_pc_platform,
+                userConfigKey='userName',
+                botHash=plugin_event.bot_info.hash,
+                default=f"用户{member_id}"
+            )
+        
+        member_results = []
+        for skill_name, op, value in skill_updates:
+            # 获取当前技能值
+            current_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
+                tmp_pcHash, skill_name, hagId=tmp_hagID
+            )
+            
+            if current_value is None:
+                current_value = 0
+            
+            new_value = current_value
+            
+            if op == '+':
+                new_value = current_value + value
+            elif op == '-':
+                new_value = current_value - value
+            elif op == '*':
+                new_value = current_value * value
+            elif op == '/':
+                if value != 0:
+                    new_value = current_value // value
+                else:
+                    new_value = current_value
+            
+            OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
+                tmp_pcHash, skill_name, new_value, tmp_pc_name, hagId=tmp_hagID
+            )
+            
+            # 记录操作结果
+            member_results.append(f"{skill_name} {current_value}{op}{value}={new_value}")
+            # 自动更新群名片
+            OlivaDiceCore.msgReply.trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
+        
+        user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
+            userId=tmp_pc_id,
+            userType='user',
+            platform=tmp_pc_platform,
+            userConfigKey='userName',
+            botHash=plugin_event.bot_info.hash,
+            default=f"用户{member_id}"
+        )
+        
+        if member_results:
+            results.append(f"{user_name}: {' '.join(member_results)}")
+    
+    dictTValue['tTeamName'] = team_name
+    dictTValue['tResults'] = '\n'.join(results)
+    reply_msg = OlivaDiceCore.msgCustomManager.formatReplySTR(
+        dictStrCustom['strTeamSkillUpdate'], dictTValue
+    )
+    OlivaDiceCore.msgReply.replyMsg(plugin_event, reply_msg)
