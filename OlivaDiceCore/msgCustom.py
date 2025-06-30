@@ -259,7 +259,6 @@ dictStrCustom = {
     'strNoTeams': '当前群组没有创建任何小队',
     'strNoMembersRemoved': '没有移除任何成员',
     'strTeamEmpty': '小队[{tTeamName}]中没有成员',
-    'strForGroupOnly': '此功能仅对群聊开放',
 }
 
 dictStrConst = {
