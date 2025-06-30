@@ -172,6 +172,7 @@ dictStrCustom = {
     'strPcNoteRm' : '已删除人物卡[{tName}]的记录[{tSkillName}]',
     'strPcRecError' : '未找到人物卡[{tName}]对应的映射[{tSkillName}]',
     'strPcNoteError' : '未找到人物卡[{tName}]对应的记录[{tSkillName}]',
+    'strPcExportCardNone' : '当前没有人物卡，无法导出',
     'strNoPcInputCard' : '未找到人物卡[{tPcInputCard}]或人物卡[{tPcInputCard}]没有技能数据',
     'strPcCardNoSkill' : '人物卡[{tPcInputCard}]没有可导出的技能',
     'strPcCardExport' : '已成功导出人物卡[{tPcInputCard}]的技能数据：\n{tExport}',

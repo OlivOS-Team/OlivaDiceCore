@@ -2102,6 +2102,7 @@ def unity_reply(plugin_event, Proc):
                 replyMsg(plugin_event, tmp_reply_str)
             return
         elif isMatchWordStart(tmp_reast_str, ['st','pc'], isCommand = True):
+            tmp_reply_str = ''
             is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, dictTValue, dictStrCustom)
             if is_at:
                 if not at_user_id:
@@ -2507,6 +2508,7 @@ def unity_reply(plugin_event, Proc):
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcNewAtOther'], dictTValue)
                         else:
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcNew'], dictTValue)
+                        trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'del'):
@@ -2541,6 +2543,7 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcDelError'], dictTValue)
                 else:
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcDelNone'], dictTValue)
+                trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, ['clear', 'clr'], fullMatch = True):
@@ -3106,7 +3109,7 @@ def unity_reply(plugin_event, Proc):
                         tmp_hagID
                     )
                 if not tmp_pc_name:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRmCardNone'], dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcExportCardNone'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
                 tmp_dict_pc_card = OlivaDiceCore.pcCard.pcCardDataGetUserAll(tmp_pcHash).get(tmp_pc_name, {})
@@ -3126,25 +3129,30 @@ def unity_reply(plugin_event, Proc):
                 for skill_key in tmp_dict_pc_card:
                     if skill_key.startswith('__') or skill_key == 'template':
                         continue
+                    # 跳过以数字结尾的技能名
+                    if skill_key[-1].isdigit():
+                        continue
+                    skill_value = tmp_dict_pc_card[skill_key]
+                    # 跳过值为0的技能
+                    if skill_value == 0:
+                        continue
                     # 主技能
                     if skill_key in primary_skills:
-                        skill_value = tmp_dict_pc_card[skill_key]
-                        skill_pairs.append(f"{skill_key}{skill_value}")
-                        processed_skills.add(skill_key)
-                    # 别名删掉
+                        if skill_key not in processed_skills:
+                            skill_pairs.append(f"{skill_key}{skill_value}")
+                            processed_skills.add(skill_key)
+                    # 别名处理
                     else:
                         is_alias = False
                         for main_key in primary_skills:
                             if skill_key in tmp_template['synonyms'].get(main_key, []):
                                 if main_key not in processed_skills:
-                                    skill_value = tmp_dict_pc_card[skill_key]
                                     skill_pairs.append(f"{main_key}{skill_value}")
                                     processed_skills.add(main_key)
                                 is_alias = True
                                 break
                         # 其它技能
                         if not is_alias and skill_key not in processed_skills:
-                            skill_value = tmp_dict_pc_card[skill_key]
                             skill_pairs.append(f"{skill_key}{skill_value}")
                             processed_skills.add(skill_key)
                 if not skill_pairs:
@@ -3472,6 +3480,7 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetSkillValue'], dictTValue)
                     trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                     replyMsg(plugin_event, tmp_reply_str + tmp_notice)
+                    return
             else:
                 tmp_pcCardRule = 'default'
                 tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
@@ -3514,6 +3523,11 @@ def unity_reply(plugin_event, Proc):
                 else:
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcGetSingleSkillValue'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
+                return
+            if not tmp_reply_str:
+                tmp_reply_str = OlivaDiceCore.helpDoc.getHelp('st', plugin_event.bot_info.hash)
+                replyMsg(plugin_event, tmp_reply_str)
+                return
         elif isMatchWordStart(tmp_reast_str, 'setcoc', isCommand = True):
             if flag_is_from_group:
                 tmp_user_platform = plugin_event.platform['platform']
@@ -3794,7 +3808,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str_1 = ''
                 dictTValue['tPcTempName'] = tmp_pcCardTemplateName
                 for tmp_res_list_this in tmp_res_list:
-                    tmp_reply_str_1 += '\n'
+                    tmp_reply_str_1 += '\n\n'
                     tmp_total_count_1 = 0
                     tmp_total_count_2 = 0
                     for tmp_res_list_this_this in tmp_res_list_this:
@@ -3806,9 +3820,9 @@ def unity_reply(plugin_event, Proc):
                         if tmp_res_list_this_this != 'LUC':
                             tmp_total_count_1 += tmp_res_list_this[tmp_res_list_this_this]
                     if tmp_pcCardTemplateName in ['COC7']:
-                        tmp_reply_str_1 += '共计:%d/%d %.2f%%' % (tmp_total_count_1, tmp_total_count_2, 100 * tmp_total_count_1 / tmp_total_count_2)
+                        tmp_reply_str_1 += '\n共计: %d/%d  %.2f%%' % (tmp_total_count_1, tmp_total_count_2, 100 * tmp_total_count_1 / tmp_total_count_2)
                     elif tmp_pcCardTemplateName in ['COC6', 'DND5E']:
-                        tmp_reply_str_1 += '共计:%d' % tmp_total_count_1
+                        tmp_reply_str_1 += '\n共计: %d' % tmp_total_count_1
                 dictTValue['tPcInitResult'] = tmp_reply_str_1
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInit'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
@@ -4552,9 +4566,9 @@ def unity_reply(plugin_event, Proc):
                         if rd_para.resError == None:
                             tmp_tSkillCheckReasult += '\n'
                             if flag_bp_type == 0:
-                                tmp_tSkillCheckReasult += '%s=%d ' % (rd_para_str, rd_para.resInt)
+                                tmp_tSkillCheckReasult += '%s=%d' % (rd_para_str, rd_para.resInt)
                             else:
-                                tmp_tSkillCheckReasult += '%s=%s=%d ' % (rd_para_str, rd_para.resDetail, rd_para.resInt)
+                                tmp_tSkillCheckReasult += '%s=%s=%d' % (rd_para_str, rd_para.resDetail, rd_para.resInt)
                             dictRuleTempData = {
                                 'roll': rd_para.resInt,
                                 'skill': tmp_skill_value
@@ -4567,7 +4581,7 @@ def unity_reply(plugin_event, Proc):
                             )
                             dictTValue['tSkillValue'] = tmp_skill_value_str if not difficulty else f'{tmpSkillThreshold}({tmp_skill_value_str})'
                             if tmpSkillThreshold == None: dictTValue['tSkillValue'] = tmp_skill_value_str
-                            tmp_tSkillCheckReasult = '%s/%s ' % (tmp_tSkillCheckReasult.strip(), dictTValue['tSkillValue'])
+                            tmp_tSkillCheckReasult = '%s/%s ' % (tmp_tSkillCheckReasult, dictTValue['tSkillValue'])
                             if tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS:
                                 tmp_tSkillCheckReasult += OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckSucceed'], dictTValue)
                                 flag_check_success = True

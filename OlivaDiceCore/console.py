@@ -28,6 +28,7 @@ dictConsoleSwitchTemplate = {
         'autoAcceptGroupAdd' : 1,
         'autoAcceptFriendAdd' : 1,
         'disableReplyPrivate' : 0,
+        'disablePrivate' : 0,
         'messageFliterMode' : 0,
         'messageSplitGate' : 650,
         'messageSplitPageLimit' : 10,
