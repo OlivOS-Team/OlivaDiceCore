@@ -1091,15 +1091,15 @@ def team_create(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCusto
     else:
         for member_id in members:
             # 获取用户名称
+            plres = plugin_event.get_stranger_info(member_id)
             user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
                 userId=member_id,
                 userType='user',
                 platform=plugin_event.platform['platform'],
                 userConfigKey='userName',
                 botHash=plugin_event.bot_info.hash,
-                default=f"用户{member_id}"
+                default=plres['data']['name'] if plres['active'] else f"用户{member_id}"
             )
-            plres = plugin_event.get_stranger_info(member_id)
             if plres['active'] and user_name == f'用户{member_id}':
                 user_name = plres['data']['name']
 
@@ -1167,15 +1167,15 @@ def team_show(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
     index = 1
     for member_id in members:
         # 获取用户名称
+        plres = plugin_event.get_stranger_info(member_id)
         user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
             userId=member_id,
             userType='user',
             platform=plugin_event.platform['platform'],
             userConfigKey='userName',
             botHash=plugin_event.bot_info.hash,
-            default=f"用户{member_id}"
+            default=plres['data']['name'] if plres['active'] else f"用户{member_id}"
         )
-        plres = plugin_event.get_stranger_info(member_id)
         if plres['active'] and user_name == f'用户{member_id}':
             user_name = plres['data']['name']
         
@@ -1336,15 +1336,15 @@ def team_remove(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin
     removed_names = []
     for member_id in removed_members:
         # 获取用户名称
+        plres = plugin_event.get_stranger_info(member_id)
         user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
             userId=member_id,
             userType='user',
             platform=plugin_event.platform['platform'],
             userConfigKey='userName',
             botHash=plugin_event.bot_info.hash,
-            default=f"用户{member_id}"
+            default=plres['data']['name'] if plres['active'] else f"用户{member_id}"
         )
-        plres = plugin_event.get_stranger_info(member_id)
         if plres['active'] and user_name == f'用户{member_id}':
             user_name = plres['data']['name']
         
@@ -1367,15 +1367,15 @@ def team_remove(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin
     else:
         for member_id in members:
             # 获取用户名称
+            plres = plugin_event.get_stranger_info(member_id)
             user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
                 userId=member_id,
                 userType='user',
                 platform=plugin_event.platform['platform'],
                 userConfigKey='userName',
                 botHash=plugin_event.bot_info.hash,
-                default=f"用户{member_id}"
+                default=plres['data']['name'] if plres['active'] else f"用户{member_id}"
             )
-            plres = plugin_event.get_stranger_info(member_id)
             if plres['active'] and user_name == f'用户{member_id}':
                 user_name = plres['data']['name']
 
@@ -1716,15 +1716,15 @@ def team_sort(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
     # 收集成员信息并获取技能值
     member_info_list = []
     for original_index, member_id in enumerate(members):
+        plres = plugin_event.get_stranger_info(member_id)
         user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
             userId=member_id,
             userType='user',
             platform=plugin_event.platform['platform'],
             userConfigKey='userName',
             botHash=plugin_event.bot_info.hash,
-            default=f"用户{member_id}"
+            default=plres['data']['name'] if plres['active'] else f"用户{member_id}"
         )
-        plres = plugin_event.get_stranger_info(member_id)
         if plres['active'] and user_name == f'用户{member_id}':
             user_name = plres['data']['name']
         
@@ -2040,15 +2040,15 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
             # 自动更新群名片
             OlivaDiceCore.msgReply.trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
         
+        plres = plugin_event.get_stranger_info(member_id)
         user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
             userId=tmp_pc_id,
             userType='user',
             platform=tmp_pc_platform,
             userConfigKey='userName',
             botHash=plugin_event.bot_info.hash,
-            default=f"用户{member_id}"
+            default=plres['data']['name'] if plres['active'] else f"用户{member_id}"
         )
-        plres = plugin_event.get_stranger_info(member_id)
         if plres['active'] and user_name == f'用户{member_id}':
             user_name = plres['data']['name']
         
@@ -2230,15 +2230,15 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
     results = []
     for member_id in members:
         # 获取用户信息
+        plres = plugin_event.get_stranger_info(member_id)
         user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
             userId=member_id,
             userType='user',
             platform=plugin_event.platform['platform'],
             userConfigKey='userName',
             botHash=plugin_event.bot_info.hash,
-            default=f"用户{member_id}"
+            default=plres['data']['name'] if plres['active'] else f"用户{member_id}"
         )
-        plres = plugin_event.get_stranger_info(member_id)
         if plres['active'] and user_name == f'用户{member_id}':
             user_name = plres['data']['name']
         
