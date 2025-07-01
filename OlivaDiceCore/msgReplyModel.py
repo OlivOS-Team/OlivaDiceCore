@@ -1085,7 +1085,9 @@ def team_create(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCusto
     member_info = []
     index = 1
     if not members:
-        member_info.append("当前小组没有成员")
+        dictTValue['tTeamName'] = team_name
+        tmp_empty_msg = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strTeamEmpty'], dictTValue)
+        member_info.append(tmp_empty_msg)
     else:
         for member_id in members:
             # 获取用户名称
@@ -1359,7 +1361,9 @@ def team_remove(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin
     member_info = []
     index = 1
     if not members:
-        member_info.append("当前小组没有成员")
+        dictTValue['tTeamName'] = team_name
+        tmp_empty_msg = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strTeamEmpty'], dictTValue)
+        member_info.append(tmp_empty_msg)
     else:
         for member_id in members:
             # 获取用户名称
@@ -1588,8 +1592,8 @@ def team_at(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
     if not members:
         dictTValue['tTeamName'] = team_name
         OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
-                dictStrCustom['strTeamEmpty'], dictTValue
-            ))
+            dictStrCustom['strTeamEmpty'], dictTValue
+        ))
         return
     
     # at实现
