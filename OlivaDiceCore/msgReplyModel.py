@@ -2680,11 +2680,18 @@ def team_sc(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
         result_str = f"{display_name}(SAN:{current_san}): 1D100={roll_value}/{current_san}"
         result_str += f"\nSAN: {current_san} -> {new_san}(损失{san_success if roll_value < current_san else san_fail}={san_loss}点)"
         result_str += get_SkillCheckResult(skill_check_type, dictStrCustom, dictTValue)
+
+        success_level = 0
+        if skill_check_type in [
+            OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_SUCCESS,
+            OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS
+        ]:
+            success_level = 1
         
         results.append({
             'name': display_name,
             'result_str': result_str,
-            'success_level': skill_check_type.value if hasattr(skill_check_type, 'value') else skill_check_type,
+            'success_level': success_level,
             'roll_value': roll_value,
             'san_value': current_san,
             'san_loss': san_loss,
@@ -2710,3 +2717,4 @@ def team_sc(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
         dictStrCustom['strTeamSCResult'], dictTValue
     )
     OlivaDiceCore.msgReply.replyMsg(plugin_event, reply_str)
+    
