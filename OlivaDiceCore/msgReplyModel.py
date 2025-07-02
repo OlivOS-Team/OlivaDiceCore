@@ -2653,7 +2653,10 @@ def team_sc(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
         san_loss = 0
         
         # 困难，极难转换成普通成功
-        if skill_check_type in [OlivaDiceCore.skillCheck.resultType.SKILLCHECK_EXTREME_HARD_SUCCESS, OlivaDiceCore.skillCheck.resultType.SKILLCHECK_HARD_SUCCESS]:
+        if skill_check_type in [
+            OlivaDiceCore.skillCheck.resultType.SKILLCHECK_EXTREME_HARD_SUCCESS,
+            OlivaDiceCore.skillCheck.resultType.SKILLCHECK_HARD_SUCCESS
+        ]:
             skill_check_type = OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS
         
         if skill_check_type == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_SUCCESS:
