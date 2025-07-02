@@ -2137,7 +2137,21 @@ def unity_reply(plugin_event, Proc):
                 )
                 flag_begin = True
                 tmp_dict_pc_card_dump = {}
+                tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                    tmp_pcHash,
+                    dictTValue['tName'],
+                    'template',
+                    'default'
+                )
+                tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
+                default_skill_values = tmp_template.get('defaultSkillValue', {}) if tmp_template else {}
                 for tmp_dict_pc_card_key in tmp_dict_pc_card:
+                    # 跳过值为0且与默认值相同的技能
+                    skill_value = tmp_dict_pc_card[tmp_dict_pc_card_key]
+                    if skill_value == 0:
+                        default_value = default_skill_values.get(tmp_dict_pc_card_key, 0)
+                        if skill_value == default_value:
+                            continue
                     tmp_dict_pc_card_dump[
                         OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
                             tmp_pcHash,
@@ -2153,14 +2167,7 @@ def unity_reply(plugin_event, Proc):
                     dictTValue['tName'],
                     'enhanceList',
                     []
-                )
-                tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
-                    tmp_pcHash,
-                    dictTValue['tName'],
-                    'template',
-                    'default'
-                )
-                tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
+                )                
                 tmp_skill_dict = {}
                 if 'skill' in tmp_template:
                     tmp_skill_dict = tmp_template['skill']
@@ -3096,12 +3103,10 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'export')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 tmp_pc_name = tmp_reast_str.strip()
-
                 tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
                     tmp_pc_id,
                     tmp_pc_platform
                 )
-
                 # 没有指定人物卡，使用当前人物卡
                 if not tmp_pc_name:
                     tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
@@ -3120,7 +3125,8 @@ def unity_reply(plugin_event, Proc):
                     return
                 tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_pc_name)
                 tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name or 'default')
-
+                # 获取模板默认值
+                default_skill_values = tmp_template.get('defaultSkillValue', {}) if tmp_template else {}
                 primary_skills = set()
                 if 'synonyms' in tmp_template:
                     primary_skills.update(tmp_template['synonyms'].keys())
@@ -3133,9 +3139,11 @@ def unity_reply(plugin_event, Proc):
                     if skill_key[-1].isdigit():
                         continue
                     skill_value = tmp_dict_pc_card[skill_key]
-                    # 跳过值为0的技能
+                    # 跳过值为0且与默认值相同的技能
                     if skill_value == 0:
-                        continue
+                        default_value = default_skill_values.get(skill_key, 0)
+                        if skill_value == default_value:
+                            continue
                     # 主技能
                     if skill_key in primary_skills:
                         if skill_key not in processed_skills:
@@ -5238,32 +5246,7 @@ def unity_reply(plugin_event, Proc):
                 else:
                     dictTValue['tResult'] = str(rd_para.resError)
                     dictTValue['tRollPara'] = str(tmp_rd_para_str_show)
-                    if rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_GENERATE_FATAL:
-                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError01'], dictTValue)
-                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_COMPLETE_FATAL:
-                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError02'], dictTValue)
-                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.INPUT_RAW_INVALID:
-                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError03'], dictTValue)
-                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.INPUT_CHILD_PARA_INVALID:
-                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError04'], dictTValue)
-                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.INPUT_NODE_OPERATION_INVALID:
-                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError05'], dictTValue)
-                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_OPERATION_INVALID:
-                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError06'], dictTValue)
-                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_STACK_EMPTY:
-                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError07'], dictTValue)
-                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_LEFT_VAL_INVALID:
-                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError08'], dictTValue)
-                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_RIGHT_VAL_INVALID:
-                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError09'], dictTValue)
-                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_SUB_VAL_INVALID:
-                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError10'], dictTValue)
-                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_EXTREME_VAL_INVALID:
-                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError11'], dictTValue)
-                    elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_REPLACE_FATAL:
-                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError12'], dictTValue)
-                    else:
-                        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollErrorUnknown'], dictTValue)
+                    tmp_reply_str_1 = OlivaDiceCore.msgReplyModel.get_SkillCheckError(rd_para.resError, dictStrCustom, dictTValue)
                     tmp_reply_str_1 += OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollErrorHelp'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str_1)
                     return
@@ -5339,32 +5322,7 @@ def unity_reply(plugin_event, Proc):
                     else:
                         dictTValue['tResult'] = str(rd_para.resError)
                         dictTValue['tRollPara'] = str(rd_para_str)
-                        if rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_GENERATE_FATAL:
-                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError01'], dictTValue)
-                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_COMPLETE_FATAL:
-                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError02'], dictTValue)
-                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.INPUT_RAW_INVALID:
-                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError03'], dictTValue)
-                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.INPUT_CHILD_PARA_INVALID:
-                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError04'], dictTValue)
-                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.INPUT_NODE_OPERATION_INVALID:
-                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError05'], dictTValue)
-                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_OPERATION_INVALID:
-                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError06'], dictTValue)
-                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_STACK_EMPTY:
-                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError07'], dictTValue)
-                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_LEFT_VAL_INVALID:
-                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError08'], dictTValue)
-                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_RIGHT_VAL_INVALID:
-                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError09'], dictTValue)
-                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_SUB_VAL_INVALID:
-                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError10'], dictTValue)
-                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_EXTREME_VAL_INVALID:
-                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError11'], dictTValue)
-                        elif rd_para.resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_REPLACE_FATAL:
-                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError12'], dictTValue)
-                        else:
-                            tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollErrorUnknown'], dictTValue)
+                        tmp_reply_str_1 = OlivaDiceCore.msgReplyModel.get_SkillCheckError(rd_para.resError, dictStrCustom, dictTValue)
                         tmp_reply_str_1 += OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollErrorHelp'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str_1)
                         return
