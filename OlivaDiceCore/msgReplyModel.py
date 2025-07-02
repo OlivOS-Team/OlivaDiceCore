@@ -326,6 +326,34 @@ def get_SkillCheckResult(tmpSkillCheckType, dictStrCustom, dictTValue):
         res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckError'], dictTValue)
     return res
 
+def get_SkillCheckError(resError, dictStrCustom, dictTValue):
+    if resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_GENERATE_FATAL:
+        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError01'], dictTValue)
+    elif resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_COMPLETE_FATAL:
+        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError02'], dictTValue)
+    elif resError == OlivaDiceCore.onedice.RD.resErrorType.INPUT_RAW_INVALID:
+        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError03'], dictTValue)
+    elif resError == OlivaDiceCore.onedice.RD.resErrorType.INPUT_CHILD_PARA_INVALID:
+        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError04'], dictTValue)
+    elif resError == OlivaDiceCore.onedice.RD.resErrorType.INPUT_NODE_OPERATION_INVALID:
+        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError05'], dictTValue)
+    elif resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_OPERATION_INVALID:
+        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError06'], dictTValue)
+    elif resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_STACK_EMPTY:
+        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError07'], dictTValue)
+    elif resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_LEFT_VAL_INVALID:
+        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError08'], dictTValue)
+    elif resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_RIGHT_VAL_INVALID:
+        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError09'], dictTValue)
+    elif resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_SUB_VAL_INVALID:
+        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError10'], dictTValue)
+    elif resError == OlivaDiceCore.onedice.RD.resErrorType.NODE_EXTREME_VAL_INVALID:
+        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError11'], dictTValue)
+    elif resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_REPLACE_FATAL:
+        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError12'], dictTValue)
+    else:
+        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollErrorUnknown'], dictTValue)
+    return tmp_reply_str_1
 
 def replyRAV_command(plugin_event, Proc, valDict):
     tmp_reast_str = valDict['tmp_reast_str']
@@ -970,32 +998,36 @@ def replyTEAM_command(plugin_event, Proc, valDict, flag_is_from_group_admin):
     tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
     
     if OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'show'):
-        return team_show(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
+        team_show(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'list'):
-        return team_list(plugin_event, tmp_hagID, dictTValue, dictStrCustom)
+        team_list(plugin_event, tmp_hagID, dictTValue, dictStrCustom)
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'rm'):
-        return team_remove(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin, 
+        team_remove(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin, 
                            flag_is_from_master, dictTValue, dictStrCustom)
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'del'):
-        return team_delete(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin, 
+        team_delete(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin, 
                            flag_is_from_master, dictTValue, dictStrCustom)
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, ['clear','clr']):
-        return team_clear(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin, 
+        team_clear(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin, 
                           flag_is_from_master, dictTValue, dictStrCustom)
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'at'):
-        return team_at(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
+        team_at(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'set'):
-        return team_set(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
+        team_set(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, ['sort','arr']):
-        return team_sort(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
+        team_sort(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'rename'):
-        return team_rename(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
+        team_rename(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, ['st','pc']):
-        return team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
+        team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, ['ra','rc']):
-        return team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
+        team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
+    elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'sc'):
+        team_sc(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
+    elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'help', fullMatch=True):
+        OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'team')
     else:
-        return team_create(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
+        team_create(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom)
 
 def team_create(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
     tmp_reast_str_para = OlivOS.messageAPI.Message_templet('old_string', tmp_reast_str)
@@ -2312,7 +2344,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
         
         if rd_para.resError is not None:
             # 检定出错
-            result_str = f"{display_name}: 检定错误 [{rd_para.resError}]"
+            result_str = get_SkillCheckError(rd_para.resError, dictStrCustom, dictTValue)
             results.append({
                 'name': display_name,
                 'result_str': result_str,
@@ -2438,5 +2470,243 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
     dictTValue['tResult'] = '\n'.join(result_lines)
     reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
         dictStrCustom['strTeamCheckResult'], dictTValue
+    )
+    OlivaDiceCore.msgReply.replyMsg(plugin_event, reply_str)
+
+def team_sc(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
+    tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'sc')
+    tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
+
+    # 获取小队配置和活跃小队
+    team_config = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='teamConfig',
+        botHash=plugin_event.bot_info.hash,
+        default={}
+    )
+    active_team = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='activeTeam',
+        botHash=plugin_event.bot_info.hash
+    )
+    
+    # 解析小队名称
+    team_name = None
+    
+    # 按名称长度降序排序，优先匹配更长的名称
+    sorted_team_names = sorted(team_config.keys(), key=lambda x: -len(x))
+    for candidate in sorted_team_names:
+        if tmp_reast_str.startswith(candidate):
+            team_name = candidate
+            tmp_reast_str = tmp_reast_str[len(candidate):].strip()
+            break
+    
+    # 如果没有匹配到小队名称，使用活跃小队
+    if team_name is None:
+        if active_team is None:
+            OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+                dictStrCustom['strNoActiveTeam'], dictTValue
+            ))
+            return
+        team_name = active_team
+    
+    # 检查小队是否存在
+    if team_name not in team_config:
+        dictTValue['tTeamName'] = team_name
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strTeamNotFound'], dictTValue
+        ))
+        return
+    
+    # 解析成功/失败参数
+    san_success = '0'
+    san_fail = '0'
+    if len(tmp_reast_str) > 0:
+        san_parts = tmp_reast_str.split('/')
+        if len(san_parts) >= 2:
+            san_success = san_parts[0].strip() or '0'
+            san_fail = '/'.join(san_parts[1:]).strip() or '0'
+        elif len(san_parts) == 1:
+            san_success = '0'
+            san_fail = san_parts[0].strip() or '0'
+    
+    flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='groupTemplate',
+        botHash=plugin_event.bot_info.hash
+    )
+    flag_groupTemplateRule = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='groupTemplateRule',
+        botHash=plugin_event.bot_info.hash
+    )
+    
+    # 获取小队成员
+    members = team_config[team_name]['members']
+    if not members:
+        dictTValue['tTeamName'] = team_name
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strTeamEmpty'], dictTValue
+        ))
+        return
+    
+    # 为每个成员进行sc检定
+    results = []
+    for member_id in members:
+        tmp_pc_platform = plugin_event.platform['platform']
+        # 获取用户信息
+        plres = plugin_event.get_stranger_info(member_id)
+        user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
+            userId=member_id,
+            userType='user',
+            platform=plugin_event.platform['platform'],
+            userConfigKey='userName',
+            botHash=plugin_event.bot_info.hash,
+            default=plres['data']['name'] if plres['active'] else f"用户{member_id}"
+        )
+        if plres['active'] and user_name == f'用户{member_id}':
+            user_name = plres['data']['name']
+        
+        pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
+        pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
+        
+        # 构建显示名称
+        display_name = f"[{user_name}] - [{pc_name if pc_name else user_name}]"
+        current_san = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
+            pc_hash, 'SAN', hagId=tmp_hagID
+        )
+        if current_san is None:
+            current_san = 0
+        
+        # 1d100判断
+        rd_para = OlivaDiceCore.onedice.RD('1D100')
+        rd_para.roll()
+        
+        if rd_para.resError is not None:
+            # 检定出错
+            result_str = get_SkillCheckError(rd_para.resError, dictStrCustom, dictTValue)
+            results.append({
+                'name': display_name,
+                'result_str': result_str,
+                'success_level': -1,
+                'roll_value': 0,
+                'san_value': current_san,
+                'san_loss': 0,
+                'new_san': current_san
+            })
+            continue
+        
+        roll_value = rd_para.resInt
+        skill_check_data = {
+            'roll': roll_value,
+            'skill': current_san
+        }
+        
+        # 获取检定结果
+        template_name = flag_groupTemplate or 'COC7'
+        template_rule_name = flag_groupTemplateRule or 'default'
+        template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(template_name)
+        skill_check_type, _ = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
+            skill_check_data, template, template_rule_name
+        )
+        
+        # 预先计算成功和失败表达式
+        success_rd = OlivaDiceCore.onedice.RD(san_success)
+        success_rd.roll()
+        fail_rd = OlivaDiceCore.onedice.RD(san_fail)
+        fail_rd.roll()
+        success_error = success_rd.resError is not None
+        fail_error = fail_rd.resError is not None
+
+        if success_error or fail_error:
+            # 构建错误信息
+            error_str = ""
+            if success_error and roll_value < current_san:
+                dictTValue['tRollPara'] = san_success
+                error_str += f"左式错误: {get_SkillCheckError(success_rd.resError, dictStrCustom, dictTValue)}"
+            if fail_error and roll_value > current_san:
+                dictTValue['tRollPara'] = san_fail
+                error_str += f"右式错误: {get_SkillCheckError(fail_rd.resError, dictStrCustom, dictTValue)}"
+            
+            result_str = f"{display_name}(SAN:{current_san}): 1D100={roll_value}/{current_san}"
+            result_str += f"\n{error_str}"
+            
+            results.append({
+                'name': display_name,
+                'result_str': result_str,
+                'success_level': -1,
+                'roll_value': roll_value,
+                'san_value': current_san,
+                'san_loss': 0,
+                'new_san': current_san
+            })
+            continue
+        
+        san_loss = 0
+        
+        # 困难，极难转换成普通成功
+        if skill_check_type in [OlivaDiceCore.skillCheck.resultType.SKILLCHECK_EXTREME_HARD_SUCCESS, OlivaDiceCore.skillCheck.resultType.SKILLCHECK_HARD_SUCCESS]:
+            skill_check_type = OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS
+        
+        if skill_check_type == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_SUCCESS:
+            if success_rd.resError is None:
+                san_loss = success_rd.resInt
+        elif skill_check_type == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS:
+            if success_rd.resError is None:
+                san_loss = success_rd.resInt
+        elif skill_check_type == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FAIL:
+            if fail_rd.resError is None:
+                san_loss = fail_rd.resInt
+        elif skill_check_type == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_FAIL:
+            if fail_rd.resError is None:
+                san_loss = fail_rd.resIntMax
+        
+        # 更新SAN值
+        new_san = max(0, current_san - san_loss)
+        OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
+            pc_hash, 'SAN', new_san, pc_name, hagId=tmp_hagID
+        )
+        OlivaDiceCore.msgReply.trigger_auto_sn_update(plugin_event, member_id, tmp_pc_platform, tmp_hagID, dictTValue)
+        
+        # 构建结果字符串
+        result_str = f"{display_name}(SAN:{current_san}): 1D100={roll_value}/{current_san}"
+        result_str += f"\nSAN: {current_san} -> {new_san}(损失{san_success if roll_value < current_san else san_fail}={san_loss}点)"
+        result_str += get_SkillCheckResult(skill_check_type, dictStrCustom, dictTValue)
+        
+        results.append({
+            'name': display_name,
+            'result_str': result_str,
+            'success_level': skill_check_type.value if hasattr(skill_check_type, 'value') else skill_check_type,
+            'roll_value': roll_value,
+            'san_value': current_san,
+            'san_loss': san_loss,
+            'new_san': new_san
+        })
+    
+    # 排序结果：先按成功等级(成功在上)，再按roll值(小在上)，最后按SAN值(大在上)
+    results.sort(key=lambda x: (
+        -x['success_level'],  # 成功在上
+        x['roll_value'],     # roll值小在上
+        -x['san_value']      # SAN值大在上
+    ))
+    
+    # 构建回复消息
+    result_lines = []
+    for i, result in enumerate(results, 1):
+        result_lines.append(f"{i}. {result['result_str']}")
+    
+    dictTValue['tTeamName'] = team_name
+    dictTValue['tResult'] = '\n'.join(result_lines)
+    
+    reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+        dictStrCustom['strTeamSCResult'], dictTValue
     )
     OlivaDiceCore.msgReply.replyMsg(plugin_event, reply_str)
