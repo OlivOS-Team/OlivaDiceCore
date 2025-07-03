@@ -1993,9 +1993,8 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
                 OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
                 return
-            if isMatchWordStart(tmp_reast_str, 'auto', fullMatch = True):
+            if isMatchWordStart(tmp_reast_str, 'auto'):
                 if is_at: return
-                # 自动群名片功能
                 auto_sn_enabled = OlivaDiceCore.userConfig.getUserConfigByKey(
                     userId = tmp_pc_id,
                     userType = 'user',
@@ -2004,28 +2003,78 @@ def unity_reply(plugin_event, Proc):
                     botHash = plugin_event.bot_info.hash,
                     default = False
                 )
-                new_auto_sn_enabled = not auto_sn_enabled
-                OlivaDiceCore.userConfig.setUserConfigByKey(
-                    userConfigKey = 'autoSnEnabled',
-                    userConfigValue = new_auto_sn_enabled,
-                    botHash = plugin_event.bot_info.hash,
-                    userId = tmp_pc_id,
-                    userType = 'user',
-                    platform = tmp_pc_platform
-                )
-                OlivaDiceCore.userConfig.writeUserConfigByUserHash(
-                    userHash = OlivaDiceCore.userConfig.getUserHash(
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'auto')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                if isMatchWordStart(tmp_reast_str, 'on', fullMatch = True):
+                    # sn auto on 命令
+                    if auto_sn_enabled:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnAutoAlreadyOn'], dictTValue)
+                    else:
+                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                            userConfigKey = 'autoSnEnabled',
+                            userConfigValue = True,
+                            botHash = plugin_event.bot_info.hash,
+                            userId = tmp_pc_id,
+                            userType = 'user',
+                            platform = tmp_pc_platform
+                        )
+                        OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                            userHash = OlivaDiceCore.userConfig.getUserHash(
+                                userId = tmp_pc_id,
+                                userType = 'user',
+                                platform = tmp_pc_platform
+                            )
+                        )
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnAutoOn'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
+                elif isMatchWordStart(tmp_reast_str, 'off', fullMatch = True):
+                    # sn auto off 命令
+                    if not auto_sn_enabled:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnAutoAlreadyOff'], dictTValue)
+                    else:
+                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                            userConfigKey = 'autoSnEnabled',
+                            userConfigValue = False,
+                            botHash = plugin_event.bot_info.hash,
+                            userId = tmp_pc_id,
+                            userType = 'user',
+                            platform = tmp_pc_platform
+                        )
+                        OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                            userHash = OlivaDiceCore.userConfig.getUserHash(
+                                userId = tmp_pc_id,
+                                userType = 'user',
+                                platform = tmp_pc_platform
+                            )
+                        )
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnAutoOff'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
+                else:
+                    # 原有逻辑
+                    new_auto_sn_enabled = not auto_sn_enabled
+                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                        userConfigKey = 'autoSnEnabled',
+                        userConfigValue = new_auto_sn_enabled,
+                        botHash = plugin_event.bot_info.hash,
                         userId = tmp_pc_id,
                         userType = 'user',
                         platform = tmp_pc_platform
                     )
-                )
-                if new_auto_sn_enabled:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnAutoOn'], dictTValue)
-                else:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnAutoOff'], dictTValue)
-                replyMsg(plugin_event, tmp_reply_str)
-                return
+                    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                        userHash = OlivaDiceCore.userConfig.getUserHash(
+                            userId = tmp_pc_id,
+                            userType = 'user',
+                            platform = tmp_pc_platform
+                        )
+                    )
+                    if new_auto_sn_enabled:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnAutoOn'], dictTValue)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnAutoOff'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
             if '' == tmp_reast_str.lower():
                 flag_mode = 'coc'
                 flag_force = False
@@ -4827,6 +4876,9 @@ def unity_reply(plugin_event, Proc):
                             tmp_skill_name,
                             hagId = tmp_hagID
                         )
+                        # 检查是否为0，为0则跳过不成长
+                        if tmp_skill_value == 0:
+                            continue
                         rd_para_1 = OlivaDiceCore.onedice.RD('1D100')
                         rd_para_1.roll()
                         if rd_para_1.resInt > tmp_skill_value or rd_para_1.resInt >= 96:
