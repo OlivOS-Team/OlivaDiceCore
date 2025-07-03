@@ -2278,9 +2278,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
         pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
         
         # 构建显示名称
-        display_name = f"[{user_name}]"
-        if pc_name:
-            display_name += f" - [{pc_name}]"
+        display_name = f"[{user_name}] - [{pc_name if pc_name else user_name}]"
         
         # 获取技能值
         current_skill_value = None

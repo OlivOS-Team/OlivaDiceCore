@@ -3345,7 +3345,7 @@ def unity_reply(plugin_event, Proc):
                                         dictTValue.get('tName', ''),
                                         hagId=tmp_hagID
                                     )
-                                    update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old}→{tmp_skill_value_new}"
+                                    update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new}"
                                     reply_messages.append(update_msg)
                                 else:
                                     reply_messages.append(f"[{tmp_skill_name}]: 无效数值 '{tmp_skill_value_new}'")
