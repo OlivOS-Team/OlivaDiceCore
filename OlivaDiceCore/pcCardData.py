@@ -259,7 +259,7 @@ dictPcCardTemplateDefaultTemp = {
         'mapping': {
             '闪避': '({DEX})/2',
             '母语': '{EDU}',
-            'SAN': '{POW}',
+            'SAN': '({POW})',
             'SANMAX': '({POW})+({SANMAXADD})',
             'HP': '(({CON})+({SIZ}))/10',
             'HPMAX': '(({CON})+({SIZ}))/10+({HPMAXADD})',
@@ -784,7 +784,7 @@ dictPcCardTemplateDefaultTemp = {
         'mapping': {
             '闪避': '({DEX})/2',
             '母语': '{EDU}',
-            'SAN': '{POW}',
+            'SAN': '({POW})',
             'SANMAX': '({POW})+({SANMAXADD})',
             'HP': '(({CON})+({SIZ}))/10',
             'HPMAX': '(({CON})+({SIZ}))/10+({HPMAXADD})',
@@ -1625,12 +1625,12 @@ dictPcCardTemplateDefaultTemp = {
             'LUC': '3d6x5'
         },
         'mapping': {
-            'SAN': '{POW}',
-            'SANMAX': '{POW}',
-            'HP': '({CON}+{SIZ})/10',
-            'HPMAX': '({CON}+{SIZ})/10',
-            'MP': '{POW}/5',
-            'MPMAX': '{POW}/5'
+            'SAN': '({POW})',
+            'SANMAX': '({POW})',
+            'HP': '(({CON})+({SIZ}))/10',
+            'HPMAX': '(({CON})+({SIZ}))/10',
+            'MP': '({POW})/5',
+            'MPMAX': '({POW})/5'
         },
         'synonyms':{
             'STR': ['力量', 'STR'],
@@ -2414,15 +2414,15 @@ dictPcCardTemplateDefaultTemp = {
             'EDU': '2d6+6'
         },
         'mapping': {
-            'SAN': '{POW}',
+            'SAN': '({POW})',
             'SANMAX': '({POW})+({SANMAXADD})',
             'HP': '(({CON})+({SIZ}))/10',
             'HPMAX': '(({CON})+({SIZ}))/10+({HPMAXADD})',
             'MP': '({POW})/5',
             'MPMAX': '({POW})/5+({MPMAXADD})',
-            'LUC': '{POW}*5',
-            'IDEA': '{INT}*5',
-            'KNOW': '{EDU}*5'
+            'LUC': '({POW})*5',
+            'IDEA': '({INT})*5',
+            'KNOW': '({EDU})*5'
         },
         'synonyms':{
             'STR': ['力量', 'STR'],
