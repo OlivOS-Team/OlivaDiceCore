@@ -75,7 +75,10 @@ dictPcCardTemplateDefaultTemp = {
                 'MP',
                 'MPMAX',
                 'IDEA',
-                'KNOW'
+                'KNOW',
+                'HPMAXADD',
+                'MPMAXADD',
+                'SANMAXADD'
             ],
             '技能': [
                 '会计',
@@ -230,6 +233,9 @@ dictPcCardTemplateDefaultTemp = {
                 'MPMAX',
                 'IDEA',
                 'KNOW',
+                'HPMAXADD',
+                'MPMAXADD',
+                'SANMAXADD',
                 '克苏鲁神话',
                 '信用'
             ],
@@ -251,14 +257,14 @@ dictPcCardTemplateDefaultTemp = {
             'LUC': '3d6x5'
         },
         'mapping': {
-            '闪避': '{DEX}/2',
+            '闪避': '({DEX})/2',
             '母语': '{EDU}',
             'SAN': '{POW}',
-            'SANMAX': '{POW}',
-            'HP': '({CON}+{SIZ})/10',
-            'HPMAX': '({CON}+{SIZ})/10',
-            'MP': '{POW}/5',
-            'MPMAX': '{POW}/5'
+            'SANMAX': '({POW})+({SANMAXADD})',
+            'HP': '(({CON})+({SIZ}))/10',
+            'HPMAX': '(({CON})+({SIZ}))/10+({HPMAXADD})',
+            'MP': '({POW})/5',
+            'MPMAX': '({POW})/5+({MPMAXADD})'
         },
         'synonyms':{
             'STR': ['力量', 'STR'],
@@ -272,10 +278,13 @@ dictPcCardTemplateDefaultTemp = {
             'LUC': ['幸运', 'LUC', '运气', 'LUK'],
             'SAN': ['理智', 'SAN','Sanity','SAN值','理智值'],
             'SANMAX': ['理智上限', 'SANMAX','SanityMAX'],
-            'HP': ['生命值','体力','HP','HitPoints'],
-            'HPMAX': ['生命值上限','HPMAX','HitPointsMAX'],
+            'HP': ['生命值','体力','HP','HitPoints','生命','血量'],
+            'HPMAX': ['生命值上限','HPMAX','HitPointsMAX','生命上限','血量上限','体力上限'],
             'MP': ['魔法','MP','MagicPoints'],
             'MPMAX': ['魔法上限','MPMAX','MagicPointsMAX'],
+            'SANMAXADD': ['SANMAXADD','理智上限加值'],
+            'HPMAXADD': ['HPMAXADD','生命值上限加值','生命上限加值','血量上限加值','体力上限加值'],
+            'MPMAXADD': ['MPMAXADD','魔法上限加值'],
             'IDEA': ['灵感', 'IDEA'],
             'KNOW': ['知识', 'KNOW'],
             'MOV': ['移动力','MOV'],
@@ -485,7 +494,10 @@ dictPcCardTemplateDefaultTemp = {
             '炮术': 1,
             '手枪': 20,
             '步霰': 25,
-            '斗殴': 20
+            '斗殴': 20,
+            'SANMAXADD': 0,
+            'HPMAXADD': 0,
+            'MPMAXADD': 0
         },
         'checkRules': {
             'default': {
@@ -588,7 +600,10 @@ dictPcCardTemplateDefaultTemp = {
                 'MP',
                 'MPMAX',
                 'IDEA',
-                'KNOW'
+                'KNOW',
+                'HPMAXADD',
+                'MPMAXADD',
+                'SANMAXADD'
             ],
             '技能': [
                 '会计',
@@ -743,6 +758,9 @@ dictPcCardTemplateDefaultTemp = {
                 'MPMAX',
                 'IDEA',
                 'KNOW',
+                'HPMAXADD',
+                'MPMAXADD',
+                'SANMAXADD',
                 '克苏鲁神话',
                 '信用'
             ],
@@ -764,14 +782,14 @@ dictPcCardTemplateDefaultTemp = {
             'LUC': '3d6x5'
         },
         'mapping': {
-            '闪避': '{DEX}/2',
+            '闪避': '({DEX})/2',
             '母语': '{EDU}',
             'SAN': '{POW}',
-            'SANMAX': '{POW}',
-            'HP': '({CON}+{SIZ})/10',
-            'HPMAX': '({CON}+{SIZ})/10',
-            'MP': '{POW}/5',
-            'MPMAX': '{POW}/5'
+            'SANMAX': '({POW})+({SANMAXADD})',
+            'HP': '(({CON})+({SIZ}))/10',
+            'HPMAX': '(({CON})+({SIZ}))/10+({HPMAXADD})',
+            'MP': '({POW})/5',
+            'MPMAX': '({POW})/5+({MPMAXADD})'
         },
         'synonyms':{
             'STR': ['力量', 'STR'],
@@ -785,10 +803,13 @@ dictPcCardTemplateDefaultTemp = {
             'LUC': ['幸运', 'LUC', '运气', 'LUK'],
             'SAN': ['理智', 'SAN','Sanity','SAN值','理智值'],
             'SANMAX': ['理智上限', 'SANMAX','SanityMAX'],
-            'HP': ['生命值','体力','HP','HitPoints'],
-            'HPMAX': ['生命值上限','HPMAX','HitPointsMAX'],
+            'HP': ['生命值','体力','HP','HitPoints','生命','血量'],
+            'HPMAX': ['生命值上限','HPMAX','HitPointsMAX','生命上限','血量上限','体力上限'],
             'MP': ['魔法','MP','MagicPoints'],
             'MPMAX': ['魔法上限','MPMAX','MagicPointsMAX'],
+            'SANMAXADD': ['SANMAXADD','理智上限加值'],
+            'HPMAXADD': ['HPMAXADD','生命值上限加值','生命上限加值','血量上限加值','体力上限加值'],
+            'MPMAXADD': ['MPMAXADD','魔法上限加值'],
             'IDEA': ['灵感', 'IDEA'],
             'KNOW': ['知识', 'KNOW'],
             'MOV': ['移动力','MOV'],
@@ -998,7 +1019,10 @@ dictPcCardTemplateDefaultTemp = {
             '炮术': 1,
             '手枪': 20,
             '步霰': 25,
-            '斗殴': 20
+            '斗殴': 20,
+            'SANMAXADD': 0,
+            'HPMAXADD': 0,
+            'MPMAXADD': 0
         },
         'checkRules': {
             'default': {
@@ -1419,7 +1443,10 @@ dictPcCardTemplateDefaultTemp = {
                 'MP',
                 'MPMAX',
                 'IDEA',
-                'KNOW'
+                'KNOW',
+                'HPMAXADD',
+                'MPMAXADD',
+                'SANMAXADD'
             ],
             '技能': [
                 '会计',
@@ -1574,6 +1601,9 @@ dictPcCardTemplateDefaultTemp = {
                 'MPMAX',
                 'IDEA',
                 'KNOW',
+                'HPMAXADD',
+                'MPMAXADD',
+                'SANMAXADD',
                 '克苏鲁神话',
                 '信用'
             ],
@@ -1614,10 +1644,13 @@ dictPcCardTemplateDefaultTemp = {
             'LUC': ['幸运', 'LUC', '运气', 'LUK'],
             'SAN': ['理智', 'SAN','Sanity','SAN值','理智值'],
             'SANMAX': ['理智上限', 'SANMAX','SanityMAX'],
-            'HP': ['生命值','体力','HP','HitPoints'],
-            'HPMAX': ['生命值上限','HPMAX','HitPointsMAX'],
+            'HP': ['生命值','体力','HP','HitPoints','生命','血量'],
+            'HPMAX': ['生命值上限','HPMAX','HitPointsMAX','生命上限','血量上限','体力上限'],
             'MP': ['魔法','MP','MagicPoints'],
             'MPMAX': ['魔法上限','MPMAX','MagicPointsMAX'],
+            'SANMAXADD': ['SANMAXADD','理智上限加值'],
+            'HPMAXADD': ['HPMAXADD','生命值上限加值','生命上限加值','血量上限加值','体力上限加值'],
+            'MPMAXADD': ['MPMAXADD','魔法上限加值'],
             'IDEA': ['灵感', 'IDEA'],
             'KNOW': ['知识', 'KNOW'],
             'MOV': ['移动力','MOV'],
@@ -2200,7 +2233,10 @@ dictPcCardTemplateDefaultTemp = {
                 'MP',
                 'MPMAX',
                 'IDEA',
-                'KNOW'
+                'KNOW',
+                'HPMAXADD',
+                'MPMAXADD',
+                'SANMAXADD'
             ],
             '技能': [
                 '会计',
@@ -2355,6 +2391,9 @@ dictPcCardTemplateDefaultTemp = {
                 'MPMAX',
                 'IDEA',
                 'KNOW',
+                'HPMAXADD',
+                'MPMAXADD',
+                'SANMAXADD',
                 '克苏鲁神话',
                 '信用'
             ],
@@ -2375,11 +2414,12 @@ dictPcCardTemplateDefaultTemp = {
             'EDU': '2d6+6'
         },
         'mapping': {
-            'SAN': '{POW}*5',
-            'HP': '({CON}+{SIZ})/2',
-            'HPMAX': '({CON}+{SIZ})/2',
-            'MP': '{POW}',
-            'MPMAX': '{POW}',
+            'SAN': '{POW}',
+            'SANMAX': '({POW})+({SANMAXADD})',
+            'HP': '(({CON})+({SIZ}))/10',
+            'HPMAX': '(({CON})+({SIZ}))/10+({HPMAXADD})',
+            'MP': '({POW})/5',
+            'MPMAX': '({POW})/5+({MPMAXADD})',
             'LUC': '{POW}*5',
             'IDEA': '{INT}*5',
             'KNOW': '{EDU}*5'
@@ -2396,10 +2436,13 @@ dictPcCardTemplateDefaultTemp = {
             'LUC': ['幸运', 'LUC', '运气', 'LUK'],
             'SAN': ['理智', 'SAN','Sanity','SAN值','理智值'],
             'SANMAX': ['理智上限', 'SANMAX','SanityMAX'],
-            'HP': ['生命值','体力','HP','HitPoints'],
-            'HPMAX': ['生命值上限','HPMAX','HitPointsMAX'],
+            'HP': ['生命值','体力','HP','HitPoints','生命','血量'],
+            'HPMAX': ['生命值上限','HPMAX','HitPointsMAX','生命上限','血量上限','体力上限'],
             'MP': ['魔法','MP','MagicPoints'],
             'MPMAX': ['魔法上限','MPMAX','MagicPointsMAX'],
+            'SANMAXADD': ['SANMAXADD','理智上限加值'],
+            'HPMAXADD': ['HPMAXADD','生命值上限加值','生命上限加值','血量上限加值','体力上限加值'],
+            'MPMAXADD': ['MPMAXADD','魔法上限加值'],
             'IDEA': ['灵感', 'IDEA'],
             'KNOW': ['知识', 'KNOW'],
             'MOV': ['移动力','MOV'],
