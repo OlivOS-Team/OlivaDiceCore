@@ -19,6 +19,7 @@ import OlivOS
 
 import time
 import hashlib
+import re
 
 contextFeq = 0.1
 
@@ -1946,32 +1947,57 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
         ))
         return
     
-    # 解析多项技能操作（不包含赋值）
+    # 获取所有成员的技能列表并去重
+    all_pc_skill_names = set()
+    for member_id in team_config[team_name]['members']:
+        tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
+        pc_skills = OlivaDiceCore.pcCard.pcCardDataGetByPcName(tmp_pcHash, hagId=tmp_hagID)
+        for skill_name in pc_skills:
+            if not skill_name.startswith('__'):
+                # 移除技能名中的数字
+                clean_skill_name = re.sub(r'\d+', '', skill_name).upper()
+                all_pc_skill_names.add(clean_skill_name)
+    # 预处理字符串，在特定字母先查找技能名，找到技能名后添加空格
+    processed_skill_ops = skill_operations
+    for start_char in OlivaDiceCore.pcCardData.arrPcCardLetterStart:
+        i = 0
+        while i < len(processed_skill_ops):
+            if processed_skill_ops[i].lower() == start_char.lower():
+                max_len = 0
+                for skill in sorted(all_pc_skill_names, key=len, reverse=True):
+                    if skill.startswith(start_char.upper()) and processed_skill_ops[i:].upper().startswith(skill):
+                        if len(skill) > max_len:
+                            max_len = len(skill)
+                            break
+                if max_len > 0:
+                    # 在匹配的技能名前添加空格
+                    processed_skill_ops = processed_skill_ops[:i] + ' ' + processed_skill_ops[i:]
+                    i += max_len + 1
+                else:
+                    i += 1
+            else:
+                i += 1
+    
+    # 解析多项技能操作
     op_list = ['+', '-', '*', '/']
     skill_updates = []
-    
     # 分割技能操作
     current_pos = 0
-    while current_pos < len(skill_operations):
+    while current_pos < len(processed_skill_ops):
         # 查找技能名结束位置（遇到操作符）
         skill_end_pos = -1
-        for i in range(current_pos, len(skill_operations)):
-            if skill_operations[i] in op_list:
+        for i in range(current_pos, len(processed_skill_ops)):
+            if processed_skill_ops[i] in op_list:
                 skill_end_pos = i
                 break
-        
         if skill_end_pos == -1:
-            # 没有找到操作符，可能是无效格式
             break
-        
-        skill_name = skill_operations[current_pos:skill_end_pos].strip()
+        skill_name = processed_skill_ops[current_pos:skill_end_pos].strip()
         if not skill_name:
             current_pos = skill_end_pos + 1
             continue
-        
-        op = skill_operations[skill_end_pos]
-        rest_str = skill_operations[skill_end_pos+1:]
-        
+        op = processed_skill_ops[skill_end_pos]
+        rest_str = processed_skill_ops[skill_end_pos+1:]
         # 提取表达式
         expr_end_pos = 0
         in_dice_expr = False
@@ -1993,7 +2019,9 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
         current_pos = skill_end_pos + expr_end_pos + 1
         
         if skill_name and expr_str:
-            skill_updates.append((skill_name.upper(), op, expr_str))
+            # 移除技能名中的数字
+            clean_skill_name = re.sub(r'\d+', '', skill_name).upper()
+            skill_updates.append((clean_skill_name, op, expr_str))
     
     if not skill_updates:
         OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'team')

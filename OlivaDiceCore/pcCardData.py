@@ -2985,3 +2985,6 @@ dictPcCardMappingSpecial = {
     'default': ['体格', 'DB'],
     'COC7': ['体格', 'DB']
 }
+
+# 特殊技能开头表
+arrPcCardLetterStart = ['d','D']
