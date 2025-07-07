@@ -3231,13 +3231,10 @@ def unity_reply(plugin_event, Proc):
                 special_skills = []
                 op_list = ['+', '-', '*', '/']
                 assign_op = '='
-                
                 is_pass = False
-
                 # 检查是否需要跳过
                 if not any(op in tmp_reast_str_new for op in op_list + [assign_op]) or tmp_reast_str_new.startswith('&'):
                     is_pass = True
-                    
                 # 检查是否是录卡格式（字符串-字符串）
                 dash_pos = tmp_reast_str_new.find('-')
                 if dash_pos > 0:
@@ -3248,28 +3245,52 @@ def unity_reply(plugin_event, Proc):
                 if is_pass:
                     pass
                 else:
+                    # 获取当前人物卡的所有技能名
+                    tmp_pc_id = at_user_id if at_user_id else plugin_event.data.user_id
+                    tmp_pc_platform = plugin_event.platform['platform']
+                    tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+                    pc_skills = OlivaDiceCore.pcCard.pcCardDataGetByPcName(tmp_pcHash, hagId=tmp_hagID)
+                    pc_skill_names = [s.upper() for s in pc_skills.keys() if not s.startswith('__')]
+                    # 预处理字符串，在特定字母先查找技能名，找到技能名后添加空格
+                    processed_str = tmp_reast_str_new
+                    for start_char in OlivaDiceCore.pcCardData.arrPcCardLetterStart:
+                        i = 0
+                        while i < len(processed_str):
+                            if processed_str[i].lower() == start_char.lower():
+                                max_len = 0
+                                for skill in sorted(pc_skill_names, key=len, reverse=True):
+                                    if skill[0].lower() == start_char.lower() and processed_str[i:].upper().startswith(skill):
+                                        if len(skill) > max_len:
+                                            max_len = len(skill)
+                                            break
+                                if max_len > 0:
+                                    # 在匹配的技能名前添加空格
+                                    processed_str = processed_str[:i] + ' ' + processed_str[i:]
+                                    i += max_len + 1
+                                else:
+                                    i += 1
+                            else:
+                                i += 1
                     current_pos = 0
-                    while current_pos < len(tmp_reast_str_new):
+                    while current_pos < len(processed_str):
                         # 查找技能名结束位置（遇到符号或数字）
                         skill_end_pos = -1
-                        for i in range(current_pos, len(tmp_reast_str_new)):
-                            if tmp_reast_str_new[i] in op_list + [assign_op] or tmp_reast_str_new[i].isdigit():
+                        for i in range(current_pos, len(processed_str)):
+                            if processed_str[i] in op_list + [assign_op] or processed_str[i].isdigit():
                                 skill_end_pos = i
                                 break
-                            
-                        if tmp_reast_str_new[skill_end_pos].isdigit():
+                        if processed_str[skill_end_pos].isdigit():
                             num_start = skill_end_pos
                             num_end = num_start
-                            while num_end < len(tmp_reast_str_new) and tmp_reast_str_new[num_end].isdigit():
+                            while num_end < len(processed_str) and processed_str[num_end].isdigit():
                                 num_end += 1
-                            tmp_skill_name = tmp_reast_str_new[current_pos:skill_end_pos].strip()
-                            tmp_skill_value = '=' + tmp_reast_str_new[skill_end_pos:num_end].strip()
+                            tmp_skill_name = processed_str[current_pos:skill_end_pos].strip()
+                            tmp_skill_value = '=' + processed_str[skill_end_pos:num_end].strip()
                             tmp_skill_updates.append([tmp_skill_name, tmp_skill_value])
                             current_pos = num_end
                             continue
-                        
-                        tmp_skill_name = tmp_reast_str_new[current_pos:skill_end_pos].strip()
-                        tmp_rest_str = tmp_reast_str_new[skill_end_pos:]
+                        tmp_skill_name = processed_str[current_pos:skill_end_pos].strip()
+                        tmp_rest_str = processed_str[skill_end_pos:]
                         expr_end_pos = 0
                         in_dice_expr = False
                         for i in range(len(tmp_rest_str)):
@@ -3317,7 +3338,6 @@ def unity_reply(plugin_event, Proc):
                         )
                         if tmp_pc_name_1:
                             dictTValue['tName'] = tmp_pc_name_1
-                            
                         # 添加特殊技能检测提示
                         tmp_pcCardRule = 'default'
                         if tmp_pc_name_1 is not None:
@@ -3331,7 +3351,6 @@ def unity_reply(plugin_event, Proc):
                             # 检查当前技能是否在特殊技能列表中
                             if tmp_skill_name in [skill for skill in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[tmp_pcCardRule]]:
                                 special_skills.append(tmp_skill_name)
-                            
                         if tmp_skill_value:
                             # 处理直接赋值的情况
                             if tmp_skill_value.startswith('='):
