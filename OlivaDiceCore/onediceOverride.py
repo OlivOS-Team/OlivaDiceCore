@@ -436,7 +436,7 @@ def RDDataFormat_default(data:list, mode = 'default'):
                                 for data_this_this_1 in data_this['result'][1]
                             ]
                         res += ''.join([
-                            '{1D100=%s 奖励骰:[%s]}' % (
+                            '{1D100=%s bonus:[%s]}' % (
                                 str(data_this_this_0),
                                 ', '.join(tmp_data_this_list_1)
                             ) for data_this_this_0 in data_this['result'][0]
@@ -452,7 +452,7 @@ def RDDataFormat_default(data:list, mode = 'default'):
                                 for data_this_this_1 in data_this['result'][1]
                             ]
                         res += ''.join([
-                            '{1D100=%s 惩罚骰:[%s]}' % (
+                            '{1D100=%s punish:[%s]}' % (
                                 str(data_this_this_0),
                                 ', '.join(tmp_data_this_list_1)
                             ) for data_this_this_0 in data_this['result'][0]
