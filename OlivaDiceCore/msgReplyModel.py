@@ -2503,6 +2503,26 @@ def team_sc(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
     tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'sc')
     tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
 
+    # 处理奖励骰和惩罚骰
+    flag_bp_type = 0  # 0:无 1:奖励骰 2:惩罚骰
+    flag_bp_count = 1  # 骰子数量
+    if OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'b'):
+        flag_bp_type = 1
+        tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'b')
+        # 检查是否有数字指定骰子数量
+        if len(tmp_reast_str) > 0 and tmp_reast_str[0].isdigit():
+            flag_bp_count = int(tmp_reast_str[0])
+            tmp_reast_str = tmp_reast_str[1:]
+    elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'p'):
+        flag_bp_type = 2
+        tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'p')
+        # 检查是否有数字指定骰子数量
+        if len(tmp_reast_str) > 0 and tmp_reast_str[0].isdigit():
+            flag_bp_count = int(tmp_reast_str[0])
+            tmp_reast_str = tmp_reast_str[1:]
+    
+    tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
+
     # 获取小队配置和活跃小队
     team_config = OlivaDiceCore.userConfig.getUserConfigByKey(
         userId=tmp_hagID,
@@ -2584,6 +2604,13 @@ def team_sc(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
         ))
         return
     
+    # 构建骰子表达式
+    rd_para_str = '1D100'
+    if flag_bp_type == 1:
+        rd_para_str = f'B{flag_bp_count}'
+    elif flag_bp_type == 2:
+        rd_para_str = f'P{flag_bp_count}'
+    
     # 为每个成员进行sc检定
     results = []
     for member_id in members:
@@ -2612,8 +2639,8 @@ def team_sc(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
         if current_san is None:
             current_san = 0
         
-        # 1d100判断
-        rd_para = OlivaDiceCore.onedice.RD('1D100')
+        # 进行检定
+        rd_para = OlivaDiceCore.onedice.RD(rd_para_str)
         rd_para.roll()
         
         if rd_para.resError is not None:
@@ -2662,7 +2689,12 @@ def team_sc(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
                 dictTValue['tRollPara'] = san_fail
                 error_str += f"右式错误: {get_SkillCheckError(fail_rd.resError, dictStrCustom, dictTValue)}"
             
-            result_str = f"{display_name}(SAN:{current_san}): 1D100={roll_value}/{current_san}"
+            # 构建骰子详情
+            dice_detail = f"{rd_para_str}={roll_value}"
+            if rd_para.resDetail:
+                dice_detail = f"{rd_para_str}={rd_para.resDetail}={roll_value}"
+            
+            result_str = f"{display_name}(SAN:{current_san}): {dice_detail}/{current_san}"
             result_str += f"\n{error_str}"
             
             results.append({
@@ -2705,8 +2737,13 @@ def team_sc(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
         )
         OlivaDiceCore.msgReply.trigger_auto_sn_update(plugin_event, member_id, tmp_pc_platform, tmp_hagID, dictTValue)
         
-        # 构建结果字符串
-        result_str = f"{display_name}(SAN:{current_san}): 1D100={roll_value}/{current_san}"
+        # 构建骰子详情
+        dice_detail = f"{rd_para_str}={roll_value}"
+        if rd_para.resDetail:
+            dice_detail = f"{rd_para_str}={rd_para.resDetail}={roll_value}"
+        
+        # 构建完整结果字符串
+        result_str = f"{display_name}(SAN:{current_san}): {dice_detail}/{current_san}"
         result_str += f"\nSAN: {current_san} -> {new_san}(损失{san_success if roll_value < current_san else san_fail}={san_loss}点)"
         result_str += get_SkillCheckResult(skill_check_type, dictStrCustom, dictTValue)
 

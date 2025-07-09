@@ -3959,6 +3959,24 @@ def unity_reply(plugin_event, Proc):
             if len(tmp_reast_str) <= 0:
                 replyMsgLazyHelpByEvent(plugin_event, 'sc')
                 return
+            # 处理奖励骰和惩罚骰
+            flag_bp_type = 0  # 0:无 1:奖励骰 2:惩罚骰
+            flag_bp_count = 1  # 骰子数量
+            if isMatchWordStart(tmp_reast_str, 'b'):
+                flag_bp_type = 1
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'b')
+                # 检查是否有数字指定骰子数量
+                if len(tmp_reast_str) > 0 and tmp_reast_str[0].isdigit():
+                    flag_bp_count = int(tmp_reast_str[0])
+                    tmp_reast_str = tmp_reast_str[1:]
+            elif isMatchWordStart(tmp_reast_str, 'p'):
+                flag_bp_type = 2
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'p')
+                # 检查是否有数字指定骰子数量
+                if len(tmp_reast_str) > 0 and tmp_reast_str[0].isdigit():
+                    flag_bp_count = int(tmp_reast_str[0])
+                    tmp_reast_str = tmp_reast_str[1:]
+            tmp_reast_str = skipSpaceStart(tmp_reast_str)
             tmp_reast_str_list = tmp_reast_str.split(' ')
             tmp_sancheck_para = None
             tmp_san_val = None
@@ -4026,7 +4044,13 @@ def unity_reply(plugin_event, Proc):
                         hagId = tmp_hagID
                     )
                 tmp_skill_value_old = tmp_skill_value
-                rd_para = OlivaDiceCore.onedice.RD('1D100')
+                # 构建骰子表达式
+                rd_para_str = '1D100'
+                if flag_bp_type == 1:
+                    rd_para_str = f'B{flag_bp_count}'
+                elif flag_bp_type == 2:
+                    rd_para_str = f'P{flag_bp_count}'
+                rd_para = OlivaDiceCore.onedice.RD(rd_para_str)
                 rd_para.roll()
                 rd_para_2 = None
                 tmp_rd_int = None
@@ -4116,10 +4140,14 @@ def unity_reply(plugin_event, Proc):
                             tmp_pc_name,
                             hagId = tmp_hagID
                         )
+                        # 构建骰子详情显示
+                        dice_detail = f"{rd_para_str}={tmp_rd_int}"
+                        if rd_para.resDetail:
+                            dice_detail = f"{rd_para_str}={rd_para.resDetail}={tmp_rd_int}"
                         dictTValue['tName'] = tmp_pc_name
                         dictTValue['tSkillValue'] = str(tmp_skill_value_old)
                         dictTValue['tSkillValueNew'] = str(tmp_skill_value)
-                        dictTValue['tRollResult'] = '1D100=' + str(tmp_rd_int)
+                        dictTValue['tRollResult'] = dice_detail
                         if is_at:
                             if flag_GreatFailed:
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSanCheckGreatFailedAtOther'], dictTValue)
@@ -4135,7 +4163,7 @@ def unity_reply(plugin_event, Proc):
                     else:
                         dictTValue['tName'] = tmp_pc_name
                         dictTValue['tSkillValue'] = str(tmp_skill_value_old)
-                        dictTValue['tRollResult'] = '1D100=' + str(tmp_rd_int)
+                        dictTValue['tRollResult'] = f"{rd_para_str}={tmp_rd_int}"
                         dictTValue['tRollSubResult'] = tmp_sancheck_para_final
                         if is_at:
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSanCheckErrorAtOther'], dictTValue)
