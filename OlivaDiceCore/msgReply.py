@@ -3280,6 +3280,9 @@ def unity_reply(plugin_event, Proc):
                             if processed_str[i] in op_list + [assign_op] or processed_str[i].isdigit():
                                 skill_end_pos = i
                                 break
+                        if skill_end_pos == -1:
+                            break  # 没有找到符号或数字，结束解析
+                        # 处理技能名和表达式
                         if processed_str[skill_end_pos].isdigit() or processed_str[skill_end_pos] in op_list:
                             # 查找完整的表达式
                             expr_end_pos = skill_end_pos
@@ -3290,41 +3293,21 @@ def unity_reply(plugin_event, Proc):
                                     in_dice_expr = True
                                     expr_end_pos += 1
                                     continue
-                                if char.isdigit() or (in_dice_expr and char in op_list) or char in op_list:
+                                if char.isdigit() or (in_dice_expr and char in op_list) or char in op_list + [assign_op]:
                                     expr_end_pos += 1
                                 else:
                                     break
                                 
                             tmp_skill_name = processed_str[current_pos:skill_end_pos].strip()
                             tmp_skill_value = processed_str[skill_end_pos:expr_end_pos].strip()
-                            tmp_skill_updates.append([tmp_skill_name, tmp_skill_value])
+                            # 自动补 = 如果没有运算符
+                            if tmp_skill_value[0].isdigit() or tmp_skill_value[0].upper() == 'D':
+                                tmp_skill_value = '=' + tmp_skill_value
+                            if tmp_skill_name:
+                                tmp_skill_updates.append([tmp_skill_name, tmp_skill_value])
                             current_pos = expr_end_pos
-                            continue
-                        tmp_skill_name = processed_str[current_pos:skill_end_pos].strip()
-                        tmp_rest_str = processed_str[skill_end_pos:]
-                        expr_end_pos = 0
-                        in_dice_expr = False
-                        for i in range(len(tmp_rest_str)):
-                            char = tmp_rest_str[i]
-                            if char.upper() == 'D':
-                                in_dice_expr = True
-                                expr_end_pos = i + 1
-                                continue
-                            if i == 0 and char in op_list + [assign_op]:
-                                expr_end_pos = i + 1
-                                continue
-                            if char.isdigit() or (in_dice_expr and char in op_list):
-                                expr_end_pos = i + 1
-                            else:
-                                if i > 0:
-                                    expr_end_pos = i
-                                break
-                        if expr_end_pos == 0 and len(tmp_rest_str) > 0:
-                            expr_end_pos = 1
-                        tmp_skill_value = tmp_rest_str[:expr_end_pos]
-                        current_pos = skill_end_pos + expr_end_pos
-                        if tmp_skill_name:
-                            tmp_skill_updates.append([tmp_skill_name, tmp_skill_value])
+                        else:
+                            current_pos = skill_end_pos + 1
                     # 对这些算式进行计算
                     for tmp_skill_name, tmp_skill_value in tmp_skill_updates:
                         if not tmp_skill_name:
@@ -3365,23 +3348,55 @@ def unity_reply(plugin_event, Proc):
                         if tmp_skill_value:
                             # 处理直接赋值的情况
                             if tmp_skill_value.startswith('='):
-                                tmp_skill_value_new = tmp_skill_value[1:]
-                                if tmp_skill_value_new.isdigit():
-                                    tmp_skill_value_new = int(tmp_skill_value_new)
-                                    OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
+                                tmp_skill_value_new = tmp_skill_value[1:].strip()
+                                # 检查是否是骰子表达式或算式
+                                if 'd' in tmp_skill_value_new.lower() or any(op in tmp_skill_value_new for op in op_list):
+                                    tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
                                         OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
-                                        tmp_skill_name,
-                                        tmp_skill_value_new,
-                                        dictTValue.get('tName', ''),
-                                        hagId=tmp_hagID
+                                        dictTValue.get('tName', '')
                                     )
-                                    update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new}"
-                                    reply_messages.append(update_msg)
+                                    tmp_template_customDefault = None
+                                    if tmp_template_name:
+                                        tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
+                                        if 'customDefault' in tmp_template:
+                                            tmp_template_customDefault = tmp_template['customDefault']
+
+                                    rd_para = OlivaDiceCore.onedice.RD(tmp_skill_value_new, tmp_template_customDefault)
+                                    rd_para.roll()
+                                    if rd_para.resError is None:
+                                        tmp_skill_value_new = rd_para.resInt
+                                        # 显示详细计算过程
+                                        if "D" in update_msg.upper():
+                                            update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new} ({tmp_skill_value[1:]}={rd_para.resDetail})"
+                                        else:
+                                            update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new} ({tmp_skill_value[1:]})"
+                                        OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
+                                            OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
+                                            tmp_skill_name,
+                                            tmp_skill_value_new,
+                                            dictTValue.get('tName', ''),
+                                            hagId=tmp_hagID
+                                        )
+                                        reply_messages.append(update_msg)
+                                    else:
+                                        reply_messages.append(f"[{tmp_skill_name}]: 表达式错误 '{tmp_skill_value_new}'")
                                 else:
-                                    reply_messages.append(f"[{tmp_skill_name}]: 无效数值 '{tmp_skill_value_new}'")
+                                    # 普通数字赋值
+                                    if tmp_skill_value_new.isdigit():
+                                        tmp_skill_value_new = int(tmp_skill_value_new)
+                                        update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new}"
+                                        OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
+                                            OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
+                                            tmp_skill_name,
+                                            tmp_skill_value_new,
+                                            dictTValue.get('tName', ''),
+                                            hagId=tmp_hagID
+                                        )
+                                        reply_messages.append(update_msg)
+                                    else:
+                                        reply_messages.append(f"[{tmp_skill_name}]: 无效数值 '{tmp_skill_value_new}'")
                             else:
-                                # 处理表达式
-                                rd_para_str = str(tmp_skill_value_old) + tmp_skill_value
+                                # 处理运算表达式
                                 tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
                                     OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
                                     dictTValue.get('tName', '')
@@ -3391,10 +3406,16 @@ def unity_reply(plugin_event, Proc):
                                     tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
                                     if 'customDefault' in tmp_template:
                                         tmp_template_customDefault = tmp_template['customDefault']
+                                rd_para_str = str(tmp_skill_value_old) + tmp_skill_value
                                 rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_template_customDefault)
                                 rd_para.roll()
                                 if rd_para.resError is None:
                                     tmp_skill_value_new = rd_para.resInt
+                                    # 显示详细计算过程
+                                    if 'D' in tmp_skill_value.upper():
+                                        update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old}{tmp_skill_value}={rd_para.resDetail}={tmp_skill_value_new}"
+                                    else:
+                                        update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old}{tmp_skill_value}={tmp_skill_value_new}"
                                     OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
                                         OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
                                         tmp_skill_name,
@@ -3402,10 +3423,6 @@ def unity_reply(plugin_event, Proc):
                                         dictTValue.get('tName', ''),
                                         hagId=tmp_hagID
                                     )
-                                    if 'D' in tmp_skill_value.upper():
-                                        update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old}{tmp_skill_value}={rd_para.resDetail}={tmp_skill_value_new}"
-                                    else:
-                                        update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old}{tmp_skill_value}={tmp_skill_value_new}"
                                     reply_messages.append(update_msg)
                                 else:
                                     reply_messages.append(f"[{tmp_skill_name}]: 表达式错误 '{tmp_skill_value}'")
