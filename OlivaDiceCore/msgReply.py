@@ -3239,8 +3239,9 @@ def unity_reply(plugin_event, Proc):
                 dash_pos = tmp_reast_str_new.find('-')
                 if dash_pos > 0:
                     rest_after_dash = tmp_reast_str_new[dash_pos+1:].strip()
-                    # 录卡格式判断
-                    if rest_after_dash and not (rest_after_dash[0].isdigit() or rest_after_dash[0] in op_list + [assign_op] or rest_after_dash[0].upper().startswith('D')):
+                    # 录卡格式判断 - 只有当后面跟着非数字、非运算符、非d且不是表达式时才跳过
+                    if rest_after_dash and not (rest_after_dash[0].isdigit() or rest_after_dash[0] in op_list + [assign_op] or 
+                                              (len(rest_after_dash) > 1 and rest_after_dash[0].upper() == 'D' and rest_after_dash[1].isdigit())):
                         is_pass = True
                 if is_pass:
                     pass
@@ -3279,15 +3280,25 @@ def unity_reply(plugin_event, Proc):
                             if processed_str[i] in op_list + [assign_op] or processed_str[i].isdigit():
                                 skill_end_pos = i
                                 break
-                        if processed_str[skill_end_pos].isdigit():
-                            num_start = skill_end_pos
-                            num_end = num_start
-                            while num_end < len(processed_str) and processed_str[num_end].isdigit():
-                                num_end += 1
+                        if processed_str[skill_end_pos].isdigit() or processed_str[skill_end_pos] in op_list:
+                            # 查找完整的表达式
+                            expr_end_pos = skill_end_pos
+                            in_dice_expr = False
+                            while expr_end_pos < len(processed_str):
+                                char = processed_str[expr_end_pos]
+                                if char.upper() == 'D':
+                                    in_dice_expr = True
+                                    expr_end_pos += 1
+                                    continue
+                                if char.isdigit() or (in_dice_expr and char in op_list) or char in op_list:
+                                    expr_end_pos += 1
+                                else:
+                                    break
+                                
                             tmp_skill_name = processed_str[current_pos:skill_end_pos].strip()
-                            tmp_skill_value = '=' + processed_str[skill_end_pos:num_end].strip()
+                            tmp_skill_value = processed_str[skill_end_pos:expr_end_pos].strip()
                             tmp_skill_updates.append([tmp_skill_name, tmp_skill_value])
-                            current_pos = num_end
+                            current_pos = expr_end_pos
                             continue
                         tmp_skill_name = processed_str[current_pos:skill_end_pos].strip()
                         tmp_rest_str = processed_str[skill_end_pos:]
