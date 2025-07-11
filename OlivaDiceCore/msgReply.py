@@ -3475,7 +3475,12 @@ def unity_reply(plugin_event, Proc):
                 if not flag_is_mapping and tmp_skill_value != None:
                     tmp_skill_value = int(tmp_skill_value)
                 if tmp_skill_name != None:
-                    if tmp_skill_name[-1] in ['=', ':']:
+                    # 先判断负数，再判断赋值
+                    if tmp_skill_name[-1] == '-':
+                        if not flag_is_mapping:
+                            tmp_skill_name = tmp_skill_name[:-1]
+                            tmp_skill_value = -int(tmp_skill_value)
+                    if tmp_skill_name[-1] in ['=', ':', '：']:
                         if not flag_is_mapping:
                             tmp_skill_name = tmp_skill_name[:-1]
                     tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name)
