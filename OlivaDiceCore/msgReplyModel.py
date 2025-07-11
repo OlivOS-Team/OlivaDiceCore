@@ -2091,9 +2091,9 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
                 
                 # 记录操作结果
                 if 'D' in expr_str.upper():
-                    member_results.append(f"{skill_name}({current_value}){op}{expr_str}={rd_para.resDetail}={new_value}")
+                    member_results.append(f"[{skill_name}]: {current_value}{op}{expr_str}={rd_para.resDetail}={new_value}")
                 else:
-                    member_results.append(f"{skill_name}({current_value}){op}{expr_str}={new_value}")
+                    member_results.append(f"[{skill_name}]: {current_value}{op}{expr_str}={new_value}")
             else:
                 member_results.append(f"{skill_name}: 表达式错误 '{op}{expr_str}'")
             
