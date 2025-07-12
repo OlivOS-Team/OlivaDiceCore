@@ -3366,9 +3366,9 @@ def unity_reply(plugin_event, Proc):
                                         tmp_skill_value_new = rd_para.resInt
                                         # 显示详细计算过程
                                         if "D" in tmp_original_str.upper():
-                                            update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new} ({tmp_skill_value[1:]}={rd_para.resDetail})"
+                                            update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new} ({tmp_original_str}={rd_para.resDetail})"
                                         else:
-                                            update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new} ({tmp_skill_value[1:]})"
+                                            update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new} ({tmp_original_str})"
                                         OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
                                             OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
                                             tmp_skill_name,
