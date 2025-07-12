@@ -3254,24 +3254,22 @@ def unity_reply(plugin_event, Proc):
                     pc_skill_names = [s.upper() for s in pc_skills.keys() if not s.startswith('__')]
                     # 预处理字符串，在特定字母先查找技能名，找到技能名后添加空格
                     processed_str = tmp_reast_str_new
-                    for start_char in OlivaDiceCore.pcCardData.arrPcCardLetterStart:
-                        i = 0
-                        while i < len(processed_str):
-                            if processed_str[i].lower() == start_char.lower():
-                                max_len = 0
-                                for skill in sorted(pc_skill_names, key=len, reverse=True):
-                                    if skill[0].lower() == start_char.lower() and processed_str[i:].upper().startswith(skill):
-                                        if len(skill) > max_len:
-                                            max_len = len(skill)
-                                            break
-                                if max_len > 0:
+                    start_chars = {c.upper() for c in OlivaDiceCore.pcCardData.arrPcCardLetterStart}
+                    sorted_skills = sorted(pc_skill_names, key=len, reverse=True)
+                    i = 0
+                    while i < len(processed_str):
+                        char = processed_str[i].upper()
+                        if char in start_chars:
+                            for skill in sorted_skills:
+                                if skill[0].upper() == char and processed_str[i:].upper().startswith(skill):
                                     # 在匹配的技能名前添加空格
                                     processed_str = processed_str[:i] + ' ' + processed_str[i:]
-                                    i += max_len + 1
-                                else:
-                                    i += 1
+                                    i += len(skill) + 1
+                                    break
                             else:
                                 i += 1
+                        else:
+                            i += 1
                     current_pos = 0
                     while current_pos < len(processed_str):
                         # 查找技能名结束位置（遇到符号或数字）
@@ -3350,7 +3348,7 @@ def unity_reply(plugin_event, Proc):
                             if tmp_skill_value.startswith('='):
                                 tmp_skill_value_new = tmp_skill_value[1:].strip()
                                 # 检查是否是骰子表达式或算式
-                                if 'd' in tmp_skill_value_new.lower() or any(op in tmp_skill_value_new for op in op_list):
+                                if 'D' in tmp_skill_value_new.upper() or any(op in tmp_skill_value_new for op in op_list):
                                     tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
                                         OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
                                         dictTValue.get('tName', '')
@@ -3364,9 +3362,10 @@ def unity_reply(plugin_event, Proc):
                                     rd_para = OlivaDiceCore.onedice.RD(tmp_skill_value_new, tmp_template_customDefault)
                                     rd_para.roll()
                                     if rd_para.resError is None:
+                                        tmp_original_str = tmp_skill_value_new
                                         tmp_skill_value_new = rd_para.resInt
                                         # 显示详细计算过程
-                                        if "D" in update_msg.upper():
+                                        if "D" in tmp_original_str.upper():
                                             update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new} ({tmp_skill_value[1:]}={rd_para.resDetail})"
                                         else:
                                             update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new} ({tmp_skill_value[1:]})"

@@ -2986,5 +2986,5 @@ dictPcCardMappingSpecial = {
     'COC7': ['体格', 'DB']
 }
 
-# 特殊技能开头表
-arrPcCardLetterStart = ['d','D']
+# 特殊技能开头表（大写字母即可）
+arrPcCardLetterStart = ['D']
