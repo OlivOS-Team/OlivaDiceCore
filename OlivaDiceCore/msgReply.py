@@ -2297,53 +2297,125 @@ def unity_reply(plugin_event, Proc):
             elif isMatchWordStart(tmp_reast_str, 'show'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'show')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
-                tmp_reast_str = tmp_reast_str.strip(' ')
                 tmp_pcCardRule = 'default'
-                tmp_skill_name = tmp_reast_str
-                if tmp_skill_name == '':
-                    tmp_skill_name = None
-                if tmp_skill_name != None:
-                    tmp_skill_name = tmp_skill_name.upper()
-                    tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
-                        OlivaDiceCore.pcCard.getPcHash(
-                            tmp_pc_id,
-                            tmp_pc_platform
-                        ),
-                        tmp_hagID
-                    )
-                    tmp_pcCardRule_new = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_pc_name)
-                    if tmp_pcCardRule_new:
-                        tmp_pcCardRule = tmp_pcCardRule_new
-                    if OlivaDiceCore.skillCheck.isSpecialSkill(tmp_skill_name, tmp_pcCardRule):
-                        # 特殊技能，使用getSpecialSkill获取值
-                        tmp_skill_value_find = OlivaDiceCore.skillCheck.getSpecialSkill(
-                            tmp_skill_name,
-                            tmp_pcCardRule,
-                            OlivaDiceCore.pcCard.pcCardDataGetByPcName(
-                                OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
+                tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+                pc_skills = OlivaDiceCore.pcCard.pcCardDataGetByPcName(tmp_pcHash, hagId=tmp_hagID)
+                pc_skill_names = [s.upper() for s in pc_skills.keys() if not s.startswith('__')]
+                tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
+                tmp_pcCardRule_new = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_pc_name)
+                if tmp_pcCardRule_new:
+                    tmp_pcCardRule = tmp_pcCardRule_new
+                tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_pcCardRule)
+                synonyms = tmp_template.get('synonyms', {}) if tmp_template else {}
+                # 获取特殊技能并合并到普通技能列表
+                special_skills = []
+                if tmp_pcCardRule in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial:
+                    special_skills = OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[tmp_pcCardRule]
+                all_skills = pc_skill_names + special_skills
+                if tmp_pc_name is None:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRmCardNone'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
+                elif not tmp_reast_str:
+                    replyMsgLazyHelpByEvent(plugin_event, 'st')
+                    return
+                input_str = tmp_reast_str.strip().upper()
+                # 按空格分割输入字符串
+                input_parts = input_str.split()
+                result_lines = []
+                for part in input_parts:
+                    remaining_str = part.upper()
+                    matched_skills = []
+                    unmatched_groups = []
+                    current_unmatched = []
+                    skill_mapping = {}
+                    for skill in all_skills:
+                        main_skill = None
+                        for main_key in synonyms:
+                            if skill in synonyms[main_key]:
+                                main_skill = main_key.upper()
+                                break
+                        skill_mapping[skill] = main_skill if main_skill else skill
+                    while remaining_str:
+                        matched = False
+                        max_len = 0
+                        matched_skill = None
+                        # 按长度从长到短排序匹配
+                        for skill in sorted(all_skills, key=len, reverse=True):
+                            skill_upper = skill.upper()
+                            skill_len = len(skill_upper)
+                            if skill_len > len(remaining_str):
+                                continue
+                            if remaining_str.startswith(skill_upper):
+                                matched_skill = skill_mapping[skill]
+                                max_len = skill_len
+                                matched = True
+                                break
+                        if matched:
+                            if current_unmatched:
+                                unmatched_groups.append(''.join(current_unmatched))
+                                current_unmatched = []
+                            matched_skills.append((matched_skill, max_len, True))
+                            remaining_str = remaining_str[max_len:]
+                        else:
+                            current_unmatched.append(remaining_str[0])
+                            remaining_str = remaining_str[1:]
+                    if current_unmatched:
+                        unmatched_groups.append(''.join(current_unmatched))
+                    seen_skills = set()
+                    for skill, length, is_matched in matched_skills:
+                        if skill in seen_skills:
+                            continue
+                        seen_skills.add(skill)
+                        if is_matched:
+                            if skill in special_skills:
+                                skill_value = OlivaDiceCore.skillCheck.getSpecialSkill(
+                                    skill,
+                                    tmp_pcCardRule,
+                                    pc_skills
+                                )
+                                if skill_value is None:
+                                    skill_value = "0"
+                            else:
+                                skill_value = pc_skills.get(skill, "0")
+                            display_name = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
+                                tmp_pcHash,
+                                skill,
+                                flagShow=True,
                                 hagId=tmp_hagID
                             )
-                        )
-                        if tmp_skill_value_find is None:
-                            tmp_skill_value_find = "N/A"
-                    else:
-                        tmp_skill_value_find = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
-                            OlivaDiceCore.pcCard.getPcHash(
-                                tmp_pc_id,
-                                tmp_pc_platform
-                            ),
-                            tmp_skill_name,
-                            hagId = tmp_hagID
-                        )
-                    if tmp_pc_name != None:
-                        dictTValue['tName'] = tmp_pc_name
-                    dictTValue['tSkillName'] = tmp_skill_name
-                    dictTValue['tSkillValue'] = str(tmp_skill_value_find)
+                            result_lines.append(f"[{display_name}]: {skill_value}")
+                    for group in unmatched_groups:
+                        display_name = group.upper()
+                        result_lines.append(f"[{display_name}]: 0")
+                seen = set()
+                unique_result_lines = []
+                for line in result_lines:
+                    # 提取技能名部分进行比较
+                    skill_part = line.split(']:')[0].strip()[1:]
+                    if skill_part not in seen:
+                        seen.add(skill_part)
+                        unique_result_lines.append(line)
+                result_lines = unique_result_lines
+                dictTValue['tName'] = tmp_pc_name
+                dictTValue['tSkillName'] = input_str
+                dictTValue['tSkillValue'] = '\n'.join(result_lines)
+                # 根据匹配到的技能数量选择不同的回复模板
+                total_skills = len(result_lines)
+                if total_skills == 1:
+                    dictTValue['tSkillName'] = display_name
+                    dictTValue['tSkillValue'] = skill_value
                     if is_at:
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcGetSingleSkillValueAtOther'], dictTValue)
                     else:
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcGetSingleSkillValue'], dictTValue)
-                    replyMsg(plugin_event, tmp_reply_str)
+                else:
+                    if is_at:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcGetMultiSkillValueAtOther'], dictTValue)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcGetMultiSkillValue'], dictTValue)
+                
+                replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'list', fullMatch = True):
                 if is_at: return
@@ -3224,6 +3296,7 @@ def unity_reply(plugin_event, Proc):
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             tmp_reast_str_new = tmp_reast_str
+            tmp_reast_str_new_2 = tmp_reast_str
             if len(tmp_reast_str_new) > 0:
                 # 支持连续多个技能更新
                 tmp_skill_updates = []
@@ -3254,24 +3327,22 @@ def unity_reply(plugin_event, Proc):
                     pc_skill_names = [s.upper() for s in pc_skills.keys() if not s.startswith('__')]
                     # 预处理字符串，在特定字母先查找技能名，找到技能名后添加空格
                     processed_str = tmp_reast_str_new
-                    for start_char in OlivaDiceCore.pcCardData.arrPcCardLetterStart:
-                        i = 0
-                        while i < len(processed_str):
-                            if processed_str[i].lower() == start_char.lower():
-                                max_len = 0
-                                for skill in sorted(pc_skill_names, key=len, reverse=True):
-                                    if skill[0].lower() == start_char.lower() and processed_str[i:].upper().startswith(skill):
-                                        if len(skill) > max_len:
-                                            max_len = len(skill)
-                                            break
-                                if max_len > 0:
+                    start_chars = {c.upper() for c in OlivaDiceCore.pcCardData.arrPcCardLetterStart}
+                    sorted_skills = sorted(pc_skill_names, key=len, reverse=True)
+                    i = 0
+                    while i < len(processed_str):
+                        char = processed_str[i].upper()
+                        if char in start_chars:
+                            for skill in sorted_skills:
+                                if skill[0].upper() == char and processed_str[i:].upper().startswith(skill):
                                     # 在匹配的技能名前添加空格
                                     processed_str = processed_str[:i] + ' ' + processed_str[i:]
-                                    i += max_len + 1
-                                else:
-                                    i += 1
+                                    i += len(skill) + 1
+                                    break
                             else:
                                 i += 1
+                        else:
+                            i += 1
                     current_pos = 0
                     while current_pos < len(processed_str):
                         # 查找技能名结束位置（遇到符号或数字）
@@ -3350,7 +3421,7 @@ def unity_reply(plugin_event, Proc):
                             if tmp_skill_value.startswith('='):
                                 tmp_skill_value_new = tmp_skill_value[1:].strip()
                                 # 检查是否是骰子表达式或算式
-                                if 'd' in tmp_skill_value_new.lower() or any(op in tmp_skill_value_new for op in op_list):
+                                if 'D' in tmp_skill_value_new.upper() or any(op in tmp_skill_value_new for op in op_list):
                                     tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
                                         OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
                                         dictTValue.get('tName', '')
@@ -3364,12 +3435,13 @@ def unity_reply(plugin_event, Proc):
                                     rd_para = OlivaDiceCore.onedice.RD(tmp_skill_value_new, tmp_template_customDefault)
                                     rd_para.roll()
                                     if rd_para.resError is None:
+                                        tmp_original_str = tmp_skill_value_new
                                         tmp_skill_value_new = rd_para.resInt
                                         # 显示详细计算过程
-                                        if "D" in update_msg.upper():
-                                            update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new} ({tmp_skill_value[1:]}={rd_para.resDetail})"
+                                        if "D" in tmp_original_str.upper():
+                                            update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new} ({tmp_original_str}={rd_para.resDetail})"
                                         else:
-                                            update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new} ({tmp_skill_value[1:]})"
+                                            update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new} ({tmp_original_str})"
                                         OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
                                             OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
                                             tmp_skill_name,
@@ -3591,46 +3663,117 @@ def unity_reply(plugin_event, Proc):
                     replyMsg(plugin_event, tmp_reply_str + tmp_notice)
                     return
             else:
+                tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+                tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
                 tmp_pcCardRule = 'default'
-                tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
-                    OlivaDiceCore.pcCard.getPcHash(
-                        tmp_pc_id,
-                        tmp_pc_platform
-                    ),
-                    tmp_hagID
-                )
-                tmp_pcCardRule_new = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_pc_name_1)
-                if tmp_pcCardRule_new:
-                    tmp_pcCardRule = tmp_pcCardRule_new
-                if OlivaDiceCore.skillCheck.isSpecialSkill(tmp_skill_name, tmp_pcCardRule):
-                    # 特殊技能，使用getSpecialSkill获取值
-                    tmp_skill_value_find = OlivaDiceCore.skillCheck.getSpecialSkill(
-                        tmp_skill_name,
-                        tmp_pcCardRule,
-                        OlivaDiceCore.pcCard.pcCardDataGetByPcName(
-                            OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
-                            hagId=tmp_hagID
-                        )
-                    )
-                    if tmp_skill_value_find is None:
-                        tmp_skill_value_find = "N/A"
+                if tmp_pc_name is not None:
+                    tmp_pcCardRule_new = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_pc_name)
+                    if tmp_pcCardRule_new:
+                        tmp_pcCardRule = tmp_pcCardRule_new
+                pc_skills = OlivaDiceCore.pcCard.pcCardDataGetByPcName(tmp_pcHash, hagId=tmp_hagID)
+                pc_skill_names = [s.upper() for s in pc_skills.keys() if not s.startswith('__')]
+                tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_pcCardRule)
+                synonyms = tmp_template.get('synonyms', {}) if tmp_template else {}
+                # 获取特殊技能并合并到普通技能列表
+                special_skills = []
+                if tmp_pcCardRule in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial:
+                    special_skills = OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[tmp_pcCardRule]
+                all_skills = pc_skill_names + special_skills
+                input_str = tmp_reast_str_new_2.strip().upper()
+                # 按空格分割输入字符串
+                input_parts = input_str.split()
+                result_lines = []
+                for part in input_parts:
+                    remaining_str = part.upper()
+                    matched_skills = []
+                    unmatched_groups = []
+                    current_unmatched = []
+                    skill_mapping = {}
+                    for skill in all_skills:
+                        main_skill = None
+                        for main_key in synonyms:
+                            if skill in synonyms[main_key]:
+                                main_skill = main_key.upper()
+                                break
+                        skill_mapping[skill] = main_skill if main_skill else skill
+                    while remaining_str:
+                        matched = False
+                        max_len = 0
+                        matched_skill = None
+                        # 按长度从长到短排序匹配
+                        for skill in sorted(all_skills, key=len, reverse=True):
+                            skill_upper = skill.upper()
+                            skill_len = len(skill_upper)
+                            if skill_len > len(remaining_str):
+                                continue
+                            if remaining_str.startswith(skill_upper):
+                                matched_skill = skill_mapping[skill]
+                                max_len = skill_len
+                                matched = True
+                                break
+                        if matched:
+                            if current_unmatched:
+                                unmatched_groups.append(''.join(current_unmatched))
+                                current_unmatched = []
+                            matched_skills.append((matched_skill, max_len, True))
+                            remaining_str = remaining_str[max_len:]
+                        else:
+                            current_unmatched.append(remaining_str[0])
+                            remaining_str = remaining_str[1:]
+                    if current_unmatched:
+                        unmatched_groups.append(''.join(current_unmatched))
+                    seen_skills = set()
+                    for skill, length, is_matched in matched_skills:
+                        if skill in seen_skills:
+                            continue
+                        seen_skills.add(skill)
+                        if is_matched:
+                            if skill in special_skills:
+                                skill_value = OlivaDiceCore.skillCheck.getSpecialSkill(
+                                    skill,
+                                    tmp_pcCardRule,
+                                    pc_skills
+                                )
+                                if skill_value is None:
+                                    skill_value = "0"
+                            else:
+                                skill_value = pc_skills.get(skill, "0")
+                            display_name = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
+                                tmp_pcHash,
+                                skill,
+                                flagShow=True,
+                                hagId=tmp_hagID
+                            )
+                            result_lines.append(f"[{display_name}]: {skill_value}")
+                    for group in unmatched_groups:
+                        display_name = group.upper()
+                        result_lines.append(f"[{display_name}]: 0")
+                seen = set()
+                unique_result_lines = []
+                for line in result_lines:
+                    # 提取技能名部分进行比较
+                    skill_part = line.split(']:')[0].strip()[1:]
+                    if skill_part not in seen:
+                        seen.add(skill_part)
+                        unique_result_lines.append(line)
+                result_lines = unique_result_lines
+                dictTValue['tName'] = tmp_pc_name if tmp_pc_name else dictTValue['tName']
+                dictTValue['tSkillName'] = input_str
+                dictTValue['tSkillValue'] = '\n'.join(result_lines)
+                # 根据匹配到的技能数量选择不同的回复模板
+                total_skills = len(result_lines)
+                if total_skills == 1:
+                    dictTValue['tSkillName'] = display_name
+                    dictTValue['tSkillValue'] = skill_value
+                    if is_at:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcGetSingleSkillValueAtOther'], dictTValue)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcGetSingleSkillValue'], dictTValue)
                 else:
-                    tmp_skill_value_find = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
-                        OlivaDiceCore.pcCard.getPcHash(
-                            tmp_pc_id,
-                            tmp_pc_platform
-                        ),
-                        tmp_skill_name,
-                        hagId = tmp_hagID
-                    )
-                if tmp_pc_name_1 != None:
-                    dictTValue['tName'] = tmp_pc_name_1
-                dictTValue['tSkillName'] = tmp_skill_name_find
-                dictTValue['tSkillValue'] = str(tmp_skill_value_find)
-                if is_at:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcGetSingleSkillValueAtOther'], dictTValue)
-                else:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcGetSingleSkillValue'], dictTValue)
+                    if is_at:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcGetMultiSkillValueAtOther'], dictTValue)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcGetMultiSkillValue'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             if not tmp_reply_str:

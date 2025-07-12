@@ -165,6 +165,7 @@ He dismissed the dismiss as worthless.
 .st set [人物卡名]    切换人物卡
 .st lock/unlock    锁定/解锁人物卡
 .st show    展示人物卡
+.st show [技能名]([技能名2][技能名3]...)   展示人物卡技能
 .st del [人物卡名]    删除人物卡
     默认删除当前人物卡
 .st clear    清空当前人物卡
