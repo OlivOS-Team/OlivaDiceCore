@@ -2137,6 +2137,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
     tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, ['ra','rc'])
     tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
 
+    # 获取团队配置
     team_config = OlivaDiceCore.userConfig.getUserConfigByKey(
         userId=tmp_hagID,
         userType='group',
@@ -2178,89 +2179,84 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
     if team_name not in team_config:
         dictTValue['tTeamName'] = team_name
         OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
-            dictStrCustom['strTeamNotFound'], dictTValue
-        ))
+                dictStrCustom['strTeamNotFound'], dictTValue
+            ))
         return
     
-    # 解析技能表达式
     skill_name = None
-    skill_value = None
+    expr_str = None
+    fixed_skill_value = None
     difficulty = None
     bp_type = 0  # 0:无, 1:奖励骰, 2:惩罚骰
     bp_count = None
-    
-    # 解析奖励/惩罚骰
-    if skill_expr.startswith('b') or skill_expr.startswith('B'):
+
+    # 处理奖励/惩罚骰
+    if skill_expr.startswith(('b','B')):
         bp_type = 1
         skill_expr = skill_expr[1:]
-        # 提取数字部分
         bp_digits = ''
         while skill_expr and skill_expr[0].isdigit():
             bp_digits += skill_expr[0]
             skill_expr = skill_expr[1:]
         bp_count = int(bp_digits) if bp_digits else 1
-    elif skill_expr.startswith('p') or skill_expr.startswith('P'):
+    elif skill_expr.startswith(('p','P')):
         bp_type = 2
         skill_expr = skill_expr[1:]
-        # 提取数字部分
         bp_digits = ''
         while skill_expr and skill_expr[0].isdigit():
             bp_digits += skill_expr[0]
             skill_expr = skill_expr[1:]
         bp_count = int(bp_digits) if bp_digits else 1
-    
     skill_expr = OlivaDiceCore.msgReply.skipSpaceStart(skill_expr)
-    
+
     # 解析难度前缀
-    if len(skill_expr) > 0:
-        if OlivaDiceCore.msgReply.isMatchWordStart(skill_expr, ['困难成功', '困难']):
-            difficulty = '困难'
-            skill_expr = OlivaDiceCore.msgReply.getMatchWordStartRight(skill_expr, ['困难成功', '困难']).strip()
-        elif OlivaDiceCore.msgReply.isMatchWordStart(skill_expr, ['极难成功', '极限成功', '极难', '极限']):
-            difficulty = '极难'
-            skill_expr = OlivaDiceCore.msgReply.getMatchWordStartRight(skill_expr, ['极难成功', '极限成功', '极难', '极限']).strip()
-        elif OlivaDiceCore.msgReply.isMatchWordStart(skill_expr, '大成功'):
-            difficulty = '大成功'
-            skill_expr = OlivaDiceCore.msgReply.getMatchWordStartRight(skill_expr, '大成功').strip()
-    
-    # 解析技能名和数值
-    if len(skill_expr) > 0:
-        [skill_name, skill_expr] = OlivaDiceCore.msgReply.getToNumberPara(skill_expr)
+    if OlivaDiceCore.msgReply.isMatchWordStart(skill_expr, ['困难成功', '困难']):
+        difficulty = '困难'
+        skill_expr = OlivaDiceCore.msgReply.getMatchWordStartRight(skill_expr, ['困难成功', '困难']).strip()
+    elif OlivaDiceCore.msgReply.isMatchWordStart(skill_expr, ['极难成功', '极限成功', '极难', '极限']):
+        difficulty = '极难'
+        skill_expr = OlivaDiceCore.msgReply.getMatchWordStartRight(skill_expr, ['极难成功', '极限成功', '极难', '极限']).strip()
+    elif OlivaDiceCore.msgReply.isMatchWordStart(skill_expr, '大成功'):
+        difficulty = '大成功'
+        skill_expr = OlivaDiceCore.msgReply.getMatchWordStartRight(skill_expr, '大成功').strip()
+    skill_expr = OlivaDiceCore.msgReply.skipSpaceStart(skill_expr)
 
-        # 检查skill_name末尾是否有操作符
-        op = None
-        op_value = None
-        if len(skill_name) > 0:
-            # 查找最后一个字符是否是操作符
-            last_char = skill_name[-1]
-            if last_char in ['+', '-', '*', '/']:
-                op = last_char
-                skill_name = skill_name[:-1].strip()  # 移除末尾的操作符
-                # 尝试从剩余表达式中获取操作数
-                if len(skill_expr) > 0:
-                    [op_value_str, skill_expr] = OlivaDiceCore.msgReply.getNumberPara(skill_expr)
-                    if op_value_str.isdigit():
-                        op_value = int(op_value_str)
+    # 解析技能名和表达式
+    if skill_expr:
+        op_list = ['+', '-', '*', '/']
+        pos = len(skill_expr)
+        for i, char in enumerate(skill_expr):
+            if char in op_list or char.isdigit():
+                pos = i
+                break
+        skill_name = skill_expr[:pos].strip() or None
+        skill_expr = skill_expr[pos:].strip()
+        if skill_expr:
+            if skill_expr[0] in op_list:
+                expr_end = 0
+                in_dice = False
+                for i, char in enumerate(skill_expr):
+                    if char.isspace():
+                        expr_end = i
+                        break
+                    if char.upper() == 'D':
+                        in_dice = True
+                    if not (char.isdigit() or char in op_list or char.upper() == 'D'):
+                        if not in_dice:
+                            expr_end = i
+                            break
+                expr_str = skill_expr[:expr_end] if expr_end > 0 else skill_expr
+                skill_expr = skill_expr[len(expr_str):].strip()
+            elif skill_expr[0].isdigit():
+                [num_str, skill_expr] = OlivaDiceCore.msgReply.getNumberPara(skill_expr)
+                if num_str.isdigit():
+                    fixed_skill_value = int(num_str)
+                skill_expr = OlivaDiceCore.msgReply.skipSpaceStart(skill_expr)
+        if skill_expr:
+            [num_str, skill_expr] = OlivaDiceCore.msgReply.getNumberPara(skill_expr)
+            if num_str.isdigit():
+                fixed_skill_value = int(num_str)
 
-        dictTValue['tSkillName'] = skill_name
-        skill_expr = OlivaDiceCore.msgReply.skipSpaceStart(skill_expr)
-
-        # 如果前面没有找到操作符，再尝试从剩余表达式中解析
-        if op is None and len(skill_expr) > 0:
-            if skill_expr[0] in ['+', '-', '*', '/']:
-                op = skill_expr[0]
-                skill_expr = skill_expr[1:]
-                [op_value_str, skill_expr] = OlivaDiceCore.msgReply.getNumberPara(skill_expr)
-                if op_value_str.isdigit():
-                    op_value = int(op_value_str)
-
-        # 解析技能值(如果有)
-        if len(skill_expr) > 0:
-            [skill_value_str, skill_expr] = OlivaDiceCore.msgReply.getNumberPara(skill_expr)
-            if skill_value_str.isdigit():
-                skill_value = int(skill_value_str)
-            skill_expr = OlivaDiceCore.msgReply.skipSpaceStart(skill_expr)
-    
     # 获取群模板和规则
     flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
         userId=tmp_hagID,
@@ -2308,51 +2304,52 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
         # 构建显示名称
         display_name = f"[{user_name}] - [{pc_name if pc_name else user_name}]"
         
-        # 获取技能值
-        current_skill_value = None
+        # 获取基础技能值
+        base_skill_value = None
         if skill_name:
             skill_name_upper = skill_name.upper()
-            current_skill_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
+            base_skill_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
                 pc_hash, skill_name_upper, hagId=tmp_hagID
             )
-            
-            # 如果未找到技能值，尝试从人物卡中获取
-            if current_skill_value is None and pc_name:
+            if base_skill_value is None and pc_name:
                 pc_data = OlivaDiceCore.pcCard.pcCardDataGetByPcName(pc_hash, hagId=tmp_hagID)
                 if pc_data and skill_name_upper in pc_data:
-                    current_skill_value = pc_data[skill_name_upper]
-        
-        # 如果命令中指定了技能值，则使用该值
-        if skill_value is not None:
-            current_skill_value = skill_value
-        elif current_skill_value is not None:
+                    base_skill_value = pc_data[skill_name_upper]
+
+        # 默认值处理
+        try:
+            base_skill_value = int(base_skill_value) if base_skill_value is not None else 0
+        except (ValueError, TypeError):
+            base_skill_value = 0
+        current_skill_value = base_skill_value
+        expr_result_str = str(base_skill_value)
+        if expr_str:
             try:
-                current_skill_value = int(current_skill_value)
-            except (ValueError, TypeError):
-                current_skill_value = 0
-        else:
-            current_skill_value = 0
-        
-        current_skill_value_show = current_skill_value
-        # 应用操作符
-        if op and op_value is not None:
-            if op == '+':
-                current_skill_value += op_value
-            elif op == '-':
-                current_skill_value -= op_value
-            elif op == '*':
-                current_skill_value *= op_value
-            elif op == '/':
-                if op_value != 0:
-                    current_skill_value = int(current_skill_value / op_value)
-        
+                # 如果有固定值，基于固定值计算表达式
+                calc_base = fixed_skill_value if fixed_skill_value is not None else base_skill_value
+                rd_para = OlivaDiceCore.onedice.RD(f"{calc_base}{expr_str}")
+                rd_para.roll()
+                if not rd_para.resError:
+                    current_skill_value = rd_para.resInt
+                    # 构建表达式详情
+                    if "D" in expr_str.upper():
+                        expr_result_str = f"{calc_base}{expr_str}={rd_para.resDetail}={current_skill_value}"
+                    else:
+                        expr_result_str = f"{calc_base}{expr_str}={current_skill_value}"
+            except:
+                pass
+            
+        # 没有表达式但有固定值时使用固定值
+        elif fixed_skill_value is not None:
+            current_skill_value = fixed_skill_value
+            expr_result_str = f"{fixed_skill_value}"
+
         # 构建骰子表达式
         rd_para_str = '1D100'
         if bp_type == 1:
             rd_para_str = 'B'
         elif bp_type == 2:
             rd_para_str = 'P'
-        
         if bp_count is not None:
             rd_para_str += str(bp_count)
         
@@ -2397,19 +2394,16 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
             dice_detail = f"{rd_para_str}={rd_para.resDetail}={roll_value}"
         
         # 构建技能值显示
-        skill_value_str = str(current_skill_value_show)
+        skill_value_str = expr_result_str
         if difficulty:
-            skill_value_str = f"{skill_threshold}({skill_value_str})"
+            skill_value_str = f"{skill_threshold}({expr_result_str})"
 
-        # 构建操作符部分
-        op_display = ""
-        if op and op_value is not None:
-            op_display = f"{op}{op_value}"
-            if current_skill_value != roll_value:
-                op_display += f"={current_skill_value}"
-        
         # 构建完整结果字符串
-        result_str = f"{display_name}({skill_name}: {skill_value_str}): {dice_detail}/{skill_value_str}{op_display} "
+        result_str = f"{display_name}"
+        if skill_name:
+            result_str += f"({skill_name}: {skill_value_str}): {dice_detail}/{skill_value_str} "
+        else:
+            result_str += f": {dice_detail}/{skill_value_str} "
         result_str += get_SkillCheckResult(skill_check_type, dictStrCustom, dictTValue)
         
         # 处理enhanceList
@@ -2485,7 +2479,10 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
     ))
     
     if not dictTValue['tSkillName']:
-        dictTValue['tSkillName'] = "未知技能"
+        if skill_name:
+            dictTValue['tSkillName'] = skill_name
+        else:
+            dictTValue['tSkillName'] = str(results[0]['skill_value'])
     
     # 构建最终输出
     result_lines = []

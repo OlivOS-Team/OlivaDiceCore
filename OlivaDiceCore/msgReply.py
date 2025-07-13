@@ -4620,8 +4620,6 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['ra','rc'])
             else:
                 return
-            tmp_skill_name = None
-            tmp_skill_value = None
             flag_hide_roll = False
             if len(tmp_reast_str) > 0:
                 if isMatchWordStart(tmp_reast_str, 'h'):
@@ -4635,103 +4633,115 @@ def unity_reply(plugin_event, Proc):
                         if roll_times_count > 10:
                             roll_times_count = 10
                         tmp_reast_str = tmp_reast_str_list_1[1]
-            # 0 
-            # 1 b
-            # 2 p
-            flag_bp_type = 0
+            # 处理奖励/惩罚骰（b/p）
+            flag_bp_type = 0  # 0无 1奖励 2惩罚
             flag_bp_count = None
             if len(tmp_reast_str) > 0:
-                if isMatchWordStart(tmp_reast_str, 'b'):
+                if isMatchWordStart(tmp_reast_str, ['b','B']):
                     flag_bp_type = 1
-                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'b')
-                elif isMatchWordStart(tmp_reast_str, 'B'):
-                    flag_bp_type = 1
-                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'B')
-                elif isMatchWordStart(tmp_reast_str, 'p'):
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['b','B'])
+                elif isMatchWordStart(tmp_reast_str, ['p','P']):
                     flag_bp_type = 2
-                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'p')
-                elif isMatchWordStart(tmp_reast_str, 'P'):
-                    flag_bp_type = 2
-                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'P')
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['p','P'])
                 if flag_bp_type != 0 and len(tmp_reast_str) > 1:
                     if tmp_reast_str[0].isdecimal():
                         flag_bp_count = tmp_reast_str[0]
                         tmp_reast_str = tmp_reast_str[1:]
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
-            if len(tmp_reast_str) > 0:
-                [tmp_skill_name, tmp_reast_str] = getToNumberPara(tmp_reast_str)
-                tmp_reast_str = skipSpaceStart(tmp_reast_str)
-                if len(tmp_reast_str) > 0:
-                    [tmp_skill_value, tmp_reast_str] = getNumberPara(tmp_reast_str)
-                    tmp_reast_str = skipSpaceStart(tmp_reast_str)
-            if tmp_skill_value != None:
-                try:
-                    tmp_skill_value = int(tmp_skill_value)
-                except ValueError:
-                    return
-            if tmp_skill_name == '':
-                tmp_skill_name = None
+            tmp_skill_name = None
+            tmp_skill_value = None
             difficulty = None
-            actual_skill_name = tmp_skill_name
-            if tmp_skill_name:
-                if isMatchWordStart(tmp_skill_name, ['困难成功', '困难']):
-                    difficulty = '困难'
-                    actual_skill_name = getMatchWordStartRight(tmp_skill_name, ['困难成功', '困难']).strip()
-                elif isMatchWordStart(tmp_skill_name, ['极难成功', '极限成功', '极难', '极限']):
-                    difficulty = '极难'
-                    actual_skill_name = getMatchWordStartRight(tmp_skill_name, ['极难成功', '极限成功', '极难', '极限']).strip()
-                elif isMatchWordStart(tmp_skill_name, '大成功'):
-                    difficulty = '大成功'
-                    actual_skill_name = getMatchWordStartRight(tmp_skill_name, '大成功').strip()
-            tmp_skill_name = actual_skill_name
-            flag_op = None
-            tmp_op_value = None
+            # 1. 解析难度前缀（困难/极难/大成功）
+            if isMatchWordStart(tmp_reast_str, ['困难成功', '困难']):
+                difficulty = '困难'
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['困难成功', '困难'])
+            elif isMatchWordStart(tmp_reast_str, ['极难成功', '极限成功', '极难', '极限']):
+                difficulty = '极难'
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['极难成功', '极限成功', '极难', '极限'])
+            elif isMatchWordStart(tmp_reast_str, '大成功'):
+                difficulty = '大成功'
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, '大成功')
+            tmp_reast_str = skipSpaceStart(tmp_reast_str)
             tmp_skill_value_str = None
-            if tmp_skill_name != None:
-                if len(tmp_skill_name) >= 1 and tmp_skill_name[-1] in [
-                    '+', '-', '*', '/'
-                ]:
-                    flag_op = tmp_skill_name[-1]
-                    tmp_skill_name = tmp_skill_name[:-1]
-                    tmp_skill_name = tmp_skill_name.rstrip(' ')
-                    tmp_op_value = tmp_skill_value
-                    tmp_skill_value = None
-                    if len(tmp_reast_str) > 0:
-                        [tmp_skill_value, tmp_reast_str] = getNumberPara(tmp_reast_str)
-                        tmp_reast_str = skipSpaceStart(tmp_reast_str)
-                    if tmp_skill_value != None:
-                        tmp_skill_value = int(tmp_skill_value)
-                tmp_skill_name = tmp_skill_name.upper()
-                if tmp_skill_value != None:
-                    pass
-                else:
+            if tmp_reast_str:
+                op_list = ['+', '-', '*', '/']
+                skill_end_pos = len(tmp_reast_str)
+                for i, char in enumerate(tmp_reast_str):
+                    if char in op_list or char.isdigit():
+                        skill_end_pos = i
+                        break
+                tmp_skill_name = tmp_reast_str[:skill_end_pos].strip()
+                tmp_reast_str = tmp_reast_str[skill_end_pos:].strip()
+                if not tmp_reast_str:
+                    tmp_skill_name = tmp_skill_name.split()[0]
+                    # 直接读取数值
                     tmp_skill_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
-                        OlivaDiceCore.pcCard.getPcHash(
-                            tmp_pc_id,
-                            tmp_pc_platform
-                        ),
+                        OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
                         tmp_skill_name,
-                        hagId = tmp_hagID
+                        hagId=tmp_hagID
                     )
-                if flag_op != None and tmp_op_value != None and tmp_skill_value != None:
-                    tmp_skill_value_rd_str = str(tmp_skill_value) + str(flag_op) + str(tmp_op_value)
-                    tmp_skill_value_rd = OlivaDiceCore.onedice.RD(tmp_skill_value_rd_str)
-                    tmp_skill_value_rd.roll()
-                    if tmp_skill_value_rd.resError == None:
-                        tmp_skill_value = tmp_skill_value_rd.resInt
-                        tmp_skill_value_str = '%s=%s' % (tmp_skill_value_rd_str, str(tmp_skill_value))
-            elif tmp_skill_value != None:
-                pass
-            if tmp_skill_value_str == None and tmp_skill_value != None:
-                tmp_skill_value_str = str(tmp_skill_value)
+                    tmp_skill_value_str = str(tmp_skill_value)
+                else:
+                    # 检查是否有运算符
+                    if tmp_reast_str[0] in op_list:
+                        # 带运算表达式
+                        expr_end = 0
+                        in_dice = False
+                        for i, char in enumerate(tmp_reast_str):
+                            if char.isspace():
+                                expr_end = i
+                                break
+                            if char.upper() == 'D':
+                                in_dice = True
+                            if not (char.isdigit() or char in op_list or char.upper() == 'D'):
+                                if not in_dice:
+                                    expr_end = i
+                                    break
+                        expr_str = tmp_reast_str[:expr_end] if expr_end > 0 else tmp_reast_str
+                        tmp_reast_str = tmp_reast_str[len(expr_str):].strip()
+                        base_value = None
+                        if tmp_reast_str and tmp_reast_str[0].isdigit():
+                            [base_value, tmp_reast_str] = getNumberPara(tmp_reast_str)
+                            base_value = int(base_value)
+                        else:
+                            base_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
+                                OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
+                                tmp_skill_name,
+                                hagId=tmp_hagID
+                            )
+                        if base_value is not None:
+                            full_expr = f"{base_value}{expr_str}"
+                            rd_para = OlivaDiceCore.onedice.RD(full_expr)
+                            rd_para.roll()
+                            if rd_para.resError is None:
+                                tmp_skill_value = rd_para.resInt
+                                if "D" in full_expr.upper():
+                                    tmp_skill_value_str = (
+                                        f"{full_expr}={rd_para.resDetail}={tmp_skill_value}"
+                                    )
+                                else:
+                                    tmp_skill_value_str = (
+                                        f"{full_expr}={tmp_skill_value}"
+                                    )
+                    else:
+                        # 指定数值
+                        if tmp_reast_str[0].isdigit():
+                            [tmp_skill_value, tmp_reast_str] = getNumberPara(tmp_reast_str)
+                            tmp_skill_value = int(tmp_skill_value)
+                            tmp_skill_value_str = str(tmp_skill_value)
+            if tmp_skill_name and tmp_skill_value is None:
+                tmp_skill_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
+                    OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
+                    tmp_skill_name,
+                    hagId=tmp_hagID
+                )
+                if tmp_skill_value is not None:
+                    tmp_skill_value_str = str(tmp_skill_value)
             tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
-                OlivaDiceCore.pcCard.getPcHash(
-                    tmp_pc_id,
-                    tmp_pc_platform
-                ),
+                OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
                 tmp_hagID
             )
-            if tmp_pc_name_1 != None:
+            if tmp_pc_name_1:
                 dictTValue['tName'] = tmp_pc_name_1
             if tmp_skill_name != None or tmp_skill_value != None:
                 tmp_Template = None
@@ -4889,7 +4899,7 @@ def unity_reply(plugin_event, Proc):
                         )
                 if flag_need_reply:
                     if is_at:
-                        if tmp_skill_name != None:
+                        if tmp_skill_name:
                             dictTValue['tSkillName'] = tmp_skill_name if not difficulty else f'{tmp_skill_name}({difficulty})'
                             if tmpSkillThreshold == None: dictTValue['tSkillName'] = tmp_skill_name
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckWithSkillNameAtOther'], dictTValue)
@@ -4909,7 +4919,7 @@ def unity_reply(plugin_event, Proc):
                         else:
                             replyMsg(plugin_event, tmp_reply_str)
                     else:
-                        if tmp_skill_name != None:
+                        if tmp_skill_name:
                             dictTValue['tSkillName'] = tmp_skill_name if not difficulty else f'{tmp_skill_name}({difficulty})'
                             if tmpSkillThreshold == None: dictTValue['tSkillName'] = tmp_skill_name
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckWithSkillName'], dictTValue)
