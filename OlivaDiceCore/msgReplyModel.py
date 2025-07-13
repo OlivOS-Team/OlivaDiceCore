@@ -2229,7 +2229,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
             if char in op_list or char.isdigit():
                 pos = i
                 break
-        skill_name = skill_expr[:pos].strip() or None
+        skill_name = skill_expr[:pos].strip().upper() or None
         skill_expr = skill_expr[pos:].strip()
         if skill_expr:
             if skill_expr[0] in op_list:

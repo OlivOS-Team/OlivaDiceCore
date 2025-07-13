@@ -4670,7 +4670,7 @@ def unity_reply(plugin_event, Proc):
                     if char in op_list or char.isdigit():
                         skill_end_pos = i
                         break
-                tmp_skill_name = tmp_reast_str[:skill_end_pos].strip()
+                tmp_skill_name = tmp_reast_str[:skill_end_pos].strip().upper() or None
                 tmp_reast_str = tmp_reast_str[skill_end_pos:].strip()
                 if not tmp_reast_str:
                     tmp_skill_name = tmp_skill_name.split()[0]
