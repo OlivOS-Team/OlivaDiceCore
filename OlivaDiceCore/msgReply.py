@@ -3682,7 +3682,7 @@ def unity_reply(plugin_event, Proc):
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRmCardNone'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
-                elif not tmp_reast_str:
+                elif not tmp_reast_str_new_2:
                     replyMsgLazyHelpByEvent(plugin_event, 'st')
                     return
                 input_str = tmp_reast_str_new_2.strip().upper()
