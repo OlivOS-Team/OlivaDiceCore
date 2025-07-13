@@ -2323,12 +2323,14 @@ def unity_reply(plugin_event, Proc):
                 # 按空格分割输入字符串
                 input_parts = input_str.split()
                 result_lines = []
+                seen_skills = set() 
                 for part in input_parts:
                     remaining_str = part.upper()
                     matched_skills = []
                     unmatched_groups = []
                     current_unmatched = []
                     skill_mapping = {}
+                    # 构建技能映射表
                     for skill in all_skills:
                         main_skill = None
                         for main_key in synonyms:
@@ -2355,18 +2357,18 @@ def unity_reply(plugin_event, Proc):
                             if current_unmatched:
                                 unmatched_groups.append(''.join(current_unmatched))
                                 current_unmatched = []
-                            matched_skills.append((matched_skill, max_len, True))
+                            # 检查是否已经添加过这个技能
+                            if matched_skill not in seen_skills:
+                                matched_skills.append((matched_skill, max_len, True))
+                                seen_skills.add(matched_skill)
                             remaining_str = remaining_str[max_len:]
                         else:
                             current_unmatched.append(remaining_str[0])
                             remaining_str = remaining_str[1:]
                     if current_unmatched:
                         unmatched_groups.append(''.join(current_unmatched))
-                    seen_skills = set()
+                    # 处理匹配到的技能
                     for skill, length, is_matched in matched_skills:
-                        if skill in seen_skills:
-                            continue
-                        seen_skills.add(skill)
                         if is_matched:
                             if skill in special_skills and skill not in pc_skill_names:
                                 skill_value = OlivaDiceCore.skillCheck.getSpecialSkill(
@@ -2389,19 +2391,13 @@ def unity_reply(plugin_event, Proc):
                                 hagId=tmp_hagID
                             )
                             result_lines.append(f"[{display_name}]: {skill_value}")
+                    # 处理未匹配的部分
                     for group in unmatched_groups:
                         display_name = group.upper()
-                        skill_value = '0'
-                        result_lines.append(f"[{display_name}]: {skill_value}")
-                seen = set()
-                unique_result_lines = []
-                for line in result_lines:
-                    # 提取技能名部分进行比较
-                    skill_part = line.split(']:')[0].strip()[1:]
-                    if skill_part not in seen:
-                        seen.add(skill_part)
-                        unique_result_lines.append(line)
-                result_lines = unique_result_lines
+                        if display_name not in seen_skills:
+                            skill_value = '0'
+                            result_lines.append(f"[{display_name}]: {skill_value}")
+                            seen_skills.add(display_name)
                 dictTValue['tName'] = tmp_pc_name
                 dictTValue['tSkillName'] = input_str
                 dictTValue['tSkillValue'] = '\n'.join(result_lines)
@@ -2419,7 +2415,6 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcGetMultiSkillValueAtOther'], dictTValue)
                     else:
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcGetMultiSkillValue'], dictTValue)
-                
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'list', fullMatch = True):
@@ -3668,15 +3663,14 @@ def unity_reply(plugin_event, Proc):
                     replyMsg(plugin_event, tmp_reply_str + tmp_notice)
                     return
             else:
-                tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
-                tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
                 tmp_pcCardRule = 'default'
-                if tmp_pc_name is not None:
-                    tmp_pcCardRule_new = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_pc_name)
-                    if tmp_pcCardRule_new:
-                        tmp_pcCardRule = tmp_pcCardRule_new
+                tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
                 pc_skills = OlivaDiceCore.pcCard.pcCardDataGetByPcName(tmp_pcHash, hagId=tmp_hagID)
                 pc_skill_names = [s.upper() for s in pc_skills.keys() if not s.startswith('__')]
+                tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
+                tmp_pcCardRule_new = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_pc_name)
+                if tmp_pcCardRule_new:
+                    tmp_pcCardRule = tmp_pcCardRule_new
                 tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_pcCardRule)
                 synonyms = tmp_template.get('synonyms', {}) if tmp_template else {}
                 # 获取特殊技能并合并到普通技能列表
@@ -3684,16 +3678,25 @@ def unity_reply(plugin_event, Proc):
                 if tmp_pcCardRule in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial:
                     special_skills = OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[tmp_pcCardRule]
                 all_skills = pc_skill_names + special_skills
+                if tmp_pc_name is None:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRmCardNone'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
+                elif not tmp_reast_str:
+                    replyMsgLazyHelpByEvent(plugin_event, 'st')
+                    return
                 input_str = tmp_reast_str_new_2.strip().upper()
                 # 按空格分割输入字符串
                 input_parts = input_str.split()
                 result_lines = []
+                seen_skills = set() 
                 for part in input_parts:
                     remaining_str = part.upper()
                     matched_skills = []
                     unmatched_groups = []
                     current_unmatched = []
                     skill_mapping = {}
+                    # 构建技能映射表
                     for skill in all_skills:
                         main_skill = None
                         for main_key in synonyms:
@@ -3720,18 +3723,18 @@ def unity_reply(plugin_event, Proc):
                             if current_unmatched:
                                 unmatched_groups.append(''.join(current_unmatched))
                                 current_unmatched = []
-                            matched_skills.append((matched_skill, max_len, True))
+                            # 检查是否已经添加过这个技能
+                            if matched_skill not in seen_skills:
+                                matched_skills.append((matched_skill, max_len, True))
+                                seen_skills.add(matched_skill)
                             remaining_str = remaining_str[max_len:]
                         else:
                             current_unmatched.append(remaining_str[0])
                             remaining_str = remaining_str[1:]
                     if current_unmatched:
                         unmatched_groups.append(''.join(current_unmatched))
-                    seen_skills = set()
+                    # 处理匹配到的技能
                     for skill, length, is_matched in matched_skills:
-                        if skill in seen_skills:
-                            continue
-                        seen_skills.add(skill)
                         if is_matched:
                             if skill in special_skills and skill not in pc_skill_names:
                                 skill_value = OlivaDiceCore.skillCheck.getSpecialSkill(
@@ -3754,20 +3757,14 @@ def unity_reply(plugin_event, Proc):
                                 hagId=tmp_hagID
                             )
                             result_lines.append(f"[{display_name}]: {skill_value}")
+                    # 处理未匹配的部分
                     for group in unmatched_groups:
                         display_name = group.upper()
-                        skill_value = '0'
-                        result_lines.append(f"[{display_name}]: {skill_value}")
-                seen = set()
-                unique_result_lines = []
-                for line in result_lines:
-                    # 提取技能名部分进行比较
-                    skill_part = line.split(']:')[0].strip()[1:]
-                    if skill_part not in seen:
-                        seen.add(skill_part)
-                        unique_result_lines.append(line)
-                result_lines = unique_result_lines
-                dictTValue['tName'] = tmp_pc_name if tmp_pc_name else dictTValue['tName']
+                        if display_name not in seen_skills:
+                            skill_value = '0'
+                            result_lines.append(f"[{display_name}]: {skill_value}")
+                            seen_skills.add(display_name)
+                dictTValue['tName'] = tmp_pc_name
                 dictTValue['tSkillName'] = input_str
                 dictTValue['tSkillValue'] = '\n'.join(result_lines)
                 # 根据匹配到的技能数量选择不同的回复模板
