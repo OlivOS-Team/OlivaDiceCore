@@ -2368,7 +2368,6 @@ def unity_reply(plugin_event, Proc):
                             continue
                         seen_skills.add(skill)
                         if is_matched:
-                            skill_value = pc_skills.get(skill, "0")
                             if skill in special_skills and skill not in pc_skill_names:
                                 skill_value = OlivaDiceCore.skillCheck.getSpecialSkill(
                                     skill,
@@ -2377,6 +2376,12 @@ def unity_reply(plugin_event, Proc):
                                 )
                                 if skill_value is None:
                                     skill_value = "0"
+                            else:
+                                skill_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
+                                    tmp_pcHash,
+                                    skill,
+                                    hagId = tmp_hagID
+                                )
                             display_name = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
                                 tmp_pcHash,
                                 skill,
@@ -3728,7 +3733,6 @@ def unity_reply(plugin_event, Proc):
                             continue
                         seen_skills.add(skill)
                         if is_matched:
-                            skill_value = pc_skills.get(skill, "0")
                             if skill in special_skills and skill not in pc_skill_names:
                                 skill_value = OlivaDiceCore.skillCheck.getSpecialSkill(
                                     skill,
@@ -3737,6 +3741,12 @@ def unity_reply(plugin_event, Proc):
                                 )
                                 if skill_value is None:
                                     skill_value = "0"
+                            else:
+                                skill_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
+                                    tmp_pcHash,
+                                    skill,
+                                    hagId = tmp_hagID
+                                )
                             display_name = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
                                 tmp_pcHash,
                                 skill,
