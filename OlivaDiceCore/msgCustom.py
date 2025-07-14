@@ -198,7 +198,7 @@ dictStrCustom = {
     'strPcSkillCheckHideShowWithSkillNameAtOther' : '[{tUserName}]帮[{tUserName01}]的人物卡[{tName}]进行技能[{tSkillName}:{tSkillValue}]暗检定',
     'strPcSkillEnhanceCheck' : '[{tName}]进行技能[{tSkillName}:{tSkillValue}]成长检定: {tRollResult} {tSkillCheckReasult}',
     'strPcSkillEnhanceContent' : '\n该技能发生了增长: {tRollSubResult}',
-    'strPcSkillEnhanceAll': '[{tName}]的技能成长检定结果:\n成长列表：{tCheckedSkillList}\n共有[{tSkillEnhanceCount}]个技能进行了检定，其中成功[{tSkillEnhanceSucceedCount}]个: {tSkillEnhanceSucceedList}',
+    'strPcSkillEnhanceAll': '[{tName}]的技能成长检定结果:\n技能列表：{tCheckedSkillList}\n共有[{tSkillEnhanceCount}]个技能进行了检定，其中成功[{tSkillEnhanceSucceedCount}]个: {tSkillEnhanceSucceedList}',
     'strPcSkillEnhanceSkipped': '\n跳过成长(特殊属性或0值): {tSkippedSkillList}',
     'strPcSkillEnhanceNotFound': '\n未找到技能: {tNotFoundSkillList}',
     'strPcSkillEnhanceOnlySpecial': '[{tName}]的技能({tSkippedSkillList})均为无法成长的特殊属性或0值技能。',
