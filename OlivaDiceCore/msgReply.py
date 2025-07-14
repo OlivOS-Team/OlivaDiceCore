@@ -3061,19 +3061,15 @@ def unity_reply(plugin_event, Proc):
                 if not tmp_block_name:
                     tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
                     tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
-
                     if tmp_pc_name is None:
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRmCardNone'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                         return
-                    
                     tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_pc_name)
                     tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name or 'default')
                     pc_data = OlivaDiceCore.pcCard.pcCardDataGetByPcName(tmp_pcHash, hagId=tmp_hagID)
-                    
                     block_list = []
                     template_blocks = {}
-
                     # 处理模板定义的块
                     if 'skill' in tmp_template:
                         for block_name in tmp_template['skill']:
@@ -3090,7 +3086,6 @@ def unity_reply(plugin_event, Proc):
                                 if has_skill:
                                     block_list.append(block_name)
                                     template_blocks[block_name] = block_skills
-
                     # 检查并添加有内容的固定块
                     mapping_record = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
                         tmp_pcHash, tmp_pc_name, 'mappingRecord', {})
@@ -3101,54 +3096,41 @@ def unity_reply(plugin_event, Proc):
                         tmp_pcHash, tmp_pc_name, 'noteRecord', {})
                     if note_record:
                         block_list.append('记录')
-
                     # 检查是否有"其它"内容
                     tmp_enhanceList = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
                         tmp_pcHash, tmp_pc_name, 'enhanceList', [])
-
                     has_other = False
                     all_template_skills = set()
                     for block_skills in template_blocks.values():
                         all_template_skills.update(block_skills)
-
                     for skill_key in pc_data:
                         if skill_key.startswith('__') or skill_key == 'template':
                             continue
-
                         skill_core_name = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
                             tmp_pcHash, skill_key, hagId=tmp_hagID)
-
                         if skill_core_name not in all_template_skills:
                             has_other = True
                             break
-                        
                     if has_other:
                         block_list.append('其它')
-
                     if block_list:
                         dictTValue['tBlockList'] = '\n'.join([f'- {block}' for block in block_list])
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcBlockList'], dictTValue)
                     else:
                         dictTValue['tBlockList'] = "无技能块"
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcBlockList'], dictTValue)
-
                     replyMsg(plugin_event, tmp_reply_str)
                     return
-
                 tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
                 tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
-
                 if tmp_pc_name is None:
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRmCardNone'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
-
                 tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_pc_name)
                 tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name or 'default')
                 pc_data = OlivaDiceCore.pcCard.pcCardDataGetByPcName(tmp_pcHash, hagId=tmp_hagID)
-
                 deleted = False
-
                 # 处理映射块
                 if tmp_block_name == '映射':
                     mapping_record = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
@@ -3157,7 +3139,6 @@ def unity_reply(plugin_event, Proc):
                         OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
                             tmp_pcHash, tmp_pc_name, 'mappingRecord', {})
                         deleted = True
-
                 # 处理记录块
                 elif tmp_block_name == '记录':
                     note_record = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
@@ -3167,7 +3148,6 @@ def unity_reply(plugin_event, Proc):
                             tmp_pcHash, tmp_pc_name, 'noteRecord', {})
                         deleted = True
                         trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
-
                 # 处理其它块
                 elif tmp_block_name == '其它':
                     all_template_skills = set()
@@ -3182,10 +3162,8 @@ def unity_reply(plugin_event, Proc):
                     for skill_key in pc_data:
                         if skill_key.startswith('__') or skill_key == 'template':
                             continue
-
                         skill_core_name = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
                             tmp_pcHash, skill_key, hagId=tmp_hagID)
-
                         if skill_core_name not in all_template_skills:
                             other_skills.append(skill_key)
                     if other_skills:
@@ -3193,7 +3171,6 @@ def unity_reply(plugin_event, Proc):
                             OlivaDiceCore.pcCard.pcCardDataDelBySkillName(
                                 tmp_pcHash, skill_name, tmp_pc_name)
                         deleted = True
-
                 # 处理模板定义的块
                 elif 'skill' in tmp_template and tmp_block_name in tmp_template['skill']:
                     if isinstance(tmp_template['skill'][tmp_block_name], list):
@@ -3203,20 +3180,17 @@ def unity_reply(plugin_event, Proc):
                                 tmp_pcHash, skill_name, hagId=tmp_hagID)
                             if skill_core_name in pc_data:
                                 skills_to_delete.append(skill_core_name)
-
                         if skills_to_delete:
                             for skill_name in skills_to_delete:
                                 OlivaDiceCore.pcCard.pcCardDataDelBySkillName(
                                     tmp_pcHash, skill_name, tmp_pc_name)
                             deleted = True
-
                 if deleted:
                     dictTValue['tBlockName'] = tmp_block_name
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcBlockRm'], dictTValue)
                 else:
                     dictTValue['tBlockName'] = tmp_block_name
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcBlockRmNone'], dictTValue)
-
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'export'):
@@ -3385,7 +3359,7 @@ def unity_reply(plugin_event, Proc):
                             continue
                         
                         tmp_skill_name = tmp_skill_name.strip()
-                        tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode='skillName')
+                        tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode = 'skillName')
                         if not OlivaDiceCore.pcCard.checkPcName(tmp_skill_name):
                             continue
                         
@@ -4670,7 +4644,7 @@ def unity_reply(plugin_event, Proc):
                     if char in op_list or char.isdigit():
                         skill_end_pos = i
                         break
-                tmp_skill_name = tmp_reast_str[:skill_end_pos].strip()
+                tmp_skill_name = tmp_reast_str[:skill_end_pos].strip().upper() or None
                 tmp_reast_str = tmp_reast_str[skill_end_pos:].strip()
                 if not tmp_reast_str:
                     tmp_skill_name = tmp_skill_name.split()[0]
@@ -6283,11 +6257,11 @@ def parse_at_user(plugin_event, tmp_reast_str, valDict, flag_is_from_group_admin
         if isinstance(part, OlivOS.messageAPI.PARA.at):
             at_user_id = part.data['id']
             tmp_userName01 = OlivaDiceCore.userConfig.getUserConfigByKey(
-                userId=at_user_id,
-                userType='user',
-                platform=plugin_event.platform['platform'],
-                userConfigKey='userName',
-                botHash=plugin_event.bot_info.hash
+                userId = at_user_id,
+                userType = 'user',
+                platform = plugin_event.platform['platform'],
+                userConfigKey = 'userName',
+                botHash = plugin_event.bot_info.hash
             )
             plres = plugin_event.get_stranger_info(at_user_id)
             if plres['active']:
