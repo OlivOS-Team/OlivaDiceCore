@@ -3359,7 +3359,7 @@ def unity_reply(plugin_event, Proc):
                             continue
                         
                         tmp_skill_name = tmp_skill_name.strip()
-                        tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode='skillName')
+                        tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode = 'skillName')
                         if not OlivaDiceCore.pcCard.checkPcName(tmp_skill_name):
                             continue
                         
@@ -6257,11 +6257,11 @@ def parse_at_user(plugin_event, tmp_reast_str, valDict, flag_is_from_group_admin
         if isinstance(part, OlivOS.messageAPI.PARA.at):
             at_user_id = part.data['id']
             tmp_userName01 = OlivaDiceCore.userConfig.getUserConfigByKey(
-                userId=at_user_id,
-                userType='user',
-                platform=plugin_event.platform['platform'],
-                userConfigKey='userName',
-                botHash=plugin_event.bot_info.hash
+                userId = at_user_id,
+                userType = 'user',
+                platform = plugin_event.platform['platform'],
+                userConfigKey = 'userName',
+                botHash = plugin_event.bot_info.hash
             )
             plres = plugin_event.get_stranger_info(at_user_id)
             if plres['active']:
