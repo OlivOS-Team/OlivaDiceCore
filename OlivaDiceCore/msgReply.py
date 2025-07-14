@@ -5044,7 +5044,7 @@ def unity_reply(plugin_event, Proc):
                     not_found_skills.append("".join(current_unmatched_chars))
             # 处理只输入了特殊技能或0值技能的特殊情况
             if not skills_to_grow and skipped_skills and not not_found_skills:
-                dictTValue['tSkippedSkillList'] = ','.join(f'[{skill}]' for skill in skipped_skills)
+                dictTValue['tSkippedSkillList'] = '、'.join(f'[{skill}]' for skill in skipped_skills)
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillEnhanceOnlySpecial'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
@@ -5080,20 +5080,20 @@ def unity_reply(plugin_event, Proc):
             if skills_to_grow:
                 enhancement_results = _perform_skill_enhancement(skills_to_grow)
                 checked_display_names = [OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(tmp_pcHash, s, flagShow=True, hagId=tmp_hagID) for s in skills_to_grow]
-                dictTValue['tCheckedSkillList'] = '、'.join(f'[{skill}]' for skill in skipped_skills)
+                dictTValue['tCheckedSkillList'] = '、'.join(f'[{skill}]' for skill in checked_display_names)
                 dictTValue['tSkillEnhanceCount'] = str(enhancement_results['enhance_count'])
                 dictTValue['tSkillEnhanceSucceedCount'] = str(enhancement_results['succeed_count'])
                 succeed_list_formatted = []
                 for item in enhancement_results['succeed_details']:
                     display_name = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(tmp_pcHash, item[0], flagShow=True, hagId=tmp_hagID)
                     succeed_list_formatted.append(f'{display_name}:[{item[1]}+{item[2] - item[1]}]')
-                dictTValue['tSkillEnhanceSucceedList'] = ('\n' + ' '.join(succeed_list_formatted)) if succeed_list_formatted else ''
+                dictTValue['tSkillEnhanceSucceedList'] = ('\n' + '、'.join(succeed_list_formatted)) if succeed_list_formatted else ''
                 final_reply_parts.append(OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillEnhanceAll'], dictTValue))
             if skipped_skills:
-                dictTValue['tSkippedSkillList'] = '、'.join(skipped_skills)
+                dictTValue['tSkippedSkillList'] = '、'.join(f'[{skill}]' for skill in skipped_skills)
                 final_reply_parts.append(OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillEnhanceSkipped'], dictTValue))
             if not_found_skills:
-                dictTValue['tNotFoundSkillList'] = '、'.join(not_found_skills)
+                dictTValue['tNotFoundSkillList'] = '、'.join(f'[{skill}]' for skill in not_found_skills)
                 final_reply_parts.append(OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillEnhanceNotFound'], dictTValue))
             replyMsg(plugin_event, ''.join(final_reply_parts))
             return
