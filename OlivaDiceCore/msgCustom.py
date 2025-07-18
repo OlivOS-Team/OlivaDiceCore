@@ -201,7 +201,7 @@ dictStrCustom = {
     'strPcSkillEnhanceAll': '[{tName}]的技能成长检定结果:\n技能列表：{tCheckedSkillList}\n共有[{tSkillEnhanceCount}]个技能进行了检定，其中成功[{tSkillEnhanceSucceedCount}]个: {tSkillEnhanceSucceedList}',
     'strPcSkillEnhanceSkipped': '\n跳过成长(特殊属性或0值): {tSkippedSkillList}',
     'strPcSkillEnhanceNotFound': '\n未找到技能: {tNotFoundSkillList}',
-    'strPcSkillEnhanceOnlySpecial': '[{tName}]的技能({tSkippedSkillList})均为无法成长的特殊属性或0值技能。',
+    'strPcSkillEnhanceOnlySpecial': '[{tName}]的以下技能均为无法成长的特殊属性或0值技能或未找到对应的技能：\n{tSkippedSkillList}',
     'strPcSkillEnhanceError' : '未设置人物卡，无法进行自动成长检定',
     'strSanCheck' : '[{tName}]进行理智检定[{tSkillValue}]:\n{tRollResult} {tSkillCheckReasult}\n理智减少{tRollSubResult}点,当前剩余[{tSkillValueNew}]点',
     'strSanCheckGreatFailed' : '[{tName}]进行理智检定[{tSkillValue}]:\n{tRollResult} {tSkillCheckReasult}\n理智减少{tRollSubResult}的最大值[{tRollSubResultIntMax}]点,当前剩余[{tSkillValueNew}]点',
