@@ -1985,8 +1985,31 @@ def unity_reply(plugin_event, Proc):
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'sn')
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
+                tmp_pc_id,
+                tmp_pc_platform
+            )
+            tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
+                tmp_pcHash,
+                tmp_hagID
+            )
+            tmp_template_name = None
+            tmp_template_rule_name = None
+            tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
+                tmp_pcHash,
+                tmp_pc_name
+            )
+            tmp_template_rule_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateRuleKey(
+                tmp_pcHash,
+                tmp_pc_name
+            )
+            if tmp_template_name == None:
+                tmp_template_name = 'default'
+            if tmp_template_rule_name == None:
+                tmp_template_rule_name = 'default'
             flag_mode = 'coc'
             flag_force = True
+            tmp_pc_card_snTitle = None
             sn_title = None
             sn_title_new = None
             if tmp_hagID == None:
@@ -2076,8 +2099,14 @@ def unity_reply(plugin_event, Proc):
                     replyMsg(plugin_event, tmp_reply_str)
                     return
             if '' == tmp_reast_str.lower():
-                flag_mode = 'coc'
-                flag_force = False
+                tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
+                if 'snTitle' in tmp_template:
+                    tmp_pc_card_snTitle = tmp_template['snTitle']
+                    flag_mode = 'template'
+                    flag_force = False
+                else:
+                    flag_mode = 'coc'
+                    flag_force = False
             elif tmp_reast_str.lower() in ['dnd', 'dnd5e']:
                 flag_mode = 'dnd'
             elif tmp_reast_str.lower() in ['coc', 'coc6', 'coc7']:
@@ -2085,14 +2114,6 @@ def unity_reply(plugin_event, Proc):
             else:
                 flag_mode = 'custom'
                 sn_title_new = tmp_reast_str
-            tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
-                tmp_pc_id,
-                tmp_pc_platform
-            )
-            tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
-                tmp_pcHash,
-                tmp_hagID
-            )
             tmp_Record = {}
             if tmp_pc_name != None:
                 tmp_Record = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
@@ -2110,6 +2131,8 @@ def unity_reply(plugin_event, Proc):
                     sn_title = '{tName} hp{HP}/{HPMAX} mp{MP}/{MPMAX} dex{DEX}'
                 elif 'custom' == flag_mode:
                     sn_title = sn_title_new
+                elif 'template' == flag_mode:
+                    sn_title = tmp_pc_card_snTitle
             if sn_title != None:
                 if flag_force:
                     OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
@@ -5629,6 +5652,29 @@ def trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, 
     tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
     if not tmp_pc_name:
         return
+    tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
+        tmp_pc_id,
+        tmp_pc_platform
+    )
+    tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
+        tmp_pcHash,
+        tmp_hagID
+    )
+    tmp_template_name = None
+    tmp_template_rule_name = None
+    tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
+        tmp_pcHash,
+        tmp_pc_name
+    )
+    tmp_template_rule_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateRuleKey(
+        tmp_pcHash,
+        tmp_pc_name
+    )
+    if tmp_template_name == None:
+        tmp_template_name = 'default'
+    if tmp_template_rule_name == None:
+        tmp_template_rule_name = 'default'
+    tmp_pc_card_snTitle = None
     sn_title = None
     tmp_Record = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
         pcHash = tmp_pcHash,
@@ -5636,6 +5682,10 @@ def trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, 
         dataKey = 'noteRecord',
         resDefault = {}
     )
+    tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
+    if 'snTitle' in tmp_template:
+        tmp_pc_card_snTitle = tmp_template['snTitle']
+        sn_title = tmp_pc_card_snTitle
     if '名片' in tmp_Record:
         sn_title = tmp_Record['名片']
     if not sn_title:
