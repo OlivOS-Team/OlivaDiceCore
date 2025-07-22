@@ -31,6 +31,7 @@ dictPcCardTemplateModel = {
     'synonyms':{},
     'redirect': {},
     'showName': {},
+    'snTitle': '',
     'checkRules': {
         'default': {
             'checkList': []
