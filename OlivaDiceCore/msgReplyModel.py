@@ -1873,6 +1873,10 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
                 max_len = 0
                 for skill in sorted(all_pc_skill_names, key = len, reverse = True):
                     if skill.startswith(start_char.upper()) and processed_skill_ops[i:].upper().startswith(skill):
+                        # 特殊处理以d开头的技能名
+                        if start_char.upper() == 'D' and len(skill) == 1 and i+1 < len(processed_skill_ops) and processed_skill_ops[i+1].isdigit():
+                            i += 1
+                            break
                         if len(skill) > max_len:
                             max_len = len(skill)
                             break
@@ -1902,6 +1906,11 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
         if not skill_name:
             current_pos = skill_end_pos + 1
             continue
+        # 检查是否是d后面跟着数字的情况
+        if skill_name.upper() == 'D' and skill_end_pos < len(processed_skill_ops) and processed_skill_ops[skill_end_pos+1:].strip() and processed_skill_ops[skill_end_pos+1:].strip()[0].isdigit():
+            current_pos = skill_end_pos
+            continue
+        skill_name = OlivaDiceCore.pcCard.fixName(skill_name, flagMode = 'skillName')
         op = processed_skill_ops[skill_end_pos]
         rest_str = processed_skill_ops[skill_end_pos+1:]
         # 提取表达式
@@ -2103,6 +2112,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom):
                 pos = i
                 break
         skill_name = skill_expr[:pos].strip().upper() or None
+        skill_name = OlivaDiceCore.pcCard.fixName(skill_name, flagMode = 'skillName')
         skill_expr = skill_expr[pos:].strip()
         if skill_expr:
             if skill_expr[0] in op_list:
