@@ -2902,6 +2902,7 @@ def unity_reply(plugin_event, Proc):
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcTempError'], dictTValue)
                     else:
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcTempError'], dictTValue)
+                    trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 else:
                     if tmp_pc_name != None:
@@ -3041,6 +3042,7 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcTempRuleShow'], dictTValue)
                     else:
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcTempRuleError'], dictTValue)
+                    trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, ['note', 'rec']):
@@ -3356,6 +3358,8 @@ def unity_reply(plugin_event, Proc):
                         if char in start_chars:
                             for skill in sorted_skills:
                                 if skill[0].upper() == char and processed_str[i:].upper().startswith(skill):
+                                    if char == 'D' and len(skill) == 1 and i+1 < len(processed_str) and processed_str[i+1].isdigit():
+                                        continue  # 跳过d后面跟着数字的情况
                                     # 在匹配的技能名前添加空格
                                     processed_str = processed_str[:i] + ' ' + processed_str[i:]
                                     i += len(skill) + 1
@@ -3376,6 +3380,13 @@ def unity_reply(plugin_event, Proc):
                             break  # 没有找到符号或数字，结束解析
                         # 处理技能名和表达式
                         if processed_str[skill_end_pos].isdigit() or processed_str[skill_end_pos] in op_list:
+                            # 检查是否是d后面跟着数字的情况
+                            tmp_skill_name_part = processed_str[current_pos:skill_end_pos].strip()
+                            if (tmp_skill_name_part.upper() == 'D' and 
+                                skill_end_pos < len(processed_str) and 
+                                processed_str[skill_end_pos].isdigit()):
+                                current_pos = skill_end_pos  # 跳过这个d，不视为技能名
+                                continue
                             # 查找完整的表达式
                             expr_end_pos = skill_end_pos
                             in_dice_expr = False
@@ -4695,6 +4706,8 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = tmp_reast_str[skill_end_pos:].strip()
                 if not tmp_reast_str:
                     tmp_skill_name = tmp_skill_name.split()[0]
+                    if tmp_skill_name:
+                        tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode = 'skillName')
                     # 直接读取数值
                     tmp_skill_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
                         OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
@@ -4703,6 +4716,8 @@ def unity_reply(plugin_event, Proc):
                     )
                     tmp_skill_value_str = str(tmp_skill_value)
                 else:
+                    if tmp_skill_name:
+                        tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode = 'skillName')
                     # 检查是否有运算符
                     if tmp_reast_str[0] in op_list:
                         # 带运算表达式
