@@ -4706,7 +4706,8 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = tmp_reast_str[skill_end_pos:].strip()
                 if not tmp_reast_str:
                     tmp_skill_name = tmp_skill_name.split()[0]
-                    tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode = 'skillName')
+                    if tmp_skill_name:
+                        tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode = 'skillName')
                     # 直接读取数值
                     tmp_skill_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
                         OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
@@ -4715,7 +4716,8 @@ def unity_reply(plugin_event, Proc):
                     )
                     tmp_skill_value_str = str(tmp_skill_value)
                 else:
-                    tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode = 'skillName')
+                    if tmp_skill_name:
+                        tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode = 'skillName')
                     # 检查是否有运算符
                     if tmp_reast_str[0] in op_list:
                         # 带运算表达式
