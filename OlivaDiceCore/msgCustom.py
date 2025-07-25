@@ -263,6 +263,8 @@ dictStrCustom = {
     'strTeamSkillUpdate': "小队[{tTeamName}]的技能更新:\n{tResults}",
     'strTeamCheckResult': '小队[{tTeamName}]进行技能[{tSkillName}]检定:\n{tResult}',
     'strTeamSCResult': '小队[{tTeamName}]进行理智检定:\n{tResult}',
+    'strTeamRoll': '小队[{tTeamName}]掷骰:\n{tRollResult}',
+    'strTeamRollWithReason': '小队[{tTeamName}]由于[{tReason}]掷骰:\n{tRollResult}',
     'strNoActiveTeam': '当前群组没有活跃小队',
     'strTeamNotFound': '小队[{tTeamName}]不存在',
     'strNoTeams': '当前群组没有创建任何小队',
