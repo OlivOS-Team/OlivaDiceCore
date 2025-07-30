@@ -4356,9 +4356,9 @@ def unity_reply(plugin_event, Proc):
                             hagId = tmp_hagID
                         )
                         # 构建骰子详情显示
-                        dice_detail = f"{rd_para_str}={tmp_rd_int}"
+                        dice_detail = f"{rd_para_str}={tmp_rd_int}/{str(tmp_skill_value_old)}"
                         if rd_para.resDetail:
-                            dice_detail = f"{rd_para_str}={rd_para.resDetail}={tmp_rd_int}"
+                            dice_detail = f"{rd_para_str}={rd_para.resDetail}={tmp_rd_int}/{str(tmp_skill_value_old)}"
                         dictTValue['tName'] = tmp_pc_name
                         dictTValue['tSkillValue'] = str(tmp_skill_value_old)
                         dictTValue['tSkillValueNew'] = str(tmp_skill_value)
@@ -4378,7 +4378,7 @@ def unity_reply(plugin_event, Proc):
                     else:
                         dictTValue['tName'] = tmp_pc_name
                         dictTValue['tSkillValue'] = str(tmp_skill_value_old)
-                        dictTValue['tRollResult'] = f"{rd_para_str}={tmp_rd_int}"
+                        dictTValue['tRollResult'] = f"{rd_para_str}={tmp_rd_int}/{str(tmp_skill_value_old)}"
                         dictTValue['tRollSubResult'] = tmp_sancheck_para_final
                         if is_at:
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSanCheckErrorAtOther'], dictTValue)
