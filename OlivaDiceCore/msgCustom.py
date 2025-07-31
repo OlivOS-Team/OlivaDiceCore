@@ -144,7 +144,7 @@ dictStrCustom = {
     'strPcGetMultiSkillValueAtOther': '[{tUserName}]帮[{tUserName01}]进行的技能属性查询结果如下:\n{tSkillValue}',
     'strPcShow' : '[{tUserName}]的人物卡[{tName}]:\n{tPcShow}',
     'strPcShowAtOther' : '[{tUserName01}]的人物卡[{tName}]:\n{tPcShow}',
-    'strPcList' : '[{tName}]的人物卡:\n{tPcList}\n当前选择:{tPcSelection}',
+    'strPcList' : '[{tUserName}]的人物卡:\n{tPcList}\n当前选择:{tPcSelection}',
     'strPcLock' : '本群人物卡已锁定(当前人物卡：{tName})，其他群切换人物卡将不影响本群人物卡状态',
     'strPcLockError' : '本群锁定人物卡失败，请重试(当前人物卡：{tName})',
     'strPcLockNone' : '试图锁定的人物卡不存在',
