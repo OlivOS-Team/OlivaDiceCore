@@ -3067,6 +3067,7 @@ def unity_reply(plugin_event, Proc):
                         is_remove = True
                         tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rm')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_reast_str = tmp_reast_str.upper()
                 tmp_key = None
                 tmp_value = None
                 tmp_reast_str_list = tmp_reast_str.split(' ')
@@ -3198,7 +3199,7 @@ def unity_reply(plugin_event, Proc):
                         deleted = True
                         trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                 # 处理其它块
-                elif tmp_block_name == '其它':
+                elif tmp_block_name in ['其它','其他']:
                     all_template_skills = set()
                     if 'skill' in tmp_template:
                         for block_name in tmp_template['skill']:
