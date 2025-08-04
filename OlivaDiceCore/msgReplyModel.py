@@ -781,6 +781,20 @@ def setPcNoteOrRecData(
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetMapValueError'], dictTValue)
                     OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
                 return
+        # 添加特殊技能检测
+        tmp_pcCardRule = 'default'
+        if tmp_pc_name is not None:
+            tmp_pcCardRule_new = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
+                OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
+                tmp_pc_name
+            )
+            if tmp_pcCardRule_new:
+                tmp_pcCardRule = tmp_pcCardRule_new
+        
+        special_skills = []
+        if tmp_pcCardRule in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial:
+            if tmp_key.upper() in [skill.upper() for skill in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[tmp_pcCardRule]]:
+                special_skills.append(tmp_key)
         tmp_mappingRecord[tmp_key] = tmp_value
         OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
             pcHash = tmp_pcHash,
@@ -788,9 +802,17 @@ def setPcNoteOrRecData(
             dataKey = keyName,
             dataContent = tmp_mappingRecord
         )
+        # 如果有特殊技能，添加提示
+        if special_skills:
+            dictTValue['tSpecialSkills'] = '、'.join([f'[{skill}]' for skill in special_skills])
+            tmp_notice = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                dictStrCustom['strPcSetSpecialSkills'], dictTValue
+            )
+        else:
+            tmp_notice = ''
         if enableFalse:
             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetSkillValue'], dictTValue)
-            OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+            OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str + tmp_notice)
     elif tmp_key != None and tmp_value == None:
         if tmp_key in tmp_mappingRecord:
             tmp_value = tmp_mappingRecord[tmp_key]
@@ -1028,7 +1050,7 @@ def replyTEAM_command(plugin_event, Proc, valDict, flag_is_from_group_admin):
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, ['clear','clr']):
         team_clear(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin, 
                           flag_is_from_master, dictTValue, dictStrCustom, team_name)
-    elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'at'):
+    elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, ['at','call']):
         team_at(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, team_name)
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'set'):
         team_set(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, team_name)
@@ -1549,7 +1571,7 @@ def team_clear(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin,
     ))
 
 def team_at(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, team_name):
-    tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'at')
+    tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, ['at','call'])
     tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
     if not team_name:
         team_name = tmp_reast_str.strip()
