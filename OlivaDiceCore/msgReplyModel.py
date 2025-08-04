@@ -1050,7 +1050,7 @@ def replyTEAM_command(plugin_event, Proc, valDict, flag_is_from_group_admin):
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, ['clear','clr']):
         team_clear(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin, 
                           flag_is_from_master, dictTValue, dictStrCustom, team_name)
-    elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'at'):
+    elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, ['at','call']):
         team_at(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, team_name)
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'set'):
         team_set(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, team_name)
@@ -1571,7 +1571,7 @@ def team_clear(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin,
     ))
 
 def team_at(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, team_name):
-    tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'at')
+    tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, ['at','call'])
     tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
     if not team_name:
         team_name = tmp_reast_str.strip()
