@@ -519,7 +519,13 @@ def replyRAV_command(plugin_event, Proc, valDict):
 
                 tmp_pcHash_0 = OlivaDiceCore.pcCard.getPcHash(tmp_userID, tmp_platform)
                 tmp_pcHash_1 = OlivaDiceCore.pcCard.getPcHash(tmp_userID_1, tmp_platform)
-
+                # 替换数字为空值并且修正技能名
+                if tmp_skill_name_0 is not None:
+                    tmp_skill_name_0 = re.sub(r'\d+', '', tmp_skill_name_0)
+                    tmp_skill_name_0 = OlivaDiceCore.pcCard.fixName(tmp_skill_name_0, flagMode='skillName')
+                if tmp_skill_name_1 is not None:
+                    tmp_skill_name_1 = re.sub(r'\d+', '', tmp_skill_name_1)
+                    tmp_skill_name_1 = OlivaDiceCore.pcCard.fixName(tmp_skill_name_1, flagMode='skillName')
                 # 如果未从命令中获取数值，则从角色卡中获取
                 if tmp_skill_value_0 is None:
                     tmp_skill_value_0 = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
