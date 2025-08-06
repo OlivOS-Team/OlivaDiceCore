@@ -5021,14 +5021,14 @@ def unity_reply(plugin_event, Proc):
                 enhanceList = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(tmp_pcHash, tmp_pc_name, 'enhanceList', [])
                 enhanceList_filtered = [skill for skill in enhanceList if skill not in special_skills_for_rule]
                 enhancement_results = _perform_skill_enhancement(enhanceList_filtered)
-                dictTValue['tCheckedSkillList'] = "" # 自动成长没有指定列表，此项为空
+                dictTValue['tCheckedSkillList'] = '、'.join(f'[{skill}]' for skill in enhanceList_filtered)
                 dictTValue['tSkillEnhanceCount'] = str(enhancement_results['enhance_count'])
                 dictTValue['tSkillEnhanceSucceedCount'] = str(enhancement_results['succeed_count'])
                 succeed_list_formatted = []
                 for item in enhancement_results['succeed_details']:
                     display_name = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(tmp_pcHash, item[0], flagShow=True, hagId=tmp_hagID)
                     succeed_list_formatted.append(f'{display_name}:[{item[1]}+{item[2] - item[1]}]')
-                dictTValue['tSkillEnhanceSucceedList'] = ('\n' + ' '.join(succeed_list_formatted)) if succeed_list_formatted else ''
+                dictTValue['tSkillEnhanceSucceedList'] = ('\n' + '、'.join(succeed_list_formatted)) if succeed_list_formatted else ''
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillEnhanceAll'], dictTValue)
                 OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(tmp_pcHash, tmp_pc_name, 'enhanceList', [skill for skill in enhanceList if skill in special_skills_for_rule])
                 replyMsg(plugin_event, tmp_reply_str)
