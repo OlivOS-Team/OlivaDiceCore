@@ -464,7 +464,12 @@ def replyRAV_command(plugin_event, Proc, valDict):
                 tmp_skill_name_0 = skills[0]
                 tmp_skill_name_1 = skills[1]
                 if num_values == 1:
-                    tmp_skill_value_0 = values[0]
+                    value_as_str = str(values[0])
+                    # 如果技能名2的文本部分以数值结尾，则将其分配给技能2
+                    if full_text_str.strip().endswith(value_as_str):
+                        tmp_skill_value_1 = values[0]
+                    else:
+                        tmp_skill_value_0 = values[0]
                 elif num_values >= 2:
                     tmp_skill_value_0 = values[0]
                     tmp_skill_value_1 = values[1]
