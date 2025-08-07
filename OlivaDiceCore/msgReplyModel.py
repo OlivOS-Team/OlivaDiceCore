@@ -446,9 +446,9 @@ def replyRAV_command(plugin_event, Proc, valDict):
             num_skills = len(skills)
             num_values = len(values)
             if num_skills == 1:
-                # .rav 技能名1 @B => A和B都用技能1，数值待查
-                # .rav 技能名1 50 @B => A用技能1 50，B用技能1 待查
-                # .rav 技能名1 50 60 @B => A用技能1 50，B用技能1 60
+                # .rav 技能名1 @B -> A和B都用技能1，数值待查
+                # .rav 技能名1 50 @B -> A用技能1 50，B用技能1 待查
+                # .rav 技能名1 50 60 @B -> A用技能1 50，B用技能1 60
                 tmp_skill_name_0 = skills[0]
                 tmp_skill_name_1 = skills[0]
                 if num_values == 1:
@@ -458,9 +458,9 @@ def replyRAV_command(plugin_event, Proc, valDict):
                     tmp_skill_value_1 = values[1]
                 is_rav = True
             elif num_skills >= 2:
-                # .rav 技能名1 技能名2 @B => A用技能1，B用技能2，数值待查
-                # .rav 技能名1 50 技能名2 @B => A用技能1 50，B用技能2 待查
-                # .rav 技能名1 50 技能名2 60 @B => A用技能1 50，B用技能2 60
+                # .rav 技能名1 技能名2 @B -> A用技能1，B用技能2，数值待查
+                # .rav 技能名1 50 技能名2 @B -> A用技能1 50，B用技能2 待查
+                # .rav 技能名1 50 技能名2 60 @B -> A用技能1 50，B用技能2 60
                 tmp_skill_name_0 = skills[0]
                 tmp_skill_name_1 = skills[1]
                 if num_values == 1:
