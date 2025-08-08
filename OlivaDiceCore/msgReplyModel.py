@@ -404,103 +404,76 @@ def replyRAV_command(plugin_event, Proc, valDict):
             else:
                 dictTValue['tUserName01'] = tmp_userName01
             
-            # 收集所有文本部分
+            # 提取所有文本部分并拼接
             text_parts = []
             for item in tmp_reast_str_para.data:
-                if type(item) == OlivOS.messageAPI.PARA.text:
-                    text_parts.extend(item.data['text'].strip().split())
-            
-            # 解析技能名和数值
-            if len(text_parts) > 0:
-                # 支持以下格式:
-                # 1. .rav 技能名1 数值1 技能名2 数值1 @其他人
-                # 2. .rav 技能名1 数值1 技能名2 @其他人
-                # 3. .rav 技能名1 技能名2 数值2 @其他人
-                # 4. .rav 技能名1 技能名2 @其他人
-                # 5. .rav 技能名1 @其他人
-                # 6: .rav 技能名1 数值1 @其他人
-                
-                # 先尝试提取所有数字
-                numbers = []
-                words = []
-                is_rav = False
-                for part in text_parts:
-                    if part.isdigit():
-                        numbers.append(int(part))
+                if isinstance(item, OlivOS.messageAPI.PARA.text):
+                    text_parts.append(item.data['text'].strip())
+            full_text_str = ' '.join(filter(None, text_parts))
+            is_rav = False
+            skills = []
+            values = []
+            # 解析技能和数值
+            remaining_str = full_text_str
+            while remaining_str:
+                # 提取直到数字或空格的技能名部分
+                skill_part, rest = OlivaDiceCore.msgReply.getToNumberPara(remaining_str)
+                skill_part = skill_part.strip()
+                if skill_part:
+                    skills.append(skill_part)
+                # 提取数字部分
+                value_part, rest = OlivaDiceCore.msgReply.getNumberPara(rest)
+                value_part = value_part.strip()
+                if value_part:
+                    values.append(int(value_part))
+                remaining_str = rest.strip()
+            # 解析难度
+            difficulties = [None, None]
+            for i, skill in enumerate(skills):
+                if i >= 2: break
+                if OlivaDiceCore.msgReply.isMatchWordStart(skill, ['困难成功', '困难']):
+                    difficulties[i] = '困难'
+                    skills[i] = OlivaDiceCore.msgReply.getMatchWordStartRight(skill, ['困难成功', '困难']).strip()
+                elif OlivaDiceCore.msgReply.isMatchWordStart(skill, ['极难成功', '极限成功', '极难', '极限']):
+                    difficulties[i] = '极难'
+                    skills[i] = OlivaDiceCore.msgReply.getMatchWordStartRight(skill, ['极难成功', '极限成功', '极难', '极限']).strip()
+                elif OlivaDiceCore.msgReply.isMatchWordStart(skill, '大成功'):
+                    difficulties[i] = '大成功'
+                    skills[i] = OlivaDiceCore.msgReply.getMatchWordStartRight(skill, '大成功').strip()
+            difficulty_0 = difficulties[0]
+            difficulty_1 = difficulties[1] if difficulties[1] is not None else difficulties[0]
+            # 进行分配技能和数值
+            num_skills = len(skills)
+            num_values = len(values)
+            if num_skills == 1:
+                # .rav 技能名1 @B -> A和B都用技能1，数值待查
+                # .rav 技能名1 50 @B -> A用技能1 50，B用技能1 待查
+                # .rav 技能名1 50 60 @B -> A用技能1 50，B用技能1 60
+                tmp_skill_name_0 = skills[0]
+                tmp_skill_name_1 = skills[0]
+                if num_values == 1:
+                    tmp_skill_value_0 = values[0]
+                elif num_values >= 2:
+                    tmp_skill_value_0 = values[0]
+                    tmp_skill_value_1 = values[1]
+                is_rav = True
+            elif num_skills >= 2:
+                # .rav 技能名1 技能名2 @B -> A用技能1，B用技能2，数值待查
+                # .rav 技能名1 50 技能名2 @B -> A用技能1 50，B用技能2 待查
+                # .rav 技能名1 50 技能名2 60 @B -> A用技能1 50，B用技能2 60
+                tmp_skill_name_0 = skills[0]
+                tmp_skill_name_1 = skills[1]
+                if num_values == 1:
+                    value_as_str = str(values[0])
+                    # 如果技能名2的文本部分以数值结尾，则将其分配给技能2
+                    if full_text_str.strip().endswith(value_as_str):
+                        tmp_skill_value_1 = values[0]
                     else:
-                        words.append(part)
-
-                # 处理第一个技能名
-                if OlivaDiceCore.msgReply.isMatchWordStart(words[0], ['困难成功', '困难']):
-                    difficulty_0 = '困难'
-                    words[0] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[0], ['困难成功', '困难']).strip()
-                elif OlivaDiceCore.msgReply.isMatchWordStart(words[0], ['极难成功', '极限成功', '极难', '极限']):
-                    difficulty_0 = '极难'
-                    words[0] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[0], ['极难成功', '极限成功', '极难', '极限']).strip()
-                elif OlivaDiceCore.msgReply.isMatchWordStart(words[0], '大成功'):
-                    difficulty_0 = '大成功'
-                    words[0] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[0], '大成功').strip()
-                
-                # 处理第二个技能名
-                if len(words) > 1:
-                    if OlivaDiceCore.msgReply.isMatchWordStart(words[1], ['困难成功', '困难']):
-                        difficulty_1 = '困难'
-                        words[1] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[1], ['困难成功', '困难']).strip()
-                    elif OlivaDiceCore.msgReply.isMatchWordStart(words[1], ['极难成功', '极限成功', '极难', '极限']):
-                        difficulty_1 = '极难'
-                        words[1] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[1], ['极难成功', '极限成功', '极难', '极限']).strip()
-                    elif OlivaDiceCore.msgReply.isMatchWordStart(words[1], '大成功'):
-                        difficulty_1 = '大成功'
-                        words[1] = OlivaDiceCore.msgReply.getMatchWordStartRight(words[1], '大成功').strip()
-
-                # 根据数字数量决定解析方式
-                if len(numbers) == 2:
-                    # 格式1
-                    if len(words) == 2:
-                        tmp_skill_name_0 = words[0]
-                        tmp_skill_value_0 = numbers[0]
-                        tmp_skill_name_1 = words[1]
-                        tmp_skill_value_1 = numbers[1]
-                        is_rav = True
-                elif len(numbers) == 1:
-                    # 格式2、3或6
-                    if len(words) == 2:
-                        # 检查数字位置
-                        num_pos = text_parts.index(str(numbers[0]))
-                        if num_pos == 1:
-                            # 格式2
-                            tmp_skill_name_0 = words[0]
-                            tmp_skill_value_0 = numbers[0]
-                            tmp_skill_name_1 = words[1]
-                            is_rav = True
-                        elif num_pos == 2:
-                            # 格式3
-                            tmp_skill_name_0 = words[0]
-                            tmp_skill_name_1 = words[1]
-                            tmp_skill_value_1 = numbers[0]
-                            is_rav = True
-                    elif len(words) == 1:
-                        # 格式6
-                        tmp_skill_name_0 = words[0]
-                        tmp_skill_name_1 = words[0]
-                        tmp_skill_value_0 = numbers[0]
-                        tmp_skill_value_1 = numbers[0]
-                        is_rav = True
-                else:
-                    # 格式4或5
-                    if len(words) == 2:
-                        # 格式4
-                        tmp_skill_name_0 = words[0]
-                        tmp_skill_name_1 = words[1]
-                        is_rav = True
-                    elif len(words) == 1:
-                        # 格式5
-                        tmp_skill_name_0 = words[0]
-                        tmp_skill_name_1 = words[0]
-                        is_rav = True
-            
-            difficulty_1 = difficulty_0 if not difficulty_1 else difficulty_1
-            
+                        tmp_skill_value_0 = values[0]
+                elif num_values >= 2:
+                    tmp_skill_value_0 = values[0]
+                    tmp_skill_value_1 = values[1]
+                is_rav = True
             if is_rav:
                 flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
                     userId = tmp_hagID,
@@ -519,21 +492,19 @@ def replyRAV_command(plugin_event, Proc, valDict):
 
                 tmp_pcHash_0 = OlivaDiceCore.pcCard.getPcHash(tmp_userID, tmp_platform)
                 tmp_pcHash_1 = OlivaDiceCore.pcCard.getPcHash(tmp_userID_1, tmp_platform)
-                # 替换数字为空值并且修正技能名
+                # 修正技能名
                 if tmp_skill_name_0 is not None:
-                    tmp_skill_name_0 = re.sub(r'\d+', '', tmp_skill_name_0)
                     tmp_skill_name_0 = OlivaDiceCore.pcCard.fixName(tmp_skill_name_0, flagMode='skillName')
                 if tmp_skill_name_1 is not None:
-                    tmp_skill_name_1 = re.sub(r'\d+', '', tmp_skill_name_1)
                     tmp_skill_name_1 = OlivaDiceCore.pcCard.fixName(tmp_skill_name_1, flagMode='skillName')
                 # 如果未从命令中获取数值，则从角色卡中获取
-                if tmp_skill_value_0 is None:
+                if tmp_skill_value_0 is None and tmp_skill_name_0 is not None:
                     tmp_skill_value_0 = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
                         tmp_pcHash_0, tmp_skill_name_0, hagId = tmp_hagID
                     )
                 tmp_pc_name_0 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash_0, tmp_hagID)
 
-                if tmp_skill_value_1 is None:
+                if tmp_skill_value_1 is None and tmp_skill_name_1 is not None:
                     tmp_skill_value_1 = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
                         tmp_pcHash_1, tmp_skill_name_1, hagId = tmp_hagID
                     )
