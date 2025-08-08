@@ -2622,6 +2622,7 @@ def unity_reply(plugin_event, Proc):
                 dictTValue['tPcInitResult'] = '\n%s' % ' '.join(tmp_pcCard_list)
                 dictTValue['tPcTempName'] = tmp_template_name
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitSt'], dictTValue)
+                trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'new'):
@@ -2730,6 +2731,7 @@ def unity_reply(plugin_event, Proc):
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcClear'], dictTValue)
                 else:
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcClearNone'], dictTValue)
+                trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'rm'):
@@ -2868,7 +2870,7 @@ def unity_reply(plugin_event, Proc):
                             dictStrCustom['strPcRmNone'], 
                             dictTValue
                         )
-
+                    trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
             elif isMatchWordStart(tmp_reast_str, 'temp'):
@@ -6316,7 +6318,6 @@ def isMatchWordStart(data, key, ignoreCase=True, fullMatch=False, isCommand=Fals
     flag_skip = False
     tmp_data = data.strip()
     tmp_keys = [key] if isinstance(key, str) else key
-
     if isCommand:
         if 'replyContextFliter' in OlivaDiceCore.crossHook.dictHookList:
             for k in tmp_keys:
@@ -6324,13 +6325,13 @@ def isMatchWordStart(data, key, ignoreCase=True, fullMatch=False, isCommand=Fals
                     tmp_output = False
                     flag_skip = True
                     break
-
     if not flag_skip:
         if ignoreCase:
             tmp_data = tmp_data.lower()
             tmp_keys = [k.lower() for k in tmp_keys]
-
-        for tmp_key in tmp_keys:
+        # 按长度从长到短排序
+        tmp_keys_sorted = sorted(tmp_keys, key=lambda x: len(x), reverse=True)
+        for tmp_key in tmp_keys_sorted:
             if not fullMatch and len(tmp_data) >= len(tmp_key):
                 if tmp_data[:len(tmp_key)] == tmp_key:
                     tmp_output = True
@@ -6338,24 +6339,22 @@ def isMatchWordStart(data, key, ignoreCase=True, fullMatch=False, isCommand=Fals
             elif fullMatch and tmp_data == tmp_key:
                 tmp_output = True
                 break
-
     return tmp_output
 
 def getMatchWordStartRight(data, key, ignoreCase=True):
     tmp_output_str = ''
     tmp_data = data
     tmp_keys = [key] if isinstance(key, str) else key
-
     if ignoreCase:
         tmp_data = tmp_data.lower()
         tmp_keys = [k.lower() for k in tmp_keys]
-
-    for tmp_key in tmp_keys:
+    # 按长度从长到短排序
+    tmp_keys_sorted = sorted(tmp_keys, key=lambda x: len(x), reverse=True)
+    for tmp_key in tmp_keys_sorted:
         if len(tmp_data) > len(tmp_key):
             if tmp_data[:len(tmp_key)] == tmp_key:
                 tmp_output_str = data[len(tmp_key):]
                 break
-
     return tmp_output_str
 
 def isdigitSafe(data):
