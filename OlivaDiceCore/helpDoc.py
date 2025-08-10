@@ -236,6 +236,8 @@ def getRecommendRank(word1_in:str, word2_in:str):
     find_flag = 1
     word1 = word1_in.lower()
     word2 = word2_in.lower()
+    if not word1 or not word2:
+        return 1001  # 返回一个高数值，表示完全不匹配，因为有些HelpDoc里面的键值可能因为误设置从而为空字符串
     if len(word1) > len(word2):
         [word1, word2] = [word2, word1]
     word1_len = len(word1)
