@@ -192,6 +192,7 @@ def unity_reply(plugin_event, Proc):
             tmp_at_str_sub = OlivOS.messageAPI.PARA.at(plugin_event.data.extend['sub_self_id']).CQ()
             tmp_id_str_sub = str(plugin_event.data.extend['sub_self_id'])
     tmp_reast_str = plugin_event.data.message
+    tmp_reast_str = to_half_width(tmp_reast_str) # 转半角
     flag_force_reply = False
     flag_is_command = False
     flag_is_from_host = False
@@ -378,6 +379,7 @@ def unity_reply(plugin_event, Proc):
         )
         if tmp_pc_name_1 != None:
             dictTValue['tName'] = tmp_pc_name_1
+        
         if flag_is_from_master:
             if isMatchWordStart(tmp_reast_str, 'master'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'master')
@@ -2622,6 +2624,7 @@ def unity_reply(plugin_event, Proc):
                 dictTValue['tPcInitResult'] = '\n%s' % ' '.join(tmp_pcCard_list)
                 dictTValue['tPcTempName'] = tmp_template_name
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitSt'], dictTValue)
+                trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'new'):
@@ -2730,6 +2733,7 @@ def unity_reply(plugin_event, Proc):
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcClear'], dictTValue)
                 else:
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcClearNone'], dictTValue)
+                trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'rm'):
@@ -2868,7 +2872,7 @@ def unity_reply(plugin_event, Proc):
                             dictStrCustom['strPcRmNone'], 
                             dictTValue
                         )
-
+                    trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
             elif isMatchWordStart(tmp_reast_str, 'temp'):
@@ -3181,6 +3185,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name or 'default')
                 pc_data = OlivaDiceCore.pcCard.pcCardDataGetByPcName(tmp_pcHash, hagId=tmp_hagID)
                 deleted = False
+                tmp_block_name = tmp_block_name.strip()
                 # 处理映射块
                 if tmp_block_name == '映射':
                     mapping_record = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
@@ -6316,7 +6321,6 @@ def isMatchWordStart(data, key, ignoreCase=True, fullMatch=False, isCommand=Fals
     flag_skip = False
     tmp_data = data.strip()
     tmp_keys = [key] if isinstance(key, str) else key
-
     if isCommand:
         if 'replyContextFliter' in OlivaDiceCore.crossHook.dictHookList:
             for k in tmp_keys:
@@ -6324,13 +6328,13 @@ def isMatchWordStart(data, key, ignoreCase=True, fullMatch=False, isCommand=Fals
                     tmp_output = False
                     flag_skip = True
                     break
-
     if not flag_skip:
         if ignoreCase:
             tmp_data = tmp_data.lower()
             tmp_keys = [k.lower() for k in tmp_keys]
-
-        for tmp_key in tmp_keys:
+        # 按长度从长到短排序
+        tmp_keys_sorted = sorted(tmp_keys, key=lambda x: len(x), reverse=True)
+        for tmp_key in tmp_keys_sorted:
             if not fullMatch and len(tmp_data) >= len(tmp_key):
                 if tmp_data[:len(tmp_key)] == tmp_key:
                     tmp_output = True
@@ -6338,24 +6342,22 @@ def isMatchWordStart(data, key, ignoreCase=True, fullMatch=False, isCommand=Fals
             elif fullMatch and tmp_data == tmp_key:
                 tmp_output = True
                 break
-
     return tmp_output
 
 def getMatchWordStartRight(data, key, ignoreCase=True):
     tmp_output_str = ''
     tmp_data = data
     tmp_keys = [key] if isinstance(key, str) else key
-
     if ignoreCase:
         tmp_data = tmp_data.lower()
         tmp_keys = [k.lower() for k in tmp_keys]
-
-    for tmp_key in tmp_keys:
+    # 按长度从长到短排序
+    tmp_keys_sorted = sorted(tmp_keys, key=lambda x: len(x), reverse=True)
+    for tmp_key in tmp_keys_sorted:
         if len(tmp_data) > len(tmp_key):
             if tmp_data[:len(tmp_key)] == tmp_key:
                 tmp_output_str = data[len(tmp_key):]
                 break
-
     return tmp_output_str
 
 def isdigitSafe(data):
@@ -6409,3 +6411,19 @@ def parse_at_user(plugin_event, tmp_reast_str, valDict, flag_is_from_group_admin
     # 返回解析结果
     cleaned_message = ''.join(new_tmp_reast_str_parts).strip()
     return is_at, at_user_id, cleaned_message
+
+def to_half_width(res):
+    """
+    将字符串中的全角符号转换为半角符号
+    """
+    result = []
+    for char in res:
+        code = ord(char)
+        # 全角空格
+        if code == 0x3000:
+            code = 0x0020
+        # 全角字符（除空格外）
+        elif 0xFF01 <= code <= 0xFF5E:
+            code -= 0xFEE0
+        result.append(chr(code))
+    return ''.join(result)
