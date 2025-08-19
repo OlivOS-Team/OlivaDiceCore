@@ -3185,6 +3185,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name or 'default')
                 pc_data = OlivaDiceCore.pcCard.pcCardDataGetByPcName(tmp_pcHash, hagId=tmp_hagID)
                 deleted = False
+                tmp_block_name = tmp_block_name.strip()
                 # 处理映射块
                 if tmp_block_name == '映射':
                     mapping_record = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
