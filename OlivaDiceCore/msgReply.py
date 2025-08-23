@@ -4108,7 +4108,10 @@ def unity_reply(plugin_event, Proc):
                     tmp_reply_str_1 += '\n\n'
                     tmp_total_count_1 = 0
                     tmp_total_count_2 = 0
-                    for tmp_res_list_this_this in tmp_res_list_this:
+                    # 添加计数器用于换行
+                    count = 0
+                    total_skills = len(tmp_res_list_this)
+                    for i, tmp_res_list_this_this in enumerate(tmp_res_list_this):
                         tmp_skill_name_this_1 = tmp_res_list_this_this
                         if tmp_res_list_this_this in tmp_pcCardTemplate['showName']:
                             tmp_skill_name_this_1 = tmp_pcCardTemplate['showName'][tmp_res_list_this_this]
@@ -4116,6 +4119,10 @@ def unity_reply(plugin_event, Proc):
                         tmp_total_count_2 += tmp_res_list_this[tmp_res_list_this_this]
                         if tmp_res_list_this_this != 'LUC':
                             tmp_total_count_1 += tmp_res_list_this[tmp_res_list_this_this]
+                        # 每三个属性后换行，最后一行不换
+                        count += 1
+                        if count % 3 == 0 and i < total_skills - 1:
+                            tmp_reply_str_1 += '\n'
                     if tmp_pcCardTemplateName in ['COC7']:
                         tmp_reply_str_1 += '\n共计: %d/%d  %.2f%%' % (tmp_total_count_1, tmp_total_count_2, 100 * tmp_total_count_1 / tmp_total_count_2)
                     elif tmp_pcCardTemplateName in ['COC6', 'DND5E']:
