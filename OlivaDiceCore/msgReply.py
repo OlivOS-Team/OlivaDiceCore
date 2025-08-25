@@ -4104,8 +4104,12 @@ def unity_reply(plugin_event, Proc):
                     tmp_res_list.append(tmp_res_list_node)
                 tmp_reply_str_1 = ''
                 dictTValue['tPcTempName'] = tmp_pcCardTemplateName
+                time_count = 0
                 for tmp_res_list_this in tmp_res_list:
-                    tmp_reply_str_1 += '\n\n'
+                    if time_count > 0:
+                        tmp_reply_str_1 += '\n\n'
+                    else:
+                        tmp_reply_str_1 += '\n'
                     tmp_total_count_1 = 0
                     tmp_total_count_2 = 0
                     # 添加计数器用于换行
@@ -4124,9 +4128,22 @@ def unity_reply(plugin_event, Proc):
                         if count % 3 == 0 and i < total_skills - 1:
                             tmp_reply_str_1 += '\n'
                     if tmp_pcCardTemplateName in ['COC7']:
+                        # 计算HP
+                        if 'CON' in tmp_res_list_this and 'SIZ' in tmp_res_list_this:
+                            hp = (tmp_res_list_this['CON'] + tmp_res_list_this['SIZ']) // 10
+                            tmp_reply_str_1 += f'\nHP: {hp}'
+                        # 计算体格
+                        build = OlivaDiceCore.skillCheck.getSpecialSkill('体格', tmp_pcCardTemplateName, tmp_res_list_this)
+                        if build:
+                            tmp_reply_str_1 += f'  体格: {build}'
+                        # 计算DB
+                        db = OlivaDiceCore.skillCheck.getSpecialSkill('DB', tmp_pcCardTemplateName, tmp_res_list_this)
+                        if db:
+                            tmp_reply_str_1 += f'  DB: {db}'
                         tmp_reply_str_1 += '\n共计: %d/%d  %.2f%%' % (tmp_total_count_1, tmp_total_count_2, 100 * tmp_total_count_1 / tmp_total_count_2)
                     elif tmp_pcCardTemplateName in ['COC6', 'DND5E']:
                         tmp_reply_str_1 += '\n共计: %d' % tmp_total_count_1
+                    time_count += 1
                 dictTValue['tPcInitResult'] = tmp_reply_str_1
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInit'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
