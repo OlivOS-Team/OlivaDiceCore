@@ -4119,7 +4119,7 @@ def unity_reply(plugin_event, Proc):
                         tmp_skill_name_this_1 = tmp_res_list_this_this
                         if tmp_res_list_this_this in tmp_pcCardTemplate['showName']:
                             tmp_skill_name_this_1 = tmp_pcCardTemplate['showName'][tmp_res_list_this_this]
-                        tmp_reply_str_1 += '%s:%d  ' % (tmp_skill_name_this_1, tmp_res_list_this[tmp_res_list_this_this])
+                        tmp_reply_str_1 += '%s: %d  ' % (tmp_skill_name_this_1, tmp_res_list_this[tmp_res_list_this_this])
                         tmp_total_count_2 += tmp_res_list_this[tmp_res_list_this_this]
                         if tmp_res_list_this_this != 'LUC':
                             tmp_total_count_1 += tmp_res_list_this[tmp_res_list_this_this]
