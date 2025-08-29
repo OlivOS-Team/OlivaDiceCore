@@ -1145,7 +1145,7 @@ def team_create(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCusto
             # 获取当前人物卡
             pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
             pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
-            member_info.append(f"成员{index}: [{user_name}] - 人物卡: [{pc_name if pc_name else {user_name}}]")
+            member_info.append(f"成员{index}: [{user_name}] - 人物卡: [{pc_name if pc_name else user_name}]")
             index += 1
     dictTValue['tTeamName'] = team_name
     dictTValue['tMemberCount'] = str(len(members))
@@ -1214,7 +1214,7 @@ def team_show(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom,
         # 获取当前人物卡
         pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
         pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
-        member_info.append(f"成员{index}: [{user_name}] - 人物卡: [{pc_name if pc_name else {user_name}}]")
+        member_info.append(f"成员{index}: [{user_name}] - 人物卡: [{pc_name if pc_name else user_name}]")
         index += 1
     dictTValue['tTeamName'] = team_name
     dictTValue['tMemberCount'] = str(len(members))
@@ -1387,7 +1387,7 @@ def team_remove(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin
             # 获取当前人物卡
             pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
             pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
-            member_info.append(f"成员{index}: [{user_name}] - 人物卡: [{pc_name if pc_name else {user_name}}]")
+            member_info.append(f"成员{index}: [{user_name}] - 人物卡: [{pc_name if pc_name else user_name}]")
             index += 1
     dictTValue['tTeamName'] = team_name
     dictTValue['tRemovedCount'] = str(len(removed_members))
@@ -2781,6 +2781,8 @@ def team_r(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, te
         if rd_para.resError is None:
             if not current_rd_para_str_show:
                 current_rd_para_str_show = current_rd_para_str
+            if not any(op in current_rd_para_str_show for op in ['+','-','*','/']) and current_rd_para_str.endswith("D"):
+                current_rd_para_str_show += str(rd_para_main_D_right)
             tmp_resDetail_str = OlivaDiceCore.onediceOverride.RDDataFormat(
                 data=rd_para.resDetailData,
                 mode='default'
