@@ -1913,7 +1913,7 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
             else:
                 i += 1
     # 解析多项技能操作
-    op_list = ['+', '-', '*', '/']
+    op_list = ['+', '-', '*', '/', '^']
     skill_updates = []
     # 分割技能操作
     current_pos = 0
@@ -2129,7 +2129,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
     skill_expr = OlivaDiceCore.msgReply.skipSpaceStart(skill_expr)
     # 解析技能名和表达式
     if skill_expr:
-        op_list = ['+', '-', '*', '/']
+        op_list = ['+', '-', '*', '/', '^']
         pos = len(skill_expr)
         for i, char in enumerate(skill_expr):
             if char in op_list or char.isdigit():
@@ -2781,7 +2781,7 @@ def team_r(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, te
         if rd_para.resError is None:
             if not current_rd_para_str_show:
                 current_rd_para_str_show = current_rd_para_str
-            if not any(op in current_rd_para_str_show for op in ['+','-','*','/']) and current_rd_para_str.endswith("D"):
+            if not any(op in current_rd_para_str_show for op in ['+','-','*','/','^']) and current_rd_para_str.endswith("D"):
                 current_rd_para_str_show += str(rd_para_main_D_right)
             tmp_resDetail_str = OlivaDiceCore.onediceOverride.RDDataFormat(
                 data=rd_para.resDetailData,
