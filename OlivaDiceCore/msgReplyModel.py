@@ -357,6 +357,19 @@ def get_SkillCheckError(resError, dictStrCustom, dictTValue):
         tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollErrorUnknown'], dictTValue)
     return tmp_reply_str_1
 
+def difficulty_analyze(res):
+    if OlivaDiceCore.msgReply.isMatchWordStart(res, ['困难成功', '困难']):
+        difficulty = '困难'
+        skill_expr = OlivaDiceCore.msgReply.getMatchWordStartRight(res, ['困难成功', '困难']).strip()
+    elif OlivaDiceCore.msgReply.isMatchWordStart(res, ['极难成功', '极限成功', '极难', '极限']):
+        difficulty = '极难'
+        skill_expr = OlivaDiceCore.msgReply.getMatchWordStartRight(res, ['极难成功', '极限成功', '极难', '极限']).strip()
+    elif OlivaDiceCore.msgReply.isMatchWordStart(res, '大成功'):
+        difficulty = '大成功'
+        skill_expr = OlivaDiceCore.msgReply.getMatchWordStartRight(res, '大成功').strip()
+    skill_expr = OlivaDiceCore.msgReply.skipSpaceStart(skill_expr)
+    return difficulty, skill_expr
+
 def replyRAV_command(plugin_event, Proc, valDict):
     tmp_reast_str = valDict['tmp_reast_str']
     flag_is_from_master = valDict['flag_is_from_master']
@@ -431,15 +444,7 @@ def replyRAV_command(plugin_event, Proc, valDict):
             difficulties = [None, None]
             for i, skill in enumerate(skills):
                 if i >= 2: break
-                if OlivaDiceCore.msgReply.isMatchWordStart(skill, ['困难成功', '困难']):
-                    difficulties[i] = '困难'
-                    skills[i] = OlivaDiceCore.msgReply.getMatchWordStartRight(skill, ['困难成功', '困难']).strip()
-                elif OlivaDiceCore.msgReply.isMatchWordStart(skill, ['极难成功', '极限成功', '极难', '极限']):
-                    difficulties[i] = '极难'
-                    skills[i] = OlivaDiceCore.msgReply.getMatchWordStartRight(skill, ['极难成功', '极限成功', '极难', '极限']).strip()
-                elif OlivaDiceCore.msgReply.isMatchWordStart(skill, '大成功'):
-                    difficulties[i] = '大成功'
-                    skills[i] = OlivaDiceCore.msgReply.getMatchWordStartRight(skill, '大成功').strip()
+                difficulties[i], skills[i] = difficulty_analyze(skill)
             difficulty_0 = difficulties[0]
             difficulty_1 = difficulties[1] if difficulties[1] is not None else difficulties[0]
             # 进行分配技能和数值
@@ -2117,16 +2122,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
     skill_expr = OlivaDiceCore.msgReply.skipSpaceStart(skill_expr)
 
     # 解析难度前缀
-    if OlivaDiceCore.msgReply.isMatchWordStart(skill_expr, ['困难成功', '困难']):
-        difficulty = '困难'
-        skill_expr = OlivaDiceCore.msgReply.getMatchWordStartRight(skill_expr, ['困难成功', '困难']).strip()
-    elif OlivaDiceCore.msgReply.isMatchWordStart(skill_expr, ['极难成功', '极限成功', '极难', '极限']):
-        difficulty = '极难'
-        skill_expr = OlivaDiceCore.msgReply.getMatchWordStartRight(skill_expr, ['极难成功', '极限成功', '极难', '极限']).strip()
-    elif OlivaDiceCore.msgReply.isMatchWordStart(skill_expr, '大成功'):
-        difficulty = '大成功'
-        skill_expr = OlivaDiceCore.msgReply.getMatchWordStartRight(skill_expr, '大成功').strip()
-    skill_expr = OlivaDiceCore.msgReply.skipSpaceStart(skill_expr)
+    difficulty, skill_expr = difficulty_analyze(skill_expr)
     # 解析技能名和表达式
     if skill_expr:
         op_list = ['+', '-', '*', '/', '^']

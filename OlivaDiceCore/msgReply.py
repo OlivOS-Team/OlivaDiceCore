@@ -4713,17 +4713,8 @@ def unity_reply(plugin_event, Proc):
             tmp_skill_name = None
             tmp_skill_value = None
             difficulty = None
-            # 1. 解析难度前缀（困难/极难/大成功）
-            if isMatchWordStart(tmp_reast_str, ['困难成功', '困难']):
-                difficulty = '困难'
-                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['困难成功', '困难'])
-            elif isMatchWordStart(tmp_reast_str, ['极难成功', '极限成功', '极难', '极限']):
-                difficulty = '极难'
-                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['极难成功', '极限成功', '极难', '极限'])
-            elif isMatchWordStart(tmp_reast_str, '大成功'):
-                difficulty = '大成功'
-                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, '大成功')
-            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            # 解析难度前缀（困难/极难/大成功）
+            difficulty, tmp_reast_str = OlivaDiceCore.msgReplyModel.difficulty_analyze(tmp_reast_str)
             tmp_skill_value_str = None
             if tmp_reast_str:
                 op_list = ['+', '-', '*', '/', '^']
