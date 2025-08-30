@@ -358,17 +358,18 @@ def get_SkillCheckError(resError, dictStrCustom, dictTValue):
     return tmp_reply_str_1
 
 def difficulty_analyze(res):
+    difficulty = None
     if OlivaDiceCore.msgReply.isMatchWordStart(res, ['困难成功', '困难']):
         difficulty = '困难'
-        skill_expr = OlivaDiceCore.msgReply.getMatchWordStartRight(res, ['困难成功', '困难']).strip()
+        res = OlivaDiceCore.msgReply.getMatchWordStartRight(res, ['困难成功', '困难']).strip()
     elif OlivaDiceCore.msgReply.isMatchWordStart(res, ['极难成功', '极限成功', '极难', '极限']):
         difficulty = '极难'
-        skill_expr = OlivaDiceCore.msgReply.getMatchWordStartRight(res, ['极难成功', '极限成功', '极难', '极限']).strip()
+        res = OlivaDiceCore.msgReply.getMatchWordStartRight(res, ['极难成功', '极限成功', '极难', '极限']).strip()
     elif OlivaDiceCore.msgReply.isMatchWordStart(res, '大成功'):
         difficulty = '大成功'
-        skill_expr = OlivaDiceCore.msgReply.getMatchWordStartRight(res, '大成功').strip()
-    skill_expr = OlivaDiceCore.msgReply.skipSpaceStart(skill_expr)
-    return difficulty, skill_expr
+        res = OlivaDiceCore.msgReply.getMatchWordStartRight(res, '大成功').strip()
+    res = res.strip()
+    return difficulty, res
 
 def replyRAV_command(plugin_event, Proc, valDict):
     tmp_reast_str = valDict['tmp_reast_str']
