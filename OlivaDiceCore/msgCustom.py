@@ -241,7 +241,7 @@ dictStrCustom = {
     'strObListNone' : '当前旁观列表为空',
     'strObUserObList' : '当前旁观列表:\n{tResult}',
     'strObUserObListNone' : '当前旁观列表为空',
-    'strObJoin' : '[{tUserName}]现已加入旁观',
+    'strObJoin' : '[{tUserName}]现已加入旁观，若你已添加骰娘好友，暗骰结果将发送给你。同时，你的群名片也会被修改为[ob_{tUserName}]。',
     'strObJoinAlready' : '[{tUserName}]已在旁观中',
     'strObExit' : '[{tUserName}]现已退出旁观',
     'strObExitAlready' : '[{tUserName}]不在旁观中',

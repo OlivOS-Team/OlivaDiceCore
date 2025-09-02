@@ -448,6 +448,7 @@ dictPcCardTemplateDefaultTemp = {
             'IDEA': '灵感',
             'KNOW': '知识'
         },
+        'snTitle': '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}',
         'defaultSkillValue': {
             '会计': 5,
             '人类学': 1,
@@ -973,6 +974,7 @@ dictPcCardTemplateDefaultTemp = {
             'IDEA': '灵感',
             'KNOW': '知识'
         },
+        'snTitle': '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}',
         'defaultSkillValue': {
             '会计': 5,
             '人类学': 1,
@@ -1814,6 +1816,7 @@ dictPcCardTemplateDefaultTemp = {
             'IDEA': '灵感',
             'KNOW': '知识'
         },
+        'snTitle': '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}',
         'defaultSkillValue': {},
         'checkRules': {
             'default': {
@@ -2606,6 +2609,7 @@ dictPcCardTemplateDefaultTemp = {
             'IDEA': '灵感',
             'KNOW': '知识'
         },
+        'snTitle': '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}',
         'checkRules': {
             'default': {
                 'checkList': [
@@ -2839,6 +2843,7 @@ dictPcCardTemplateDefaultTemp = {
             'WIS': '感知',
             'CHA': '魅力',
         },
+        'snTitle': '{tName} hp{HP}/{HPMAX} mp{MP}/{MPMAX} dex{DEX}',
         'checkRules': {
             'default': {
                 'checkList': [

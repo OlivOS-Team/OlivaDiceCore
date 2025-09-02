@@ -1615,10 +1615,12 @@ def unity_reply(plugin_event, Proc):
                             if tmp_groupHash != tmp_userObList_list_this:
                                 tmp_userObList_list_new.append(tmp_userObList_list_this)
                         tmp_userObList_list = tmp_userObList_list_new
+                        trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strObExit'], dictTValue)
                     elif flag_ob_is_enable and flag_ob_will_enable:
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strObJoinAlready'], dictTValue)
                     elif not flag_ob_is_enable and not flag_ob_will_enable:
+                        trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strObExitAlready'], dictTValue)
                     if flag_ob_is_enable != flag_ob_will_enable:
                         OlivaDiceCore.userConfig.setUserConfigByKey(
@@ -1651,6 +1653,13 @@ def unity_reply(plugin_event, Proc):
                                 platform = tmp_user_platform
                             )
                         )
+                        if not flag_ob_is_enable:
+                            plugin_event.set_group_card(
+                                group_id = plugin_event.data.group_id,
+                                user_id = tmp_pc_id,
+                                card = f'ob_{tmp_userName}',
+                                host_id = plugin_event.data.host_id
+                            )
                     if tmp_reply_str != None:
                         replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'exit'):
@@ -1722,6 +1731,7 @@ def unity_reply(plugin_event, Proc):
                     OlivaDiceCore.userConfig.writeUserConfigByUserHash(
                         userHash = tmp_userHash
                     )
+                    trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strObExitAll'], dictTValue)
                     if tmp_reply_str != None:
                         replyMsg(plugin_event, tmp_reply_str)
@@ -2113,6 +2123,13 @@ def unity_reply(plugin_event, Proc):
                 flag_mode = 'dnd'
             elif tmp_reast_str.lower() in ['coc', 'coc6', 'coc7']:
                 flag_mode = 'coc'
+            elif tmp_reast_str.lower() in ['default','template']:
+                tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
+                if 'snTitle' in tmp_template:
+                    tmp_pc_card_snTitle = tmp_template['snTitle']
+                else:
+                    tmp_pc_card_snTitle = '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}'
+                flag_mode = 'template'
             else:
                 flag_mode = 'custom'
                 sn_title_new = tmp_reast_str
