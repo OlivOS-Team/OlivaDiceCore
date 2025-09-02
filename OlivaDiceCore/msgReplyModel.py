@@ -357,6 +357,20 @@ def get_SkillCheckError(resError, dictStrCustom, dictTValue):
         tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollErrorUnknown'], dictTValue)
     return tmp_reply_str_1
 
+def difficulty_analyze(res):
+    difficulty = None
+    if OlivaDiceCore.msgReply.isMatchWordStart(res, ['困难成功', '困难']):
+        difficulty = '困难'
+        res = OlivaDiceCore.msgReply.getMatchWordStartRight(res, ['困难成功', '困难']).strip()
+    elif OlivaDiceCore.msgReply.isMatchWordStart(res, ['极难成功', '极限成功', '极难', '极限']):
+        difficulty = '极难'
+        res = OlivaDiceCore.msgReply.getMatchWordStartRight(res, ['极难成功', '极限成功', '极难', '极限']).strip()
+    elif OlivaDiceCore.msgReply.isMatchWordStart(res, '大成功'):
+        difficulty = '大成功'
+        res = OlivaDiceCore.msgReply.getMatchWordStartRight(res, '大成功').strip()
+    res = res.strip()
+    return difficulty, res
+
 def replyRAV_command(plugin_event, Proc, valDict):
     tmp_reast_str = valDict['tmp_reast_str']
     flag_is_from_master = valDict['flag_is_from_master']
@@ -431,15 +445,7 @@ def replyRAV_command(plugin_event, Proc, valDict):
             difficulties = [None, None]
             for i, skill in enumerate(skills):
                 if i >= 2: break
-                if OlivaDiceCore.msgReply.isMatchWordStart(skill, ['困难成功', '困难']):
-                    difficulties[i] = '困难'
-                    skills[i] = OlivaDiceCore.msgReply.getMatchWordStartRight(skill, ['困难成功', '困难']).strip()
-                elif OlivaDiceCore.msgReply.isMatchWordStart(skill, ['极难成功', '极限成功', '极难', '极限']):
-                    difficulties[i] = '极难'
-                    skills[i] = OlivaDiceCore.msgReply.getMatchWordStartRight(skill, ['极难成功', '极限成功', '极难', '极限']).strip()
-                elif OlivaDiceCore.msgReply.isMatchWordStart(skill, '大成功'):
-                    difficulties[i] = '大成功'
-                    skills[i] = OlivaDiceCore.msgReply.getMatchWordStartRight(skill, '大成功').strip()
+                difficulties[i], skills[i] = difficulty_analyze(skill)
             difficulty_0 = difficulties[0]
             difficulty_1 = difficulties[1] if difficulties[1] is not None else difficulties[0]
             # 进行分配技能和数值
@@ -1145,7 +1151,7 @@ def team_create(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCusto
             # 获取当前人物卡
             pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
             pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
-            member_info.append(f"成员{index}: [{user_name}] - 人物卡: [{pc_name if pc_name else {user_name}}]")
+            member_info.append(f"成员{index}: [{user_name}] - 人物卡: [{pc_name if pc_name else user_name}]")
             index += 1
     dictTValue['tTeamName'] = team_name
     dictTValue['tMemberCount'] = str(len(members))
@@ -1214,7 +1220,7 @@ def team_show(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom,
         # 获取当前人物卡
         pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
         pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
-        member_info.append(f"成员{index}: [{user_name}] - 人物卡: [{pc_name if pc_name else {user_name}}]")
+        member_info.append(f"成员{index}: [{user_name}] - 人物卡: [{pc_name if pc_name else user_name}]")
         index += 1
     dictTValue['tTeamName'] = team_name
     dictTValue['tMemberCount'] = str(len(members))
@@ -1387,7 +1393,7 @@ def team_remove(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin
             # 获取当前人物卡
             pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
             pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
-            member_info.append(f"成员{index}: [{user_name}] - 人物卡: [{pc_name if pc_name else {user_name}}]")
+            member_info.append(f"成员{index}: [{user_name}] - 人物卡: [{pc_name if pc_name else user_name}]")
             index += 1
     dictTValue['tTeamName'] = team_name
     dictTValue['tRemovedCount'] = str(len(removed_members))
@@ -1913,7 +1919,7 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
             else:
                 i += 1
     # 解析多项技能操作
-    op_list = ['+', '-', '*', '/']
+    op_list = ['+', '-', '*', '/', '^']
     skill_updates = []
     # 分割技能操作
     current_pos = 0
@@ -2117,19 +2123,10 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
     skill_expr = OlivaDiceCore.msgReply.skipSpaceStart(skill_expr)
 
     # 解析难度前缀
-    if OlivaDiceCore.msgReply.isMatchWordStart(skill_expr, ['困难成功', '困难']):
-        difficulty = '困难'
-        skill_expr = OlivaDiceCore.msgReply.getMatchWordStartRight(skill_expr, ['困难成功', '困难']).strip()
-    elif OlivaDiceCore.msgReply.isMatchWordStart(skill_expr, ['极难成功', '极限成功', '极难', '极限']):
-        difficulty = '极难'
-        skill_expr = OlivaDiceCore.msgReply.getMatchWordStartRight(skill_expr, ['极难成功', '极限成功', '极难', '极限']).strip()
-    elif OlivaDiceCore.msgReply.isMatchWordStart(skill_expr, '大成功'):
-        difficulty = '大成功'
-        skill_expr = OlivaDiceCore.msgReply.getMatchWordStartRight(skill_expr, '大成功').strip()
-    skill_expr = OlivaDiceCore.msgReply.skipSpaceStart(skill_expr)
+    difficulty, skill_expr = difficulty_analyze(skill_expr)
     # 解析技能名和表达式
     if skill_expr:
-        op_list = ['+', '-', '*', '/']
+        op_list = ['+', '-', '*', '/', '^']
         pos = len(skill_expr)
         for i, char in enumerate(skill_expr):
             if char in op_list or char.isdigit():
@@ -2781,6 +2778,8 @@ def team_r(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, te
         if rd_para.resError is None:
             if not current_rd_para_str_show:
                 current_rd_para_str_show = current_rd_para_str
+            if not any(op in current_rd_para_str_show for op in ['+','-','*','/','^']) and current_rd_para_str.endswith("D"):
+                current_rd_para_str_show += str(rd_para_main_D_right)
             tmp_resDetail_str = OlivaDiceCore.onediceOverride.RDDataFormat(
                 data=rd_para.resDetailData,
                 mode='default'

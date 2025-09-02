@@ -301,12 +301,15 @@ https://wiki.dice.center/OlivOS_Login.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9B%9E%
 .ob join 加入旁观模式
 .ob exit 退出旁观模式
 .ob exit all 退出所有已旁观
-.ob clear 清空本群旁观列表''',
+.ob clear 清空本群旁观列表
+
+进入ob后会自动更改群名片为[ob_用户名]，且暗骰结果将发送给你''',
 
     'sn': '''跑团名片：
 .sn  套用人物卡中的名片记录
 .sn coc  套用coc跑团名片
 .sn dnd  套用dnd跑团名片
+.sn template  套用人物卡模板名片
 .sn [自定义名片]  套用任意自定义名片
 .sn auto 切换自动群名片功能
 .sn auto on 开启自动群名片功能
