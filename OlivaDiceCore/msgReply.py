@@ -3580,26 +3580,31 @@ def unity_reply(plugin_event, Proc):
                 tmp_skill_name = None
                 tmp_skill_value = None
             if len(tmp_reast_str) > 0:
+                # 在这里判断映射，不在后面判断，防止录卡格式判断影响映射
+                flag_is_mapping = False
+                if tmp_reast_str[0] in ['&']:
+                    flag_is_mapping = True
                 special_skills = []
                 tmp_reast_str_bak = tmp_reast_str
-                [tmp_pc_name, tmp_reast_str] = splitBy(tmp_reast_str, '-')
-                if tmp_reast_str == '-':
-                    tmp_pc_name = None
-                    return
-                elif tmp_reast_str == '':
-                    tmp_pc_name == None
-                    tmp_reast_str = tmp_reast_str_bak
-                elif tmp_pc_name == '':
-                    tmp_pc_name = None
-                    tmp_reast_str = tmp_reast_str[1:]
-                else:
-                    tmp_reast_str = tmp_reast_str[1:]
-                if tmp_pc_name != None:
-                    tmp_pc_name = tmp_pc_name.strip()
-                if tmp_pc_name == '':
-                    tmp_pc_name = None
-                tmp_reast_str = skipSpaceStart(tmp_reast_str)
-                tmp_reast_str = tmp_reast_str.rstrip()
+                if not flag_is_mapping:
+                    [tmp_pc_name, tmp_reast_str] = splitBy(tmp_reast_str, '-')
+                    if tmp_reast_str == '-':
+                        tmp_pc_name = None
+                        return
+                    elif tmp_reast_str == '':
+                        tmp_pc_name == None
+                        tmp_reast_str = tmp_reast_str_bak
+                    elif tmp_pc_name == '':
+                        tmp_pc_name = None
+                        tmp_reast_str = tmp_reast_str[1:]
+                    else:
+                        tmp_reast_str = tmp_reast_str[1:]
+                    if tmp_pc_name != None:
+                        tmp_pc_name = tmp_pc_name.strip()
+                    if tmp_pc_name == '':
+                        tmp_pc_name = None
+                    tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                    tmp_reast_str = tmp_reast_str.rstrip()
             if tmp_pc_name != None:
                 tmp_pc_name = OlivaDiceCore.pcCard.fixName(tmp_pc_name)
                 if not OlivaDiceCore.pcCard.checkPcName(tmp_pc_name):
@@ -3607,16 +3612,22 @@ def unity_reply(plugin_event, Proc):
             while len(tmp_reast_str) > 0 and tmp_skill_name_find == None:
                 tmp_skill_name = None
                 tmp_skill_value = None
-                flag_is_mapping = False
-                if tmp_reast_str[0] in ['&']:
-                    flag_is_mapping = True
+                # 前面判断过映射了，这里不需要再判断了，并且通过 break 能跳出循环，不影响
+                if flag_is_mapping:
                     tmp_reast_str_list_0 = tmp_reast_str.split('=')
                     if len(tmp_reast_str_list_0) > 1:
-                        tmp_skill_name = tmp_reast_str_list_0[0][1:]
+                        tmp_skill_name = tmp_reast_str_list_0[0][1:].upper()
                         tmp_reast_str = '='.join(tmp_reast_str_list_0[1:])
+                        # # 不进行表达式解析，故这里注释掉
+                        # if len(tmp_reast_str) > 0:
+                        #     [tmp_skill_value, tmp_reast_str] = getExpression(tmp_reast_str)
+                        #     tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                        tmp_skill_value = tmp_reast_str
                         if len(tmp_reast_str) > 0:
-                            [tmp_skill_value, tmp_reast_str] = getExpression(tmp_reast_str)
-                            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                            tmp_skill_pair_list.append([tmp_skill_name, tmp_skill_value])
+                        else:
+                            tmp_skill_name_find = tmp_skill_name
+                        break
                 else:
                     [tmp_skill_name, tmp_reast_str] = getToNumberPara(tmp_reast_str)
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)

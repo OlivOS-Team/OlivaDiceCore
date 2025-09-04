@@ -755,15 +755,16 @@ def setPcNoteOrRecData(
         return
     
     if tmp_key != None and tmp_value != None:
-        if flag_mode == 'rec':
-            tmp_rd = OlivaDiceCore.onedice.RD(tmp_value)
-            tmp_rd.roll()
-            if tmp_rd.resError != None:
-                if enableFalse:
-                    dictTValue['tResult'] = tmp_value
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetMapValueError'], dictTValue)
-                    OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
-                return
+        # # 删除 rec 的合规检测
+        # if flag_mode == 'rec':
+        #     tmp_rd = OlivaDiceCore.onedice.RD(tmp_value)
+        #     tmp_rd.roll()
+        #     if tmp_rd.resError != None:
+        #         if enableFalse:
+        #             dictTValue['tResult'] = tmp_value
+        #             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetMapValueError'], dictTValue)
+        #             OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+        #         return
         # 添加特殊技能检测
         tmp_pcCardRule = 'default'
         if tmp_pc_name is not None:
