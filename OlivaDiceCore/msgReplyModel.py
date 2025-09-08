@@ -1265,11 +1265,11 @@ def team_list(plugin_event, tmp_hagID, dictTValue, dictStrCustom):
 
 def team_remove(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin, 
                 flag_is_from_master, dictTValue, dictStrCustom, team_name):
-    if not (flag_is_from_group_admin or flag_is_from_master):
-        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
-            dictStrCustom['strNeedAdmin'], dictTValue
-        ))
-        return
+    # if not (flag_is_from_group_admin or flag_is_from_master):
+    #     OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+    #         dictStrCustom['strNeedAdmin'], dictTValue
+    #     ))
+    #     return
     tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'rm')
     tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
     tmp_reast_str_para = OlivOS.messageAPI.Message_templet('old_string', tmp_reast_str)
@@ -1407,11 +1407,11 @@ def team_remove(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin
 
 def team_delete(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin, 
                 flag_is_from_master, dictTValue, dictStrCustom, team_name):
-    if not (flag_is_from_group_admin or flag_is_from_master):
-        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
-            dictStrCustom['strNeedAdmin'], dictTValue
-        ))
-        return
+    # if not (flag_is_from_group_admin or flag_is_from_master):
+    #     OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+    #         dictStrCustom['strNeedAdmin'], dictTValue
+    #     ))
+    #     return
     tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'del')
     tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
     if not team_name:
@@ -1494,11 +1494,11 @@ def team_delete(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin
 
 def team_clear(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin, 
                flag_is_from_master, dictTValue, dictStrCustom, team_name):
-    if not (flag_is_from_group_admin or flag_is_from_master):
-        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
-            dictStrCustom['strNeedAdmin'], dictTValue
-        ))
-        return
+    # if not (flag_is_from_group_admin or flag_is_from_master):
+    #     OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+    #         dictStrCustom['strNeedAdmin'], dictTValue
+    #     ))
+    #     return
     tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, ['clear','clr'])
     tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
     if not team_name:
