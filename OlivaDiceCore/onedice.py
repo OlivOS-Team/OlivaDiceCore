@@ -985,8 +985,13 @@ class RD(object):
                     else:
                         self.resError = self.resErrorType.NODE_EXTREME_VAL_INVALID
                         return resNoneTemplate
-                    tmp_node_this_output_str = tmp_main_val_left[1] + '-' + tmp_main_val_right[1]
-                    tmp_node_this_output_data_final = tmp_main_val_left_data + [{'op': '-'}] + tmp_main_val_right_data
+                    # 特殊处理负数显示形式: (-1)虽然还是按(0-1)去计算，但是不再显示成(0-1)，而是正常显示成(-1)，这样避免看起来过程错误结果正确
+                    if tmp_main_val_left[0] == 0:
+                        tmp_node_this_output_str = '(-' + tmp_main_val_right[1] + ')'
+                        tmp_node_this_output_data_final = [{'op': '('}, {'op': '-'}] + tmp_main_val_right_data + [{'op': ')'}]
+                    else:
+                        tmp_node_this_output_str = tmp_main_val_left[1] + '-' + tmp_main_val_right[1]
+                        tmp_node_this_output_data_final = tmp_main_val_left_data + [{'op': '-'}] + tmp_main_val_right_data
                     if tmp_priority_this < rootPriority:
                         tmp_node_this_output_str = '(' + tmp_node_this_output_str + ')'
                         tmp_node_this_output_data_final = [{'op': '('}] + tmp_node_this_output_data_final + [{'op': ')'}]
