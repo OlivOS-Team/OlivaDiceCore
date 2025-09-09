@@ -4912,7 +4912,6 @@ def unity_reply(plugin_event, Proc):
                         rd_para = OlivaDiceCore.onedice.RD(rd_para_str)
                         rd_para.roll()
                         if rd_para.resError == None:
-                            tmp_tSkillCheckReasult += '\n'
                             if flag_bp_type == 0:
                                 tmp_tSkillCheckReasult += '%s=%d' % (rd_para_str, rd_para.resInt)
                             else:
@@ -4939,11 +4938,12 @@ def unity_reply(plugin_event, Proc):
                             ]:
                                 flag_check_success = True
                             flag_need_reply = True
+                            tmp_tSkillCheckReasult += '\n'
                         else:
                             flag_need_reply = False
                             break
                     dictTValue['tRollResult'] = ''
-                    dictTValue['tSkillCheckReasult'] = tmp_tSkillCheckReasult
+                    dictTValue['tSkillCheckReasult'] = tmp_tSkillCheckReasult.strip()
                 if flag_check_success:
                     if tmp_pc_name_1 != None and tmp_skill_name != None:
                         tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
