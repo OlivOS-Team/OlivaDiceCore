@@ -444,7 +444,6 @@ https://github.com/OlivOS-Team/onedice
 .team (小队) sort (小队) [技能名] 按照技能数值排序小队成员
 
 当命令中需要指定小队时，两个小队的位置均可以解析，但是优先解析第一个位置
-其中 'rm' 'del' 'clear' 指令需要管理员权限
 不带小队时默认使用当前活跃小队''',
 
     'OlivaDiceCore更新': '&更新',
