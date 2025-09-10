@@ -24,6 +24,9 @@ import copy
 
 contextFeq = 0.1
 
+def op_list_get():
+    return ['+', '-', '*', '/', '^']
+
 def replyCONTEXT_fliter(tmp_reast_str):
     res = False
     if 'replyContextPrefixFliter' in OlivaDiceCore.crossHook.dictHookList:
@@ -1890,10 +1893,10 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
     for member_id in team_config[team_name]['members']:
         tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
         pc_skills = OlivaDiceCore.pcCard.pcCardDataGetByPcName(tmp_pcHash, hagId = tmp_hagID)
-        for skill_name in pc_skills:
-            if not skill_name.startswith('__'):
+        for tmp_skill_name in pc_skills:
+            if not tmp_skill_name.startswith('__'):
                 # 移除技能名中的数字
-                clean_skill_name = re.sub(r'\d+', '', skill_name).upper()
+                clean_skill_name = re.sub(r'\d+', '', tmp_skill_name).upper()
                 all_pc_skill_names.add(clean_skill_name)
     # 预处理字符串，在特定字母先查找技能名，找到技能名后添加空格
     processed_skill_ops = skill_name
@@ -1920,7 +1923,7 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
             else:
                 i += 1
     # 解析多项技能操作
-    op_list = ['+', '-', '*', '/', '^']
+    op_list = op_list_get()
     skill_updates = []
     # 分割技能操作
     current_pos = 0
@@ -2127,7 +2130,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
     difficulty, skill_expr = difficulty_analyze(skill_expr)
     # 解析技能名和表达式
     if skill_expr:
-        op_list = ['+', '-', '*', '/', '^']
+        op_list = op_list_get()
         pos = len(skill_expr)
         for i, char in enumerate(skill_expr):
             if char in op_list or char.isdigit():

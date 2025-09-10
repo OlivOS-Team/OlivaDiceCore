@@ -3348,7 +3348,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_skill_updates = []
                 reply_messages = []
                 special_skills = []
-                op_list = ['+', '-', '*', '/', '^']
+                op_list = OlivaDiceCore.msgReplyModel.op_list_get()
                 assign_op = '='
                 is_pass = False
                 # 检查是否需要跳过
@@ -4745,7 +4745,7 @@ def unity_reply(plugin_event, Proc):
             difficulty, tmp_reast_str = OlivaDiceCore.msgReplyModel.difficulty_analyze(tmp_reast_str)
             tmp_skill_value_str = None
             if tmp_reast_str:
-                op_list = ['+', '-', '*', '/', '^']
+                op_list = OlivaDiceCore.msgReplyModel.op_list_get()
                 skill_end_pos = len(tmp_reast_str)
                 for i, char in enumerate(tmp_reast_str):
                     if char in op_list or char.isdigit():
