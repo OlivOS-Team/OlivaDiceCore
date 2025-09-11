@@ -355,6 +355,7 @@ def unity_reply(plugin_event, Proc):
                     botHash = plugin_event.bot_info.hash
                 )
         valDict['flag_is_from_group'] = flag_is_from_group
+        valDict['flag_is_from_group_admin'] = flag_is_from_group_admin
         flag_messageFliterModeDisabled = False
         flag_messageFliterMode = OlivaDiceCore.console.getConsoleSwitchByHash(
             'messageFliterMode',
@@ -4992,7 +4993,7 @@ def unity_reply(plugin_event, Proc):
                     dictStrCustom['strForGroupOnly'], dictTValue
                 ))
                 return
-            OlivaDiceCore.msgReplyModel.replyTEAM_command(plugin_event, Proc, valDict, flag_is_from_group_admin)
+            OlivaDiceCore.msgReplyModel.replyTEAM_command(plugin_event, Proc, valDict)
         #关闭该调试性质指令
         elif False and isMatchWordStart(tmp_reast_str, 'rrange', isCommand = True):
             tmp_pc_id = plugin_event.data.user_id

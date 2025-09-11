@@ -1239,9 +1239,10 @@ def getNoteFormat(
 team指令部分
 '''
 
-def replyTEAM_command(plugin_event, Proc, valDict, flag_is_from_group_admin):
+def replyTEAM_command(plugin_event, Proc, valDict):
     tmp_reast_str = valDict['tmp_reast_str']
     flag_is_from_master = valDict['flag_is_from_master']
+    flag_is_from_group_admin = valDict['flag_is_from_group_admin']
     tmp_hagID = valDict['tmp_hagID']
     dictTValue = valDict['dictTValue']
     dictStrCustom = valDict['dictStrCustom']
