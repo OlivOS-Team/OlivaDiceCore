@@ -3388,6 +3388,8 @@ def unity_reply(plugin_event, Proc):
                     if rest_after_dash and not (rest_after_dash[0].isdigit() or rest_after_dash[0] in op_list + [assign_op] or 
                                               (len(rest_after_dash) > 1 and rest_after_dash[0].upper() == 'D' and rest_after_dash[1].isdigit())):
                         is_pass = True
+                        # 是录卡模式直接覆盖人物卡模板
+                        forced_is_new_card = True
                 if is_pass:
                     pass
                 else:
@@ -3630,7 +3632,6 @@ def unity_reply(plugin_event, Proc):
                         tmp_reast_str = tmp_reast_str[1:]
                     if tmp_pc_name != None:
                         tmp_pc_name = tmp_pc_name.strip()
-                        forced_is_new_card = True
                     if tmp_pc_name == '':
                         tmp_pc_name = None
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
