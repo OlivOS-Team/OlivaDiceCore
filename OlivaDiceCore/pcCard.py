@@ -609,6 +609,119 @@ def pcCardDataCheckTemplateKey(templateName = 'default', ruleName = 'default', r
         res = ruleName_core
     return res
 
+def setPcTemplateByGroupRule(plugin_event, tmp_pc_id = None, tmp_pc_name = None, set_flag = True):
+    """
+    根据传入参数设置人物卡模板
+    set_flag为True时设置为当前群规的模板，False时直接返回
+    """
+    if not set_flag:
+        return
+    
+    # 获取当前群规的模板
+    group_template, group_rule = getGroupTemplateRule(plugin_event)
+    if not group_template:
+        return
+    
+    # 获取当前用户和群组信息
+    if not tmp_pc_id:
+        tmp_pc_id = plugin_event.data.user_id
+    tmp_pc_platform = plugin_event.platform['platform']
+    tmp_hagID = getHagIDFromMsg(plugin_event, OlivaDiceCore.data.global_Proc)
+    
+    # 获取人物卡哈希和当前选择的人物卡名
+    tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+    if not tmp_pc_name:
+        tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
+    
+    if tmp_pc_name:
+        # 设置人物卡模板
+        OlivaDiceCore.pcCard.pcCardDataSetTemplateKey(
+            tmp_pcHash,
+            tmp_pc_name,
+            group_template,
+            group_rule
+        )
+        
+def isNewPcCard(plugin_event, tmp_pc_id = None, external_flag = None):
+    """
+    判断人物卡是否为新卡
+    external_flag: 外部传入的标志（True/False），如果传入则优先使用外部标志
+    返回: True-新卡, False-非新卡
+    """
+    # 如果外部传入了标志，直接返回外部值
+    if external_flag is not None:
+        return external_flag
+    
+    # 获取当前用户和群组信息
+    if not tmp_pc_id:
+        tmp_pc_id = plugin_event.data.user_id
+    tmp_pc_platform = plugin_event.platform['platform']
+    tmp_hagID = getHagIDFromMsg(plugin_event, OlivaDiceCore.data.global_Proc)
+    
+    # 获取人物卡哈希和当前选择的人物卡数据
+    tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+    pc_skills = OlivaDiceCore.pcCard.pcCardDataGetByPcName(tmp_pcHash, hagId=tmp_hagID)
+    
+    # 过滤掉系统字段，检查是否为空
+    valid_skills = {k: v for k, v in pc_skills.items() 
+                   if not k.startswith('__') and k != 'template'}
+    
+    # 如果没有任何有效技能，则为新卡
+    return len(valid_skills) == 0
+
+def getGroupTemplateRule(plugin_event):
+    """
+    获取当前群聊的房规模板
+    返回: (template_name, rule_name) 元组
+    """
+    tmp_hagID = getHagIDFromMsg(plugin_event, OlivaDiceCore.data.global_Proc)
+    tmp_user_platform = plugin_event.platform['platform']
+    
+    if not tmp_hagID:
+        return (None, None)
+    
+    # 获取群模板和规则
+    group_template = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userConfigKey='groupTemplate',
+        botHash=plugin_event.bot_info.hash,
+        userId=tmp_hagID,
+        userType='group',
+        platform=tmp_user_platform,
+    )
+    
+    group_rule = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userConfigKey='groupTemplateRule',
+        botHash=plugin_event.bot_info.hash,
+        userId=tmp_hagID,
+        userType='group',
+        platform=tmp_user_platform
+    )
+    
+    return (group_template, group_rule)
+
+def getHagIDFromMsg(plugin_event, Proc):
+    """
+    从消息中获取群组/频道ID（从原代码中提取）
+    """
+    tmp_hagID = None
+    flag_is_from_host = False
+    flag_is_from_group = False
+    
+    if plugin_event.plugin_info['func_type'] == 'group_message':
+        if plugin_event.data.host_id is not None:
+            flag_is_from_host = True
+        flag_is_from_group = True
+    elif plugin_event.plugin_info['func_type'] == 'private_message':
+        flag_is_from_group = False
+    
+    if flag_is_from_host and flag_is_from_group:
+        tmp_hagID = f"{plugin_event.data.host_id}|{plugin_event.data.group_id}"
+    elif flag_is_from_group:
+        tmp_hagID = str(plugin_event.data.group_id)
+    
+    return tmp_hagID
+
+
 #更通用的接口
 
 def pcCardDataGetTemplateDataByKey(pcHash, pcCardName, dataKey, resDefault = None):

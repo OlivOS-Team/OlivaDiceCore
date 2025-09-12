@@ -58,6 +58,7 @@ dictUserConfigNoteDefault = {
     'trustLevel' : 0,
     'trustRank' : 1000,
     'autoSnEnabled' : False,
+    'showDefault' : False,
     'teamConfig': {},
     'activeTeam': None,
 }

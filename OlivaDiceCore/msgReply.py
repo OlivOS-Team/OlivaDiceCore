@@ -354,6 +354,8 @@ def unity_reply(plugin_event, Proc):
                     userConfigKey = 'groupEnable',
                     botHash = plugin_event.bot_info.hash
                 )
+        valDict['flag_is_from_group'] = flag_is_from_group
+        valDict['flag_is_from_group_admin'] = flag_is_from_group_admin
         flag_messageFliterModeDisabled = False
         flag_messageFliterMode = OlivaDiceCore.console.getConsoleSwitchByHash(
             'messageFliterMode',
@@ -389,8 +391,8 @@ def unity_reply(plugin_event, Proc):
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBecomeMasterAlready'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
-                if isMatchWordStart(tmp_reast_str, 'exit'):
-                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'exit')
+                if isMatchWordStart(tmp_reast_str, ['exit','bye']):
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['exit','bye'])
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
                     tmp_reast_str = tmp_reast_str.rstrip(' ')
                     tmp_group_id = None
@@ -1244,8 +1246,8 @@ def unity_reply(plugin_event, Proc):
                         else:
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
-            elif isMatchWordStart(tmp_reast_str, 'exit'):
-                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'exit')
+            elif isMatchWordStart(tmp_reast_str, ['exit','bye']):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['exit','bye'])
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 tmp_reast_str = tmp_reast_str.rstrip(' ')
                 if flag_is_from_group and tmp_reast_str in tmp_end_list:
@@ -1254,6 +1256,9 @@ def unity_reply(plugin_event, Proc):
                         replyMsg(plugin_event, tmp_reply_str)
                         time.sleep(1)
                         plugin_event.set_group_leave(plugin_event.data.group_id)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'summary', fullMatch = True) and flag_is_from_master:
                 tmp_reply_str = ''
                 tmp_reply_str += OlivaDiceCore.data.bot_summary
@@ -1984,6 +1989,9 @@ def unity_reply(plugin_event, Proc):
                     else:
                         dictTValue['tPcSelection'] = dictTValue['tName']
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRename'], dictTValue)
+                    is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
+                    if is_new_card:
+                        OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                     trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
             else:
@@ -2206,12 +2214,17 @@ def unity_reply(plugin_event, Proc):
             tmp_reply_str_1 = ''
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['st','pc'])
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            forced_is_new_card = False
+            forced_is_new_card_time = 0
             tmp_skill_name = None
             tmp_skill_value = None
             tmp_skill_name_find = None
             tmp_skill_value_find = 0
             tmp_skill_pair_list = []
             if isMatchWordStart(tmp_reast_str, 'show', fullMatch = True):
+                is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
+                if is_new_card:
+                    OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                 tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
                     tmp_pc_id,
                     tmp_pc_platform
@@ -2236,13 +2249,46 @@ def unity_reply(plugin_event, Proc):
                 )
                 tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
                 default_skill_values = tmp_template.get('defaultSkillValue', {}) if tmp_template else {}
+                # 检查是否开启默认值显示模式
+                show_default_enabled = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_pc_id,
+                    userType = 'user',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'showDefault',
+                    botHash = plugin_event.bot_info.hash,
+                    default = False
+                )
+                # 保存原始数据用于标记比较
+                tmp_dict_pc_card_original = tmp_dict_pc_card.copy()
+                processed_core_skills = set()  # 用于去重别名技能
                 for tmp_dict_pc_card_key in tmp_dict_pc_card:
-                    # 跳过值为0且与默认值相同的技能
                     skill_value = tmp_dict_pc_card[tmp_dict_pc_card_key]
-                    if skill_value == 0:
-                        default_value = default_skill_values.get(tmp_dict_pc_card_key, 0)
+                    # 获取技能的核心名称用于去重检查
+                    core_skill_name = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
+                        tmp_pcHash,
+                        tmp_dict_pc_card_key,
+                        hagId = tmp_hagID
+                    )
+                    # 如果这个核心技能已经处理过，跳过（去重别名）
+                    if core_skill_name in processed_core_skills:
+                        continue
+                    processed_core_skills.add(core_skill_name)
+                    
+                    # 尝试用原始技能名获取默认值，如果没找到再用核心技能名
+                    default_value = default_skill_values.get(tmp_dict_pc_card_key, 
+                                   default_skill_values.get(core_skill_name, 0))
+                    
+                    if show_default_enabled:
+                        # 默认值显示模式：只显示非默认值的技能
                         if skill_value == default_value:
-                            continue
+                            continue  # 跳过等于默认值的技能
+                        display_value = skill_value
+                    else:
+                        # 正常模式：跳过值为0且与默认值相同的技能
+                        if skill_value == 0:
+                            if skill_value == default_value:
+                                continue
+                        display_value = skill_value
                     tmp_dict_pc_card_dump[
                         OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
                             tmp_pcHash,
@@ -2250,7 +2296,7 @@ def unity_reply(plugin_event, Proc):
                             flagShow = True,
                             hagId = tmp_hagID
                         )
-                    ] = tmp_dict_pc_card[tmp_dict_pc_card_key]
+                    ] = display_value
                 tmp_reply_str_1_list = []
                 tmp_reply_str_1_dict = {}
                 tmp_enhanceList = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
@@ -2274,16 +2320,56 @@ def unity_reply(plugin_event, Proc):
                         tmp_dict_pc_card_key,
                         tmp_dict_pc_card_dump[tmp_dict_pc_card_key]
                     )
-                    if tmp_dict_pc_card_key_core in tmp_enhanceList:
-                        tmp_reply_str_1_list_this = '[*]' + tmp_reply_str_1_list_this
+                    # 确定技能属于哪个分组
                     for tmp_skill_dict_this in tmp_skill_dict:
                         if type(tmp_skill_dict[tmp_skill_dict_this]) == list:
                             if tmp_dict_pc_card_key_core in tmp_skill_dict[tmp_skill_dict_this]:
                                 flag_hit_skill_list_name = tmp_skill_dict_this
                                 break
+                    # 检查标记条件
+                    is_enhanced = tmp_dict_pc_card_key_core in tmp_enhanceList
+                    is_non_default = False
+                    # 对非"其它"分组的技能，检查是否与默认值不同（仅在非默认值显示模式下）
+                    if (not show_default_enabled and 
+                        flag_hit_skill_list_name != flag_hit_skill_list_name_default):
+                        # 使用原始值而不是显示值进行比较，与前面逻辑保持一致的默认值获取方式
+                        original_value = tmp_dict_pc_card_original[tmp_dict_pc_card_key]
+                        # 寻找对应的原始技能键来获取默认值
+                        original_skill_key = None
+                        for orig_key in tmp_dict_pc_card_original:
+                            if OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(tmp_pcHash, orig_key, hagId=tmp_hagID) == tmp_dict_pc_card_key_core:
+                                original_skill_key = orig_key
+                                break
+                        if original_skill_key:
+                            default_value = default_skill_values.get(original_skill_key, 
+                                           default_skill_values.get(tmp_dict_pc_card_key_core, 0))
+                        else:
+                            default_value = default_skill_values.get(tmp_dict_pc_card_key_core, 0)
+                        if original_value != default_value:
+                            is_non_default = True
+                    # 根据条件组合标记
+                    if show_default_enabled:
+                        # 默认值显示模式下只保留增强标记
+                        if is_enhanced:
+                            tmp_reply_str_1_list_this = '[*]' + tmp_reply_str_1_list_this
+                    else:
+                        # 正常模式下显示所有标记
+                        if is_enhanced and is_non_default:
+                            tmp_reply_str_1_list_this = '[*/+]' + tmp_reply_str_1_list_this
+                        elif is_enhanced:
+                            tmp_reply_str_1_list_this = '[*]' + tmp_reply_str_1_list_this
+                        elif is_non_default:
+                            tmp_reply_str_1_list_this = '[+]' + tmp_reply_str_1_list_this
                     if flag_hit_skill_list_name not in tmp_reply_str_1_dict:
                         tmp_reply_str_1_dict[flag_hit_skill_list_name] = []
                     tmp_reply_str_1_dict[flag_hit_skill_list_name].append(tmp_reply_str_1_list_this)
+                # 对每个技能组内的技能按数值排序
+                for tmp_reply_str_1_dict_this in tmp_reply_str_1_dict:
+                    # 按数值大小排序（从大到小）
+                    tmp_reply_str_1_dict[tmp_reply_str_1_dict_this].sort(
+                        key=lambda x: int(x.split(':')[-1]) if x.split(':')[-1].replace('[*]', '').replace('[+]', '').replace('[*/+]', '').isdigit() else 0,
+                        reverse=True
+                    )
                 for tmp_reply_str_1_dict_this in tmp_reply_str_1_dict:
                     if tmp_reply_str_1_dict_this != flag_hit_skill_list_name_default:
                         tmp_reply_str_1_list.append(
@@ -2330,6 +2416,11 @@ def unity_reply(plugin_event, Proc):
                             )
                 tmp_reply_str_1 = '\n'.join(tmp_reply_str_1_list)
                 dictTValue['tPcShow'] = tmp_reply_str_1
+                # 根据defaultshow状态设置不同的说明文字
+                if show_default_enabled:
+                    dictTValue['tDefaultShow'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDefaultShowOn'], dictTValue)
+                else:
+                    dictTValue['tDefaultShow'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDefaultShowOff'], dictTValue)
                 if is_at:
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowAtOther'], dictTValue)
                 else:
@@ -2337,6 +2428,9 @@ def unity_reply(plugin_event, Proc):
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'show'):
+                is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
+                if is_new_card:
+                    OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'show')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 tmp_pcCardRule = 'default'
@@ -2566,11 +2660,17 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSet'], dictTValue)
                     else:
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetError'], dictTValue)
+                    is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
+                    if is_new_card:
+                        OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                     trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'init'):
                 if is_at: return
+                is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
+                if is_new_card:
+                    OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'init')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 flag_force_init = False
@@ -2674,6 +2774,7 @@ def unity_reply(plugin_event, Proc):
                             '__new',
                             tmp_pc_name
                         )
+                        OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event)
                         dictTValue['tPcSelection'] = tmp_pc_name
                         if is_at:
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcNewAtOther'], dictTValue)
@@ -2717,6 +2818,88 @@ def unity_reply(plugin_event, Proc):
                 trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
+            elif isMatchWordStart(tmp_reast_str, ['defaultshow','ds'], isCommand = True):
+                if is_at: return
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['defaultshow','ds'])
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                current_show_default = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_pc_id,
+                    userType = 'user',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'showDefault',
+                    botHash = plugin_event.bot_info.hash,
+                    default = False
+                )
+                if isMatchWordStart(tmp_reast_str, 'on', fullMatch = True):
+                    # defaultshow on 命令
+                    if current_show_default:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strShowDefaultAlreadyOn'], dictTValue)
+                    else:
+                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                            userConfigKey = 'showDefault',
+                            userConfigValue = True,
+                            botHash = plugin_event.bot_info.hash,
+                            userId = tmp_pc_id,
+                            userType = 'user',
+                            platform = tmp_pc_platform
+                        )
+                        OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                            userHash = OlivaDiceCore.userConfig.getUserHash(
+                                userId = tmp_pc_id,
+                                userType = 'user',
+                                platform = tmp_pc_platform
+                            )
+                        )
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strShowDefaultOn'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
+                elif isMatchWordStart(tmp_reast_str, 'off', fullMatch = True):
+                    # defaultshow off 命令
+                    if not current_show_default:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strShowDefaultAlreadyOff'], dictTValue)
+                    else:
+                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                            userConfigKey = 'showDefault',
+                            userConfigValue = False,
+                            botHash = plugin_event.bot_info.hash,
+                            userId = tmp_pc_id,
+                            userType = 'user',
+                            platform = tmp_pc_platform
+                        )
+                        OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                            userHash = OlivaDiceCore.userConfig.getUserHash(
+                                userId = tmp_pc_id,
+                                userType = 'user',
+                                platform = tmp_pc_platform
+                            )
+                        )
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strShowDefaultOff'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
+                else:
+                    # 切换模式
+                    new_show_default = not current_show_default
+                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                        userConfigKey = 'showDefault',
+                        userConfigValue = new_show_default,
+                        botHash = plugin_event.bot_info.hash,
+                        userId = tmp_pc_id,
+                        userType = 'user',
+                        platform = tmp_pc_platform
+                    )
+                    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                        userHash = OlivaDiceCore.userConfig.getUserHash(
+                            userId = tmp_pc_id,
+                            userType = 'user',
+                            platform = tmp_pc_platform
+                        )
+                    )
+                    if new_show_default:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strShowDefaultOn'], dictTValue)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strShowDefaultOff'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
             elif isMatchWordStart(tmp_reast_str, ['clear', 'clr'], fullMatch = True):
                 if is_at: return
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['clear', 'clr'])
@@ -2750,6 +2933,7 @@ def unity_reply(plugin_event, Proc):
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcClear'], dictTValue)
                 else:
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcClearNone'], dictTValue)
+                OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                 trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
@@ -2890,6 +3074,9 @@ def unity_reply(plugin_event, Proc):
                             dictTValue
                         )
                     trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
+                    is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
+                    if is_new_card:
+                        OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
             elif isMatchWordStart(tmp_reast_str, 'temp'):
@@ -3263,6 +3450,9 @@ def unity_reply(plugin_event, Proc):
                 else:
                     dictTValue['tBlockName'] = tmp_block_name
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcBlockRmNone'], dictTValue)
+                is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
+                if is_new_card:
+                    OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'export'):
@@ -3348,20 +3538,27 @@ def unity_reply(plugin_event, Proc):
                 tmp_skill_updates = []
                 reply_messages = []
                 special_skills = []
-                op_list = ['+', '-', '*', '/', '^']
+                op_list = OlivaDiceCore.msgReplyModel.op_list_get()
                 assign_op = '='
                 is_pass = False
                 # 检查是否需要跳过
-                if not any(op in tmp_reast_str_new for op in op_list + [assign_op]) or tmp_reast_str_new.startswith('&'):
+                if not any(op in tmp_reast_str_new for op in op_list) or tmp_reast_str_new.startswith('&'):
                     is_pass = True
                 # 检查是否是录卡格式（字符串-字符串）
                 dash_pos = tmp_reast_str_new.find('-')
                 if dash_pos > 0:
                     rest_after_dash = tmp_reast_str_new[dash_pos+1:].strip()
+                    card_name = tmp_reast_str_new[:dash_pos].strip()
                     # 录卡格式判断 - 只有当后面跟着非数字、非运算符、非d且不是表达式时才跳过
                     if rest_after_dash and not (rest_after_dash[0].isdigit() or rest_after_dash[0] in op_list + [assign_op] or 
                                               (len(rest_after_dash) > 1 and rest_after_dash[0].upper() == 'D' and rest_after_dash[1].isdigit())):
                         is_pass = True
+                        # 检查人物卡是否存在
+                        tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+                        existing_cards = OlivaDiceCore.pcCard.pcCardDataGetUserAll(tmp_pcHash)
+                        # 如果人物卡不存在或者是空的，才设置forced_is_new_card为True
+                        if card_name not in existing_cards or not existing_cards[card_name]:
+                            forced_is_new_card = True
                 if is_pass:
                     pass
                 else:
@@ -3369,6 +3566,9 @@ def unity_reply(plugin_event, Proc):
                     tmp_pc_id = at_user_id if at_user_id else plugin_event.data.user_id
                     tmp_pc_platform = plugin_event.platform['platform']
                     tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+                    is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
+                    if is_new_card:
+                        OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                     pc_skills = OlivaDiceCore.pcCard.pcCardDataGetByPcName(tmp_pcHash, hagId=tmp_hagID)
                     pc_skill_names = [s.upper() for s in pc_skills.keys() if not s.startswith('__')]
                     # 预处理字符串，在特定字母先查找技能名，找到技能名后添加空格
@@ -3714,6 +3914,9 @@ def unity_reply(plugin_event, Proc):
                                 flag_mode = 'rec',
                                 enableFalse = False
                             )
+                        if forced_is_new_card and forced_is_new_card_time == 0:
+                            forced_is_new_card_time = 1
+                            OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id, tmp_pc_name)
                     if special_skills:
                         dictTValue['tSpecialSkills'] = '、'.join([f'[{skill}]' for skill in special_skills])
                         tmp_notice = OlivaDiceCore.msgCustomManager.formatReplySTR(
@@ -3731,6 +3934,9 @@ def unity_reply(plugin_event, Proc):
             else:
                 tmp_pcCardRule = 'default'
                 tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+                is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
+                if is_new_card:
+                    OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                 pc_skills = OlivaDiceCore.pcCard.pcCardDataGetByPcName(tmp_pcHash, hagId=tmp_hagID)
                 pc_skill_names = [s.upper() for s in pc_skills.keys() if not s.startswith('__')]
                 tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
@@ -3853,242 +4059,6 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = OlivaDiceCore.helpDoc.getHelp('st', plugin_event.bot_info.hash)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
-        elif isMatchWordStart(tmp_reast_str, 'setcoc', isCommand = True):
-            if flag_is_from_group:
-                tmp_user_platform = plugin_event.platform['platform']
-                tmp_hag_id = tmp_hagID
-                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'setcoc')
-                tmp_reast_str = skipSpaceStart(tmp_reast_str)
-                tmp_reast_str = tmp_reast_str.rstrip()
-                tmp_switch_setcoc = None
-                if tmp_reast_str.isdecimal():
-                    tmp_switch_setcoc = int(tmp_reast_str)
-                    if tmp_switch_setcoc not in [0, 1, 2, 3, 4, 5, 6, 7]:
-                        tmp_switch_setcoc = None
-                if tmp_switch_setcoc != None:
-                    tmp_templateName = 'COC7'
-                    tmp_templateRuleName = 'default'
-                    if tmp_switch_setcoc in [0, 1, 2, 3, 4, 5, 6]:
-                        tmp_templateRuleName = 'C%s' % str(tmp_switch_setcoc)
-                    elif tmp_switch_setcoc == 7:
-                        tmp_templateRuleName = 'DeltaGreen'
-                    OlivaDiceCore.userConfig.setUserConfigByKey(
-                        userConfigKey = 'groupTemplate',
-                        userConfigValue = tmp_templateName,
-                        botHash = plugin_event.bot_info.hash,
-                        userId = tmp_hag_id,
-                        userType = 'group',
-                        platform = tmp_user_platform
-                    )
-                    OlivaDiceCore.userConfig.setUserConfigByKey(
-                        userConfigKey = 'groupTemplateRule',
-                        userConfigValue = tmp_templateRuleName,
-                        botHash = plugin_event.bot_info.hash,
-                        userId = tmp_hag_id,
-                        userType = 'group',
-                        platform = tmp_user_platform
-                    )
-                    dictTValue['tPcTempName'] = tmp_templateName
-                    dictTValue['tPcTempRuleName'] = tmp_templateRuleName
-                    if tmp_templateRuleName in OlivaDiceCore.msgCustom.dictSetCOCDetail:
-                        dictTValue['tLazyResult'] = ':\n%s' % OlivaDiceCore.msgCustom.dictSetCOCDetail[tmp_templateRuleName]
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSetGroupTempRule'], dictTValue)
-                else:
-                    OlivaDiceCore.userConfig.setUserConfigByKey(
-                        userConfigKey = 'groupTemplate',
-                        userConfigValue = None,
-                        botHash = plugin_event.bot_info.hash,
-                        userId = tmp_hag_id,
-                        userType = 'group',
-                        platform = tmp_user_platform
-                    )
-                    OlivaDiceCore.userConfig.setUserConfigByKey(
-                        userConfigKey = 'groupTemplateRule',
-                        userConfigValue = None,
-                        botHash = plugin_event.bot_info.hash,
-                        userId = tmp_hag_id,
-                        userType = 'group',
-                        platform = tmp_user_platform
-                    )
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDelGroupTempRule'], dictTValue)
-                OlivaDiceCore.userConfig.writeUserConfigByUserHash(
-                    userHash = OlivaDiceCore.userConfig.getUserHash(
-                        userId = tmp_hag_id,
-                        userType = 'group',
-                        platform = tmp_user_platform
-                    )
-                )
-            else:
-                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
-            replyMsg(plugin_event, tmp_reply_str)
-            return
-        elif isMatchWordStart(tmp_reast_str, 'setdnd', fullMatch = True, isCommand = True):
-            if flag_is_from_group:
-                tmp_user_platform = plugin_event.platform['platform']
-                tmp_hag_id = tmp_hagID
-                tmp_switch_setcoc = None
-                flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
-                    userId = tmp_hag_id,
-                    userType = 'group',
-                    platform = tmp_user_platform,
-                    userConfigKey = 'groupTemplate',
-                    botHash = plugin_event.bot_info.hash
-                )
-                flag_groupTemplateRule = OlivaDiceCore.userConfig.getUserConfigByKey(
-                    userId = tmp_hag_id,
-                    userType = 'group',
-                    platform = tmp_user_platform,
-                    userConfigKey = 'groupTemplateRule',
-                    botHash = plugin_event.bot_info.hash
-                )
-                if flag_groupTemplate not in ['DND5E']:
-                    tmp_templateName = 'DND5E'
-                    tmp_templateRuleName = 'default'
-                    OlivaDiceCore.userConfig.setUserConfigByKey(
-                        userConfigKey = 'groupTemplate',
-                        userConfigValue = tmp_templateName,
-                        botHash = plugin_event.bot_info.hash,
-                        userId = tmp_hag_id,
-                        userType = 'group',
-                        platform = tmp_user_platform
-                    )
-                    OlivaDiceCore.userConfig.setUserConfigByKey(
-                        userConfigKey = 'groupTemplateRule',
-                        userConfigValue = tmp_templateRuleName,
-                        botHash = plugin_event.bot_info.hash,
-                        userId = tmp_hag_id,
-                        userType = 'group',
-                        platform = tmp_user_platform
-                    )
-                    dictTValue['tPcTempName'] = tmp_templateName
-                    dictTValue['tPcTempRuleName'] = tmp_templateRuleName
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSetGroupTempRule'], dictTValue)
-                else:
-                    OlivaDiceCore.userConfig.setUserConfigByKey(
-                        userConfigKey = 'groupTemplate',
-                        userConfigValue = None,
-                        botHash = plugin_event.bot_info.hash,
-                        userId = tmp_hag_id,
-                        userType = 'group',
-                        platform = tmp_user_platform
-                    )
-                    OlivaDiceCore.userConfig.setUserConfigByKey(
-                        userConfigKey = 'groupTemplateRule',
-                        userConfigValue = None,
-                        botHash = plugin_event.bot_info.hash,
-                        userId = tmp_hag_id,
-                        userType = 'group',
-                        platform = tmp_user_platform
-                    )
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDelGroupTempRule'], dictTValue)
-                OlivaDiceCore.userConfig.writeUserConfigByUserHash(
-                    userHash = OlivaDiceCore.userConfig.getUserHash(
-                        userId = tmp_hag_id,
-                        userType = 'group',
-                        platform = tmp_user_platform
-                    )
-                )
-            else:
-                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
-            replyMsg(plugin_event, tmp_reply_str)
-            return
-        elif isMatchWordStart(tmp_reast_str, ['settemp','setrule'], isCommand = True):
-            if flag_is_from_group:
-                flag_settemp_mode = 'settemp'
-                tmp_templateName_input = 'default'
-                tmp_templateRuleName_input = 'default'
-                tmp_user_platform = plugin_event.platform['platform']
-                tmp_hag_id = tmp_hagID
-                if isMatchWordStart(tmp_reast_str, 'settemp'):
-                    flag_settemp_mode = 'settemp'
-                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'settemp')
-                elif isMatchWordStart(tmp_reast_str, 'setrule'):
-                    flag_settemp_mode = 'setrule'
-                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'setrule')
-                tmp_reast_str = skipSpaceStart(tmp_reast_str)
-                tmp_reast_str = tmp_reast_str.rstrip()
-                if flag_settemp_mode == 'settemp':
-                    tmp_templateName_input = tmp_reast_str
-                elif flag_settemp_mode == 'setrule':
-                    flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
-                        userId = tmp_hag_id,
-                        userType = 'group',
-                        platform = tmp_user_platform,
-                        userConfigKey = 'groupTemplate',
-                        botHash = plugin_event.bot_info.hash
-                    )
-                    if flag_groupTemplate != None:
-                        tmp_templateName_input = flag_groupTemplate
-                    tmp_templateRuleName_input = tmp_reast_str
-                    if tmp_templateRuleName_input == '':
-                        tmp_templateRuleName_input = 'default'
-                if tmp_templateName_input == '' or OlivaDiceCore.pcCard.pcCardDataCheckTemplateKey(tmp_templateName_input, tmp_templateRuleName_input):
-                    if tmp_templateName_input != '':
-                        tmp_templateName_input = OlivaDiceCore.pcCard.pcCardDataCheckTemplateKey(
-                            tmp_templateName_input,
-                            tmp_templateRuleName_input,
-                            resMode = 'temp'
-                        )
-                        tmp_templateRuleName_input = OlivaDiceCore.pcCard.pcCardDataCheckTemplateKey(
-                            tmp_templateName_input,
-                            tmp_templateRuleName_input,
-                            resMode = 'rule'
-                        )
-                        tmp_templateName = tmp_templateName_input
-                        tmp_templateRuleName = tmp_templateRuleName_input
-                        OlivaDiceCore.userConfig.setUserConfigByKey(
-                            userConfigKey = 'groupTemplate',
-                            userConfigValue = tmp_templateName,
-                            botHash = plugin_event.bot_info.hash,
-                            userId = tmp_hag_id,
-                            userType = 'group',
-                            platform = tmp_user_platform
-                        )
-                        OlivaDiceCore.userConfig.setUserConfigByKey(
-                            userConfigKey = 'groupTemplateRule',
-                            userConfigValue = tmp_templateRuleName,
-                            botHash = plugin_event.bot_info.hash,
-                            userId = tmp_hag_id,
-                            userType = 'group',
-                            platform = tmp_user_platform
-                        )
-                        dictTValue['tPcTempName'] = tmp_templateName
-                        dictTValue['tPcTempRuleName'] = tmp_templateRuleName
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSetGroupTempRule'], dictTValue)
-                    else:
-                        OlivaDiceCore.userConfig.setUserConfigByKey(
-                            userConfigKey = 'groupTemplate',
-                            userConfigValue = None,
-                            botHash = plugin_event.bot_info.hash,
-                            userId = tmp_hag_id,
-                            userType = 'group',
-                            platform = tmp_user_platform
-                        )
-                        OlivaDiceCore.userConfig.setUserConfigByKey(
-                            userConfigKey = 'groupTemplateRule',
-                            userConfigValue = None,
-                            botHash = plugin_event.bot_info.hash,
-                            userId = tmp_hag_id,
-                            userType = 'group',
-                            platform = tmp_user_platform
-                        )
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDelGroupTempRule'], dictTValue)
-                    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
-                        userHash = OlivaDiceCore.userConfig.getUserHash(
-                            userId = tmp_hag_id,
-                            userType = 'group',
-                            platform = tmp_user_platform
-                        )
-                    )
-                else:
-                    if flag_settemp_mode == 'settemp':
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSetGroupTempError'], dictTValue)
-                    elif flag_settemp_mode == 'setrule':
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSetGroupTempRuleError'], dictTValue)
-            else:
-                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
-            replyMsg(plugin_event, tmp_reply_str)
-            return
         elif isMatchWordStart(tmp_reast_str, 'set', isCommand = True):
             OlivaDiceCore.msgReplyModel.replySET_command(plugin_event, Proc, valDict)
         elif isMatchWordStart(tmp_reast_str, ['coc6','coc'], isCommand = True) \
@@ -4745,7 +4715,7 @@ def unity_reply(plugin_event, Proc):
             difficulty, tmp_reast_str = OlivaDiceCore.msgReplyModel.difficulty_analyze(tmp_reast_str)
             tmp_skill_value_str = None
             if tmp_reast_str:
-                op_list = ['+', '-', '*', '/', '^']
+                op_list = OlivaDiceCore.msgReplyModel.op_list_get()
                 skill_end_pos = len(tmp_reast_str)
                 for i, char in enumerate(tmp_reast_str):
                     if char in op_list or char.isdigit():
@@ -4912,7 +4882,6 @@ def unity_reply(plugin_event, Proc):
                         rd_para = OlivaDiceCore.onedice.RD(rd_para_str)
                         rd_para.roll()
                         if rd_para.resError == None:
-                            tmp_tSkillCheckReasult += '\n'
                             if flag_bp_type == 0:
                                 tmp_tSkillCheckReasult += '%s=%d' % (rd_para_str, rd_para.resInt)
                             else:
@@ -4939,11 +4908,12 @@ def unity_reply(plugin_event, Proc):
                             ]:
                                 flag_check_success = True
                             flag_need_reply = True
+                            tmp_tSkillCheckReasult += '\n'
                         else:
                             flag_need_reply = False
                             break
                     dictTValue['tRollResult'] = ''
-                    dictTValue['tSkillCheckReasult'] = tmp_tSkillCheckReasult
+                    dictTValue['tSkillCheckReasult'] = tmp_tSkillCheckReasult.strip()
                 if flag_check_success:
                     if tmp_pc_name_1 != None and tmp_skill_name != None:
                         tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
@@ -5227,7 +5197,7 @@ def unity_reply(plugin_event, Proc):
                     dictStrCustom['strForGroupOnly'], dictTValue
                 ))
                 return
-            OlivaDiceCore.msgReplyModel.replyTEAM_command(plugin_event, Proc, valDict, flag_is_from_group_admin)
+            OlivaDiceCore.msgReplyModel.replyTEAM_command(plugin_event, Proc, valDict)
         #关闭该调试性质指令
         elif False and isMatchWordStart(tmp_reast_str, 'rrange', isCommand = True):
             tmp_pc_id = plugin_event.data.user_id
@@ -5461,15 +5431,25 @@ def unity_reply(plugin_event, Proc):
                 userConfigKey = 'groupMainDiceDRight',
                 botHash = plugin_event.bot_info.hash
             )
-            if rd_para_main_str != None and not flag_have_para and flag_roll_mode in ['r', 'rx']:
-                rd_para_str = rd_para_main_str
+            # FATE规则时无视主骰设置
+            if tmp_template_name and tmp_template_name.lower() in ['fate']:
+                # FATE规则不使用主骰设置
+                pass
+            else:
+                if rd_para_main_str != None and not flag_have_para and flag_roll_mode in ['r', 'rx']:
+                    rd_para_str = rd_para_main_str
+            # 确保 tmp_template_customDefault 是有效的字典
+            if tmp_template_customDefault is None:
+                tmp_template_customDefault = {}
             tmp_template_customDefault = copy.deepcopy(tmp_template_customDefault)
-            if type(rd_para_main_D_right) == int:
-                if type(tmp_template_customDefault) != dict:
-                    tmp_template_customDefault = {}
+            # FATE规则时不修改D右值
+            if tmp_template_name and tmp_template_name.lower() not in ['fate']:
+                if type(rd_para_main_D_right) == int:
+                    if type(tmp_template_customDefault) != dict:
+                        tmp_template_customDefault = {}
                     if 'd' not in tmp_template_customDefault:
                         tmp_template_customDefault['d'] = {}
-                tmp_template_customDefault['d']['rightD'] = rd_para_main_D_right
+                    tmp_template_customDefault['d']['rightD'] = rd_para_main_D_right
             if roll_times_count == 1:
                 rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_template_customDefault, valueTable = skill_valueTable)
                 rd_para.ruleMode = tmp_ruleMode

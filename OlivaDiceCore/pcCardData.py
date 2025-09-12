@@ -497,6 +497,7 @@ dictPcCardTemplateDefaultTemp = {
             '手枪': 20,
             '步霰': 25,
             '斗殴': 20,
+            'SANMAX': 99,
             'SANMAXADD': 0,
             'HPMAXADD': 0,
             'MPMAXADD': 0
@@ -1023,6 +1024,7 @@ dictPcCardTemplateDefaultTemp = {
             '手枪': 20,
             '步霰': 25,
             '斗殴': 20,
+            'SANMAX': 99,
             'SANMAXADD': 0,
             'HPMAXADD': 0,
             'MPMAXADD': 0
