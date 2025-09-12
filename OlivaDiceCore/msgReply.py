@@ -391,8 +391,8 @@ def unity_reply(plugin_event, Proc):
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBecomeMasterAlready'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
-                if isMatchWordStart(tmp_reast_str, 'exit'):
-                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'exit')
+                if isMatchWordStart(tmp_reast_str, ['exit','bye']):
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['exit','bye'])
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
                     tmp_reast_str = tmp_reast_str.rstrip(' ')
                     tmp_group_id = None
@@ -1986,6 +1986,9 @@ def unity_reply(plugin_event, Proc):
                     else:
                         dictTValue['tPcSelection'] = dictTValue['tName']
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRename'], dictTValue)
+                    is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
+                    if is_new_card:
+                        OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                     trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
             else:
@@ -2208,12 +2211,16 @@ def unity_reply(plugin_event, Proc):
             tmp_reply_str_1 = ''
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['st','pc'])
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            forced_is_new_card = False
             tmp_skill_name = None
             tmp_skill_value = None
             tmp_skill_name_find = None
             tmp_skill_value_find = 0
             tmp_skill_pair_list = []
             if isMatchWordStart(tmp_reast_str, 'show', fullMatch = True):
+                is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
+                if is_new_card:
+                    OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                 tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
                     tmp_pc_id,
                     tmp_pc_platform
@@ -2339,6 +2346,9 @@ def unity_reply(plugin_event, Proc):
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'show'):
+                is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
+                if is_new_card:
+                    OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'show')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 tmp_pcCardRule = 'default'
@@ -2568,11 +2578,17 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSet'], dictTValue)
                     else:
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetError'], dictTValue)
+                    is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
+                    if is_new_card:
+                        OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                     trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'init'):
                 if is_at: return
+                is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
+                if is_new_card:
+                    OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'init')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 flag_force_init = False
@@ -2676,6 +2692,7 @@ def unity_reply(plugin_event, Proc):
                             '__new',
                             tmp_pc_name
                         )
+                        OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event)
                         dictTValue['tPcSelection'] = tmp_pc_name
                         if is_at:
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcNewAtOther'], dictTValue)
@@ -2752,6 +2769,7 @@ def unity_reply(plugin_event, Proc):
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcClear'], dictTValue)
                 else:
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcClearNone'], dictTValue)
+                OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                 trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
@@ -2892,6 +2910,9 @@ def unity_reply(plugin_event, Proc):
                             dictTValue
                         )
                     trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
+                    is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
+                    if is_new_card:
+                        OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
             elif isMatchWordStart(tmp_reast_str, 'temp'):
@@ -3265,6 +3286,9 @@ def unity_reply(plugin_event, Proc):
                 else:
                     dictTValue['tBlockName'] = tmp_block_name
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcBlockRmNone'], dictTValue)
+                is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
+                if is_new_card:
+                    OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'export'):
@@ -3371,6 +3395,9 @@ def unity_reply(plugin_event, Proc):
                     tmp_pc_id = at_user_id if at_user_id else plugin_event.data.user_id
                     tmp_pc_platform = plugin_event.platform['platform']
                     tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+                    is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
+                    if is_new_card:
+                        OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                     pc_skills = OlivaDiceCore.pcCard.pcCardDataGetByPcName(tmp_pcHash, hagId=tmp_hagID)
                     pc_skill_names = [s.upper() for s in pc_skills.keys() if not s.startswith('__')]
                     # 预处理字符串，在特定字母先查找技能名，找到技能名后添加空格
@@ -3603,6 +3630,7 @@ def unity_reply(plugin_event, Proc):
                         tmp_reast_str = tmp_reast_str[1:]
                     if tmp_pc_name != None:
                         tmp_pc_name = tmp_pc_name.strip()
+                        forced_is_new_card = True
                     if tmp_pc_name == '':
                         tmp_pc_name = None
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -3727,6 +3755,9 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetSkillValueAtOther'], dictTValue)
                     else:
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetSkillValue'], dictTValue)
+                    is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id, forced_is_new_card)
+                    if is_new_card:
+                        OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id, tmp_pc_name)
                     trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                     replyMsg(plugin_event, tmp_reply_str + tmp_notice)
                     return
