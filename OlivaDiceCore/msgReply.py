@@ -2212,6 +2212,7 @@ def unity_reply(plugin_event, Proc):
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['st','pc'])
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             forced_is_new_card = False
+            forced_is_new_card_time = 0
             tmp_skill_name = None
             tmp_skill_value = None
             tmp_skill_name_find = None
@@ -3392,7 +3393,6 @@ def unity_reply(plugin_event, Proc):
                         # 检查人物卡是否存在
                         tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
                         existing_cards = OlivaDiceCore.pcCard.pcCardDataGetUserAll(tmp_pcHash)
-                        print(existing_cards)
                         # 如果人物卡不存在或者是空的，才设置forced_is_new_card为True
                         if card_name not in existing_cards or not existing_cards[card_name]:
                             forced_is_new_card = True
@@ -3751,6 +3751,9 @@ def unity_reply(plugin_event, Proc):
                                 flag_mode = 'rec',
                                 enableFalse = False
                             )
+                        if forced_is_new_card and forced_is_new_card_time == 0:
+                            forced_is_new_card_time = 1
+                            OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id, tmp_pc_name)
                     if special_skills:
                         dictTValue['tSpecialSkills'] = '、'.join([f'[{skill}]' for skill in special_skills])
                         tmp_notice = OlivaDiceCore.msgCustomManager.formatReplySTR(
@@ -3762,9 +3765,6 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetSkillValueAtOther'], dictTValue)
                     else:
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetSkillValue'], dictTValue)
-                    is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id, forced_is_new_card)
-                    if is_new_card:
-                        OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id, tmp_pc_name)
                     trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                     replyMsg(plugin_event, tmp_reply_str + tmp_notice)
                     return
