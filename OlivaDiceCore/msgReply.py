@@ -3375,6 +3375,7 @@ def unity_reply(plugin_event, Proc):
                 reply_messages = []
                 special_skills = []
                 op_list = OlivaDiceCore.msgReplyModel.op_list_get()
+                assign_op = '='
                 is_pass = False
                 # 检查是否需要跳过
                 if not any(op in tmp_reast_str_new for op in op_list) or tmp_reast_str_new.startswith('&'):
@@ -3383,12 +3384,18 @@ def unity_reply(plugin_event, Proc):
                 dash_pos = tmp_reast_str_new.find('-')
                 if dash_pos > 0:
                     rest_after_dash = tmp_reast_str_new[dash_pos+1:].strip()
+                    card_name = tmp_reast_str_new[:dash_pos].strip()
                     # 录卡格式判断 - 只有当后面跟着非数字、非运算符、非d且不是表达式时才跳过
                     if rest_after_dash and not (rest_after_dash[0].isdigit() or rest_after_dash[0] in op_list + [assign_op] or 
                                               (len(rest_after_dash) > 1 and rest_after_dash[0].upper() == 'D' and rest_after_dash[1].isdigit())):
                         is_pass = True
-                        # 是录卡模式直接覆盖人物卡模板
-                        forced_is_new_card = True
+                        # 检查人物卡是否存在
+                        tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+                        existing_cards = OlivaDiceCore.pcCard.pcCardDataGetUserAll(tmp_pcHash)
+                        print(existing_cards)
+                        # 如果人物卡不存在或者是空的，才设置forced_is_new_card为True
+                        if card_name not in existing_cards or not existing_cards[card_name]:
+                            forced_is_new_card = True
                 if is_pass:
                     pass
                 else:
