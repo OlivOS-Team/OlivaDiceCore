@@ -2247,7 +2247,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
                 default_skill_values = tmp_template.get('defaultSkillValue', {}) if tmp_template else {}
                 for tmp_dict_pc_card_key in tmp_dict_pc_card:
-                    # 跳过值为0且与默认值相同的技能
+                    # 跳过值为0的技能
                     skill_value = tmp_dict_pc_card[tmp_dict_pc_card_key]
                     if skill_value == 0:
                         default_value = default_skill_values.get(tmp_dict_pc_card_key, 0)
@@ -2284,13 +2284,28 @@ def unity_reply(plugin_event, Proc):
                         tmp_dict_pc_card_key,
                         tmp_dict_pc_card_dump[tmp_dict_pc_card_key]
                     )
-                    if tmp_dict_pc_card_key_core in tmp_enhanceList:
-                        tmp_reply_str_1_list_this = '[*]' + tmp_reply_str_1_list_this
+                    # 确定技能属于哪个分组
                     for tmp_skill_dict_this in tmp_skill_dict:
                         if type(tmp_skill_dict[tmp_skill_dict_this]) == list:
                             if tmp_dict_pc_card_key_core in tmp_skill_dict[tmp_skill_dict_this]:
                                 flag_hit_skill_list_name = tmp_skill_dict_this
                                 break
+                    # 检查标记条件
+                    is_enhanced = tmp_dict_pc_card_key_core in tmp_enhanceList
+                    is_non_default = False
+                    # 对非"其它"分组的技能，检查是否与默认值不同
+                    if flag_hit_skill_list_name != flag_hit_skill_list_name_default:
+                        current_value = tmp_dict_pc_card_dump[tmp_dict_pc_card_key]
+                        default_value = default_skill_values.get(tmp_dict_pc_card_key_core, 0)
+                        if current_value != default_value:
+                            is_non_default = True
+                    # 根据条件组合标记
+                    if is_enhanced and is_non_default:
+                        tmp_reply_str_1_list_this = '[*/+]' + tmp_reply_str_1_list_this
+                    elif is_enhanced:
+                        tmp_reply_str_1_list_this = '[*]' + tmp_reply_str_1_list_this
+                    elif is_non_default:
+                        tmp_reply_str_1_list_this = '[+]' + tmp_reply_str_1_list_this
                     if flag_hit_skill_list_name not in tmp_reply_str_1_dict:
                         tmp_reply_str_1_dict[flag_hit_skill_list_name] = []
                     tmp_reply_str_1_dict[flag_hit_skill_list_name].append(tmp_reply_str_1_list_this)
@@ -2298,7 +2313,7 @@ def unity_reply(plugin_event, Proc):
                 for tmp_reply_str_1_dict_this in tmp_reply_str_1_dict:
                     # 按数值大小排序（从大到小）
                     tmp_reply_str_1_dict[tmp_reply_str_1_dict_this].sort(
-                        key=lambda x: int(x.split(':')[-1]) if x.split(':')[-1].replace('[*]', '').isdigit() else 0,
+                        key=lambda x: int(x.split(':')[-1]) if x.split(':')[-1].replace('[*]', '').replace('[+]', '').replace('[*/+]', '').isdigit() else 0,
                         reverse=True
                     )
                 for tmp_reply_str_1_dict_this in tmp_reply_str_1_dict:
