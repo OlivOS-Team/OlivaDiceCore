@@ -5431,15 +5431,25 @@ def unity_reply(plugin_event, Proc):
                 userConfigKey = 'groupMainDiceDRight',
                 botHash = plugin_event.bot_info.hash
             )
-            if rd_para_main_str != None and not flag_have_para and flag_roll_mode in ['r', 'rx']:
-                rd_para_str = rd_para_main_str
+            # FATE规则时无视主骰设置
+            if tmp_template_name and tmp_template_name.lower() in ['fate']:
+                # FATE规则不使用主骰设置
+                pass
+            else:
+                if rd_para_main_str != None and not flag_have_para and flag_roll_mode in ['r', 'rx']:
+                    rd_para_str = rd_para_main_str
+            # 确保 tmp_template_customDefault 是有效的字典
+            if tmp_template_customDefault is None:
+                tmp_template_customDefault = {}
             tmp_template_customDefault = copy.deepcopy(tmp_template_customDefault)
-            if type(rd_para_main_D_right) == int:
-                if type(tmp_template_customDefault) != dict:
-                    tmp_template_customDefault = {}
+            # FATE规则时不修改D右值
+            if tmp_template_name and tmp_template_name.lower() not in ['fate']:
+                if type(rd_para_main_D_right) == int:
+                    if type(tmp_template_customDefault) != dict:
+                        tmp_template_customDefault = {}
                     if 'd' not in tmp_template_customDefault:
                         tmp_template_customDefault['d'] = {}
-                tmp_template_customDefault['d']['rightD'] = rd_para_main_D_right
+                    tmp_template_customDefault['d']['rightD'] = rd_para_main_D_right
             if roll_times_count == 1:
                 rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_template_customDefault, valueTable = skill_valueTable)
                 rd_para.ruleMode = tmp_ruleMode
