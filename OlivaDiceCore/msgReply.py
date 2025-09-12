@@ -3375,10 +3375,9 @@ def unity_reply(plugin_event, Proc):
                 reply_messages = []
                 special_skills = []
                 op_list = OlivaDiceCore.msgReplyModel.op_list_get()
-                assign_op = '='
                 is_pass = False
                 # 检查是否需要跳过
-                if not any(op in tmp_reast_str_new for op in op_list + [assign_op]) or tmp_reast_str_new.startswith('&'):
+                if not any(op in tmp_reast_str_new for op in op_list) or tmp_reast_str_new.startswith('&'):
                     is_pass = True
                 # 检查是否是录卡格式（字符串-字符串）
                 dash_pos = tmp_reast_str_new.find('-')
