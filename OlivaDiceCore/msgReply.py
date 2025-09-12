@@ -3764,9 +3764,9 @@ def unity_reply(plugin_event, Proc):
             else:
                 tmp_pcCardRule = 'default'
                 tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
-                is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id, forced_is_new_card)
+                is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
                 if is_new_card:
-                    OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id, tmp_pc_name)
+                    OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                 pc_skills = OlivaDiceCore.pcCard.pcCardDataGetByPcName(tmp_pcHash, hagId=tmp_hagID)
                 pc_skill_names = [s.upper() for s in pc_skills.keys() if not s.startswith('__')]
                 tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
