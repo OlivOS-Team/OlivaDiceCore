@@ -1246,8 +1246,8 @@ def unity_reply(plugin_event, Proc):
                         else:
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
-            elif isMatchWordStart(tmp_reast_str, 'exit'):
-                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'exit')
+            elif isMatchWordStart(tmp_reast_str, ['exit','bye']):
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['exit','bye'])
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 tmp_reast_str = tmp_reast_str.rstrip(' ')
                 if flag_is_from_group and tmp_reast_str in tmp_end_list:
@@ -1256,6 +1256,9 @@ def unity_reply(plugin_event, Proc):
                         replyMsg(plugin_event, tmp_reply_str)
                         time.sleep(1)
                         plugin_event.set_group_leave(plugin_event.data.group_id)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'summary', fullMatch = True) and flag_is_from_master:
                 tmp_reply_str = ''
                 tmp_reply_str += OlivaDiceCore.data.bot_summary
