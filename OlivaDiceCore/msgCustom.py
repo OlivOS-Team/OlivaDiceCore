@@ -378,6 +378,7 @@ dictTValue = {
     'tOldTeamName': '',
     'tNewTeamName': '',
     'strTeamSkillUpdate': '',
+    'tDefaultShow': '',
 }
 
 dictSetCOCDetail = {
