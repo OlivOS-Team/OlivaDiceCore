@@ -2294,6 +2294,13 @@ def unity_reply(plugin_event, Proc):
                     if flag_hit_skill_list_name not in tmp_reply_str_1_dict:
                         tmp_reply_str_1_dict[flag_hit_skill_list_name] = []
                     tmp_reply_str_1_dict[flag_hit_skill_list_name].append(tmp_reply_str_1_list_this)
+                # 对每个技能组内的技能按数值排序
+                for tmp_reply_str_1_dict_this in tmp_reply_str_1_dict:
+                    # 按数值大小排序（从大到小）
+                    tmp_reply_str_1_dict[tmp_reply_str_1_dict_this].sort(
+                        key=lambda x: int(x.split(':')[-1]) if x.split(':')[-1].replace('[*]', '').isdigit() else 0,
+                        reverse=True
+                    )
                 for tmp_reply_str_1_dict_this in tmp_reply_str_1_dict:
                     if tmp_reply_str_1_dict_this != flag_hit_skill_list_name_default:
                         tmp_reply_str_1_list.append(
