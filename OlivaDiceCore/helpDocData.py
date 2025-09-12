@@ -164,6 +164,8 @@ He dismissed the dismiss as worthless.
 .st new [人物卡名]    新建人物卡
 .st set [人物卡名]    切换人物卡
 .st lock/unlock    锁定/解锁人物卡
+.st defaultshow    切换非默认值显示模式
+.st defaultshow on/off    开启/关闭非默认值显示模式
 .st show    展示人物卡
 .st show [技能名]([技能名2][技能名3]...)   展示人物卡技能
 .st del [人物卡名]    删除人物卡

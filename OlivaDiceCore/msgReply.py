@@ -2246,13 +2246,46 @@ def unity_reply(plugin_event, Proc):
                 )
                 tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
                 default_skill_values = tmp_template.get('defaultSkillValue', {}) if tmp_template else {}
+                # 检查是否开启默认值显示模式
+                show_default_enabled = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_pc_id,
+                    userType = 'user',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'showDefault',
+                    botHash = plugin_event.bot_info.hash,
+                    default = False
+                )
+                # 保存原始数据用于标记比较
+                tmp_dict_pc_card_original = tmp_dict_pc_card.copy()
+                processed_core_skills = set()  # 用于去重别名技能
                 for tmp_dict_pc_card_key in tmp_dict_pc_card:
-                    # 跳过值为0的技能
                     skill_value = tmp_dict_pc_card[tmp_dict_pc_card_key]
-                    if skill_value == 0:
-                        default_value = default_skill_values.get(tmp_dict_pc_card_key, 0)
+                    # 获取技能的核心名称用于去重检查
+                    core_skill_name = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
+                        tmp_pcHash,
+                        tmp_dict_pc_card_key,
+                        hagId = tmp_hagID
+                    )
+                    # 如果这个核心技能已经处理过，跳过（去重别名）
+                    if core_skill_name in processed_core_skills:
+                        continue
+                    processed_core_skills.add(core_skill_name)
+                    
+                    # 尝试用原始技能名获取默认值，如果没找到再用核心技能名
+                    default_value = default_skill_values.get(tmp_dict_pc_card_key, 
+                                   default_skill_values.get(core_skill_name, 0))
+                    
+                    if show_default_enabled:
+                        # 默认值显示模式：只显示非默认值的技能
                         if skill_value == default_value:
-                            continue
+                            continue  # 跳过等于默认值的技能
+                        display_value = skill_value
+                    else:
+                        # 正常模式：跳过值为0且与默认值相同的技能
+                        if skill_value == 0:
+                            if skill_value == default_value:
+                                continue
+                        display_value = skill_value
                     tmp_dict_pc_card_dump[
                         OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
                             tmp_pcHash,
@@ -2260,7 +2293,7 @@ def unity_reply(plugin_event, Proc):
                             flagShow = True,
                             hagId = tmp_hagID
                         )
-                    ] = tmp_dict_pc_card[tmp_dict_pc_card_key]
+                    ] = display_value
                 tmp_reply_str_1_list = []
                 tmp_reply_str_1_dict = {}
                 tmp_enhanceList = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
@@ -2293,19 +2326,37 @@ def unity_reply(plugin_event, Proc):
                     # 检查标记条件
                     is_enhanced = tmp_dict_pc_card_key_core in tmp_enhanceList
                     is_non_default = False
-                    # 对非"其它"分组的技能，检查是否与默认值不同
-                    if flag_hit_skill_list_name != flag_hit_skill_list_name_default:
-                        current_value = tmp_dict_pc_card_dump[tmp_dict_pc_card_key]
-                        default_value = default_skill_values.get(tmp_dict_pc_card_key_core, 0)
-                        if current_value != default_value:
+                    # 对非"其它"分组的技能，检查是否与默认值不同（仅在非默认值显示模式下）
+                    if (not show_default_enabled and 
+                        flag_hit_skill_list_name != flag_hit_skill_list_name_default):
+                        # 使用原始值而不是显示值进行比较，与前面逻辑保持一致的默认值获取方式
+                        original_value = tmp_dict_pc_card_original[tmp_dict_pc_card_key]
+                        # 寻找对应的原始技能键来获取默认值
+                        original_skill_key = None
+                        for orig_key in tmp_dict_pc_card_original:
+                            if OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(tmp_pcHash, orig_key, hagId=tmp_hagID) == tmp_dict_pc_card_key_core:
+                                original_skill_key = orig_key
+                                break
+                        if original_skill_key:
+                            default_value = default_skill_values.get(original_skill_key, 
+                                           default_skill_values.get(tmp_dict_pc_card_key_core, 0))
+                        else:
+                            default_value = default_skill_values.get(tmp_dict_pc_card_key_core, 0)
+                        if original_value != default_value:
                             is_non_default = True
                     # 根据条件组合标记
-                    if is_enhanced and is_non_default:
-                        tmp_reply_str_1_list_this = '[*/+]' + tmp_reply_str_1_list_this
-                    elif is_enhanced:
-                        tmp_reply_str_1_list_this = '[*]' + tmp_reply_str_1_list_this
-                    elif is_non_default:
-                        tmp_reply_str_1_list_this = '[+]' + tmp_reply_str_1_list_this
+                    if show_default_enabled:
+                        # 默认值显示模式下只保留增强标记
+                        if is_enhanced:
+                            tmp_reply_str_1_list_this = '[*]' + tmp_reply_str_1_list_this
+                    else:
+                        # 正常模式下显示所有标记
+                        if is_enhanced and is_non_default:
+                            tmp_reply_str_1_list_this = '[*/+]' + tmp_reply_str_1_list_this
+                        elif is_enhanced:
+                            tmp_reply_str_1_list_this = '[*]' + tmp_reply_str_1_list_this
+                        elif is_non_default:
+                            tmp_reply_str_1_list_this = '[+]' + tmp_reply_str_1_list_this
                     if flag_hit_skill_list_name not in tmp_reply_str_1_dict:
                         tmp_reply_str_1_dict[flag_hit_skill_list_name] = []
                     tmp_reply_str_1_dict[flag_hit_skill_list_name].append(tmp_reply_str_1_list_this)
@@ -2362,6 +2413,11 @@ def unity_reply(plugin_event, Proc):
                             )
                 tmp_reply_str_1 = '\n'.join(tmp_reply_str_1_list)
                 dictTValue['tPcShow'] = tmp_reply_str_1
+                # 根据defaultshow状态设置不同的说明文字
+                if show_default_enabled:
+                    dictTValue['tDefaultShow'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDefaultShowOn'], dictTValue)
+                else:
+                    dictTValue['tDefaultShow'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDefaultShowOff'], dictTValue)
                 if is_at:
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowAtOther'], dictTValue)
                 else:
@@ -2759,6 +2815,88 @@ def unity_reply(plugin_event, Proc):
                 trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
+            elif isMatchWordStart(tmp_reast_str, ['defaultshow','ds'], isCommand = True):
+                if is_at: return
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['defaultshow','ds'])
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                current_show_default = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_pc_id,
+                    userType = 'user',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'showDefault',
+                    botHash = plugin_event.bot_info.hash,
+                    default = False
+                )
+                if isMatchWordStart(tmp_reast_str, 'on', fullMatch = True):
+                    # defaultshow on 命令
+                    if current_show_default:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strShowDefaultAlreadyOn'], dictTValue)
+                    else:
+                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                            userConfigKey = 'showDefault',
+                            userConfigValue = True,
+                            botHash = plugin_event.bot_info.hash,
+                            userId = tmp_pc_id,
+                            userType = 'user',
+                            platform = tmp_pc_platform
+                        )
+                        OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                            userHash = OlivaDiceCore.userConfig.getUserHash(
+                                userId = tmp_pc_id,
+                                userType = 'user',
+                                platform = tmp_pc_platform
+                            )
+                        )
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strShowDefaultOn'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
+                elif isMatchWordStart(tmp_reast_str, 'off', fullMatch = True):
+                    # defaultshow off 命令
+                    if not current_show_default:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strShowDefaultAlreadyOff'], dictTValue)
+                    else:
+                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                            userConfigKey = 'showDefault',
+                            userConfigValue = False,
+                            botHash = plugin_event.bot_info.hash,
+                            userId = tmp_pc_id,
+                            userType = 'user',
+                            platform = tmp_pc_platform
+                        )
+                        OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                            userHash = OlivaDiceCore.userConfig.getUserHash(
+                                userId = tmp_pc_id,
+                                userType = 'user',
+                                platform = tmp_pc_platform
+                            )
+                        )
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strShowDefaultOff'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
+                else:
+                    # 切换模式
+                    new_show_default = not current_show_default
+                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                        userConfigKey = 'showDefault',
+                        userConfigValue = new_show_default,
+                        botHash = plugin_event.bot_info.hash,
+                        userId = tmp_pc_id,
+                        userType = 'user',
+                        platform = tmp_pc_platform
+                    )
+                    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                        userHash = OlivaDiceCore.userConfig.getUserHash(
+                            userId = tmp_pc_id,
+                            userType = 'user',
+                            platform = tmp_pc_platform
+                        )
+                    )
+                    if new_show_default:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strShowDefaultOn'], dictTValue)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strShowDefaultOff'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
             elif isMatchWordStart(tmp_reast_str, ['clear', 'clr'], fullMatch = True):
                 if is_at: return
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['clear', 'clr'])
