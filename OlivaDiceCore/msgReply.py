@@ -3640,6 +3640,9 @@ def unity_reply(plugin_event, Proc):
                             continue
                         
                         tmp_skill_name = tmp_skill_name.strip()
+                        # 移除技能名末尾的分隔符 = : ：
+                        if tmp_skill_name and tmp_skill_name[-1] in ['=', ':', '：']:
+                            tmp_skill_name = tmp_skill_name[:-1]
                         tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode = 'skillName')
                         if not OlivaDiceCore.pcCard.checkPcName(tmp_skill_name):
                             continue
@@ -3814,10 +3817,17 @@ def unity_reply(plugin_event, Proc):
                 tmp_skill_value = None
                 # 前面判断过映射了，这里不需要再判断了，并且通过 break 能跳出循环，不影响
                 if flag_is_mapping:
-                    tmp_reast_str_list_0 = tmp_reast_str.split('=')
-                    if len(tmp_reast_str_list_0) > 1:
+                    # 支持 = : ： 三种分隔符
+                    tmp_reast_str_list_0 = None
+                    used_separator = None
+                    for separator in ['=', ':', '：']:
+                        if separator in tmp_reast_str:
+                            tmp_reast_str_list_0 = tmp_reast_str.split(separator)
+                            used_separator = separator
+                            break
+                    if tmp_reast_str_list_0 and len(tmp_reast_str_list_0) > 1:
                         tmp_skill_name = tmp_reast_str_list_0[0][1:].upper()
-                        tmp_reast_str = '='.join(tmp_reast_str_list_0[1:])
+                        tmp_reast_str = used_separator.join(tmp_reast_str_list_0[1:])
                         # # 不进行表达式解析，故这里注释掉
                         # if len(tmp_reast_str) > 0:
                         #     [tmp_skill_value, tmp_reast_str] = getExpression(tmp_reast_str)
@@ -3889,6 +3899,24 @@ def unity_reply(plugin_event, Proc):
                     if tmp_pc_name != None:
                         dictTValue['tName'] = tmp_pc_name
                     for tmp_skill_pair_this in tmp_skill_pair_list:
+                        if forced_is_new_card and forced_is_new_card_time == 0:
+                            forced_is_new_card_time = 1
+                            # 先创建新的人物卡
+                            tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+                            OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
+                                tmp_pcHash,
+                                '__new',
+                                0,
+                                dictTValue['tName'],
+                                hagId = tmp_hagID
+                            )
+                            OlivaDiceCore.pcCard.pcCardDataDelBySkillName(
+                                tmp_pcHash,
+                                '__new',
+                                dictTValue['tName']
+                            )
+                            # 再更改模板
+                            OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id, dictTValue['tName'])
                         if type(tmp_skill_pair_this[1]) == int:
                             OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
                                 OlivaDiceCore.pcCard.getPcHash(
@@ -3914,9 +3942,6 @@ def unity_reply(plugin_event, Proc):
                                 flag_mode = 'rec',
                                 enableFalse = False
                             )
-                        if forced_is_new_card and forced_is_new_card_time == 0:
-                            forced_is_new_card_time = 1
-                            OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id, tmp_pc_name)
                     if special_skills:
                         dictTValue['tSpecialSkills'] = '、'.join([f'[{skill}]' for skill in special_skills])
                         tmp_notice = OlivaDiceCore.msgCustomManager.formatReplySTR(
