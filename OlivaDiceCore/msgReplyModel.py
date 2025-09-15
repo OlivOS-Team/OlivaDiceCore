@@ -979,6 +979,7 @@ def setPcNoteOrRecData(
                 if flag_mode == 'rec':
                     dictTValue['tSkillName'] = tmp_key
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRecRm'], dictTValue)
+                    OlivaDiceCore.msgReply.trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                     OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
                 else:
                     dictTValue['tSkillName'] = tmp_key
@@ -1038,6 +1039,7 @@ def setPcNoteOrRecData(
         else:
             tmp_notice = ''
         if enableFalse:
+            OlivaDiceCore.msgReply.trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetSkillValue'], dictTValue)
             OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str + tmp_notice)
     elif tmp_key != None and tmp_value == None:
@@ -1046,6 +1048,7 @@ def setPcNoteOrRecData(
             if enableFalse:
                 dictTValue['tSkillName'] = tmp_key
                 dictTValue['tSkillValue'] = tmp_value
+                OlivaDiceCore.msgReply.trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcGetSingleSkillValue'], dictTValue)
                 OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
 

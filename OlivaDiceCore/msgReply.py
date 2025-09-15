@@ -3275,11 +3275,18 @@ def unity_reply(plugin_event, Proc):
                         is_remove = True
                         tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rm')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
-                tmp_reast_str = tmp_reast_str.upper()
+                tmp_reast_str_original = tmp_reast_str
+                # 根据模式决定是否对字符串进行大写处理
+                if flag_mode == 'rec':
+                    tmp_reast_str = tmp_reast_str.upper()
                 tmp_key = None
                 tmp_value = None
                 tmp_reast_str_list = tmp_reast_str.split(' ')
                 tmp_reast_str_list = [tmp_reast_str_list_this for tmp_reast_str_list_this in tmp_reast_str_list if tmp_reast_str_list_this != '']
+                # 使用原始字符串列表来提取值（保持原始大小写）
+                tmp_reast_str_list_original = tmp_reast_str_original.split(' ')
+                tmp_reast_str_list_original = [tmp_reast_str_list_this for tmp_reast_str_list_this in tmp_reast_str_list_original if tmp_reast_str_list_this != '']
+                
                 if len(tmp_reast_str_list) > 0:
                     tmp_key = tmp_reast_str_list[0]
                     tmp_key = OlivaDiceCore.pcCard.fixName(tmp_key)
@@ -3291,9 +3298,11 @@ def unity_reply(plugin_event, Proc):
                             tmp_value = None
                     else:
                         if flag_mode == 'note':
-                            if len(tmp_reast_str_list) > 1:
-                                tmp_value = ' '.join(tmp_reast_str_list[1:])
+                            # note 模式：使用原始字符串保持大小写
+                            if len(tmp_reast_str_list_original) > 1:
+                                tmp_value = ' '.join(tmp_reast_str_list_original[1:])
                         elif flag_mode == 'rec':
+                            # rec 模式：强制大写
                             if len(tmp_reast_str_list) > 1:
                                 tmp_value = tmp_reast_str_list[1]
                 OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
@@ -3520,12 +3529,34 @@ def unity_reply(plugin_event, Proc):
                         if not is_alias and skill_key not in processed_skills:
                             skill_pairs.append(f"{skill_key}{skill_value}")
                             processed_skills.add(skill_key)
-                if not skill_pairs:
+                export_lines = []
+                # 添加技能导出
+                if skill_pairs:
+                    export_lines.append(f".st {tmp_pc_name}-" + "".join(skill_pairs))
+                # 添加映射导出
+                tmp_mappingRecord = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                    pcHash = tmp_pcHash,
+                    pcCardName = tmp_pc_name,
+                    dataKey = 'mappingRecord',
+                    resDefault = {}
+                )
+                for mapping_name, mapping_expr in tmp_mappingRecord.items():
+                    export_lines.append(f".st &{mapping_name}={mapping_expr}")
+                # 添加记录导出
+                tmp_noteRecord = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                    pcHash = tmp_pcHash,
+                    pcCardName = tmp_pc_name,
+                    dataKey = 'noteRecord',
+                    resDefault = {}
+                )
+                for note_name, note_value in tmp_noteRecord.items():
+                    export_lines.append(f".st note {note_name} {note_value}")
+                if not export_lines:
                     dictTValue['tPcInputCard'] = tmp_pc_name
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcCardNoSkill'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
-                export_str = f"{tmp_pc_name}-" + "".join(skill_pairs)
+                export_str = '\n'.join(export_lines)
                 dictTValue['tPcInputCard'] = tmp_pc_name
                 dictTValue['tExport'] = export_str
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcCardExport'], dictTValue)
