@@ -3275,37 +3275,35 @@ def unity_reply(plugin_event, Proc):
                 flag_mode = 'note'
                 keyName = 'noteRecord'
                 is_remove = False
-                # 根据指令类型选择使用原始消息还是转半角消息
                 if isMatchWordStart(tmp_reast_str_original, 'note'):
                     # note 使用原始消息（保持全角/半角）
-                    tmp_reast_str_work = getMatchWordStartRight(tmp_reast_str_original, 'note')
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str_original, 'note')
                     flag_mode = 'note'
                     keyName = 'noteRecord'
-                    tmp_reast_str_work = skipSpaceStart(tmp_reast_str_work)
-                    if isMatchWordStart(tmp_reast_str_work, 'rm'):
+                    tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                    if isMatchWordStart(tmp_reast_str, 'rm'):
                         is_remove = True
-                        tmp_reast_str_work = getMatchWordStartRight(tmp_reast_str_work, 'rm')
+                        tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rm')
                 elif isMatchWordStart(tmp_reast_str, 'rec'):
                     # rec 使用转半角消息
-                    tmp_reast_str_work = getMatchWordStartRight(tmp_reast_str, 'rec')
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rec')
                     flag_mode = 'rec'
                     keyName = 'mappingRecord'
-                    tmp_reast_str_work = skipSpaceStart(tmp_reast_str_work)
-                    if isMatchWordStart(tmp_reast_str_work, 'rm'):
+                    tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                    if isMatchWordStart(tmp_reast_str, 'rm'):
                         is_remove = True
-                        tmp_reast_str_work = getMatchWordStartRight(tmp_reast_str_work, 'rm')
-                tmp_reast_str_work = skipSpaceStart(tmp_reast_str_work)
-                tmp_reast_str_for_processing = tmp_reast_str_work
+                        tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rm')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                tmp_reast_str_original = tmp_reast_str
                 # 根据模式决定是否对字符串进行大写处理
-                tmp_reast_str_upper = tmp_reast_str_for_processing
                 if flag_mode == 'rec':
-                    tmp_reast_str_upper = tmp_reast_str_for_processing.upper()
+                    tmp_reast_str = tmp_reast_str.upper()
                 tmp_key = None
                 tmp_value = None
-                tmp_reast_str_list = tmp_reast_str_upper.split(' ')
+                tmp_reast_str_list = tmp_reast_str.split(' ')
                 tmp_reast_str_list = [tmp_reast_str_list_this for tmp_reast_str_list_this in tmp_reast_str_list if tmp_reast_str_list_this != '']
                 # 使用原始字符串列表来提取值（保持原始大小写）
-                tmp_reast_str_list_original = tmp_reast_str_for_processing.split(' ')
+                tmp_reast_str_list_original = tmp_reast_str_original.split(' ')
                 tmp_reast_str_list_original = [tmp_reast_str_list_this for tmp_reast_str_list_this in tmp_reast_str_list_original if tmp_reast_str_list_this != '']
                 
                 if len(tmp_reast_str_list) > 0:
