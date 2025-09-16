@@ -3270,7 +3270,7 @@ def unity_reply(plugin_event, Proc):
                     trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
-            elif isMatchWordStart(tmp_reast_str, ['note', 'rec']) or isMatchWordStart(tmp_reast_str_original, ['note', 'rec']):
+            elif isMatchWordStart(tmp_reast_str_original, ['note', 'rec']):
                 if is_at: return
                 flag_mode = 'note'
                 keyName = 'noteRecord'
@@ -3284,9 +3284,10 @@ def unity_reply(plugin_event, Proc):
                     if isMatchWordStart(tmp_reast_str, 'rm'):
                         is_remove = True
                         tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rm')
-                elif isMatchWordStart(tmp_reast_str, 'rec'):
+                elif isMatchWordStart(tmp_reast_str_original, 'rec'):
                     # rec 使用转半角消息
-                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rec')
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str_original, 'rec')
+                    tmp_reast_str = to_half_width(tmp_reast_str)
                     flag_mode = 'rec'
                     keyName = 'mappingRecord'
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
