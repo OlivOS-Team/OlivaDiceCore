@@ -1118,6 +1118,8 @@ def unity_reply(plugin_event, Proc):
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAlreadyOn'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
                     else:
+                        if plugin_event.platform['platform'] in ['qqGuild']:
+                            return
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'off'):
@@ -1173,6 +1175,8 @@ def unity_reply(plugin_event, Proc):
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAlreadyOff'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
                     else:
+                        if plugin_event.platform['platform'] in ['qqGuild']:
+                            return
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'host'):
@@ -1210,6 +1214,8 @@ def unity_reply(plugin_event, Proc):
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotNotUnderHost'], dictTValue)
                                 replyMsg(plugin_event, tmp_reply_str)
                         else:
+                            if plugin_event.platform['platform'] in ['qqGuild']:
+                                return
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
                 elif isMatchWordStart(tmp_reast_str, 'off'):
@@ -1244,6 +1250,8 @@ def unity_reply(plugin_event, Proc):
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotNotUnderHost'], dictTValue)
                                 replyMsg(plugin_event, tmp_reply_str)
                         else:
+                            if plugin_event.platform['platform'] in ['qqGuild']:
+                                return
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, ['exit','bye']):
@@ -1257,6 +1265,8 @@ def unity_reply(plugin_event, Proc):
                         time.sleep(1)
                         plugin_event.set_group_leave(plugin_event.data.group_id)
                     else:
+                        if plugin_event.platform['platform'] in ['qqGuild']:
+                            return
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'summary', fullMatch = True) and flag_is_from_master:
@@ -1329,6 +1339,8 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strWelcomeDel'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                 else:
+                    if plugin_event.platform['platform'] in ['qqGuild']:
+                        return
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
             else:
@@ -6478,6 +6490,8 @@ def parse_at_user(plugin_event, tmp_reast_str, valDict, flag_is_from_group_admin
                 new_tmp_reast_str_parts.append(part.data['text'])
     
     if is_at:
+        if plugin_event.platform['platform'] in ['qqGuild']:
+            return
         # 检查发送者是否为管理员或群主
         if not (flag_is_from_group_admin or flag_is_from_master):
             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(

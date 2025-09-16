@@ -2991,6 +2991,7 @@ dictPcCardTemplateDefaultTemp = {
 # 特殊处理方法表
 dictPcCardMappingSpecial = {
     'default': ['体格', 'DB'],
+    '纯净COC7': ['体格', 'DB'],
     'COC7': ['体格', 'DB']
 }
 
