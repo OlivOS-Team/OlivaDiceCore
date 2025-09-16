@@ -192,7 +192,6 @@ def unity_reply(plugin_event, Proc):
             tmp_at_str_sub = OlivOS.messageAPI.PARA.at(plugin_event.data.extend['sub_self_id']).CQ()
             tmp_id_str_sub = str(plugin_event.data.extend['sub_self_id'])
     tmp_reast_str = plugin_event.data.message
-    tmp_reast_str = to_half_width(tmp_reast_str) # 转半角
     flag_force_reply = False
     flag_is_command = False
     flag_is_from_host = False
@@ -1295,17 +1294,23 @@ def unity_reply(plugin_event, Proc):
             plugin_event.set_block()
             return
         #放弃使用全前缀匹配方案
+        # 保存原始消息，用于welcome指令
+        tmp_reast_str_original = tmp_reast_str
+        # 转半角（除welcome指令外的其他指令使用转半角后的消息）
+        tmp_reast_str = to_half_width(tmp_reast_str)
+        
         if OlivaDiceCore.msgReplyModel.replyCONTEXT_fliter(tmp_reast_str):
             pass
-        elif isMatchWordStart(tmp_reast_str, 'welcome', isCommand = True):
-            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'welcome')
-            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+        elif isMatchWordStart(tmp_reast_str_original, 'welcome', isCommand = True):
+            # 对于welcome指令，使用原始消息而不是转半角后的消息
+            tmp_reast_str_welcome = getMatchWordStartRight(tmp_reast_str_original, 'welcome')
+            tmp_reast_str_welcome = skipSpaceStart(tmp_reast_str_welcome)
             if flag_is_from_group:
                 if (flag_is_from_group_have_admin and flag_is_from_group_admin) or flag_is_from_master:
-                    if len(tmp_reast_str) > 0:
+                    if len(tmp_reast_str_welcome) > 0:
                         OlivaDiceCore.userConfig.setUserConfigByKey(
                             userConfigKey = 'welcomeMsg',
-                            userConfigValue = tmp_reast_str,
+                            userConfigValue = tmp_reast_str_welcome,
                             botHash = plugin_event.bot_info.hash,
                             userId = tmp_hagID,
                             userType = 'group',
@@ -3265,38 +3270,42 @@ def unity_reply(plugin_event, Proc):
                     trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
-            elif isMatchWordStart(tmp_reast_str, ['note', 'rec']):
+            elif isMatchWordStart(tmp_reast_str, ['note', 'rec']) or isMatchWordStart(tmp_reast_str_original, ['note', 'rec']):
                 if is_at: return
                 flag_mode = 'note'
                 keyName = 'noteRecord'
                 is_remove = False
-                if isMatchWordStart(tmp_reast_str, 'note'):
-                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'note')
+                # 根据指令类型选择使用原始消息还是转半角消息
+                if isMatchWordStart(tmp_reast_str_original, 'note'):
+                    # note 使用原始消息（保持全角/半角）
+                    tmp_reast_str_work = getMatchWordStartRight(tmp_reast_str_original, 'note')
                     flag_mode = 'note'
                     keyName = 'noteRecord'
-                    tmp_reast_str = skipSpaceStart(tmp_reast_str)
-                    if isMatchWordStart(tmp_reast_str, 'rm'):
+                    tmp_reast_str_work = skipSpaceStart(tmp_reast_str_work)
+                    if isMatchWordStart(tmp_reast_str_work, 'rm'):
                         is_remove = True
-                        tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rm')
+                        tmp_reast_str_work = getMatchWordStartRight(tmp_reast_str_work, 'rm')
                 elif isMatchWordStart(tmp_reast_str, 'rec'):
-                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rec')
+                    # rec 使用转半角消息
+                    tmp_reast_str_work = getMatchWordStartRight(tmp_reast_str, 'rec')
                     flag_mode = 'rec'
                     keyName = 'mappingRecord'
-                    tmp_reast_str = skipSpaceStart(tmp_reast_str)
-                    if isMatchWordStart(tmp_reast_str, 'rm'):
+                    tmp_reast_str_work = skipSpaceStart(tmp_reast_str_work)
+                    if isMatchWordStart(tmp_reast_str_work, 'rm'):
                         is_remove = True
-                        tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rm')
-                tmp_reast_str = skipSpaceStart(tmp_reast_str)
-                tmp_reast_str_original = tmp_reast_str
+                        tmp_reast_str_work = getMatchWordStartRight(tmp_reast_str_work, 'rm')
+                tmp_reast_str_work = skipSpaceStart(tmp_reast_str_work)
+                tmp_reast_str_for_processing = tmp_reast_str_work
                 # 根据模式决定是否对字符串进行大写处理
+                tmp_reast_str_upper = tmp_reast_str_for_processing
                 if flag_mode == 'rec':
-                    tmp_reast_str = tmp_reast_str.upper()
+                    tmp_reast_str_upper = tmp_reast_str_for_processing.upper()
                 tmp_key = None
                 tmp_value = None
-                tmp_reast_str_list = tmp_reast_str.split(' ')
+                tmp_reast_str_list = tmp_reast_str_upper.split(' ')
                 tmp_reast_str_list = [tmp_reast_str_list_this for tmp_reast_str_list_this in tmp_reast_str_list if tmp_reast_str_list_this != '']
                 # 使用原始字符串列表来提取值（保持原始大小写）
-                tmp_reast_str_list_original = tmp_reast_str_original.split(' ')
+                tmp_reast_str_list_original = tmp_reast_str_for_processing.split(' ')
                 tmp_reast_str_list_original = [tmp_reast_str_list_this for tmp_reast_str_list_this in tmp_reast_str_list_original if tmp_reast_str_list_this != '']
                 
                 if len(tmp_reast_str_list) > 0:
