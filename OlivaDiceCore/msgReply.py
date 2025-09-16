@@ -2217,7 +2217,7 @@ def unity_reply(plugin_event, Proc):
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnPcCardNone'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
             return
-        elif isMatchWordStart(tmp_reast_str, ['st','pc'], isCommand = True):
+        elif isMatchWordStart(tmp_reast_str_original, ['st','pc'], isCommand = True):
             tmp_reply_str = ''
             is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, valDict, flag_is_from_group_admin)
             if is_at:
@@ -2229,8 +2229,9 @@ def unity_reply(plugin_event, Proc):
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
             tmp_reply_str_1 = ''
-            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['st','pc'])
-            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            tmp_reast_str_original = getMatchWordStartRight(tmp_reast_str_original, ['st','pc'])
+            tmp_reast_str_original = skipSpaceStart(tmp_reast_str_original)
+            tmp_reast_str = to_half_width(tmp_reast_str_original)
             forced_is_new_card = False
             forced_is_new_card_time = 0
             tmp_skill_name = None
