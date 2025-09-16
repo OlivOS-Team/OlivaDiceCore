@@ -192,7 +192,6 @@ def unity_reply(plugin_event, Proc):
             tmp_at_str_sub = OlivOS.messageAPI.PARA.at(plugin_event.data.extend['sub_self_id']).CQ()
             tmp_id_str_sub = str(plugin_event.data.extend['sub_self_id'])
     tmp_reast_str = plugin_event.data.message
-    tmp_reast_str = to_half_width(tmp_reast_str) # 转半角
     flag_force_reply = False
     flag_is_command = False
     flag_is_from_host = False
@@ -1118,6 +1117,8 @@ def unity_reply(plugin_event, Proc):
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAlreadyOn'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
                     else:
+                        if plugin_event.platform['platform'] in ['qqGuild']:
+                            return
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'off'):
@@ -1173,6 +1174,8 @@ def unity_reply(plugin_event, Proc):
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAlreadyOff'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
                     else:
+                        if plugin_event.platform['platform'] in ['qqGuild']:
+                            return
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'host'):
@@ -1210,6 +1213,8 @@ def unity_reply(plugin_event, Proc):
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotNotUnderHost'], dictTValue)
                                 replyMsg(plugin_event, tmp_reply_str)
                         else:
+                            if plugin_event.platform['platform'] in ['qqGuild']:
+                                return
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
                 elif isMatchWordStart(tmp_reast_str, 'off'):
@@ -1244,6 +1249,8 @@ def unity_reply(plugin_event, Proc):
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotNotUnderHost'], dictTValue)
                                 replyMsg(plugin_event, tmp_reply_str)
                         else:
+                            if plugin_event.platform['platform'] in ['qqGuild']:
+                                return
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
                             replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, ['exit','bye']):
@@ -1257,6 +1264,8 @@ def unity_reply(plugin_event, Proc):
                         time.sleep(1)
                         plugin_event.set_group_leave(plugin_event.data.group_id)
                     else:
+                        if plugin_event.platform['platform'] in ['qqGuild']:
+                            return
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'summary', fullMatch = True) and flag_is_from_master:
@@ -1285,17 +1294,23 @@ def unity_reply(plugin_event, Proc):
             plugin_event.set_block()
             return
         #放弃使用全前缀匹配方案
+        # 保存原始消息，用于welcome指令
+        tmp_reast_str_original = tmp_reast_str
+        # 转半角（除welcome指令外的其他指令使用转半角后的消息）
+        tmp_reast_str = to_half_width(tmp_reast_str)
+        
         if OlivaDiceCore.msgReplyModel.replyCONTEXT_fliter(tmp_reast_str):
             pass
-        elif isMatchWordStart(tmp_reast_str, 'welcome', isCommand = True):
-            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'welcome')
-            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+        elif isMatchWordStart(tmp_reast_str_original, 'welcome', isCommand = True):
+            # 对于welcome指令，使用原始消息而不是转半角后的消息
+            tmp_reast_str_welcome = getMatchWordStartRight(tmp_reast_str_original, 'welcome')
+            tmp_reast_str_welcome = skipSpaceStart(tmp_reast_str_welcome)
             if flag_is_from_group:
                 if (flag_is_from_group_have_admin and flag_is_from_group_admin) or flag_is_from_master:
-                    if len(tmp_reast_str) > 0:
+                    if len(tmp_reast_str_welcome) > 0:
                         OlivaDiceCore.userConfig.setUserConfigByKey(
                             userConfigKey = 'welcomeMsg',
-                            userConfigValue = tmp_reast_str,
+                            userConfigValue = tmp_reast_str_welcome,
                             botHash = plugin_event.bot_info.hash,
                             userId = tmp_hagID,
                             userType = 'group',
@@ -1329,6 +1344,8 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strWelcomeDel'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                 else:
+                    if plugin_event.platform['platform'] in ['qqGuild']:
+                        return
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strNeedAdmin'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
             else:
@@ -2200,7 +2217,7 @@ def unity_reply(plugin_event, Proc):
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnPcCardNone'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
             return
-        elif isMatchWordStart(tmp_reast_str, ['st','pc'], isCommand = True):
+        elif isMatchWordStart(tmp_reast_str_original, ['st','pc'], isCommand = True):
             tmp_reply_str = ''
             is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, valDict, flag_is_from_group_admin)
             if is_at:
@@ -2212,8 +2229,9 @@ def unity_reply(plugin_event, Proc):
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
             tmp_reply_str_1 = ''
-            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['st','pc'])
-            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            tmp_reast_str_original = getMatchWordStartRight(tmp_reast_str_original, ['st','pc'])
+            tmp_reast_str_original = skipSpaceStart(tmp_reast_str_original)
+            tmp_reast_str = to_half_width(tmp_reast_str_original)
             forced_is_new_card = False
             forced_is_new_card_time = 0
             tmp_skill_name = None
@@ -3253,21 +3271,24 @@ def unity_reply(plugin_event, Proc):
                     trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                 return
-            elif isMatchWordStart(tmp_reast_str, ['note', 'rec']):
+            elif isMatchWordStart(tmp_reast_str_original, ['note', 'rec']):
                 if is_at: return
                 flag_mode = 'note'
                 keyName = 'noteRecord'
                 is_remove = False
-                if isMatchWordStart(tmp_reast_str, 'note'):
-                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'note')
+                if isMatchWordStart(tmp_reast_str_original, 'note'):
+                    # note 使用原始消息（保持全角/半角）
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str_original, 'note')
                     flag_mode = 'note'
                     keyName = 'noteRecord'
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
                     if isMatchWordStart(tmp_reast_str, 'rm'):
                         is_remove = True
                         tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rm')
-                elif isMatchWordStart(tmp_reast_str, 'rec'):
-                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rec')
+                elif isMatchWordStart(tmp_reast_str_original, 'rec'):
+                    # rec 使用转半角消息
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str_original, 'rec')
+                    tmp_reast_str = to_half_width(tmp_reast_str)
                     flag_mode = 'rec'
                     keyName = 'mappingRecord'
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -6478,6 +6499,8 @@ def parse_at_user(plugin_event, tmp_reast_str, valDict, flag_is_from_group_admin
                 new_tmp_reast_str_parts.append(part.data['text'])
     
     if is_at:
+        if plugin_event.platform['platform'] in ['qqGuild']:
+            return
         # 检查发送者是否为管理员或群主
         if not (flag_is_from_group_admin or flag_is_from_master):
             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
