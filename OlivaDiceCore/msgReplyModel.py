@@ -529,8 +529,26 @@ dictSkillCheckRank = {
     OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_FAIL: 0
 }
 
-def get_SkillCheckResult(tmpSkillCheckType, dictStrCustom, dictTValue):
+def get_SkillCheckResult(tmpSkillCheckType, dictStrCustom, dictTValue, pcHash = None, pcCardName = None):
     res = dictStrCustom['strPcSkillCheckError']
+    # 存储hiy统计数据
+    if pcHash and pcCardName:
+        hiy_key = None
+        if tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS:
+            hiy_key = '普通成功'
+        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_HARD_SUCCESS:
+            hiy_key = '困难成功'
+        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_EXTREME_HARD_SUCCESS:
+            hiy_key = '极难成功'
+        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_SUCCESS:
+            hiy_key = '大成功'
+        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FAIL:
+            hiy_key = '失败'
+        elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_FAIL:
+            hiy_key = '大失败'
+        
+        if hiy_key:
+            OlivaDiceCore.pcCard.pcCardDataSetHiyKey(pcHash, pcCardName, hiy_key, 1)
     if tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS:
         res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckSucceed'], dictTValue)
     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_HARD_SUCCESS:
@@ -827,8 +845,14 @@ def replyRAV_command(plugin_event, Proc, valDict):
                     dictTValue['tSkillValue01'] = str(tmp_skill_value_1) if not difficulty_1 else f'{tmpSkillThreshold_1}({str(tmp_skill_value_1)})'
                 flag_rav_type = 'x'
                 if tmpSkillCheckType in dictSkillCheckRank and tmpSkillCheckType_1 in dictSkillCheckRank:
-                    dictTValue['tSkillCheckReasult'] = get_SkillCheckResult(tmpSkillCheckType, dictStrCustom, dictTValue)
-                    dictTValue['tSkillCheckReasult01'] = get_SkillCheckResult(tmpSkillCheckType_1, dictStrCustom, dictTValue)
+                    dictTValue['tSkillCheckReasult'] = get_SkillCheckResult(
+                        tmpSkillCheckType, dictStrCustom, dictTValue,
+                        pcHash=tmp_pcHash_0, pcCardName=tmp_pc_name_0
+                    )
+                    dictTValue['tSkillCheckReasult01'] = get_SkillCheckResult(
+                        tmpSkillCheckType_1, dictStrCustom, dictTValue,
+                        pcHash=tmp_pcHash_1, pcCardName=tmp_pc_name_1
+                    )
                     if dictSkillCheckRank[tmpSkillCheckType] > dictSkillCheckRank[tmpSkillCheckType_1]:
                         flag_rav_type = '0'
                     elif dictSkillCheckRank[tmpSkillCheckType] < dictSkillCheckRank[tmpSkillCheckType_1]:
@@ -2533,7 +2557,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
             result_str += f"({skill_name}: {skill_value_str}): {dice_detail}/{skill_value_str} "
         else:
             result_str += f": {dice_detail}/{skill_value_str} "
-        result_str += get_SkillCheckResult(skill_check_type, dictStrCustom, dictTValue)
+        result_str += get_SkillCheckResult(skill_check_type, dictStrCustom, dictTValue, pc_hash, pc_name)
         # 处理enhanceList
         if skill_check_type in [
             OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS,
@@ -2828,7 +2852,7 @@ def team_sc(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
             dice_detail = f"{rd_para_str}={rd_para.resDetail}={roll_value}"
         result_str = f"{display_name}(SAN:{current_san}): {dice_detail}/{current_san}"
         result_str += f"\nSAN: {current_san} -> {new_san}(损失{san_success if roll_value < current_san else san_fail}={san_loss}点)"
-        result_str += get_SkillCheckResult(skill_check_type, dictStrCustom, dictTValue)
+        result_str += get_SkillCheckResult(skill_check_type, dictStrCustom, dictTValue, pc_hash, pc_name)
         success_level = 0
         if skill_check_type in [
             OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_SUCCESS,

@@ -41,6 +41,10 @@ dictPcCardTemplateDefault = {
     'unity' : OlivaDiceCore.pcCardData.dictPcCardTemplateDefault.copy()
 }
 
+dictPcCardHiy = {
+    'unity' : {}
+}
+
 def releaseDir(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
@@ -104,6 +108,7 @@ def dataPcCardSave(hostKey, pcHash):
     global dictPcCardData
     global dictPcCardSelection
     global dictPcCardTemplate
+    global dictPcCardHiy
     dataDirRoot_this = OlivaDiceCore.data.dataDirRoot
     releaseDir(dataDirRoot_this)
     if hostKey in dictPcCardData:
@@ -130,11 +135,20 @@ def dataPcCardSave(hostKey, pcHash):
             pcCardTemplatePath = dataDirRoot_this + '/' + hostKey + '/pcCard/template/' + pcHash
             with open(pcCardTemplatePath, 'w', encoding = 'utf-8') as dictPcCardTemplate_f:
                 dictPcCardTemplate_f.write(json.dumps(dictPcCardTemplate[hostKey][pcHash], ensure_ascii = False, indent = 4))
+    if hostKey in dictPcCardHiy:
+        if pcHash in dictPcCardHiy[hostKey]:
+            releaseDir(dataDirRoot_this + '/' + hostKey)
+            releaseDir(dataDirRoot_this + '/' + hostKey + '/pcCard')
+            releaseDir(dataDirRoot_this + '/' + hostKey + '/pcCard/hiy')
+            pcCardHiyPath = dataDirRoot_this + '/' + hostKey + '/pcCard/hiy/' + pcHash
+            with open(pcCardHiyPath, 'w', encoding = 'utf-8') as pcCardHiyPath_f:
+                pcCardHiyPath_f.write(json.dumps(dictPcCardHiy[hostKey][pcHash], ensure_ascii = False, indent = 4))
 
 def dataPcCardLoad(hostKey, pcHash):
     global dictPcCardData
     global dictPcCardSelection
     global dictPcCardTemplate
+    global dictPcCardHiy
     dataDirRoot_this = OlivaDiceCore.data.dataDirRoot
     releaseDir(dataDirRoot_this)
     releaseDir(dataDirRoot_this + '/' + hostKey)
@@ -142,9 +156,11 @@ def dataPcCardLoad(hostKey, pcHash):
     releaseDir(dataDirRoot_this + '/' + hostKey + '/pcCard/data')
     releaseDir(dataDirRoot_this + '/' + hostKey + '/pcCard/selection')
     releaseDir(dataDirRoot_this + '/' + hostKey + '/pcCard/template')
+    releaseDir(dataDirRoot_this + '/' + hostKey + '/pcCard/hiy')
     pcCardDataPath = dataDirRoot_this + '/' + hostKey + '/pcCard/data/' + pcHash
     pcCardSelectionPath = dataDirRoot_this + '/' + hostKey + '/pcCard/selection/' + pcHash
     pcCardTemplatePath = dataDirRoot_this + '/' + hostKey + '/pcCard/template/' + pcHash
+    pcCardHiyPath = dataDirRoot_this + '/' + hostKey + '/pcCard/hiy/' + pcHash
     if hostKey not in dictPcCardData:
         dictPcCardData[hostKey] = {}
     if pcHash not in dictPcCardData[hostKey]:
@@ -157,6 +173,10 @@ def dataPcCardLoad(hostKey, pcHash):
         dictPcCardTemplate[hostKey] = {}
     if pcHash not in dictPcCardTemplate[hostKey]:
         dictPcCardTemplate[hostKey][pcHash] = {}
+    if hostKey not in dictPcCardHiy:
+        dictPcCardHiy[hostKey] = {}
+    if pcHash not in dictPcCardHiy[hostKey]:
+        dictPcCardHiy[hostKey][pcHash] = {}
     if os.path.exists(pcCardDataPath):
         with open(pcCardDataPath, 'r', encoding = 'utf-8') as pcCardDataPath_f:
             dictPcCardData[hostKey][pcHash] = jsonDataLoadSafe(pcCardDataPath_f, "人物卡", f"{hostKey}/{pcHash}")
@@ -166,6 +186,9 @@ def dataPcCardLoad(hostKey, pcHash):
     if os.path.exists(pcCardTemplatePath):
         with open(pcCardTemplatePath, 'r', encoding = 'utf-8') as pcCardTemplatePath_f:
             dictPcCardTemplate[hostKey][pcHash] = jsonDataLoadSafe(pcCardTemplatePath_f, "人物卡", f"{hostKey}/{pcHash}")
+    if os.path.exists(pcCardHiyPath):
+        with open(pcCardHiyPath, 'r', encoding = 'utf-8') as pcCardHiyPath_f:
+            dictPcCardHiy[hostKey][pcHash] = jsonDataLoadSafe(pcCardHiyPath_f, "骰点统计", f"{hostKey}/{pcHash}")
 
 def jsonDataLoadSafe(data_f, dataType, dataName):
     tmp_userConfigData = {}
@@ -431,11 +454,13 @@ def pcCardDataSetSelectionKey(pcHash, pcCardName, forceSwitch = False):
         return False
 
 def pcCardDataDelSelectionKey(pcHash, pcCardName, skipDel = False):
+    global dictPcCardHiy
     selection_key = 'selection'
     lockList_key = 'lockList'
     tmp_pc_card_name_key = pcCardName
     tmp_card_dict = {}
     tmp_card_dict_2 = {}
+    tmp_card_dict_3 = {}
     if pcHash in dictPcCardData['unity']:
         tmp_card_dict = dictPcCardData['unity'][pcHash]
     else:
@@ -444,10 +469,16 @@ def pcCardDataDelSelectionKey(pcHash, pcCardName, skipDel = False):
         tmp_card_dict_2 = dictPcCardTemplate['unity'][pcHash]
     else:
         dictPcCardTemplate['unity'][pcHash] = {}
+    if pcHash in dictPcCardHiy['unity']:
+        tmp_card_dict_3 = dictPcCardHiy['unity'][pcHash]
+    else:
+        dictPcCardHiy['unity'][pcHash] = {}
     if tmp_pc_card_name_key in tmp_card_dict:
         dictPcCardData['unity'][pcHash].pop(tmp_pc_card_name_key)
         if tmp_pc_card_name_key in tmp_card_dict_2:
             dictPcCardTemplate['unity'][pcHash].pop(tmp_pc_card_name_key)
+        if tmp_pc_card_name_key in tmp_card_dict_3:
+            dictPcCardHiy['unity'][pcHash].pop(tmp_pc_card_name_key)
         if pcHash not in dictPcCardSelection['unity']:
             dictPcCardSelection['unity'][pcHash] = {}
             return False
@@ -720,6 +751,76 @@ def getHagIDFromMsg(plugin_event, Proc):
         tmp_hagID = str(plugin_event.data.group_id)
     
     return tmp_hagID
+
+def pcCardDataSetHiyKey(pcHash, pcCardName, hiyKey, value):
+    '''
+    设置人物卡骰点统计数据
+    Args:
+        pcHash: 人物卡哈希值
+        pcCardName: 人物卡名称
+        hiyKey: 统计键（普通成功、困难成功、极难成功、大成功、失败、大失败）
+        value: 增加的数值
+    '''
+    global dictPcCardHiy
+    hostKey = 'unity'
+    
+    if hostKey not in dictPcCardHiy:
+        dictPcCardHiy[hostKey] = {}
+    if pcHash not in dictPcCardHiy[hostKey]:
+        dictPcCardHiy[hostKey][pcHash] = {}
+    if pcCardName not in dictPcCardHiy[hostKey][pcHash]:
+        dictPcCardHiy[hostKey][pcHash][pcCardName] = {}
+    if hiyKey not in dictPcCardHiy[hostKey][pcHash][pcCardName]:
+        dictPcCardHiy[hostKey][pcHash][pcCardName][hiyKey] = 0
+    
+    dictPcCardHiy[hostKey][pcHash][pcCardName][hiyKey] += value
+    dataPcCardSave(hostKey, pcHash)
+
+def pcCardDataGetHiyKey(pcHash, pcCardName, hiyKey):
+    '''
+    获取人物卡骰点统计数据
+    Args:
+        pcHash: 人物卡哈希值
+        pcCardName: 人物卡名称
+        hiyKey: 统计键（普通成功、困难成功、极难成功、大成功、失败、大失败）
+    Returns:
+        int: 对应的统计数值，如果不存在则返回0
+    '''
+    global dictPcCardHiy
+    hostKey = 'unity'
+    
+    if hostKey not in dictPcCardHiy:
+        return 0
+    if pcHash not in dictPcCardHiy[hostKey]:
+        return 0
+    if pcCardName not in dictPcCardHiy[hostKey][pcHash]:
+        return 0
+    if hiyKey not in dictPcCardHiy[hostKey][pcHash][pcCardName]:
+        return 0
+    
+    return dictPcCardHiy[hostKey][pcHash][pcCardName][hiyKey]
+
+def pcCardDataGetAllHiyKeys(pcHash, pcCardName):
+    '''
+    获取人物卡所有骰点统计数据
+    Args:
+        pcHash: 人物卡哈希值
+        pcCardName: 人物卡名称
+    Returns:
+        dict: 包含所有统计数据的字典
+    '''
+    global dictPcCardHiy
+    hostKey = 'unity'
+    
+    if hostKey not in dictPcCardHiy:
+        return {}
+    if pcHash not in dictPcCardHiy[hostKey]:
+        return {}
+    if pcCardName not in dictPcCardHiy[hostKey][pcHash]:
+        return {}
+    
+    return dictPcCardHiy[hostKey][pcHash][pcCardName].copy()
+
 
 
 #更通用的接口

@@ -209,6 +209,8 @@ dictStrCustom = {
     'strPcSkillEnhanceNotFound': '\n未找到技能: {tNotFoundSkillList}',
     'strPcSkillEnhanceOnlySpecial': '[{tName}]的以下技能均为无法成长的特殊属性或0值技能或未找到对应的技能：\n{tSkippedSkillList}',
     'strPcSkillEnhanceError' : '未设置人物卡，无法进行自动成长检定',
+    'strHiyResult' : '[{tPcName}]的骰点统计:\n骰点次数：{tTotalRolls}次\n普通成功：{tNormalSuccess}次\n困难成功：{tHardSuccess}次\n极难成功：{tExtremeSuccess}次\n大成功：{tGreatSuccess}次\n失败：{tFail}次\n大失败：{tGreatFail}次\n总成功数：{tTotalSuccess}次\n总失败数：{tTotalFail}次\n成功率：{tSuccessRate}%',
+    'strHiyPcNotFound' : '未找到人物卡或未设置人物卡',
     'strSanCheck' : '[{tName}]进行理智检定[{tSkillValue}]:\n{tRollResult} {tSkillCheckReasult}\n理智减少{tRollSubResult}点,当前剩余[{tSkillValueNew}]点',
     'strSanCheckGreatFailed' : '[{tName}]进行理智检定[{tSkillValue}]:\n{tRollResult} {tSkillCheckReasult}\n理智减少{tRollSubResult}的最大值[{tRollSubResultIntMax}]点,当前剩余[{tSkillValueNew}]点',
     'strSanCheckError' : '[{tName}]进行理智检定[{tSkillValue}]:\n{tRollResult} {tSkillCheckReasult}\n掷骰表达式[{tRollSubResult}]存在错误',
@@ -379,6 +381,17 @@ dictTValue = {
     'tNewTeamName': '',
     'strTeamSkillUpdate': '',
     'tDefaultShow': '',
+    'tPcName': 'N/A',
+    'tTotalRolls': '0',
+    'tNormalSuccess': '0',
+    'tHardSuccess': '0',
+    'tExtremeSuccess': '0',
+    'tGreatSuccess': '0',
+    'tFail': '0',
+    'tGreatFail': '0',
+    'tTotalSuccess': '0',
+    'tTotalFail': '0',
+    'tSuccessRate': '0.00',
 }
 
 dictSetCOCDetail = {
