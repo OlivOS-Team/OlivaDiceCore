@@ -19,6 +19,7 @@ import OlivaDiceCore
 
 import json
 import os
+import datetime
 
 dictConsoleSwitchTemplate = {
     'default' : {
@@ -48,6 +49,19 @@ dictConsoleSwitchTemplate = {
 }
 
 dictConsoleSwitch = {}
+
+# 备份配置相关
+dictBackupConfigTemplate = {
+    'default': {
+        'isBackup': 0,
+        'startDate': '',  # 将在初始化时设置为当前日期
+        'passDay': 1,
+        'backupTime': '04:00:00',
+        'maxBackupCount': 1,
+    }
+}
+
+dictBackupConfig = {}
 
 def getConsoleSwitchByHash(switchKey, botHash = 'unity'):
     global dictConsoleSwitch
@@ -126,3 +140,68 @@ def setMasterListAppend(botHash, dataList):
 def releaseDir(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
+
+# 备份配置相关函数
+def getBackupConfigByKey(configKey):
+    global dictBackupConfig
+    tmp_res = None
+    if 'unity' in dictBackupConfig:
+        if configKey in dictBackupConfig['unity']:
+            tmp_res = dictBackupConfig['unity'][configKey]
+    return tmp_res
+
+def setBackupConfigByKey(configKey, configValue):
+    global dictBackupConfig
+    if 'unity' in dictBackupConfig:
+        if configKey in dictBackupConfig['unity']:
+            dictBackupConfig['unity'][configKey] = configValue
+
+def initBackupConfig():
+    global dictBackupConfig
+    global dictBackupConfigTemplate
+    if 'unity' not in dictBackupConfig:
+        dictBackupConfig['unity'] = {}
+    # 获取当前日期作为默认开始日期
+    current_date = datetime.datetime.now().strftime('%Y-%m-%d')
+    for template_key_this in dictBackupConfigTemplate['default']:
+        if template_key_this not in dictBackupConfig['unity']:
+            if template_key_this == 'startDate':
+                # 设置开始日期为当前日期
+                dictBackupConfig['unity'][template_key_this] = current_date
+            else:
+                dictBackupConfig['unity'][template_key_this] = dictBackupConfigTemplate['default'][template_key_this]
+
+def saveBackupConfig():
+    global dictBackupConfig
+    # 创建备份文件夹
+    releaseDir(OlivaDiceCore.data.backupDirRoot)
+    releaseDir(OlivaDiceCore.data.dataDirRoot)
+    releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity')
+    releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity/console')
+    backupConfigDir = OlivaDiceCore.data.dataDirRoot + '/unity/console'
+    backupConfigFile = 'backup.json'
+    backupConfigPath = backupConfigDir + '/' + backupConfigFile
+    if 'unity' in dictBackupConfig:
+        with open(backupConfigPath, 'w', encoding='utf-8') as backupConfigPath_f:
+            backupConfigPath_f.write(json.dumps(dictBackupConfig['unity'], ensure_ascii=False, indent=4))
+
+def readBackupConfig():
+    global dictBackupConfig
+    # 创建备份文件夹
+    releaseDir(OlivaDiceCore.data.backupDirRoot)
+    releaseDir(OlivaDiceCore.data.dataDirRoot)
+    releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity')
+    releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity/console')
+    backupConfigDir = OlivaDiceCore.data.dataDirRoot + '/unity/console'
+    backupConfigFile = 'backup.json'
+    backupConfigPath = backupConfigDir + '/' + backupConfigFile
+    # 初始化unity配置
+    if 'unity' not in dictBackupConfig:
+        dictBackupConfig['unity'] = {}
+    
+    try:
+        with open(backupConfigPath, 'r', encoding='utf-8') as backupConfigPath_f:
+            dictBackupConfig['unity'].update(json.loads(backupConfigPath_f.read()))
+    except:
+        # 如果文件不存在或读取失败，使用默认配置
+        pass
