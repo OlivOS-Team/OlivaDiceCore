@@ -241,6 +241,7 @@ def pcCardRebase(pcHash, pcCardName, hagId = None):
     pcCardNameOld = None
     dict_pcCardNameOld = {}
     dict_pcCardTemplateOld = {}
+    dict_pcCardHiyOld = {}
     if pcHash not in dictPcCardSelection['unity']:
         dictPcCardSelection['unity'][pcHash] = {}
     pcCardNameOld = pcCardDataGetSelectionKey(pcHash, hagId)
@@ -270,6 +271,17 @@ def pcCardRebase(pcHash, pcCardName, hagId = None):
     else:
         dictPcCardTemplate['unity'][pcHash] = {}
     dictPcCardTemplate['unity'][pcHash][pcCardName] = dict_pcCardTemplateOld
+    # 处理hiy统计数据的重命名
+    if pcCardNameOld != None:
+        if pcHash in dictPcCardHiy['unity']:
+            if pcCardNameOld in dictPcCardHiy['unity'][pcHash]:
+                dict_pcCardHiyOld = dictPcCardHiy['unity'][pcHash][pcCardNameOld].copy()
+                dictPcCardHiy['unity'][pcHash].pop(pcCardNameOld)
+        else:
+            dictPcCardHiy['unity'][pcHash] = {}
+    else:
+        dictPcCardHiy['unity'][pcHash] = {}
+    dictPcCardHiy['unity'][pcHash][pcCardName] = dict_pcCardHiyOld
     dataPcCardSave('unity', pcHash)
     return True
 
