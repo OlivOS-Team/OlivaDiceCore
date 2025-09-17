@@ -45,6 +45,9 @@ def unity_init(plugin_event, Proc):
     OlivaDiceCore.console.initConsoleSwitchByBotDict(Proc.Proc_data['bot_info_dict'])
     OlivaDiceCore.console.readConsoleSwitch()
     OlivaDiceCore.console.saveConsoleSwitch()
+    OlivaDiceCore.console.initBackupConfig()
+    OlivaDiceCore.console.readBackupConfig()
+    OlivaDiceCore.console.saveBackupConfig()
     OlivaDiceCore.onediceOverride.initOnedice()
     OlivaDiceCore.msgCustomManager.initMsgCustom(Proc.Proc_data['bot_info_dict'])
     OlivaDiceCore.msgCustomManager.saveMsgCustom(Proc.Proc_data['bot_info_dict'])
@@ -4407,29 +4410,30 @@ def unity_reply(plugin_event, Proc):
                         OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name),
                         tmp_template_rule_name
                     )
+                    # 使用统一的技能检查结果函数，自动记录hiy统计数据
+                    pc_hash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+                    dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgReplyModel.get_SkillCheckResult(
+                        tmpSkillCheckType, dictStrCustom, dictTValue, pc_hash, tmp_pc_name
+                    )
+                    
+                    # 根据检查结果决定使用成功还是失败的SAN值损失
                     if tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS:
                         tmp_sancheck_para_final = tmp_sancheck_para_s
-                        dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckSucceed'], dictTValue)
                     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_HARD_SUCCESS:
                         tmp_sancheck_para_final = tmp_sancheck_para_s
-                        dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckSucceed'], dictTValue)
                     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_EXTREME_HARD_SUCCESS:
                         tmp_sancheck_para_final = tmp_sancheck_para_s
-                        dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckSucceed'], dictTValue)
                     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_SUCCESS:
                         tmp_sancheck_para_final = tmp_sancheck_para_s
-                        dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckGreatSucceed'], dictTValue)
                     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_FAIL:
                         tmp_sancheck_para_final = tmp_sancheck_para_f
-                        dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckFailed'], dictTValue)
                     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_FAIL:
                         tmp_sancheck_para_final = tmp_sancheck_para_f
                         flag_GreatFailed = True
-                        dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckGreatFailed'], dictTValue)
                     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_NOPE:
-                        dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckNope'], dictTValue)
+                        pass
                     else:
-                        dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckError'], dictTValue)
+                        pass
                 else:
                     return
                 if tmp_sancheck_para_final != None:
@@ -4943,7 +4947,11 @@ def unity_reply(plugin_event, Proc):
                         dictTValue['tSkillValue'] = tmp_skill_value_str if not difficulty else f'{tmpSkillThreshold}({tmp_skill_value_str})'
                         if tmpSkillThreshold == None: dictTValue['tSkillValue'] = tmp_skill_value_str
                         dictTValue['tRollResult'] = '%s/%s' % (dictTValue['tRollResult'], dictTValue['tSkillValue'])
-                        dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgReplyModel.get_SkillCheckResult(tmpSkillCheckType, dictStrCustom, dictTValue)
+                        dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgReplyModel.get_SkillCheckResult(
+                            tmpSkillCheckType, dictStrCustom, dictTValue,
+                            pcHash=OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
+                            pcCardName=tmp_pc_name_1
+                        )
                         if tmpSkillCheckType in [
                             OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS,
                             OlivaDiceCore.skillCheck.resultType.SKILLCHECK_HARD_SUCCESS,
@@ -4976,7 +4984,11 @@ def unity_reply(plugin_event, Proc):
                             dictTValue['tSkillValue'] = tmp_skill_value_str if not difficulty else f'{tmpSkillThreshold}({tmp_skill_value_str})'
                             if tmpSkillThreshold == None: dictTValue['tSkillValue'] = tmp_skill_value_str
                             tmp_tSkillCheckReasult = '%s/%s ' % (tmp_tSkillCheckReasult, dictTValue['tSkillValue'])
-                            tmp_tSkillCheckReasult += OlivaDiceCore.msgReplyModel.get_SkillCheckResult(tmpSkillCheckType, dictStrCustom, dictTValue)
+                            tmp_tSkillCheckReasult += OlivaDiceCore.msgReplyModel.get_SkillCheckResult(
+                                tmpSkillCheckType, dictStrCustom, dictTValue,
+                                pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
+                                pcCardName = tmp_pc_name_1
+                            )
                             if tmpSkillCheckType in [
                                 OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS,
                                 OlivaDiceCore.skillCheck.resultType.SKILLCHECK_HARD_SUCCESS,
@@ -5267,6 +5279,61 @@ def unity_reply(plugin_event, Proc):
                 dictTValue['tNotFoundSkillList'] = '、'.join(f'[{skill}]' for skill in not_found_skills)
                 final_reply_parts.append(OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillEnhanceNotFound'], dictTValue))
             replyMsg(plugin_event, ''.join(final_reply_parts))
+            return
+        elif isMatchWordStart(tmp_reast_str, 'hiy', isCommand = True):
+            tmp_pc_id = plugin_event.data.user_id
+            tmp_pc_platform = plugin_event.platform['platform']
+            tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'hiy')
+            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            tmp_reast_str = tmp_reast_str.rstrip()
+            # 检查是否指定了人物卡名称
+            target_pc_name = None
+            if tmp_reast_str:
+                target_pc_name = tmp_reast_str
+                if target_pc_name not in OlivaDiceCore.pcCard.dictPcCardData['unity'].get(tmp_pcHash, {}):
+                    dictTValue['tPcName'] = target_pc_name
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHiyPcNotFound'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
+            else:
+                # 没有指定名称，使用当前选中的人物卡
+                target_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
+                if target_pc_name is None:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHiyPcNotFound'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
+            # 获取骰点统计数据
+            hiy_data = OlivaDiceCore.pcCard.pcCardDataGetAllHiyKeys(tmp_pcHash, target_pc_name)
+            # 统计各项数据
+            normal_success = hiy_data.get('普通成功', 0)
+            hard_success = hiy_data.get('困难成功', 0)
+            extreme_success = hiy_data.get('极难成功', 0) 
+            great_success = hiy_data.get('大成功', 0)
+            fail = hiy_data.get('失败', 0)
+            great_fail = hiy_data.get('大失败', 0)
+            # 计算总数据
+            total_rolls = normal_success + hard_success + extreme_success + great_success + fail + great_fail
+            total_success = normal_success + hard_success + extreme_success + great_success
+            total_fail = fail + great_fail
+            # 计算成功率
+            success_rate = 0.0
+            if total_rolls > 0:
+                success_rate = (total_success / total_rolls) * 100
+            # 构建回复
+            dictTValue['tPcName'] = target_pc_name
+            dictTValue['tTotalRolls'] = str(total_rolls)
+            dictTValue['tNormalSuccess'] = str(normal_success)
+            dictTValue['tHardSuccess'] = str(hard_success)
+            dictTValue['tExtremeSuccess'] = str(extreme_success)
+            dictTValue['tGreatSuccess'] = str(great_success)
+            dictTValue['tFail'] = str(fail)
+            dictTValue['tGreatFail'] = str(great_fail)
+            dictTValue['tTotalSuccess'] = str(total_success)
+            dictTValue['tTotalFail'] = str(total_fail)
+            dictTValue['tSuccessRate'] = f"{success_rate:.2f}"
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHiyResult'], dictTValue)
+            replyMsg(plugin_event, tmp_reply_str)
             return
         elif isMatchWordStart(tmp_reast_str, 'team', isCommand = True):
             if not flag_is_from_group:
