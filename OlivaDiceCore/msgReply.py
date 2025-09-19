@@ -4293,6 +4293,9 @@ def unity_reply(plugin_event, Proc):
                     if not flag_begin_tmp_sancheck_para_list:
                         tmp_sancheck_para_f += '/'
                     tmp_sancheck_para_f += tmp_sancheck_para_list_this
+            elif len(tmp_sancheck_para_list) == 1:
+                tmp_sancheck_para_s = '0'
+                tmp_sancheck_para_f = tmp_sancheck_para_list[0]
             else:
                 replyMsgLazyHelpByEvent(plugin_event, 'sc')
                 return
