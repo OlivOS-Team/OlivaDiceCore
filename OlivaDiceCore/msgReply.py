@@ -2311,10 +2311,10 @@ def unity_reply(plugin_event, Proc):
                             continue  # 跳过等于默认值的技能
                         display_value = skill_value
                     else:
-                        # 正常模式：跳过值为0且与默认值相同的技能
-                        if skill_value == 0:
-                            if skill_value == default_value:
-                                continue
+                        # # 正常模式：跳过值为0且与默认值相同的技能
+                        # if skill_value == 0:
+                        #     if skill_value == default_value:
+                        #         continue
                         display_value = skill_value
                     tmp_dict_pc_card_dump[
                         OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
@@ -2355,38 +2355,41 @@ def unity_reply(plugin_event, Proc):
                                 break
                     # 检查标记条件
                     is_enhanced = tmp_dict_pc_card_key_core in tmp_enhanceList
-                    is_non_default = False
-                    # 对非"其它"分组的技能，检查是否与默认值不同（仅在非默认值显示模式下）
-                    if (not show_default_enabled and 
-                        flag_hit_skill_list_name != flag_hit_skill_list_name_default):
-                        # 使用原始值而不是显示值进行比较，与前面逻辑保持一致的默认值获取方式
-                        original_value = tmp_dict_pc_card_original[tmp_dict_pc_card_key]
-                        # 寻找对应的原始技能键来获取默认值
-                        original_skill_key = None
-                        for orig_key in tmp_dict_pc_card_original:
-                            if OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(tmp_pcHash, orig_key, hagId=tmp_hagID) == tmp_dict_pc_card_key_core:
-                                original_skill_key = orig_key
-                                break
-                        if original_skill_key:
-                            default_value = default_skill_values.get(original_skill_key, 
-                                           default_skill_values.get(tmp_dict_pc_card_key_core, 0))
-                        else:
-                            default_value = default_skill_values.get(tmp_dict_pc_card_key_core, 0)
-                        if original_value != default_value:
-                            is_non_default = True
-                    # 根据条件组合标记
-                    if show_default_enabled:
-                        # 默认值显示模式下只保留增强标记
-                        if is_enhanced:
-                            tmp_reply_str_1_list_this = '[*]' + tmp_reply_str_1_list_this
-                    else:
-                        # 正常模式下显示所有标记
-                        if is_enhanced and is_non_default:
-                            tmp_reply_str_1_list_this = '[*/+]' + tmp_reply_str_1_list_this
-                        elif is_enhanced:
-                            tmp_reply_str_1_list_this = '[*]' + tmp_reply_str_1_list_this
-                        elif is_non_default:
-                            tmp_reply_str_1_list_this = '[+]' + tmp_reply_str_1_list_this
+                    # is_non_default = False
+                    # # 对非"其它"分组的技能，检查是否与默认值不同（仅在非默认值显示模式下）
+                    # if (not show_default_enabled and 
+                    #     flag_hit_skill_list_name != flag_hit_skill_list_name_default):
+                    #     # 使用原始值而不是显示值进行比较，与前面逻辑保持一致的默认值获取方式
+                    #     original_value = tmp_dict_pc_card_original[tmp_dict_pc_card_key]
+                    #     # 寻找对应的原始技能键来获取默认值
+                    #     original_skill_key = None
+                    #     for orig_key in tmp_dict_pc_card_original:
+                    #         if OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(tmp_pcHash, orig_key, hagId=tmp_hagID) == tmp_dict_pc_card_key_core:
+                    #             original_skill_key = orig_key
+                    #             break
+                    #     if original_skill_key:
+                    #         default_value = default_skill_values.get(original_skill_key, 
+                    #                        default_skill_values.get(tmp_dict_pc_card_key_core, 0))
+                    #     else:
+                    #         default_value = default_skill_values.get(tmp_dict_pc_card_key_core, 0)
+                    #     if original_value != default_value:
+                    #         is_non_default = True
+                    # # 根据条件组合标记
+                    # if show_default_enabled:
+                    #     # 默认值显示模式下只保留增强标记
+                    #     if is_enhanced:
+                    #         tmp_reply_str_1_list_this = '[*]' + tmp_reply_str_1_list_this
+                    # else:
+                    #     # 正常模式下显示所有标记
+                    #     if is_enhanced and is_non_default:
+                    #         tmp_reply_str_1_list_this = '[*/+]' + tmp_reply_str_1_list_this
+                    #     elif is_enhanced:
+                    #         tmp_reply_str_1_list_this = '[*]' + tmp_reply_str_1_list_this
+                    #     elif is_non_default:
+                    #         tmp_reply_str_1_list_this = '[+]' + tmp_reply_str_1_list_this
+                    # 只进行成长标记
+                    if is_enhanced:
+                        tmp_reply_str_1_list_this = '[*]' + tmp_reply_str_1_list_this
                     if flag_hit_skill_list_name not in tmp_reply_str_1_dict:
                         tmp_reply_str_1_dict[flag_hit_skill_list_name] = []
                     tmp_reply_str_1_dict[flag_hit_skill_list_name].append(tmp_reply_str_1_list_this)
@@ -2394,7 +2397,8 @@ def unity_reply(plugin_event, Proc):
                 for tmp_reply_str_1_dict_this in tmp_reply_str_1_dict:
                     # 按数值大小排序（从大到小）
                     tmp_reply_str_1_dict[tmp_reply_str_1_dict_this].sort(
-                        key=lambda x: int(x.split(':')[-1]) if x.split(':')[-1].replace('[*]', '').replace('[+]', '').replace('[*/+]', '').isdigit() else 0,
+                        # key=lambda x: int(x.split(':')[-1]) if x.split(':')[-1].replace('[*]', '').replace('[+]', '').replace('[*/+]', '').isdigit() else 0,
+                        key=lambda x: int(x.split(':')[-1]) if x.split(':')[-1].replace('[*]', '').isdigit() else 0,
                         reverse=True
                     )
                 for tmp_reply_str_1_dict_this in tmp_reply_str_1_dict:
