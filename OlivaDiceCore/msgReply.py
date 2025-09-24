@@ -1297,9 +1297,9 @@ def unity_reply(plugin_event, Proc):
             plugin_event.set_block()
             return
         #放弃使用全前缀匹配方案
-        # 保存原始消息，用于welcome指令
+        # 保存原始消息
         tmp_reast_str_original = tmp_reast_str
-        # 转半角（除welcome指令外的其他指令使用转半角后的消息）
+        # 转半角（除welcome指令和st录入名片外的其他指令使用转半角后的消息）
         tmp_reast_str = to_half_width(tmp_reast_str)
         
         if OlivaDiceCore.msgReplyModel.replyCONTEXT_fliter(tmp_reast_str):
@@ -2311,10 +2311,10 @@ def unity_reply(plugin_event, Proc):
                             continue  # 跳过等于默认值的技能
                         display_value = skill_value
                     else:
-                        # 正常模式：跳过值为0且与默认值相同的技能
-                        if skill_value == 0:
-                            if skill_value == default_value:
-                                continue
+                        # # 正常模式：跳过值为0且与默认值相同的技能
+                        # if skill_value == 0:
+                        #     if skill_value == default_value:
+                        #         continue
                         display_value = skill_value
                     tmp_dict_pc_card_dump[
                         OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(
@@ -2355,38 +2355,41 @@ def unity_reply(plugin_event, Proc):
                                 break
                     # 检查标记条件
                     is_enhanced = tmp_dict_pc_card_key_core in tmp_enhanceList
-                    is_non_default = False
-                    # 对非"其它"分组的技能，检查是否与默认值不同（仅在非默认值显示模式下）
-                    if (not show_default_enabled and 
-                        flag_hit_skill_list_name != flag_hit_skill_list_name_default):
-                        # 使用原始值而不是显示值进行比较，与前面逻辑保持一致的默认值获取方式
-                        original_value = tmp_dict_pc_card_original[tmp_dict_pc_card_key]
-                        # 寻找对应的原始技能键来获取默认值
-                        original_skill_key = None
-                        for orig_key in tmp_dict_pc_card_original:
-                            if OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(tmp_pcHash, orig_key, hagId=tmp_hagID) == tmp_dict_pc_card_key_core:
-                                original_skill_key = orig_key
-                                break
-                        if original_skill_key:
-                            default_value = default_skill_values.get(original_skill_key, 
-                                           default_skill_values.get(tmp_dict_pc_card_key_core, 0))
-                        else:
-                            default_value = default_skill_values.get(tmp_dict_pc_card_key_core, 0)
-                        if original_value != default_value:
-                            is_non_default = True
-                    # 根据条件组合标记
-                    if show_default_enabled:
-                        # 默认值显示模式下只保留增强标记
-                        if is_enhanced:
-                            tmp_reply_str_1_list_this = '[*]' + tmp_reply_str_1_list_this
-                    else:
-                        # 正常模式下显示所有标记
-                        if is_enhanced and is_non_default:
-                            tmp_reply_str_1_list_this = '[*/+]' + tmp_reply_str_1_list_this
-                        elif is_enhanced:
-                            tmp_reply_str_1_list_this = '[*]' + tmp_reply_str_1_list_this
-                        elif is_non_default:
-                            tmp_reply_str_1_list_this = '[+]' + tmp_reply_str_1_list_this
+                    # is_non_default = False
+                    # # 对非"其它"分组的技能，检查是否与默认值不同（仅在非默认值显示模式下）
+                    # if (not show_default_enabled and 
+                    #     flag_hit_skill_list_name != flag_hit_skill_list_name_default):
+                    #     # 使用原始值而不是显示值进行比较，与前面逻辑保持一致的默认值获取方式
+                    #     original_value = tmp_dict_pc_card_original[tmp_dict_pc_card_key]
+                    #     # 寻找对应的原始技能键来获取默认值
+                    #     original_skill_key = None
+                    #     for orig_key in tmp_dict_pc_card_original:
+                    #         if OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(tmp_pcHash, orig_key, hagId=tmp_hagID) == tmp_dict_pc_card_key_core:
+                    #             original_skill_key = orig_key
+                    #             break
+                    #     if original_skill_key:
+                    #         default_value = default_skill_values.get(original_skill_key, 
+                    #                        default_skill_values.get(tmp_dict_pc_card_key_core, 0))
+                    #     else:
+                    #         default_value = default_skill_values.get(tmp_dict_pc_card_key_core, 0)
+                    #     if original_value != default_value:
+                    #         is_non_default = True
+                    # # 根据条件组合标记
+                    # if show_default_enabled:
+                    #     # 默认值显示模式下只保留增强标记
+                    #     if is_enhanced:
+                    #         tmp_reply_str_1_list_this = '[*]' + tmp_reply_str_1_list_this
+                    # else:
+                    #     # 正常模式下显示所有标记
+                    #     if is_enhanced and is_non_default:
+                    #         tmp_reply_str_1_list_this = '[*/+]' + tmp_reply_str_1_list_this
+                    #     elif is_enhanced:
+                    #         tmp_reply_str_1_list_this = '[*]' + tmp_reply_str_1_list_this
+                    #     elif is_non_default:
+                    #         tmp_reply_str_1_list_this = '[+]' + tmp_reply_str_1_list_this
+                    # 只进行成长标记
+                    if is_enhanced:
+                        tmp_reply_str_1_list_this = '[*]' + tmp_reply_str_1_list_this
                     if flag_hit_skill_list_name not in tmp_reply_str_1_dict:
                         tmp_reply_str_1_dict[flag_hit_skill_list_name] = []
                     tmp_reply_str_1_dict[flag_hit_skill_list_name].append(tmp_reply_str_1_list_this)
@@ -2394,7 +2397,8 @@ def unity_reply(plugin_event, Proc):
                 for tmp_reply_str_1_dict_this in tmp_reply_str_1_dict:
                     # 按数值大小排序（从大到小）
                     tmp_reply_str_1_dict[tmp_reply_str_1_dict_this].sort(
-                        key=lambda x: int(x.split(':')[-1]) if x.split(':')[-1].replace('[*]', '').replace('[+]', '').replace('[*/+]', '').isdigit() else 0,
+                        # key=lambda x: int(x.split(':')[-1]) if x.split(':')[-1].replace('[*]', '').replace('[+]', '').replace('[*/+]', '').isdigit() else 0,
+                        key=lambda x: int(x.split(':')[-1]) if x.split(':')[-1].replace('[*]', '').isdigit() else 0,
                         reverse=True
                     )
                 for tmp_reply_str_1_dict_this in tmp_reply_str_1_dict:
@@ -4595,6 +4599,25 @@ def unity_reply(plugin_event, Proc):
                         userConfigValue = tmp_groupInitList_list,
                         botHash = bot_hash
                     )
+                tmp_groupInitUserList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitUserList',
+                    botHash = bot_hash
+                )
+                if tmp_groupInitUserList_list == None:
+                    tmp_groupInitUserList_list = {}
+                if tmp_name in tmp_groupInitUserList_list:
+                    tmp_groupInitUserList_list.pop(tmp_name)
+                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                        userId = tmp_hagID,
+                        userType = 'group',
+                        platform = tmp_pc_platform,
+                        userConfigKey = 'groupInitUserList',
+                        userConfigValue = tmp_groupInitUserList_list,
+                        botHash = bot_hash
+                    )
                 OlivaDiceCore.userConfig.writeUserConfigByUserHash(
                     userHash = tmp_groupHash
                 )
@@ -4646,6 +4669,16 @@ def unity_reply(plugin_event, Proc):
                     userConfigValue = tmp_groupInitList_list,
                     botHash = bot_hash
                 )
+                # 重置当前玩家索引为第一个（如果有玩家的话）
+                current_player_index = 0 if tmp_groupInitList_list else None
+                OlivaDiceCore.userConfig.setUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitCurrentPlayer',
+                    userConfigValue = current_player_index,
+                    botHash = bot_hash
+                )
                 tmp_groupHash = OlivaDiceCore.userConfig.getUserHash(
                     userId = tmp_hagID,
                     userType = 'group',
@@ -4695,6 +4728,22 @@ def unity_reply(plugin_event, Proc):
                     userConfigValue = {},
                     botHash = bot_hash
                 )
+                OlivaDiceCore.userConfig.setUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitUserList',
+                    userConfigValue = {},
+                    botHash = bot_hash
+                )
+                OlivaDiceCore.userConfig.setUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitCurrentPlayer',
+                    userConfigValue = None,
+                    botHash = bot_hash
+                )
                 tmp_groupHash = OlivaDiceCore.userConfig.getUserHash(
                     userId = tmp_hagID,
                     userType = 'group',
@@ -4704,6 +4753,86 @@ def unity_reply(plugin_event, Proc):
                     userHash = tmp_groupHash
                 )
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitClear'], dictTValue)
+                OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+                return
+            elif isMatchWordStart(tmp_reast_str, 'end', fullMatch = True):
+                tmp_groupInitList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitList',
+                    botHash = bot_hash
+                )
+                if tmp_groupInitList_list == None or len(tmp_groupInitList_list) == 0:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitEndNoList'], dictTValue)
+                    OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+                    return
+                tmp_groupInitUserList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitUserList',
+                    botHash = bot_hash
+                )
+                if tmp_groupInitUserList_list == None:
+                    tmp_groupInitUserList_list = {}
+                tmp_currentPlayerIndex = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitCurrentPlayer',
+                    botHash = bot_hash
+                )
+                # 排序先攻列表
+                tmp_groupInitList_list_sort = [
+                    [tmp_groupInitList_list_this, tmp_groupInitList_list[tmp_groupInitList_list_this]]
+                    for tmp_groupInitList_list_this in tmp_groupInitList_list
+                ]
+                tmp_groupInitList_list_sort.sort(key = lambda x : x[1], reverse = True)
+                # 如果没有当前玩家，初始化为第一个
+                if tmp_currentPlayerIndex is None:
+                    tmp_currentPlayerIndex = 0
+                else:
+                    # 轮换到下一个玩家
+                    tmp_currentPlayerIndex = (tmp_currentPlayerIndex + 1) % len(tmp_groupInitList_list_sort)
+                # 更新当前玩家索引
+                OlivaDiceCore.userConfig.setUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitCurrentPlayer',
+                    userConfigValue = tmp_currentPlayerIndex,
+                    botHash = bot_hash
+                )
+                tmp_groupHash = OlivaDiceCore.userConfig.getUserHash(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform
+                )
+                OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                    userHash = tmp_groupHash
+                )
+                # 获取下一个玩家信息
+                current_player_name = tmp_groupInitList_list_sort[tmp_currentPlayerIndex][0]
+                current_player_value = tmp_groupInitList_list_sort[tmp_currentPlayerIndex][1]
+                # 准备回复消息
+                dictTValue['tSubName'] = current_player_name
+                dictTValue['tSubResult'] = str(current_player_value)
+                # 检查是否有用户信息可以at
+                at_str = ""
+                if current_player_name in tmp_groupInitUserList_list:
+                    user_info = tmp_groupInitUserList_list[current_player_name]
+                    if isinstance(user_info, dict) and 'userId' in user_info:
+                        # 构建at消息
+                        at_para = OlivOS.messageAPI.PARA.at(str(user_info['userId']))
+                        at_str = at_para.get_string_by_key('CQ')
+                        dictTValue['tAtUser'] = at_str
+                    else:
+                        dictTValue['tAtUser'] = ""
+                else:
+                    dictTValue['tAtUser'] = ""
+                # 发送回复消息
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitEnd'], dictTValue)
                 OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
                 return
             elif '' == tmp_reast_str:
@@ -4716,22 +4845,61 @@ def unity_reply(plugin_event, Proc):
                 )
                 if tmp_groupInitList_list == None:
                     tmp_groupInitList_list = {}
+                # 获取当前回合玩家索引
+                tmp_currentPlayerIndex = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitCurrentPlayer',
+                    botHash = bot_hash
+                )
                 tmp_groupInitList_list_sort = [
                     [tmp_groupInitList_list_this, tmp_groupInitList_list[tmp_groupInitList_list_this]]
                     for tmp_groupInitList_list_this in tmp_groupInitList_list
                 ]
                 tmp_groupInitList_list_sort.sort(key = lambda x : x[1], reverse = True)
+                # 如果没有当前玩家且有玩家列表，默认设置为第一个玩家
+                if tmp_currentPlayerIndex is None and len(tmp_groupInitList_list_sort) > 0:
+                    tmp_currentPlayerIndex = 0
+                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                        userId = tmp_hagID,
+                        userType = 'group',
+                        platform = tmp_pc_platform,
+                        userConfigKey = 'groupInitCurrentPlayer',
+                        userConfigValue = tmp_currentPlayerIndex,
+                        botHash = bot_hash
+                    )
+                    tmp_groupHash = OlivaDiceCore.userConfig.getUserHash(
+                        userId = tmp_hagID,
+                        userType = 'group',
+                        platform = tmp_pc_platform
+                    )
+                    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                        userHash = tmp_groupHash
+                    )
+                
                 count = 1
                 tmp_groupInitList_list_final = []
                 for tmp_groupInitList_list_sort_this in tmp_groupInitList_list_sort:
                     dictTValue['tId'] = str(count)
                     dictTValue['tSubName'] = str(tmp_groupInitList_list_sort_this[0])
                     dictTValue['tSubResult'] = str(tmp_groupInitList_list_sort_this[1])
-                    tmp_groupInitList_list_final.append(
-                        OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitShowNode'], dictTValue)
-                    )
+                    # 标记当前回合的玩家
+                    if tmp_currentPlayerIndex is not None and count - 1 == tmp_currentPlayerIndex:
+                        # 为当前玩家使用特殊模板
+                        node_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitShowNodeSpecial'], dictTValue)
+                    else:
+                        # 普通格式
+                        node_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitShowNode'], dictTValue)
+                    tmp_groupInitList_list_final.append(node_str)
                     count += 1
                 dictTValue['tResult'] = '\n'.join(tmp_groupInitList_list_final)
+                # 显示当前回合信息
+                if tmp_currentPlayerIndex is not None and len(tmp_groupInitList_list_sort) > 0:
+                    current_player_name = tmp_groupInitList_list_sort[tmp_currentPlayerIndex][0]
+                    dictTValue['tCurrentPlayer'] = current_player_name
+                else:
+                    dictTValue['tCurrentPlayer'] = "无"
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitShow'], dictTValue)
                 OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
                 return
@@ -4951,8 +5119,10 @@ def unity_reply(plugin_event, Proc):
                             difficulty_prefix=difficulty
                         )
                         dictTValue['tSkillValue'] = tmp_skill_value_str if not difficulty else f'{tmpSkillThreshold}({tmp_skill_value_str})'
-                        if tmpSkillThreshold == None: dictTValue['tSkillValue'] = tmp_skill_value_str
-                        dictTValue['tRollResult'] = '%s/%s' % (dictTValue['tRollResult'], dictTValue['tSkillValue'])
+                        if tmpSkillThreshold == None:
+                            dictTValue['tSkillValue'] = tmp_skill_value_str
+                            tmpSkillThreshold = tmp_skill_value
+                        dictTValue['tRollResult'] = '%s/%s' % (dictTValue['tRollResult'], tmpSkillThreshold)
                         dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgReplyModel.get_SkillCheckResult(
                             tmpSkillCheckType, dictStrCustom, dictTValue,
                             pcHash=OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
@@ -4988,8 +5158,10 @@ def unity_reply(plugin_event, Proc):
                                 difficulty_prefix=difficulty
                             )
                             dictTValue['tSkillValue'] = tmp_skill_value_str if not difficulty else f'{tmpSkillThreshold}({tmp_skill_value_str})'
-                            if tmpSkillThreshold == None: dictTValue['tSkillValue'] = tmp_skill_value_str
-                            tmp_tSkillCheckReasult = '%s/%s ' % (tmp_tSkillCheckReasult, dictTValue['tSkillValue'])
+                            if tmpSkillThreshold == None:
+                                dictTValue['tSkillValue'] = tmp_skill_value_str
+                                tmpSkillThreshold = tmp_skill_value
+                            tmp_tSkillCheckReasult = '%s/%s ' % (tmp_tSkillCheckReasult, tmpSkillThreshold)
                             tmp_tSkillCheckReasult += OlivaDiceCore.msgReplyModel.get_SkillCheckResult(
                                 tmpSkillCheckType, dictStrCustom, dictTValue,
                                 pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),

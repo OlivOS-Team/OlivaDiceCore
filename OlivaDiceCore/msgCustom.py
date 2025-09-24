@@ -130,7 +130,10 @@ dictStrCustom = {
     'strPcInitReset' : '重新生成先攻列表:\n{tResult}',
     'strPcInitClear' : '已清空先攻列表',
     'strPcInitShowNode' : '{tId}. [{tSubName}]: {tSubResult}',
+    'strPcInitShowNodeSpecial' : '-> {tId}. [{tSubName}]: {tSubResult}',
     'strPcInitDel' : '已从先攻列表中删除[{tName}]',
+    'strPcInitEnd' : '回合结束！现在轮到[{tSubName}]{tAtUser}行动了！（先攻值：{tSubResult}）',
+    'strPcInitEndNoList' : '当前没有先攻列表',
     'strPcInit' : '[{tPcTempName}]人物卡作成:{tPcInitResult}',
     'strPcInitErrorRange' : '[{tPcTempName}]人物卡作成失败:\n错误的人物卡作成范围(需为1-10)',
     'strPcUpdateSkillValue' : '[{tName}]的人物卡已更新:\n{tSkillUpdate}',
@@ -278,6 +281,17 @@ dictStrCustom = {
     'strNoTeams': '当前群组没有创建任何小队',
     'strNoMembersRemoved': '没有移除任何成员',
     'strTeamEmpty': '小队[{tTeamName}]中没有成员',
+    
+    # team 成员显示格式模板
+    'strTeamMemberFormat': '[{tUserName}] - [{tPcName}]',  # 基本成员显示格式
+    'strTeamMemberFormatWithIndex': '{tIndex}: [{tUserName}] - 人物卡: [{tPcName}]',  # 带序号的成员显示格式
+    'strTeamSortMemberFormat': '{tIndex}. [{tUserName}] - [{tPcName}]({tSkillName}: {tSkillValue})',  # 排序结果成员格式
+    'strTeamCheckMemberFormat': '{tDisplayName}({tSkillName}: {tSkillValue}): {tDiceDetail}/{tSkillValue} {tResult}',  # 技能检定成员格式
+    'strTeamCheckMemberFormatNoSkill': '{tDisplayName}: {tDiceDetail}/{tSkillValue} {tResult}',  # 无技能名的检定格式
+    'strTeamSCMemberFormat': '{tDisplayName}(SAN:{tCurrentSan}): {tDiceDetail}/{tCurrentSan}\nSAN: {tCurrentSan} -> {tNewSan}(损失{tSanLoss}点)',  # 理智检定成员格式
+    'strTeamSkillUpdateMemberFormat': '-> [{tUserName}] - [{tPcName}]',  # 技能更新成员开头格式
+    'strTeamSkillUpdateResultFormat': '{tSkillName}: {tOldValue} -> {tNewValue}',  # 技能更新结果格式
+    'strTeamRollMemberFormat': '[{tUserName}] - [{tPcName}]: {tRollResult}',  # 掷骰成员格式
 }
 
 dictStrConst = {
@@ -363,6 +377,7 @@ dictTValue = {
     'tInitDataType': '未知',
     'tInitDataName': 'N/A',
     'tInitDataTimeCost': 'N/A',
+    'tAtUser': '',
     'tHelpDocResult': 'N/A',
     'tDrawDeckResult': 'N/A',
     'tConsoleKey': 'N/A',
