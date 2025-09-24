@@ -122,6 +122,8 @@ def getHelp(key_str, bot_hash, plugin_event = None):
     tmp_recommend_list = []
     tmp_recommend_str = ''
     key_str_new = key_str
+    if plugin_event is not None:
+        dictTValue['tUserName'] = plugin_event.data.sender['name']
     if bot_hash in OlivaDiceCore.msgCustom.dictStrCustomDict:
         dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[bot_hash]
     if bot_hash in OlivaDiceCore.helpDocData.dictHelpDoc:

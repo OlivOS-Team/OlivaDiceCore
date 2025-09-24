@@ -308,11 +308,12 @@ https://wiki.dice.center/OlivOS_Login.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9B%9E%
 .ri =1D20+4  表示 1D20+4
 .ri 4  表示 4
 
-.init  显示先攻列表
+.init  显示先攻列表（-> 标记当前回合玩家）
 .init set [表达式] [名称]  添加先攻
 .init del [名称]  删除先攻
 .init clear  清空先攻列表
-.init reset  重新生成先攻列表''',
+.init reset  重新生成先攻列表
+.init end  结束当前回合，轮换到下一个玩家''',
 
     'ob': '''旁观模式：
 .ob  切换旁观模式
