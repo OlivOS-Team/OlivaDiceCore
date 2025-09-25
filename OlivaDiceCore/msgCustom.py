@@ -284,7 +284,7 @@ dictStrCustom = {
     
     # team 成员显示格式模板
     'strTeamMemberFormat': '[{tUserName}] - [{tPcName}]',  # 基本成员显示格式
-    'strTeamMemberFormatWithIndex': '{tIndex}: [{tUserName}] - 人物卡: [{tPcName}]',  # 带序号的成员显示格式
+    'strTeamMemberFormatWithIndex': '成员{tIndex}: [{tUserName}] - 人物卡: [{tPcName}]',  # 带序号的成员显示格式
     'strTeamSortMemberFormat': '{tIndex}. [{tUserName}] - [{tPcName}]({tSkillName}: {tSkillValue})',  # 排序结果成员格式
     'strTeamCheckMemberFormat': '{tDisplayName}({tSkillName}: {tSkillValue}): {tDiceDetail}/{tSkillValue} {tResult}',  # 技能检定成员格式
     'strTeamCheckMemberFormatNoSkill': '{tDisplayName}: {tDiceDetail}/{tSkillValue} {tResult}',  # 无技能名的检定格式

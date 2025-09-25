@@ -1460,7 +1460,7 @@ def team_create(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCusto
             pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
             pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
             member_display = format_team_member_display(
-                user_name, pc_name, dictStrCustom, 'strTeamMemberFormatWithIndex', tIndex=f"成员{index}"
+                user_name, pc_name, dictStrCustom, 'strTeamMemberFormatWithIndex', tIndex=f"{index}"
             )
             member_info.append(member_display)
             index += 1
@@ -1532,7 +1532,7 @@ def team_show(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom,
         pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
         pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
         member_display = format_team_member_display(
-            user_name, pc_name, dictStrCustom, 'strTeamMemberFormatWithIndex', tIndex=f"成员{index}"
+            user_name, pc_name, dictStrCustom, 'strTeamMemberFormatWithIndex', tIndex=f"{index}"
         )
         member_info.append(member_display)
         index += 1
@@ -1708,7 +1708,7 @@ def team_remove(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin
             pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
             pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
             member_display = format_team_member_display(
-                user_name, pc_name, dictStrCustom, 'strTeamMemberFormatWithIndex', tIndex=f"成员{index}"
+                user_name, pc_name, dictStrCustom, 'strTeamMemberFormatWithIndex', tIndex=f"{index}"
             )
             member_info.append(member_display)
             index += 1
