@@ -1610,6 +1610,14 @@ def unity_reply(plugin_event, Proc):
                         userConfigKey = 'userName',
                         botHash = plugin_event.bot_info.hash
                     )
+                    auto_sn_enabled = OlivaDiceCore.userConfig.getUserConfigByKey(
+                        userId = tmp_pc_id,
+                        userType = 'user',
+                        platform = tmp_pc_platform,
+                        userConfigKey = 'autoSnEnabled',
+                        botHash = plugin_event.bot_info.hash,
+                        default = False
+                    )
                     dictTValue['tUserName'] = tmp_userName
                     if tmp_groupObList_list == None:
                         tmp_groupObList_list = []
@@ -1640,7 +1648,13 @@ def unity_reply(plugin_event, Proc):
                             if tmp_groupHash != tmp_userObList_list_this:
                                 tmp_userObList_list_new.append(tmp_userObList_list_this)
                         tmp_userObList_list = tmp_userObList_list_new
-                        trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
+                        if auto_sn_enabled:
+                            plugin_event.set_group_card(
+                                group_id = plugin_event.data.group_id,
+                                user_id = tmp_pc_id,
+                                card = tmp_userName,
+                                host_id = plugin_event.data.host_id
+                            )
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strObExit'], dictTValue)
                     elif flag_ob_is_enable and flag_ob_will_enable:
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strObJoinAlready'], dictTValue)
@@ -1678,7 +1692,7 @@ def unity_reply(plugin_event, Proc):
                                 platform = tmp_user_platform
                             )
                         )
-                        if not flag_ob_is_enable:
+                        if not flag_ob_is_enable and auto_sn_enabled:
                             plugin_event.set_group_card(
                                 group_id = plugin_event.data.group_id,
                                 user_id = tmp_pc_id,
@@ -1702,6 +1716,14 @@ def unity_reply(plugin_event, Proc):
                         platform = plugin_event.platform['platform'],
                         userConfigKey = 'userObList',
                         botHash = plugin_event.bot_info.hash
+                    )
+                    auto_sn_enabled = OlivaDiceCore.userConfig.getUserConfigByKey(
+                        userId = tmp_pc_id,
+                        userType = 'user',
+                        platform = tmp_pc_platform,
+                        userConfigKey = 'autoSnEnabled',
+                        botHash = plugin_event.bot_info.hash,
+                        default = False
                     )
                     if tmp_userObList_list == None:
                         tmp_userObList_list = []
@@ -1756,7 +1778,13 @@ def unity_reply(plugin_event, Proc):
                     OlivaDiceCore.userConfig.writeUserConfigByUserHash(
                         userHash = tmp_userHash
                     )
-                    trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
+                    if auto_sn_enabled:
+                        plugin_event.set_group_card(
+                            group_id = plugin_event.data.group_id,
+                            user_id = tmp_pc_id,
+                            card = tmp_userName,
+                            host_id = plugin_event.data.host_id
+                        )
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strObExitAll'], dictTValue)
                     if tmp_reply_str != None:
                         replyMsg(plugin_event, tmp_reply_str)
