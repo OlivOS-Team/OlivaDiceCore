@@ -132,7 +132,7 @@ def getHelp(key_str, bot_hash, plugin_event = None):
                 tmp_tHelpDocResult = OlivaDiceCore.helpDocData.dictHelpDoc[bot_hash][key_str_new]
                 if len(tmp_tHelpDocResult) > 1:
                     if tmp_tHelpDocResult[0] == '&' and tmp_tHelpDocResult[1:] != key_str_new:
-                        tmp_reply_str = getHelp(tmp_tHelpDocResult[1:], bot_hash)
+                        tmp_reply_str = getHelp(tmp_tHelpDocResult[1:], bot_hash, plugin_event)
                         return tmp_reply_str
                 dictTValue['tHelpDocResult'] = OlivaDiceCore.helpDocData.dictHelpDoc[bot_hash][key_str_new]
                 if key_str_new == 'default':
