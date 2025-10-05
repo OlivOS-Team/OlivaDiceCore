@@ -2614,18 +2614,16 @@ def unity_reply(plugin_event, Proc):
                 return
             elif isMatchWordStart(tmp_reast_str, 'list', fullMatch = True):
                 if is_at: return
+                tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
+                    tmp_pc_id,
+                    tmp_pc_platform
+                )
                 tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
-                    OlivaDiceCore.pcCard.getPcHash(
-                        tmp_pc_id,
-                        tmp_pc_platform
-                    ),
+                    tmp_pcHash,
                     tmp_hagID
                 )
                 tmp_dict_pc_card = OlivaDiceCore.pcCard.pcCardDataGetUserAll(
-                    OlivaDiceCore.pcCard.getPcHash(
-                        tmp_pc_id,
-                        tmp_pc_platform
-                    )
+                    tmp_pcHash
                 )
                 flag_begin = True
                 for tmp_dict_pc_card_this in tmp_dict_pc_card:
@@ -2633,7 +2631,26 @@ def unity_reply(plugin_event, Proc):
                         flag_begin = False
                     else:
                         tmp_reply_str_1 += '\n'
-                    tmp_reply_str_1 += '%s' % (tmp_dict_pc_card_this, )
+                    # 获取当前人物卡的 template 和 rule
+                    tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
+                        tmp_pcHash,
+                        tmp_dict_pc_card_this
+                    )
+                    tmp_rule_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateRuleKey(
+                        tmp_pcHash,
+                        tmp_dict_pc_card_this
+                    )
+                    # 如果没有设置，显示 default
+                    if tmp_template_name is None:
+                        tmp_template_name = 'default'
+                    if tmp_rule_name is None:
+                        tmp_rule_name = 'default'
+                    # 格式化显示：人物卡名 [template/rule]
+                    tmp_reply_str_1 += '%s [%s/%s]' % (
+                        tmp_dict_pc_card_this,
+                        tmp_template_name,
+                        tmp_rule_name
+                    )
                 if tmp_pc_name_1 != None:
                     dictTValue['tPcSelection'] = tmp_pc_name_1
                 dictTValue['tPcList'] = tmp_reply_str_1
