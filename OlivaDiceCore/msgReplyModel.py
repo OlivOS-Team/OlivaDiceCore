@@ -18,31 +18,6 @@ import OlivaDiceCore
 import OlivOS
 
 import time
-
-# Team成员信息格式化辅助函数
-def format_team_member_display(user_name, pc_name, dictStrCustom, template_key='strTeamMemberFormat', **kwargs):
-    """格式化团队成员显示信息的通用函数
-    
-    Args:
-        user_name: 用户名
-        pc_name: 角色卡名称，如果为None则使用user_name
-        dictStrCustom: 自定义消息字典
-        template_key: 要使用的模板键名
-        **kwargs: 其他要传递给模板的参数
-    
-    Returns:
-        格式化后的字符串
-    """
-    display_pc_name = pc_name if pc_name else user_name
-    format_dict = {
-        'tUserName': user_name,
-        'tPcName': display_pc_name,
-        **kwargs
-    }
-    return OlivaDiceCore.msgCustomManager.formatReplySTR(
-        dictStrCustom.get(template_key, '[{tUserName}] - [{tPcName}]'), 
-        format_dict
-    )
 import hashlib
 import re
 import copy
@@ -1370,6 +1345,19 @@ def getNoteFormat(
 '''
 team指令部分
 '''
+# Team成员信息格式化辅助函数
+def format_team_member_display(user_name, pc_name, dictStrCustom, template_key='strTeamMemberFormat', **kwargs):
+    """格式化团队成员显示信息的通用函数"""
+    display_pc_name = pc_name if pc_name else user_name
+    format_dict = {
+        'tUserName': user_name,
+        'tPcName': display_pc_name,
+        **kwargs
+    }
+    return OlivaDiceCore.msgCustomManager.formatReplySTR(
+        dictStrCustom.get(template_key, '[{tUserName}] - [{tPcName}]'), 
+        format_dict
+    )
 
 def replyTEAM_command(plugin_event, Proc, valDict):
     tmp_reast_str = valDict['tmp_reast_str']
