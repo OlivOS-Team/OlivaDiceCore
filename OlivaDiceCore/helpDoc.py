@@ -449,11 +449,9 @@ def fuzzySearchAndSelect(
         elif tmp_select == None:
             return None
         elif tmp_select == False:
-            # 用户输入了新命令,已被系统重新处理,不发送错误消息
             return None
         else:
             flag_need_loop = False
-    # 如果 flag_need_loop 为 False，发送错误消息
     if not flag_need_loop:
         if strErrorKey is not None and strErrorKey in dictStrCustom:
             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(

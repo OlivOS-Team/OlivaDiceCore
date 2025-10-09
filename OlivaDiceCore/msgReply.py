@@ -2863,13 +2863,14 @@ def unity_reply(plugin_event, Proc):
                 trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
-            elif isMatchWordStart(tmp_reast_str, 'new'):
-                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'new')
-                tmp_reast_str = skipSpaceStart(tmp_reast_str)
-                tmp_reast_str = tmp_reast_str.rstrip('')
+            elif isMatchWordStart(tmp_reast_str_original, 'new'):
+                # 使用原始字符串（不转半角）
+                tmp_reast_str_new = getMatchWordStartRight(tmp_reast_str_original, 'new')
+                tmp_reast_str_new = skipSpaceStart(tmp_reast_str_new)
+                tmp_reast_str_new = tmp_reast_str_new.rstrip('')
                 tmp_pc_name = None
-                if len(tmp_reast_str) > 0:
-                    tmp_pc_name = tmp_reast_str
+                if len(tmp_reast_str_new) > 0:
+                    tmp_pc_name = tmp_reast_str_new
                 if tmp_pc_name != None:
                     tmp_pc_name = OlivaDiceCore.pcCard.fixName(tmp_pc_name)
                     if not OlivaDiceCore.pcCard.checkPcName(tmp_pc_name):
@@ -2893,7 +2894,10 @@ def unity_reply(plugin_event, Proc):
                             '__new',
                             tmp_pc_name
                         )
-                        OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event)
+                        # 只有当新建的人物卡是空卡时才应用群规则模板
+                        is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
+                        if is_new_card:
+                            OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event)
                         dictTValue['tPcSelection'] = tmp_pc_name
                         if is_at:
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcNewAtOther'], dictTValue)
