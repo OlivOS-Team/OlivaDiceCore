@@ -112,6 +112,8 @@ dictStrCustom = {
     'strDelGroupTempRule' : '已清除本群套用模板与规则，将按照人物卡设置各自进行检定',
     'strSetGroupTempError' : '试图套用的模板不存在',
     'strSetGroupTempRuleError' : '试图套用的模板规则不存在',
+    'strSetGroupRavRule' : '已设置本群RAV判定规则[{tRavRuleName}]{tLazyResult}',
+    'strDelGroupRavRule' : '已清除本群RAV判定规则，将使用默认规则（规则1：官方规则）',
     'strSetGroupMainDice' : '已设置本群套用主骰[{tResult}]',
     'strShowGroupMainDice' : '本群已套用主骰[{tResult}]',
     'strShowGroupMainDiceNone' : '本群未设置主骰',
@@ -160,6 +162,7 @@ dictStrCustom = {
     'strPcUnLock' : '本群人物卡锁定已解除(当前人物卡：{tName})，其他群切换人物卡将同步至本群',
     'strPcUnLockNone' : '本群未启用人物卡锁定功能',
     'strPcInitSt' : '人物卡[{tName}]已按照[{tPcTempName}]完成人物卡作成:{tPcInitResult}',
+    'strPcSetRecommend' : '未找到人物卡[{tPcSelection}]，你是想找以下人物卡吗？\n{tSearchResult}\n请输入序号以切换对应人物卡',
     'strPcSet' : '人物卡已切换至[{tPcSelection}]',
     'strPcSetError' : '试图切入的人物卡不存在',
     'strPcNew' : '[{tUserName}]的人物卡[{tPcSelection}]已创建',
@@ -276,6 +279,7 @@ dictStrCustom = {
     'strTeamSCResult': '小队[{tTeamName}]进行理智检定:\n{tResult}',
     'strTeamRoll': '小队[{tTeamName}]掷骰:\n{tRollResult}',
     'strTeamRollWithReason': '小队[{tTeamName}]由于[{tReason}]掷骰:\n{tRollResult}',
+    'strTeamSetRecommend' : '未找到小队[{tTeamName}]，你是想找以下小队吗？\n{tSearchResult}\n请输入序号以切换对应小队',
     'strNoActiveTeam': '当前群组没有活跃小队',
     'strTeamNotFound': '小队[{tTeamName}]不存在',
     'strNoTeams': '当前群组没有创建任何小队',
@@ -427,6 +431,18 @@ dictSetCOCDetail = {
     'DeltaGreen': '''小于等于检定目标成功，若结果为1或两骰相同为大成功（相当于整除11）
 大于检定目标失败，若结果为100或两骰相同为大失败（相当于整除11）
 没有极难成功/困难成功'''
+}
+
+dictSetRAVDetail = {
+    '1': '''官规：
+1. 先比较成功难度等级
+2. 难度相同时比较属性值（技能值）
+3. 属性值相同直接平局（不比较骰点数字）''',
+    '2': '''村规：
+1. 先比较成功难度等级
+2. 难度相同时比较骰点数字
+3. 骰点数字相同时比较属性值
+4. 属性值也相同才平局'''
 }
 
 dictAdapterMapper = {

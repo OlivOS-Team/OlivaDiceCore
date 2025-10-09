@@ -347,3 +347,131 @@ def formatSTRReplace(data:str, valDict:dict):
         reg_res += '{%s' % reg_key
     res = reg_res
     return res
+
+# 通用模糊搜索和选择函数
+# 参数：
+#   key_str: 搜索关键词
+#   item_list: 待搜索的项目列表
+#   bot_hash: bot哈希值（用于获取阈值配置）
+#   plugin_event: 事件对象（如果为None则不等待用户选择，仅返回搜索结果）
+#   strRecommendKey: 找到相似项时使用的消息模板键名（如 'strPcSetRecommend', 'strTeamSetRecommend'）
+#   dictStrCustom: 自定义回复字符串字典
+#   dictTValue: 模板值字典
+# 返回值：
+#   如果 plugin_event 为 None，返回搜索结果列表
+#   如果 plugin_event 不为 None，返回用户选择的项目，或 None（用户未选择/超时/取消）
+def fuzzySearchAndSelect(
+    key_str:str, 
+    item_list:list, 
+    bot_hash:str, 
+    plugin_event = None,
+    strRecommendKey:str = 'strSearchRecommend',
+    strErrorKey:str = None,
+    dictStrCustom = None,
+    dictTValue = None
+):
+    """
+    使用与 helpDoc 相同的模糊搜索算法，对任意列表进行模糊搜索，
+    并可选择性地等待用户输入数字选择结果
+    strErrorKey: 未找到匹配或用户超时/取消时的错误消息模板键
+    """
+    if dictStrCustom is None:
+        dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustom
+    if dictTValue is None:
+        dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
+    
+    # 获取推荐阈值
+    helpRecommendGate = OlivaDiceCore.console.getConsoleSwitchByHash(
+        'helpRecommendGate',
+        bot_hash
+    )
+    if helpRecommendGate == None:
+        helpRecommendGate = 25
+
+    # 对每个项目计算相似度（复用 getRecommendRank）
+    tmp_RecommendRank_list = []
+    for item in item_list:
+        tmp_RecommendRank_list.append([
+            getRecommendRank(key_str, str(item)),
+            item
+        ])
+    
+    # 按相似度排序
+    tmp_RecommendRank_list.sort(key = lambda x : x[0])
+    
+    # 获取前8个最相似的项目（与 getHelpRecommend 相同逻辑）
+    res = []
+    tmp_for_list = range(min(8, len(tmp_RecommendRank_list)))
+    for tmp_for_list_this in tmp_for_list:
+        if tmp_RecommendRank_list[tmp_for_list_this][0] < 1000:
+            if len(str(tmp_RecommendRank_list[tmp_for_list_this][1])) < helpRecommendGate:
+                res.append(tmp_RecommendRank_list[tmp_for_list_this][1])
+    
+    # 如果没有提供 plugin_event，直接返回搜索结果
+    if plugin_event is None:
+        return res
+    
+    # 完全按照 getHelp 的逻辑处理
+    flag_need_loop = False
+    tmp_reply_str = None
+    
+    if len(res) > 0:
+        # 构建推荐列表字符串（与 getHelp 相同逻辑）
+        tmp_recommend_str = ''
+        flag_is_begin = True
+        tmp_count = 0
+        for tmp_recommend_list_this in res:
+            if not flag_is_begin:
+                tmp_recommend_str += '\n'
+            else:
+                flag_is_begin = False
+            tmp_recommend_str += '%d. %s' % (tmp_count + 1, tmp_recommend_list_this)
+            tmp_count += 1
+        dictTValue['tSearchResult'] = tmp_recommend_str
+        
+        # 使用指定的消息模板
+        if strRecommendKey in dictStrCustom:
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                dictStrCustom[strRecommendKey], dictTValue
+            )
+        flag_need_loop = True
+    else:
+        # 没有搜索结果
+        if strErrorKey is not None and strErrorKey in dictStrCustom:
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                dictStrCustom[strErrorKey], dictTValue
+            )
+    
+    # 按照 getHelp 的逻辑处理等待和选择
+    if flag_need_loop:
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+        tmp_select:'str|None' = OlivaDiceCore.msgReplyModel.replyCONTEXT_regWait(
+            plugin_event = plugin_event,
+            flagBlock = 'allowCommand',
+            hash = OlivaDiceCore.msgReplyModel.contextRegHash([None, plugin_event.data.user_id])
+        )
+        if type(tmp_select) == str and tmp_select.isdigit():
+            tmp_select = int(tmp_select) - 1
+            if tmp_select >= 0 and tmp_select < len(res):
+                # 返回用户选择的项目
+                return res[tmp_select]
+            else:
+                flag_need_loop = False
+        elif tmp_select == None:
+            return None
+        elif tmp_select == False:
+            # 用户输入了新命令,已被系统重新处理,不发送错误消息
+            return None
+        else:
+            flag_need_loop = False
+    
+    # 如果 flag_need_loop 为 False，发送错误消息
+    if not flag_need_loop:
+        if strErrorKey is not None and strErrorKey in dictStrCustom:
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                dictStrCustom[strErrorKey], dictTValue
+            )
+            OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+        return None
+    
+    return None

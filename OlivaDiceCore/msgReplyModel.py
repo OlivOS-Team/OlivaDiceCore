@@ -243,6 +243,53 @@ def replySET_command(plugin_event, Proc, valDict):
             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
         replyMsg(plugin_event, tmp_reply_str)
         return
+    elif isMatchWordStart(tmp_reast_str, 'rav', isCommand = True):
+        if flag_is_from_group:
+            tmp_user_platform = plugin_event.platform['platform']
+            tmp_hag_id = tmp_hagID
+            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'rav')
+            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            tmp_reast_str = tmp_reast_str.rstrip()
+            tmp_switch_setrav = None
+            if tmp_reast_str.isdecimal():
+                tmp_switch_setrav = int(tmp_reast_str)
+                if tmp_switch_setrav not in [1, 2]:
+                    tmp_switch_setrav = None
+            if tmp_switch_setrav != None:
+                tmp_ravRuleName = str(tmp_switch_setrav)
+                OlivaDiceCore.userConfig.setUserConfigByKey(
+                    userConfigKey = 'groupRavRule',
+                    userConfigValue = tmp_ravRuleName,
+                    botHash = plugin_event.bot_info.hash,
+                    userId = tmp_hag_id,
+                    userType = 'group',
+                    platform = tmp_user_platform
+                )
+                dictTValue['tRavRuleName'] = tmp_ravRuleName
+                if tmp_ravRuleName in OlivaDiceCore.msgCustom.dictSetRAVDetail:
+                    dictTValue['tLazyResult'] = ':\n%s' % OlivaDiceCore.msgCustom.dictSetRAVDetail[tmp_ravRuleName]
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSetGroupRavRule'], dictTValue)
+            else:
+                OlivaDiceCore.userConfig.setUserConfigByKey(
+                    userConfigKey = 'groupRavRule',
+                    userConfigValue = None,
+                    botHash = plugin_event.bot_info.hash,
+                    userId = tmp_hag_id,
+                    userType = 'group',
+                    platform = tmp_user_platform
+                )
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDelGroupRavRule'], dictTValue)
+            OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                userHash = OlivaDiceCore.userConfig.getUserHash(
+                    userId = tmp_hag_id,
+                    userType = 'group',
+                    platform = tmp_user_platform
+                )
+            )
+        else:
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
+        replyMsg(plugin_event, tmp_reply_str)
+        return
     elif isMatchWordStart(tmp_reast_str, 'dnd', fullMatch = True, isCommand = True):
         if flag_is_from_group:
             tmp_user_platform = plugin_event.platform['platform']
@@ -781,6 +828,16 @@ def replyRAV_command(plugin_event, Proc, valDict):
                     userConfigKey = 'groupTemplateRule',
                     botHash = plugin_event.bot_info.hash
                 )
+                flag_groupRavRule = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_platform,
+                    userConfigKey = 'groupRavRule',
+                    botHash = plugin_event.bot_info.hash
+                )
+                # 默认使用规则1（官方规则）
+                if flag_groupRavRule is None:
+                    flag_groupRavRule = '1'
 
                 tmp_pcHash_0 = OlivaDiceCore.pcCard.getPcHash(tmp_userID, tmp_platform)
                 tmp_pcHash_1 = OlivaDiceCore.pcCard.getPcHash(tmp_userID_1, tmp_platform)
@@ -883,17 +940,29 @@ def replyRAV_command(plugin_event, Proc, valDict):
                     elif dictSkillCheckRank[tmpSkillCheckType] < dictSkillCheckRank[tmpSkillCheckType_1]:
                         flag_rav_type = '1'
                     elif dictSkillCheckRank[tmpSkillCheckType] == dictSkillCheckRank[tmpSkillCheckType_1]:
-                        if dictRuleTempData['roll'] < dictRuleTempData_1['roll']:
-                            flag_rav_type = '0'
-                        elif dictRuleTempData['roll'] > dictRuleTempData_1['roll']:
-                            flag_rav_type = '1'
-                        elif dictRuleTempData['roll'] == dictRuleTempData_1['roll']:
+                        # 难度相同时，根据规则判断
+                        if flag_groupRavRule == '1':
+                            # 规则1：官方规则 - 比较属性值，不比较骰点
                             if dictRuleTempData['skill'] > dictRuleTempData_1['skill']:
                                 flag_rav_type = '0'
                             elif dictRuleTempData['skill'] < dictRuleTempData_1['skill']:
                                 flag_rav_type = '1'
-                            elif dictRuleTempData['skill'] == dictRuleTempData_1['skill']:
+                            else:
+                                # 属性值相同直接平局
                                 flag_rav_type = '-'
+                        else:
+                            # 规则2：现行规则 - 先比较骰点，再比较属性值
+                            if dictRuleTempData['roll'] < dictRuleTempData_1['roll']:
+                                flag_rav_type = '0'
+                            elif dictRuleTempData['roll'] > dictRuleTempData_1['roll']:
+                                flag_rav_type = '1'
+                            elif dictRuleTempData['roll'] == dictRuleTempData_1['roll']:
+                                if dictRuleTempData['skill'] > dictRuleTempData_1['skill']:
+                                    flag_rav_type = '0'
+                                elif dictRuleTempData['skill'] < dictRuleTempData_1['skill']:
+                                    flag_rav_type = '1'
+                                elif dictRuleTempData['skill'] == dictRuleTempData_1['skill']:
+                                    flag_rav_type = '-'
                 if flag_rav_type == '0' and tmpSkillCheckType in [
                     OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS,
                     OlivaDiceCore.skillCheck.resultType.SKILLCHECK_HARD_SUCCESS,
@@ -1942,35 +2011,72 @@ def team_set(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, 
         default = {}
     )
     
-    # 检查小队是否存在
-    if team_name not in team_config:
-        dictTValue['tTeamName'] = team_name
-        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
-            dictStrCustom['strTeamNotFound'], dictTValue
-        ))
-        return
-    
-    # 设置活跃小队
-    OlivaDiceCore.userConfig.setUserConfigByKey(
-        userConfigKey = 'activeTeam',
-        userConfigValue = team_name,
-        botHash = plugin_event.bot_info.hash,
-        userId = tmp_hagID,
-        userType = 'group',
-        platform = plugin_event.platform['platform']
-    )
-    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
-        userHash = OlivaDiceCore.userConfig.getUserHash(
+    # 首先尝试直接切换
+    if team_name in team_config:
+        # 设置活跃小队
+        OlivaDiceCore.userConfig.setUserConfigByKey(
+            userConfigKey = 'activeTeam',
+            userConfigValue = team_name,
+            botHash = plugin_event.bot_info.hash,
             userId = tmp_hagID,
             userType = 'group',
             platform = plugin_event.platform['platform']
         )
-    )
-    
-    dictTValue['tTeamName'] = team_name
-    OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
-        dictStrCustom['strTeamSetActive'], dictTValue
-    ))
+        OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+            userHash = OlivaDiceCore.userConfig.getUserHash(
+                userId = tmp_hagID,
+                userType = 'group',
+                platform = plugin_event.platform['platform']
+            )
+        )
+        dictTValue['tTeamName'] = team_name
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strTeamSetActive'], dictTValue
+        ))
+    else:
+        # 如果直接切换失败，尝试模糊搜索
+        team_list = list(team_config.keys())
+        if len(team_list) > 0:
+            dictTValue['tUserName'] = plugin_event.data.sender['name']
+            dictTValue['tTeamName'] = team_name
+            selected_team_name = OlivaDiceCore.helpDoc.fuzzySearchAndSelect(
+                key_str = team_name,
+                item_list = team_list,
+                bot_hash = plugin_event.bot_info.hash,
+                plugin_event = plugin_event,
+                strRecommendKey = 'strTeamSetRecommend',
+                strErrorKey = 'strTeamNotFound',
+                dictStrCustom = dictStrCustom,
+                dictTValue = dictTValue
+            )
+            # 如果用户选择了某个小队，切换到该小队
+            if selected_team_name is not None:
+                OlivaDiceCore.userConfig.setUserConfigByKey(
+                    userConfigKey = 'activeTeam',
+                    userConfigValue = selected_team_name,
+                    botHash = plugin_event.bot_info.hash,
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = plugin_event.platform['platform']
+                )
+                OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+                    userHash = OlivaDiceCore.userConfig.getUserHash(
+                        userId = tmp_hagID,
+                        userType = 'group',
+                        platform = plugin_event.platform['platform']
+                    )
+                )
+                dictTValue['tTeamName'] = selected_team_name
+                OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+                    dictStrCustom['strTeamSetActive'], dictTValue
+                ))
+        else:
+            # 如果没有任何小队，显示错误
+            dictTValue['tTeamName'] = team_name
+            OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+                dictStrCustom['strTeamNotFound'], dictTValue
+            ))
+
 
 def team_sort(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, team_name):
     tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, ['sort','arr'])

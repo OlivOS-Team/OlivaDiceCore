@@ -43,6 +43,7 @@ dictUserConfigNoteDefault = {
     'groupWithHostEnable' : False,
     'groupTemplate' : None,
     'groupTemplateRule' : None,
+    'groupRavRule' : None,
     'groupMainDice' : None,
     'groupMainDiceDRight' : None,
     'groupObList' : None,

@@ -2429,14 +2429,16 @@ def unity_reply(plugin_event, Proc):
                         key=lambda x: int(x.split(':')[-1]) if x.split(':')[-1].replace('[*]', '').isdigit() else 0,
                         reverse=True
                     )
-                for tmp_reply_str_1_dict_this in tmp_reply_str_1_dict:
-                    if tmp_reply_str_1_dict_this != flag_hit_skill_list_name_default:
+                # 按照模板中 skill 定义的顺序显示技能分组
+                for tmp_skill_dict_this in tmp_skill_dict:
+                    if tmp_skill_dict_this in tmp_reply_str_1_dict:
                         tmp_reply_str_1_list.append(
                             '<%s>\n%s' % (
-                                tmp_reply_str_1_dict_this,
-                                ' '.join(tmp_reply_str_1_dict[tmp_reply_str_1_dict_this])
+                                tmp_skill_dict_this,
+                                ' '.join(tmp_reply_str_1_dict[tmp_skill_dict_this])
                             )
                         )
+                # 然后显示"其它"分组（未在模板中定义的技能）
                 if flag_hit_skill_list_name_default in tmp_reply_str_1_dict:
                     tmp_reply_str_1_list.append(
                         '<%s>\n%s' % (
@@ -2717,6 +2719,8 @@ def unity_reply(plugin_event, Proc):
                         tmp_pc_platform
                     )
                     tmp_flag_done = False
+                    
+                    # 首先尝试直接切换
                     if OlivaDiceCore.pcCard.pcCardDataGetSelectionKeyLock(
                         tmp_pcHash,
                         tmp_hagID
@@ -2731,16 +2735,55 @@ def unity_reply(plugin_event, Proc):
                             tmp_pc_name,
                             tmp_hagID
                         )
+                    # 如果直接切换失败，尝试模糊搜索
+                    if not tmp_flag_done:
+                        # 获取所有人物卡列表
+                        tmp_pc_card_list = []
+                        if tmp_pcHash in OlivaDiceCore.pcCard.dictPcCardData['unity']:
+                            tmp_pc_card_list = list(OlivaDiceCore.pcCard.dictPcCardData['unity'][tmp_pcHash].keys())
+                        # 如果有人物卡，进行模糊搜索
+                        if len(tmp_pc_card_list) > 0:
+                            dictTValue['tUserName'] = plugin_event.data.sender['name']
+                            dictTValue['tPcSelection'] = tmp_pc_name
+                            selected_pc_name = OlivaDiceCore.helpDoc.fuzzySearchAndSelect(
+                                key_str = tmp_pc_name,
+                                item_list = tmp_pc_card_list,
+                                bot_hash = plugin_event.bot_info.hash,
+                                plugin_event = plugin_event,
+                                strRecommendKey = 'strPcSetRecommend',
+                                strErrorKey = 'strPcSetError',
+                                dictStrCustom = dictStrCustom,
+                                dictTValue = dictTValue
+                            )
+                            # 如果用户选择了某个人物卡，尝试切换
+                            if selected_pc_name is not None:
+                                if OlivaDiceCore.pcCard.pcCardDataGetSelectionKeyLock(
+                                    tmp_pcHash,
+                                    tmp_hagID
+                                ) == None:
+                                    tmp_flag_done = OlivaDiceCore.pcCard.pcCardDataSetSelectionKey(
+                                        tmp_pcHash,
+                                        selected_pc_name
+                                    )
+                                else:
+                                    tmp_flag_done = OlivaDiceCore.pcCard.pcCardDataSetSelectionKeyLock(
+                                        tmp_pcHash,
+                                        selected_pc_name,
+                                        tmp_hagID
+                                    )
+                                tmp_pc_name = selected_pc_name
+                        else:
+                            # 没有任何人物卡
+                            tmp_flag_done = False
+                    # 发送切换结果
                     if tmp_flag_done:
                         dictTValue['tPcSelection'] = tmp_pc_name
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSet'], dictTValue)
-                    else:
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetError'], dictTValue)
-                    is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
-                    if is_new_card:
-                        OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
-                    trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
-                    replyMsg(plugin_event, tmp_reply_str)
+                        is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
+                        if is_new_card:
+                            OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
+                        trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'init'):
                 if is_at: return
