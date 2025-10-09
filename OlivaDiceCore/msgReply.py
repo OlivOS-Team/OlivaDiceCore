@@ -1071,7 +1071,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'on')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 tmp_reast_str = tmp_reast_str.rstrip(' ')
-                if flag_is_from_group and tmp_reast_str in tmp_end_list:
+                if flag_is_from_group and isInEndList(tmp_reast_str, tmp_end_list):
                     if (flag_is_from_group_have_admin and flag_is_from_group_admin or not flag_is_from_group_have_admin) or flag_is_from_master:
                         if flag_groupEnable != True:
                             if flag_is_from_host:
@@ -1128,7 +1128,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'off')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 tmp_reast_str = tmp_reast_str.rstrip(' ')
-                if flag_is_from_group and tmp_reast_str in tmp_end_list:
+                if flag_is_from_group and isInEndList(tmp_reast_str, tmp_end_list):
                     if (flag_is_from_group_have_admin and flag_is_from_group_admin or not flag_is_from_group_have_admin) or flag_is_from_master:
                         if flag_groupEnable != False:
                             if flag_is_from_host:
@@ -1188,7 +1188,7 @@ def unity_reply(plugin_event, Proc):
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'on')
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
                     tmp_reast_str = tmp_reast_str.rstrip(' ')
-                    if flag_is_from_group and tmp_reast_str in tmp_end_list:
+                    if flag_is_from_group and isInEndList(tmp_reast_str, tmp_end_list):
                         if ((flag_is_from_group_have_admin and flag_is_from_group_admin and not flag_is_from_group_sub_admin) or not flag_is_from_group_have_admin) or flag_is_from_master:
                             if flag_is_from_host:
                                 if flag_hostLocalEnable != True:
@@ -1224,7 +1224,7 @@ def unity_reply(plugin_event, Proc):
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'off')
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
                     tmp_reast_str = tmp_reast_str.rstrip(' ')
-                    if flag_is_from_group and tmp_reast_str in tmp_end_list:
+                    if flag_is_from_group and isInEndList(tmp_reast_str, tmp_end_list):
                         if ((flag_is_from_group_have_admin and flag_is_from_group_admin and not flag_is_from_group_sub_admin) or not flag_is_from_group_have_admin) or flag_is_from_master:
                             if flag_is_from_host:
                                 if flag_hostLocalEnable != False:
@@ -1260,7 +1260,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['exit','bye'])
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 tmp_reast_str = tmp_reast_str.rstrip(' ')
-                if flag_is_from_group and tmp_reast_str in tmp_end_list:
+                if flag_is_from_group and isInEndList(tmp_reast_str, tmp_end_list):
                     if (flag_is_from_group_have_admin and flag_is_from_group_admin) or flag_is_from_master:
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotExit'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
@@ -2429,14 +2429,16 @@ def unity_reply(plugin_event, Proc):
                         key=lambda x: int(x.split(':')[-1]) if x.split(':')[-1].replace('[*]', '').isdigit() else 0,
                         reverse=True
                     )
-                for tmp_reply_str_1_dict_this in tmp_reply_str_1_dict:
-                    if tmp_reply_str_1_dict_this != flag_hit_skill_list_name_default:
+                # 按照模板中 skill 定义的顺序显示技能分组
+                for tmp_skill_dict_this in tmp_skill_dict:
+                    if tmp_skill_dict_this in tmp_reply_str_1_dict:
                         tmp_reply_str_1_list.append(
                             '<%s>\n%s' % (
-                                tmp_reply_str_1_dict_this,
-                                ' '.join(tmp_reply_str_1_dict[tmp_reply_str_1_dict_this])
+                                tmp_skill_dict_this,
+                                ' '.join(tmp_reply_str_1_dict[tmp_skill_dict_this])
                             )
                         )
+                # 然后显示"其它"分组（未在模板中定义的技能）
                 if flag_hit_skill_list_name_default in tmp_reply_str_1_dict:
                     tmp_reply_str_1_list.append(
                         '<%s>\n%s' % (
@@ -2614,18 +2616,16 @@ def unity_reply(plugin_event, Proc):
                 return
             elif isMatchWordStart(tmp_reast_str, 'list', fullMatch = True):
                 if is_at: return
+                tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
+                    tmp_pc_id,
+                    tmp_pc_platform
+                )
                 tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
-                    OlivaDiceCore.pcCard.getPcHash(
-                        tmp_pc_id,
-                        tmp_pc_platform
-                    ),
+                    tmp_pcHash,
                     tmp_hagID
                 )
                 tmp_dict_pc_card = OlivaDiceCore.pcCard.pcCardDataGetUserAll(
-                    OlivaDiceCore.pcCard.getPcHash(
-                        tmp_pc_id,
-                        tmp_pc_platform
-                    )
+                    tmp_pcHash
                 )
                 flag_begin = True
                 for tmp_dict_pc_card_this in tmp_dict_pc_card:
@@ -2633,7 +2633,26 @@ def unity_reply(plugin_event, Proc):
                         flag_begin = False
                     else:
                         tmp_reply_str_1 += '\n'
-                    tmp_reply_str_1 += '%s' % (tmp_dict_pc_card_this, )
+                    # 获取当前人物卡的 template 和 rule
+                    tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
+                        tmp_pcHash,
+                        tmp_dict_pc_card_this
+                    )
+                    tmp_rule_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateRuleKey(
+                        tmp_pcHash,
+                        tmp_dict_pc_card_this
+                    )
+                    # 如果没有设置，显示 default
+                    if tmp_template_name is None:
+                        tmp_template_name = 'default'
+                    if tmp_rule_name is None:
+                        tmp_rule_name = 'default'
+                    # 格式化显示：人物卡名 [template/rule]
+                    tmp_reply_str_1 += '%s [%s/%s]' % (
+                        tmp_dict_pc_card_this,
+                        tmp_template_name,
+                        tmp_rule_name
+                    )
                 if tmp_pc_name_1 != None:
                     dictTValue['tPcSelection'] = tmp_pc_name_1
                 dictTValue['tPcList'] = tmp_reply_str_1
@@ -2700,6 +2719,8 @@ def unity_reply(plugin_event, Proc):
                         tmp_pc_platform
                     )
                     tmp_flag_done = False
+                    
+                    # 首先尝试直接切换
                     if OlivaDiceCore.pcCard.pcCardDataGetSelectionKeyLock(
                         tmp_pcHash,
                         tmp_hagID
@@ -2714,16 +2735,55 @@ def unity_reply(plugin_event, Proc):
                             tmp_pc_name,
                             tmp_hagID
                         )
+                    # 如果直接切换失败，尝试模糊搜索
+                    if not tmp_flag_done:
+                        # 获取所有人物卡列表
+                        tmp_pc_card_list = []
+                        if tmp_pcHash in OlivaDiceCore.pcCard.dictPcCardData['unity']:
+                            tmp_pc_card_list = list(OlivaDiceCore.pcCard.dictPcCardData['unity'][tmp_pcHash].keys())
+                        # 如果有人物卡，进行模糊搜索
+                        if len(tmp_pc_card_list) > 0:
+                            dictTValue['tUserName'] = plugin_event.data.sender['name']
+                            dictTValue['tPcSelection'] = tmp_pc_name
+                            selected_pc_name = OlivaDiceCore.helpDoc.fuzzySearchAndSelect(
+                                key_str = tmp_pc_name,
+                                item_list = tmp_pc_card_list,
+                                bot_hash = plugin_event.bot_info.hash,
+                                plugin_event = plugin_event,
+                                strRecommendKey = 'strPcSetRecommend',
+                                strErrorKey = 'strPcSetError',
+                                dictStrCustom = dictStrCustom,
+                                dictTValue = dictTValue
+                            )
+                            # 如果用户选择了某个人物卡，尝试切换
+                            if selected_pc_name is not None:
+                                if OlivaDiceCore.pcCard.pcCardDataGetSelectionKeyLock(
+                                    tmp_pcHash,
+                                    tmp_hagID
+                                ) == None:
+                                    tmp_flag_done = OlivaDiceCore.pcCard.pcCardDataSetSelectionKey(
+                                        tmp_pcHash,
+                                        selected_pc_name
+                                    )
+                                else:
+                                    tmp_flag_done = OlivaDiceCore.pcCard.pcCardDataSetSelectionKeyLock(
+                                        tmp_pcHash,
+                                        selected_pc_name,
+                                        tmp_hagID
+                                    )
+                                tmp_pc_name = selected_pc_name
+                        else:
+                            # 没有任何人物卡
+                            tmp_flag_done = False
+                    # 发送切换结果
                     if tmp_flag_done:
                         dictTValue['tPcSelection'] = tmp_pc_name
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSet'], dictTValue)
-                    else:
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetError'], dictTValue)
-                    is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
-                    if is_new_card:
-                        OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
-                    trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
-                    replyMsg(plugin_event, tmp_reply_str)
+                        is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
+                        if is_new_card:
+                            OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
+                        trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'init'):
                 if is_at: return
@@ -6736,6 +6796,66 @@ def getMatchWordStartRight(data, key, ignoreCase=True):
 def isdigitSafe(data):
     if data in '0123456789':
         return True
+    return False
+
+def isInEndList(tmp_reast_str, tmp_end_list):
+    """
+    检查 tmp_reast_str 是否在 tmp_end_list 中
+    兼容带 name 参数的 at CQ 码格式
+    支持格式：[CQ:at,qq=xxx] 和 [CQ:at,qq=xxx,name=xxx]
+    特殊处理：如果有多个 at，检查是否包含 bot 自己的 ID 或 all（at全体成员）
+    """
+    if tmp_reast_str in tmp_end_list:
+        return True
+    # 提取所有 at 的 QQ 号
+    at_list = []
+    tmp_str = tmp_reast_str
+    # 查找所有格式的 at
+    while '[CQ:at,qq=' in tmp_str:
+        start_pos = tmp_str.find('[CQ:at,qq=')
+        end_pos = tmp_str.find(']', start_pos)
+        if end_pos > start_pos:
+            at_code = tmp_str[start_pos:end_pos + 1]
+            try:
+                qq_start = at_code.find('qq=') + 3
+                # 查找结束位置（逗号或右括号）
+                qq_end = len(at_code) - 1  # 默认到结尾的右括号
+                comma_pos = at_code.find(',', qq_start)
+                if comma_pos > qq_start:
+                    qq_end = comma_pos
+                qq_id = at_code[qq_start:qq_end]
+                at_list.append(qq_id)
+            except:
+                pass
+            # 继续查找下一个
+            tmp_str = tmp_str[end_pos + 1:]
+        else:
+            break
+    # 如果没有找到 at，返回 False
+    if len(at_list) == 0:
+        return False
+    # 如果只有一个 at，检查是否匹配 tmp_end_list
+    if len(at_list) == 1:
+        simple_at = '[CQ:at,qq={}]'.format(at_list[0])
+        if simple_at in tmp_end_list:
+            return True
+    # 如果有多个 at，检查是否包含 bot 自己的 ID 或 'all'
+    elif len(at_list) > 1:
+        # 从 tmp_end_list 中提取 bot 的 ID
+        bot_ids = []
+        for item in tmp_end_list:
+            if item.startswith('[CQ:at,qq=') and item.endswith(']'):
+                try:
+                    qq_start = item.find('qq=') + 3
+                    qq_end = item.find(']')
+                    bot_id = item[qq_start:qq_end]
+                    bot_ids.append(bot_id)
+                except:
+                    pass
+        # 检查 at_list 中是否包含 bot 的 ID 或 'all'
+        for at_id in at_list:
+            if at_id in bot_ids or at_id == 'all':
+                return True
     return False
 
 def parse_at_user(plugin_event, tmp_reast_str, valDict, flag_is_from_group_admin):
