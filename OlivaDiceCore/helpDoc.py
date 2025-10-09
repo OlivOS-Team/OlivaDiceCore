@@ -379,42 +379,33 @@ def fuzzySearchAndSelect(
         dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustom
     if dictTValue is None:
         dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
-    
-    # 获取推荐阈值
     helpRecommendGate = OlivaDiceCore.console.getConsoleSwitchByHash(
         'helpRecommendGate',
         bot_hash
     )
     if helpRecommendGate == None:
         helpRecommendGate = 25
-
-    # 对每个项目计算相似度（复用 getRecommendRank）
+    # 对每个项目计算相似度
     tmp_RecommendRank_list = []
     for item in item_list:
         tmp_RecommendRank_list.append([
             getRecommendRank(key_str, str(item)),
             item
         ])
-    
     # 按相似度排序
     tmp_RecommendRank_list.sort(key = lambda x : x[0])
-    
-    # 获取前8个最相似的项目（与 getHelpRecommend 相同逻辑）
+    # 获取前8个最相似的项目
     res = []
     tmp_for_list = range(min(8, len(tmp_RecommendRank_list)))
     for tmp_for_list_this in tmp_for_list:
         if tmp_RecommendRank_list[tmp_for_list_this][0] < 1000:
             if len(str(tmp_RecommendRank_list[tmp_for_list_this][1])) < helpRecommendGate:
                 res.append(tmp_RecommendRank_list[tmp_for_list_this][1])
-    
     # 如果没有提供 plugin_event，直接返回搜索结果
     if plugin_event is None:
         return res
-    
-    # 完全按照 getHelp 的逻辑处理
     flag_need_loop = False
     tmp_reply_str = None
-    
     if len(res) > 0:
         # 构建推荐列表字符串（与 getHelp 相同逻辑）
         tmp_recommend_str = ''
@@ -428,7 +419,6 @@ def fuzzySearchAndSelect(
             tmp_recommend_str += '%d. %s' % (tmp_count + 1, tmp_recommend_list_this)
             tmp_count += 1
         dictTValue['tSearchResult'] = tmp_recommend_str
-        
         # 使用指定的消息模板
         if strRecommendKey in dictStrCustom:
             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
@@ -441,7 +431,6 @@ def fuzzySearchAndSelect(
             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                 dictStrCustom[strErrorKey], dictTValue
             )
-    
     # 按照 getHelp 的逻辑处理等待和选择
     if flag_need_loop:
         OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
@@ -464,7 +453,6 @@ def fuzzySearchAndSelect(
             return None
         else:
             flag_need_loop = False
-    
     # 如果 flag_need_loop 为 False，发送错误消息
     if not flag_need_loop:
         if strErrorKey is not None and strErrorKey in dictStrCustom:
