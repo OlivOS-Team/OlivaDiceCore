@@ -2339,29 +2339,51 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
                 i += 1
     # 解析多项技能操作
     op_list = op_list_get()
+    assignment_symbols = ['=', ':', '：']  # 赋值符号
+    all_op_list = op_list + assignment_symbols  # 所有操作符
     skill_updates = []
     # 分割技能操作
     current_pos = 0
     while current_pos < len(processed_skill_ops):
-        # 查找技能名结束位置（遇到操作符）
+        # 查找技能名结束位置（遇到操作符或数字）
         skill_end_pos = -1
+        op = ''  # 默认为空（直接赋值）
         for i in range(current_pos, len(processed_skill_ops)):
-            if processed_skill_ops[i] in op_list:
+            # 如果遇到操作符
+            if processed_skill_ops[i] in all_op_list:
                 skill_end_pos = i
+                op = processed_skill_ops[i]
+                break
+            # 如果遇到数字（且前面不是D）
+            elif processed_skill_ops[i].isdigit():
+                # 检查前一个字符是否是D（骰子表达式）
+                if i > current_pos and processed_skill_ops[i-1].upper() == 'D':
+                    continue
+                skill_end_pos = i
+                op = ''  # 直接赋值
                 break
         if skill_end_pos == -1:
             break
         skill_name = processed_skill_ops[current_pos:skill_end_pos].strip()
         if not skill_name:
-            current_pos = skill_end_pos + 1
+            if op in all_op_list:
+                current_pos = skill_end_pos + 1
+            else:
+                current_pos = skill_end_pos
             continue
         # 检查是否是d后面跟着数字的情况
-        if skill_name.upper() == 'D' and skill_end_pos < len(processed_skill_ops) and processed_skill_ops[skill_end_pos+1:].strip() and processed_skill_ops[skill_end_pos+1:].strip()[0].isdigit():
+        if skill_name.upper() == 'D' and skill_end_pos < len(processed_skill_ops) and processed_skill_ops[skill_end_pos:].strip() and processed_skill_ops[skill_end_pos:].strip()[0].isdigit():
             current_pos = skill_end_pos
             continue
         skill_name = OlivaDiceCore.pcCard.fixName(skill_name, flagMode = 'skillName')
-        op = processed_skill_ops[skill_end_pos]
-        rest_str = processed_skill_ops[skill_end_pos+1:]
+        # 如果技能名最后一个字符是赋值符号，移除它
+        if skill_name and skill_name[-1] in assignment_symbols:
+            skill_name = skill_name[:-1]
+        # 确定从哪里开始提取表达式
+        if op in all_op_list:
+            rest_str = processed_skill_ops[skill_end_pos+1:]
+        else:
+            rest_str = processed_skill_ops[skill_end_pos:]
         # 提取表达式
         expr_end_pos = 0
         in_dice_expr = False
@@ -2378,10 +2400,17 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
         if expr_end_pos == 0 and len(rest_str) > 0:
             expr_end_pos = 1
         expr_str = rest_str[:expr_end_pos]
-        current_pos = skill_end_pos + expr_end_pos + 1
+        # 更新当前位置
+        if op in all_op_list:
+            current_pos = skill_end_pos + expr_end_pos + 1
+        else:
+            current_pos = skill_end_pos + expr_end_pos
         if skill_name and expr_str:
             # 移除技能名中的数字
             clean_skill_name = re.sub(r'\d+', '', skill_name).upper()
+            # 如果操作符是赋值符号，将其转换为空字符串（直接赋值）
+            if op in assignment_symbols:
+                op = ''
             skill_updates.append((clean_skill_name, op, expr_str))
     if not skill_updates:
         OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'team')
@@ -2415,7 +2444,11 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
             if current_value is None:
                 current_value = 0
             # 处理表达式
-            rd_para_str = str(current_value) + op + expr_str
+            # 如果 op 为空字符串（直接赋值），直接使用 expr_str；否则使用 current_value + op + expr_str
+            if op == '':
+                rd_para_str = expr_str
+            else:
+                rd_para_str = str(current_value) + op + expr_str
             tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
                 tmp_pcHash, tmp_pc_name
             )
@@ -2450,7 +2483,7 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
                 ))
             else:
                 member_results.append(f"{skill_name}: 表达式错误 '{op}{expr_str}'")
-            OlivaDiceCore.msgReply.trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
+        OlivaDiceCore.msgReply.trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
         plres = plugin_event.get_stranger_info(member_id)
         user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
             userId = tmp_pc_id,
