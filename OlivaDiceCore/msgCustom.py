@@ -294,7 +294,7 @@ dictStrCustom = {
     'strTeamCheckMemberFormatNoSkill': '{tDisplayName}: {tDiceDetail}/{tSkillValue} {tResult}',  # 无技能名的检定格式
     'strTeamSCMemberFormat': '{tDisplayName}(SAN:{tCurrentSan}): {tDiceDetail}/{tCurrentSan}\nSAN: {tCurrentSan} -> {tNewSan}(损失{tSanLoss}点)',  # 理智检定成员格式
     'strTeamSkillUpdateMemberFormat': '-> [{tUserName}] - [{tPcName}]',  # 技能更新成员开头格式
-    'strTeamSkillUpdateResultFormat': '{tSkillName}: {tOldValue} -> {tNewValue}',  # 技能更新结果格式
+    'strTeamSkillUpdateResultFormat': '{tSkillName}: {tDetail}',  # 技能更新结果格式，{tDetail}包含完整的计算过程或结果值
     'strTeamRollMemberFormat': '[{tUserName}] - [{tPcName}]: {tRollResult}',  # 掷骰成员格式
 }
 

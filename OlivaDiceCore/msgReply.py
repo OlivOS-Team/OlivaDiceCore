@@ -2004,13 +2004,13 @@ def unity_reply(plugin_event, Proc):
             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawName'], dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
             return
-        elif isMatchWordStart(tmp_reast_str, 'nn', isCommand = True):
-            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'nn')
-            tmp_reast_str = skipSpaceStart(tmp_reast_str)
-            if len(tmp_reast_str) > 0:
+        elif isMatchWordStart(tmp_reast_str_original, 'nn', isCommand = True):
+            tmp_reast_str_original = getMatchWordStartRight(tmp_reast_str_original, 'nn')
+            tmp_reast_str_original = skipSpaceStart(tmp_reast_str_original)
+            if len(tmp_reast_str_original) > 0:
                 tmp_pc_id = plugin_event.data.user_id
                 tmp_pc_platform = plugin_event.platform['platform']
-                tmp_pc_name = tmp_reast_str
+                tmp_pc_name = tmp_reast_str_original
                 tmp_pc_name = tmp_pc_name.strip()
                 if tmp_pc_name != None:
                     tmp_pc_name = OlivaDiceCore.pcCard.fixName(tmp_pc_name)
