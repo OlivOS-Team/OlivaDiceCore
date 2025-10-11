@@ -2473,12 +2473,17 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
                 if tmp_pcCardRule in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial:
                     if skill_name in [skill for skill in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[tmp_pcCardRule]]:
                         special_skills.append(skill_name)
-                if 'D' in expr_str.upper():
-                    skill_update_detail = f"{current_value}{op}{expr_str}={rd_para.resDetail}={new_value}"
+                # 有运算符或包含骰子表达式时显示过程，直接赋值时不显示过程
+                if op != '' or 'D' in expr_str.upper():
+                    if 'D' in expr_str.upper():
+                        # 包含骰子表达式，显示掷骰结果
+                        skill_update_detail = f"{current_value}{op}{expr_str}={rd_para.resDetail}={new_value}"
+                    else:
+                        skill_update_detail = f"{current_value}{op}{expr_str}={new_value}"
                 else:
-                    skill_update_detail = f"{current_value}{op}{expr_str}={new_value}"
+                    skill_update_detail = f"{current_value} -> {new_value}"
                 member_results.append(OlivaDiceCore.msgCustomManager.formatReplySTR(
-                    dictStrCustom.get('strTeamSkillUpdateResultFormat', '{tSkillName}: {tOldValue} -> {tNewValue}'),
+                    dictStrCustom.get('strTeamSkillUpdateResultFormat', '{tSkillName}: {tDetail}'),
                     {'tSkillName': skill_name, 'tOldValue': current_value, 'tNewValue': new_value, 'tDetail': skill_update_detail}
                 ))
             else:
