@@ -3227,7 +3227,9 @@ def unity_reply(plugin_event, Proc):
                             tmp_template_name
                         ):
                             dictTValue['tPcSelection'] = tmp_pc_name
-                            dictTValue['tPcTempName'] = tmp_template_name
+                            # 显示实际模板名而不是别名
+                            actual_template_name = OlivaDiceCore.pcCard.pcCardDataResolveTemplateMapping(tmp_template_name)
+                            dictTValue['tPcTempName'] = actual_template_name
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcTemp'], dictTValue)
                         else:
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcTempError'], dictTValue)

@@ -293,6 +293,8 @@ def pcCardDataSkillNameMapper(pcHash, skillName, flagShow = False, hagId = None)
     tmp_pcCardSynonyms = {}
     if pcCardName != None:
         pcCardTemplateName = pcCardDataGetTemplateDataByKey(pcHash, pcCardName, 'template', 'default')
+    # 解析模板映射
+    pcCardTemplateName = pcCardDataResolveTemplateMapping(pcCardTemplateName)
     if 'synonyms' in OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[pcCardTemplateName]:
         tmp_pcCardSynonyms = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault[pcCardTemplateName]['synonyms']
     for tmp_pcCardSynonyms_this in tmp_pcCardSynonyms:
@@ -547,12 +549,48 @@ def pcCardDataDelSelectionKeyLock(pcHash, hagID):
                 dictPcCardSelection['unity'][pcHash][lockList_key].pop(hagID)
                 dataPcCardSave('unity', pcHash)
 
+def pcCardDataResolveTemplateMapping(templateName):
+    """
+    解析模板映射，处理 tempMapping 字段的重定向
+    """
+    global dictPcCardTemplateDefault
+    if templateName not in dictPcCardTemplateDefault['unity']:
+        return None
+    tmp_template = dictPcCardTemplateDefault['unity'][templateName]
+    # 如果没有 tempMapping 字段，直接返回原名称
+    if not tmp_template or 'tempMapping' not in tmp_template:
+        return templateName
+    # 有 tempMapping 字段，进行重定向解析
+    redirect_count = 0
+    max_redirects = 100
+    visited_templates = set()
+    current_name = templateName
+    while tmp_template and 'tempMapping' in tmp_template:
+        redirect_count += 1
+        # 检查是否超过最大重定向次数
+        if redirect_count > max_redirects:
+            return None
+        mapping_target = tmp_template['tempMapping']
+        # 检测循环引用
+        if mapping_target in visited_templates:
+            return None
+        # 记录已访问的模板
+        visited_templates.add(current_name)
+        # 检查目标模板是否存在
+        if mapping_target not in dictPcCardTemplateDefault['unity']:
+            return None
+        # 切换到目标模板
+        current_name = mapping_target
+        tmp_template = dictPcCardTemplateDefault['unity'][mapping_target]
+    return current_name
+
 def pcCardDataGetTemplateByKey(templateName):
     global dictPcCardTemplateDefault
-    tmp_template = None
-    if templateName in dictPcCardTemplateDefault['unity']:
-        tmp_template = dictPcCardTemplateDefault['unity'][templateName]
-    return tmp_template
+    resolved_name = pcCardDataResolveTemplateMapping(templateName)
+    if resolved_name in dictPcCardTemplateDefault['unity']:
+        return dictPcCardTemplateDefault['unity'][resolved_name]
+    else:
+        return None
 
 def pcCardDataGetTemplateKey(pcHash, pcCardName):
     global dictPcCardTemplate
@@ -566,7 +604,8 @@ def pcCardDataGetTemplateKey(pcHash, pcCardName):
         return tmp_pc_template_name_key
     else:
         tmp_pc_template_name_key = dictPcCardTemplate['unity'][pcHash][pcCardName][selection_key]
-    return tmp_pc_template_name_key
+    templateName_resolved = pcCardDataResolveTemplateMapping(tmp_pc_template_name_key)
+    return templateName_resolved
 
 def pcCardDataGetTemplateRuleKey(pcHash, pcCardName):
     global dictPcCardTemplate
@@ -588,9 +627,11 @@ def pcCardDataSetTemplateKey(pcHash, pcCardName, templateName = 'default', ruleN
     tmp_pc_card_name_key = pcCardName
     templateName_core = None
     ruleName_core = None
+    # 先解析模板映射
+    templateName_resolved = pcCardDataResolveTemplateMapping(templateName)
     templateName_core = getKeyWithUpper(
         data = dictPcCardTemplateDefault['unity'],
-        key = templateName
+        key = templateName_resolved
     )
     if templateName_core == None:
         return False
@@ -627,9 +668,11 @@ def pcCardDataCheckTemplateKey(templateName = 'default', ruleName = 'default', r
         res = None
     selection_key = 'template'
     selection_key_2 = 'checkRules'
+    # 先解析模板映射
+    templateName_resolved = pcCardDataResolveTemplateMapping(templateName)
     templateName_core = getKeyWithUpper(
         data = dictPcCardTemplateDefault['unity'],
-        key = templateName
+        key = templateName_resolved
     )
     if templateName_core == None:
         return res
@@ -939,6 +982,8 @@ def getPcHash(pcId, platform):
 
 def getKeyWithUpper(data, key):
     res = None
+    if key is None:
+        return res
     for key_this in data:
         if key.upper() == key_this.upper():
             res = key_this
