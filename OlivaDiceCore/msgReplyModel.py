@@ -1225,8 +1225,6 @@ def process_batch_init(
     result_list, start_count
 ):
     """处理批量先攻录入，返回实际添加的数量"""
-    import re
-    
     # 解析批量内容: 敌人+3 或 敌人-1
     # 支持: 名称+修正值 或 名称 (默认+0)
     advantage_mode = None
@@ -1362,8 +1360,6 @@ def process_single_init(
     result_list, count
 ):
     """处理单个先攻录入，返回是否成功添加"""
-    import re
-    
     tmp_value = '0'
     tmp_name = None
     flag_para_mode = '-'
