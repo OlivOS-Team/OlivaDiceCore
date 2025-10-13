@@ -1155,89 +1155,164 @@ def replyRI_command(
     dictStrCustom,
     flag_reply = True
 ):
-    tmp_reast_str_list = tmp_reast_str.split(',')
+    # 支持多种分隔符: 逗号、分号、空格
+    # 首先将所有分隔符统一替换为逗号
+    tmp_reast_str_normalized = tmp_reast_str.replace('；', ',').replace(';', ',')
+    # 对于空格分隔，需要更谨慎处理，避免破坏表达式内部的空格
+    # 使用正则表达式来智能分割
+    tmp_reast_str_list = re.split(r'[,;；]|\s{2,}', tmp_reast_str_normalized)
+    
     result_list = []
     count = 1
-    flagLazy = False
+    
     for tmp_reast_str_list_this in tmp_reast_str_list:
-        tmp_value = '0'
-        tmp_name = None
-        flag_para_mode = '-'
         tmp_reast_str_list_this = tmp_reast_str_list_this.strip(' ')
-        if len(tmp_reast_str_list_this) > 0:
-            if len(tmp_reast_str_list_this) > 1 and tmp_reast_str_list_this[0] in ['+', '-', '*', '/', '^']:
-                flag_para_mode = '1'
-                tmp_value = '0'
-                tmp_op = tmp_reast_str_list_this[0]
-                [tmp_value, tmp_reast_str_list_this] = OlivaDiceCore.msgReply.getNumberPara(tmp_reast_str_list_this[1:])
-                tmp_value = '1D20%s%s' % (tmp_op, tmp_value)
-                tmp_reast_str_list_this = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str_list_this)
-            elif len(tmp_reast_str_list_this) > 1 and tmp_reast_str_list_this[0] in ['=']:
-                flag_para_mode = '2'
-                tmp_value = '1D20'
-                [tmp_value, tmp_reast_str_list_this] = OlivaDiceCore.msgReply.getExpression(tmp_reast_str_list_this[1:])
-                tmp_reast_str_list_this = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str_list_this)
-            elif tmp_reast_str_list_this[0].isdigit():
-                flag_para_mode = '3'
-                tmp_value = '0'
-                [tmp_value, tmp_reast_str_list_this] = OlivaDiceCore.msgReply.getNumberPara(tmp_reast_str_list_this)
-                tmp_reast_str_list_this = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str_list_this)
-            tmp_reast_str_list_this = tmp_reast_str_list_this.strip(' ')
-            if tmp_reast_str_list_this == '':
-                OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
-                    plugin_event = plugin_event,
-                    tmp_pc_id = tmp_pc_id,
-                    tmp_pc_platform = tmp_pc_platform,
-                    tmp_hagID = tmp_hagID,
-                    dictTValue = dictTValue,
-                    dictStrCustom = dictStrCustom,
-                    keyName = 'mappingRecord',
-                    tmp_key = '先攻',
-                    tmp_value = tmp_value,
-                    flag_mode = 'rec',
-                    enableFalse = False
-                )
-                tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
-                    tmp_pc_id,
-                    tmp_pc_platform
-                )
-                tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
-                    tmp_pcHash,
-                    tmp_hagID
-                )
-                tmp_name = tmp_pc_name
-            else:
-                tmp_name = tmp_reast_str_list_this
-                tmp_name = OlivaDiceCore.pcCard.fixName(tmp_name)
-                if not OlivaDiceCore.pcCard.checkPcName(tmp_name):
-                    tmp_name = None
-        elif not flagLazy:
-            flagLazy = True
-            tmp_value = None
-            tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
-                tmp_pc_id,
-                tmp_pc_platform
+        if not tmp_reast_str_list_this:
+            continue
+        
+        # 检查是否是批量生成格式: 5#敌人+3 或 1D3黄色敌人
+        batch_match = re.match(r'^(\d+)#(.+)$', tmp_reast_str_list_this)
+        dice_batch_match = re.match(r'^(\d+[dD]\d+)(.+)$', tmp_reast_str_list_this)
+        
+        if batch_match:
+            # 批量生成模式: 5#敌人+3
+            batch_count = int(batch_match.group(1))
+            batch_content = batch_match.group(2).strip()
+            # 传入 count 作为起始序号，并获取实际添加的数量
+            process_batch_init(
+                plugin_event, batch_count, batch_content, tmp_pc_id, 
+                tmp_pc_platform, tmp_hagID, dictTValue, dictStrCustom, 
+                result_list, count
             )
-            tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
-                tmp_pcHash,
-                tmp_hagID
-            )
-            if tmp_pc_name != None:
-                tmp_value_dict = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
-                    pcHash = tmp_pcHash,
-                    pcCardName = tmp_pc_name,
-                    dataKey = 'mappingRecord',
-                    resDefault = {}
+            # 批量添加只算1个条目（整体显示）
+            count += 1
+        elif dice_batch_match:
+            # 骰子批量生成模式: 1D3黄色敌人
+            dice_expr = dice_batch_match.group(1)
+            batch_content = dice_batch_match.group(2).strip()
+            
+            # 投骰决定数量
+            tmp_dice_rd = OlivaDiceCore.onedice.RD(dice_expr)
+            tmp_dice_rd.roll()
+            if tmp_dice_rd.resError == None:
+                batch_count = tmp_dice_rd.resInt
+                process_batch_init(
+                    plugin_event, batch_count, batch_content, tmp_pc_id, 
+                    tmp_pc_platform, tmp_hagID, dictTValue, dictStrCustom, 
+                    result_list, count
                 )
-                if '先攻' in tmp_value_dict:
-                    tmp_value = tmp_value_dict['先攻']
-            tmp_name = tmp_pc_name
-        tmp_value_final = None
+                # 批量添加只算1个条目（整体显示）
+                count += 1
+        else:
+            # 普通单个处理
+            added = process_single_init(
+                plugin_event, tmp_reast_str_list_this, tmp_pc_id, 
+                tmp_pc_platform, tmp_hagID, dictTValue, dictStrCustom, 
+                result_list, count
+            )
+            if added:
+                count += 1
+            
+    if flag_reply:
+        dictTValue['tResult'] = '\n'.join(result_list)
+        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitSet'], dictTValue)
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+
+
+def process_batch_init(
+    plugin_event, batch_count, batch_content, tmp_pc_id, 
+    tmp_pc_platform, tmp_hagID, dictTValue, dictStrCustom, 
+    result_list, start_count
+):
+    """处理批量先攻录入，返回实际添加的数量"""
+    import re
+    
+    # 解析批量内容: 敌人+3 或 敌人-1
+    # 支持: 名称+修正值 或 名称 (默认+0)
+    advantage_mode = None
+    tmp_value_modifier = '+0'
+    tmp_base_name = batch_content
+    
+    # 检查是否有优势/劣势
+    if batch_content.startswith('优势'):
+        advantage_mode = 'advantage'
+        batch_content = batch_content[2:].strip()
+    elif batch_content.startswith('劣势'):
+        advantage_mode = 'disadvantage'
+        batch_content = batch_content[2:].strip()
+    
+    # 提取修正值
+    modifier_match = re.search(r'([+\-*/^]\d+)$', batch_content)
+    if modifier_match:
+        tmp_value_modifier = modifier_match.group(1)
+        tmp_base_name = batch_content[:modifier_match.start()].strip()
+    else:
+        tmp_base_name = batch_content.strip()
+    
+    # 生成字母序号: a, b, c, ... z, aa, ab, ... zz, aaa, aab, ...
+    def get_letter_suffix(index):
+        """
+        将数字索引转换为字母序号
+        0 -> a, 1 -> b, ..., 25 -> z
+        26 -> aa, 27 -> ab, ..., 51 -> az
+        52 -> ba, 53 -> bb, ..., 701 -> zz
+        702 -> aaa, 703 -> aab, ...
+        """
+        letters = 'abcdefghijklmnopqrstuvwxyz'
+        result = ''
+        
+        # 确定需要几位字母
+        if index < 26:
+            # 单字母: a-z
+            return letters[index]
+        elif index < 26 + 26 * 26:
+            # 双字母: aa-zz
+            index -= 26
+            return letters[index // 26] + letters[index % 26]
+        else:
+            # 三字母及以上: aaa-zzz...
+            index -= (26 + 26 * 26)
+            # 计算需要的位数
+            base = 26 * 26 * 26
+            digits = 3
+            while index >= base:
+                index -= base
+                digits += 1
+                base *= 26
+            
+            # 转换为对应位数的字母
+            for _ in range(digits):
+                result = letters[index % 26] + result
+                index //= 26
+            return result
+    
+    result_values = []
+    added_count = 0
+    
+    for i in range(batch_count):
+        letter = get_letter_suffix(i)
+        tmp_name = f"{tmp_base_name}{letter}"
+        
+        # 构建骰子表达式 - 使用 kh/kl
+        if advantage_mode == 'advantage':
+            # 优势: 投两次取高
+            tmp_value = f'2D20kh{tmp_value_modifier}'
+        elif advantage_mode == 'disadvantage':
+            # 劣势: 投两次取低
+            tmp_value = f'2D20kl{tmp_value_modifier}'
+        else:
+            # 普通投掷
+            tmp_value = f'1D20{tmp_value_modifier}'
+        
+        # 投骰
         tmp_value_rd = OlivaDiceCore.onedice.RD(tmp_value)
         tmp_value_rd.roll()
+        
         if tmp_value_rd.resError == None:
             tmp_value_final = tmp_value_rd.resInt
-        if tmp_name != None and tmp_value_final != None:
+            result_values.append(tmp_value_final)
+            
+            # 保存到先攻列表
             setUserConfigForInit(
                 tmp_hagID = tmp_hagID,
                 tmp_pc_platform = tmp_pc_platform,
@@ -1265,17 +1340,178 @@ def replyRI_command(
                     'platform': tmp_pc_platform
                 }
             )
-            dictTValue['tId'] = str(count)
-            dictTValue['tSubName'] = tmp_name
-            dictTValue['tSubResult'] = '%s=%d' % (tmp_value, tmp_value_final)
-            result_list.append(
-                OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitShowNode'], dictTValue)
-            )
-            count += 1
-    if flag_reply:
-        dictTValue['tResult'] = '\n'.join(result_list)
-        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitSet'], dictTValue)
-        OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+            added_count += 1
+    
+    # 添加到结果列表 (批量显示)
+    if result_values:
+        dictTValue['tId'] = str(start_count)
+        # 获取最后一个元素的字母后缀
+        last_letter = get_letter_suffix(batch_count - 1)
+        dictTValue['tSubName'] = f"{tmp_base_name}a_{last_letter}"
+        dictTValue['tSubResult'] = f"{tmp_value_modifier}=({','.join(map(str, result_values))})"
+        result_list.append(
+            OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitShowNode'], dictTValue)
+        )
+    
+    return added_count
+
+
+def process_single_init(
+    plugin_event, tmp_reast_str_list_this, tmp_pc_id, 
+    tmp_pc_platform, tmp_hagID, dictTValue, dictStrCustom, 
+    result_list, count
+):
+    """处理单个先攻录入，返回是否成功添加"""
+    import re
+    
+    tmp_value = '0'
+    tmp_name = None
+    flag_para_mode = '-'
+    advantage_mode = None
+    
+    # 检查是否有优势/劣势关键词
+    if tmp_reast_str_list_this.startswith('优势'):
+        advantage_mode = 'advantage'
+        tmp_reast_str_list_this = tmp_reast_str_list_this[2:].strip()
+    elif tmp_reast_str_list_this.startswith('劣势'):
+        advantage_mode = 'disadvantage'
+        tmp_reast_str_list_this = tmp_reast_str_list_this[2:].strip()
+    
+    if len(tmp_reast_str_list_this) > 0:
+        if len(tmp_reast_str_list_this) > 1 and tmp_reast_str_list_this[0] in ['+', '-', '*', '/', '^']:
+            flag_para_mode = '1'
+            tmp_value = '0'
+            tmp_op = tmp_reast_str_list_this[0]
+            [tmp_value, tmp_reast_str_list_this] = OlivaDiceCore.msgReply.getNumberPara(tmp_reast_str_list_this[1:])
+            
+            # 应用优势/劣势 - 使用 kh/kl
+            if advantage_mode == 'advantage':
+                tmp_value = '2D20kh%s%s' % (tmp_op, tmp_value)
+            elif advantage_mode == 'disadvantage':
+                tmp_value = '2D20kl%s%s' % (tmp_op, tmp_value)
+            else:
+                tmp_value = '1D20%s%s' % (tmp_op, tmp_value)
+            
+            tmp_reast_str_list_this = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str_list_this)
+        elif len(tmp_reast_str_list_this) > 1 and tmp_reast_str_list_this[0] in ['=']:
+            flag_para_mode = '2'
+            [tmp_value, tmp_reast_str_list_this] = OlivaDiceCore.msgReply.getExpression(tmp_reast_str_list_this[1:])
+            tmp_reast_str_list_this = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str_list_this)
+        elif tmp_reast_str_list_this[0].isdigit():
+            flag_para_mode = '3'
+            tmp_value = '0'
+            [tmp_value, tmp_reast_str_list_this] = OlivaDiceCore.msgReply.getNumberPara(tmp_reast_str_list_this)
+            tmp_reast_str_list_this = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str_list_this)
+        else:
+            # 检查是否是 "名称+修正值" 或 "名称-修正值" 的格式（如: 龙+8）
+            modifier_match = re.match(r'^(.+?)([+\-]\d+)$', tmp_reast_str_list_this)
+            if modifier_match:
+                # 提取名称和修正值
+                tmp_name = modifier_match.group(1).strip()
+                modifier = modifier_match.group(2)
+                flag_para_mode = '4'
+                tmp_op = modifier[0]
+                tmp_value = modifier[1:]
+                
+                # 应用优势/劣势
+                if advantage_mode == 'advantage':
+                    tmp_value = '2D20kh%s%s' % (tmp_op, tmp_value)
+                elif advantage_mode == 'disadvantage':
+                    tmp_value = '2D20kl%s%s' % (tmp_op, tmp_value)
+                else:
+                    tmp_value = '1D20%s%s' % (tmp_op, tmp_value)
+                
+                tmp_reast_str_list_this = ''  # 名称已经提取
+        
+        tmp_reast_str_list_this = tmp_reast_str_list_this.strip(' ')
+        if tmp_reast_str_list_this == '':
+            # 如果 tmp_name 还没有赋值（即 flag_para_mode != '4'），则使用角色卡
+            if tmp_name is None:
+                OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
+                    plugin_event = plugin_event,
+                    tmp_pc_id = tmp_pc_id,
+                    tmp_pc_platform = tmp_pc_platform,
+                    tmp_hagID = tmp_hagID,
+                    dictTValue = dictTValue,
+                    dictStrCustom = dictStrCustom,
+                    keyName = 'mappingRecord',
+                    tmp_key = '先攻',
+                    tmp_value = tmp_value,
+                    flag_mode = 'rec',
+                    enableFalse = False
+                )
+                tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
+                    tmp_pc_id,
+                    tmp_pc_platform
+                )
+                tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
+                    tmp_pcHash,
+                    tmp_hagID
+                )
+                tmp_name = tmp_pc_name
+        else:
+            tmp_name = tmp_reast_str_list_this
+            tmp_name = OlivaDiceCore.pcCard.fixName(tmp_name)
+            if not OlivaDiceCore.pcCard.checkPcName(tmp_name):
+                tmp_name = None
+    
+    tmp_value_final = None
+    display_detail = None
+    
+    if tmp_value:
+        # 使用 onedice 直接处理 kh/kl
+        tmp_value_rd = OlivaDiceCore.onedice.RD(tmp_value)
+        tmp_value_rd.roll()
+        if tmp_value_rd.resError == None:
+            tmp_value_final = tmp_value_rd.resInt
+            # 获取详细的投掷过程字符串
+            if tmp_value_rd.resDetail != None:
+                display_detail = tmp_value_rd.resDetail
+    
+    if tmp_name != None and tmp_value_final != None:
+        setUserConfigForInit(
+            tmp_hagID = tmp_hagID,
+            tmp_pc_platform = tmp_pc_platform,
+            bot_hash = plugin_event.bot_info.hash,
+            config_key = 'groupInitList',
+            init_name = tmp_name,
+            init_value = tmp_value_final
+        )
+        setUserConfigForInit(
+            tmp_hagID = tmp_hagID,
+            tmp_pc_platform = tmp_pc_platform,
+            bot_hash = plugin_event.bot_info.hash,
+            config_key = 'groupInitParaList',
+            init_name = tmp_name,
+            init_value = tmp_value
+        )
+        setUserConfigForInit(
+            tmp_hagID = tmp_hagID,
+            tmp_pc_platform = tmp_pc_platform,
+            bot_hash = plugin_event.bot_info.hash,
+            config_key = 'groupInitUserList',
+            init_name = tmp_name,
+            init_value = {
+                'userId': tmp_pc_id,
+                'platform': tmp_pc_platform
+            }
+        )
+        
+        # 格式化结果显示 - 使用 onedice 的详细结果
+        if display_detail:
+            display_value = f"{display_detail}={tmp_value_final}"
+        else:
+            display_value = f"{tmp_value}={tmp_value_final}"
+        
+        dictTValue['tId'] = str(count)
+        dictTValue['tSubName'] = tmp_name
+        dictTValue['tSubResult'] = display_value
+        result_list.append(
+            OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitShowNode'], dictTValue)
+        )
+        return True
+    
+    return False
 
 def setUserConfigForInit(
     tmp_hagID,

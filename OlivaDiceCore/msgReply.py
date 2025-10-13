@@ -4645,76 +4645,90 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'del')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 tmp_reast_str = tmp_reast_str.strip(' ')
-                tmp_name = tmp_reast_str
+                # 支持多种分隔符批量删除: 逗号、分号、空格
+                tmp_name_list = re.split(r'[,;；]|\s+', tmp_reast_str)
+                tmp_name_list = [name.strip() for name in tmp_name_list if name.strip()]
                 tmp_groupHash = OlivaDiceCore.userConfig.getUserHash(
                     userId = tmp_hagID,
                     userType = 'group',
                     platform = tmp_pc_platform
                 )
-                # groupInitParaList
-                tmp_groupInitList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
-                    userId = tmp_hagID,
-                    userType = 'group',
-                    platform = tmp_pc_platform,
-                    userConfigKey = 'groupInitParaList',
-                    botHash = bot_hash
-                )
-                if tmp_groupInitList_list == None:
-                    tmp_groupInitList_list = {}
-                if tmp_name in tmp_groupInitList_list:
-                    tmp_groupInitList_list.pop(tmp_name)
-                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                deleted_names = []
+                for tmp_name in tmp_name_list:
+                    # groupInitParaList
+                    tmp_groupInitList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
                         userId = tmp_hagID,
                         userType = 'group',
                         platform = tmp_pc_platform,
                         userConfigKey = 'groupInitParaList',
-                        userConfigValue = tmp_groupInitList_list,
                         botHash = bot_hash
                     )
-                # groupInitList
-                tmp_groupInitList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
-                    userId = tmp_hagID,
-                    userType = 'group',
-                    platform = tmp_pc_platform,
-                    userConfigKey = 'groupInitList',
-                    botHash = bot_hash
-                )
-                if tmp_groupInitList_list == None:
-                    tmp_groupInitList_list = {}
-                if tmp_name in tmp_groupInitList_list:
-                    tmp_groupInitList_list.pop(tmp_name)
-                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                    if tmp_groupInitList_list == None:
+                        tmp_groupInitList_list = {}
+                    if tmp_name in tmp_groupInitList_list:
+                        tmp_groupInitList_list.pop(tmp_name)
+                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                            userId = tmp_hagID,
+                            userType = 'group',
+                            platform = tmp_pc_platform,
+                            userConfigKey = 'groupInitParaList',
+                            userConfigValue = tmp_groupInitList_list,
+                            botHash = bot_hash
+                        )
+                    # groupInitList
+                    tmp_groupInitList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
                         userId = tmp_hagID,
                         userType = 'group',
                         platform = tmp_pc_platform,
                         userConfigKey = 'groupInitList',
-                        userConfigValue = tmp_groupInitList_list,
                         botHash = bot_hash
                     )
-                tmp_groupInitUserList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
-                    userId = tmp_hagID,
-                    userType = 'group',
-                    platform = tmp_pc_platform,
-                    userConfigKey = 'groupInitUserList',
-                    botHash = bot_hash
-                )
-                if tmp_groupInitUserList_list == None:
-                    tmp_groupInitUserList_list = {}
-                if tmp_name in tmp_groupInitUserList_list:
-                    tmp_groupInitUserList_list.pop(tmp_name)
-                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                    if tmp_groupInitList_list == None:
+                        tmp_groupInitList_list = {}
+                    if tmp_name in tmp_groupInitList_list:
+                        tmp_groupInitList_list.pop(tmp_name)
+                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                            userId = tmp_hagID,
+                            userType = 'group',
+                            platform = tmp_pc_platform,
+                            userConfigKey = 'groupInitList',
+                            userConfigValue = tmp_groupInitList_list,
+                            botHash = bot_hash
+                        )
+                        deleted_names.append(tmp_name)
+                    # groupInitUserList
+                    tmp_groupInitUserList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
                         userId = tmp_hagID,
                         userType = 'group',
                         platform = tmp_pc_platform,
                         userConfigKey = 'groupInitUserList',
-                        userConfigValue = tmp_groupInitUserList_list,
                         botHash = bot_hash
                     )
+                    if tmp_groupInitUserList_list == None:
+                        tmp_groupInitUserList_list = {}
+                    if tmp_name in tmp_groupInitUserList_list:
+                        tmp_groupInitUserList_list.pop(tmp_name)
+                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                            userId = tmp_hagID,
+                            userType = 'group',
+                            platform = tmp_pc_platform,
+                            userConfigKey = 'groupInitUserList',
+                            userConfigValue = tmp_groupInitUserList_list,
+                            botHash = bot_hash
+                        )
+                
                 OlivaDiceCore.userConfig.writeUserConfigByUserHash(
                     userHash = tmp_groupHash
                 )
-                dictTValue['tName'] = tmp_name
-                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitDel'], dictTValue)
+                
+                # 显示删除的名单
+                if deleted_names:
+                    dictTValue['tName'] = '、'.join(deleted_names)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitDel'], dictTValue)
+                else:
+                    dictTValue['tName'] = '无'
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitDel'], dictTValue)
+                
                 OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'reset', fullMatch = True):
@@ -4927,7 +4941,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitEnd'], dictTValue)
                 OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
                 return
-            elif '' == tmp_reast_str:
+            elif '' == tmp_reast_str or isMatchWordStart(tmp_reast_str, 'show'):
                 tmp_groupInitList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
                     userId = tmp_hagID,
                     userType = 'group',
