@@ -315,7 +315,14 @@ def pcCardDataSetBySkillName(pcHash, skillName, skillValue, pcCardName = 'defaul
     if tmp_hitList == None:
         tmp_hitList = []
     tmp_pc_card_name_key = pcCardName
-    if pcCardName != pcCardDataGetSelectionKeyLock(pcHash, hagId):
+    # 检查是否有锁定的人物卡
+    locked_pc = pcCardDataGetSelectionKeyLock(pcHash, hagId)
+    if locked_pc is not None:
+        # 如果有锁定的人物卡,只更新lockList中的人物卡,不修改全局selection
+        if pcCardName != locked_pc:
+            pcCardDataSetSelectionKeyLock(pcHash, tmp_pc_card_name_key, hagId)
+    else:
+        # 如果没有锁定的人物卡,按原逻辑修改全局selection
         pcCardDataSetSelectionKey(pcHash, tmp_pc_card_name_key, forceSwitch = True)
     if pcHash in dictPcCardData['unity']:
         pass
@@ -504,12 +511,26 @@ def pcCardDataDelSelectionKey(pcHash, pcCardName, skipDel = False):
                         tmp_card_dict_keys = list(dictPcCardData['unity'][pcHash].keys())
                         dictPcCardSelection['unity'][pcHash][selection_key] = tmp_card_dict_keys[0]
         if not skipDel:
-            lockList_dict_new = {}
+            # 处理lockList: 如果被删除的卡被某个群锁定,则切换到其他卡但保持锁定状态
             if lockList_key in dictPcCardSelection['unity'][pcHash]:
+                lockList_updates = {}  # 记录需要更新的群
+                lockList_deletes = []  # 记录需要删除锁定的群
                 for hagId_this in dictPcCardSelection['unity'][pcHash][lockList_key]:
-                    if pcCardName != dictPcCardSelection['unity'][pcHash][lockList_key][hagId_this]:
-                        lockList_dict_new[hagId_this] = dictPcCardSelection['unity'][pcHash][lockList_key][hagId_this]
-                dictPcCardSelection['unity'][pcHash][lockList_key] = lockList_dict_new
+                    if pcCardName == dictPcCardSelection['unity'][pcHash][lockList_key][hagId_this]:
+                        # 该群锁定的是被删除的卡,需要切换到其他卡
+                        if len(dictPcCardData['unity'][pcHash].keys()) > 0:
+                            # 还有其他人物卡,切换到第一个并保持锁定
+                            tmp_card_dict_keys = list(dictPcCardData['unity'][pcHash].keys())
+                            lockList_updates[hagId_this] = tmp_card_dict_keys[0]
+                        else:
+                            # 没有其他人物卡了,删除该群的锁定
+                            lockList_deletes.append(hagId_this)
+                # 应用更新
+                for hagId_this, new_card in lockList_updates.items():
+                    dictPcCardSelection['unity'][pcHash][lockList_key][hagId_this] = new_card
+                # 应用删除
+                for hagId_this in lockList_deletes:
+                    dictPcCardSelection['unity'][pcHash][lockList_key].pop(hagId_this)
         dataPcCardSave('unity', pcHash)
         return True
     else:
@@ -1058,15 +1079,18 @@ def getPcNameForceAPI(pcHash, hagId, pcName = '人物卡'):
 def setPcSwitchAPI(pcHash, hagId, switchName = '人物卡'):
     res = False
     if getPcNameForceAPI(pcHash, hagId, switchName) != None:
+        # 检查是否有锁定的人物卡
         if OlivaDiceCore.pcCard.pcCardDataGetSelectionKeyLock(
             pcHash,
             hagId
         ) == None:
+            # 没有锁定,修改全局selection
             res = OlivaDiceCore.pcCard.pcCardDataSetSelectionKey(
                 pcHash,
                 switchName
             )
         else:
+            # 有锁定,只修改lockList中的人物卡
             res = OlivaDiceCore.pcCard.pcCardDataSetSelectionKeyLock(
                 pcHash,
                 switchName,
