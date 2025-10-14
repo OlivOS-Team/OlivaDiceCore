@@ -6178,10 +6178,11 @@ def trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, 
         host_id = plugin_event.data.host_id
     )
 
-def replyMsg(plugin_event, message):
+def replyMsg(plugin_event, message, at_user = False):
     host_id = None
     group_id = None
     user_id = None
+    at_user_msg = ""
     tmp_name = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]['strBotName']
     tmp_self_id = plugin_event.bot_info.id
     if 'host_id' in plugin_event.data.__dict__:
@@ -6200,7 +6201,12 @@ def replyMsg(plugin_event, message):
         [host_id, group_id, user_id],
         str(message)
     )
-    return pluginReply(plugin_event, str(message))
+    if at_user:
+        at_para = OlivOS.messageAPI.PARA.at(str(user_id))
+        at_user_msg = at_para.get_string_by_key('CQ')
+        return OlivaDiceCore.msgReply.pluginReply(plugin_event, f'{at_user_msg} ' + str(message))
+    else:
+        return OlivaDiceCore.msgReply.pluginReply(plugin_event, str(message))
 
 def sendMsgByEvent(plugin_event, message, target_id, target_type, host_id = None):
     group_id = None
