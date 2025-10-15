@@ -1262,6 +1262,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = tmp_reast_str.rstrip(' ')
                 if flag_is_from_group and isInEndList(tmp_reast_str, tmp_end_list):
                     if (flag_is_from_group_have_admin and flag_is_from_group_admin) or flag_is_from_master:
+                        dictTValue['tGroupId'] = str(plugin_event.data.group_id)
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotExit'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                         time.sleep(1)
@@ -2696,8 +2697,16 @@ def unity_reply(plugin_event, Proc):
                     )
                     tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKeyLock(tmp_pc_hash, tmp_hagID)
                     if tmp_pc_name_1 != None:
+                        # 解锁之前，先获取全局人物卡
+                        tmp_pc_name_global = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pc_hash)
                         OlivaDiceCore.pcCard.pcCardDataDelSelectionKeyLock(tmp_pc_hash, tmp_hagID)
-                        dictTValue['tName'] = tmp_pc_name_1
+                        # 切换到全局人物卡
+                        if tmp_pc_name_global != None:
+                            OlivaDiceCore.pcCard.pcCardDataSetSelectionKey(tmp_pc_hash, tmp_pc_name_global)
+                            dictTValue['tName'] = tmp_pc_name_global
+                            trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
+                        else:
+                            dictTValue['tName'] = tmp_pc_name_1
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcUnLock'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                     else:
