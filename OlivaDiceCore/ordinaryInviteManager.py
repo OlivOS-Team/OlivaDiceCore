@@ -16,6 +16,7 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 
 import OlivOS
 import OlivaDiceCore
+import hashlib
 
 def unity_group_invite_request(plugin_event, Proc):
     flag_enable_default = 1
@@ -100,6 +101,40 @@ def unity_group_member_increase(plugin_event, Proc):
         tmp_hagID = '%s|%s' % (str(plugin_event.data.host_id), str(plugin_event.data.group_id))
     else:
         tmp_hagID = str(plugin_event.data.group_id)
+    # 检查是否是机器人自己加入群聊
+    new_member_id = plugin_event.data.user_id
+    # 计算新成员的 bot hash
+    hash_tmp = hashlib.new('md5')
+    hash_tmp.update(str(new_member_id).encode(encoding='UTF-8'))
+    hash_tmp.update(str(plugin_event.bot_info.platform['sdk']).encode(encoding='UTF-8'))
+    hash_tmp.update(str(plugin_event.bot_info.platform['platform']).encode(encoding='UTF-8'))
+    new_member_hash = hash_tmp.hexdigest()
+    # 如果是机器人自己加入群聊
+    if new_member_hash == plugin_event.bot_info.hash:
+        record_bot_join = OlivaDiceCore.console.getConsoleSwitchByHash('recordBotJoinGroup', plugin_event.bot_info.hash)
+        # 如果启用了记录,则记录时间
+        if record_bot_join == 1:
+            tmp_list_hit = []
+            if fake_plugin_event.data.host_id != None:
+                tmp_list_hit = [
+                    [fake_plugin_event.data.host_id, 'host', plugin_event.platform['platform']],
+                    ['%s|%s' % (str(fake_plugin_event.data.host_id), str(fake_plugin_event.data.group_id)), 'group', plugin_event.platform['platform']]
+                ]
+            else:
+                tmp_list_hit = [
+                    [fake_plugin_event.data.group_id, 'group', plugin_event.platform['platform']]
+                ]
+            # 记录机器人加群时间
+            OlivaDiceCore.userConfig.releaseUnityMsgCount(tmp_list_hit, plugin_event.bot_info.hash)
+        # 发送入群欢迎消息
+        dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
+        dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]
+        dictGValue = OlivaDiceCore.msgCustom.dictGValue
+        dictTValue.update(dictGValue)
+        hello_msg = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHello'], dictTValue)
+        replyMsg(fake_plugin_event, hello_msg)
+        return
+    # 如果不是机器人自己,则处理 welcome 消息
     reply_msg = OlivaDiceCore.userConfig.getUserConfigByKey(
         userConfigKey = 'welcomeMsg',
         botHash = plugin_event.bot_info.hash,

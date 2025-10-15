@@ -28,6 +28,7 @@ dictConsoleSwitchTemplate = {
         'pulseInterval' : 300,
         'autoAcceptGroupAdd' : 1,
         'autoAcceptFriendAdd' : 1,
+        'recordBotJoinGroup' : 0,
         'disableReplyPrivate' : 0,
         'disablePrivate' : 0,
         'messageFliterMode' : 0,
