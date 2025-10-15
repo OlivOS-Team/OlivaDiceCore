@@ -6354,12 +6354,14 @@ def pluginReply(plugin_event, message):
     message_list = message_list_new
     count = 1
     flag_need_split = len(message_list) > 1
+    total_pages = min(len(message_list), messageSplitPageLimit)
     for message_list_this in message_list:
         if len(message_list_this) > 0:
             tmp_message = message_list_this
             if flag_need_split:
-                tmp_message = '[第%s页]\n%s' % (
+                tmp_message = '---[第%s/%s页]---\n%s' % (
                     str(count),
+                    str(total_pages),
                     message_list_this
                 )
             plugin_event.reply(tmp_message)
@@ -6404,12 +6406,14 @@ def pluginSend(plugin_event:OlivOS.API.Event, send_type, target_id, message:str,
     message_list = message_list_new
     count = 1
     flag_need_split = len(message_list) > 1
+    total_pages = min(len(message_list), messageSplitPageLimit)
     for message_list_this in message_list:
         if len(message_list_this) > 0:
             tmp_message = message_list_this
             if flag_need_split:
-                tmp_message = '[第%s页]\n%s' % (
+                tmp_message = '---[第%s/%s页]---\n%s' % (
                     str(count),
+                    str(total_pages),
                     message_list_this
                 )
             plugin_event.send(send_type, target_id, tmp_message, host_id = host_id)
