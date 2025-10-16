@@ -156,7 +156,7 @@ dictStrCustom = {
     'strDefaultShowOff': '[*]为使用en自动成长技能\n输入[.st defaultshow on]只显示非默认值技能',
     'strDefaultShowOn' : '[*]为使用en自动成长技能\n输入[.st defaultshow off]显示所有技能',
     'strPcList' : '[{tUserName}]的人物卡:\n{tPcList}\n当前选择:{tPcSelection}',
-    'strPcLock' : '本群人物卡已锁定(当前人物卡：{tName})，其他群切换人物卡将不影响本群人物卡状态',
+    'strPcLock' : '本群人物卡已锁定(当前人物卡：{tName})，其他群切换人物卡将不影响本群人物卡状态，本群切换人物卡也不会影响其他群状态',
     'strPcLockError' : '本群锁定人物卡失败，请重试(当前人物卡：{tName})',
     'strPcLockNone' : '[{tUserName}]未设置人物卡，无法锁定',
     'strPcUnLock' : '本群人物卡锁定已解除(当前人物卡：{tName})，其他群切换人物卡将同步至本群',
@@ -287,15 +287,15 @@ dictStrCustom = {
     'strTeamEmpty': '小队[{tTeamName}]中没有成员',
     
     # team 成员显示格式模板
-    'strTeamMemberFormat': '[{tUserName}] - [{tPcName}]',  # 基本成员显示格式
-    'strTeamMemberFormatWithIndex': '成员{tIndex}: [{tUserName}] - 人物卡: [{tPcName}]',  # 带序号的成员显示格式
-    'strTeamSortMemberFormat': '{tIndex}. [{tUserName}] - [{tPcName}]({tSkillName}: {tSkillValue})',  # 排序结果成员格式
-    'strTeamCheckMemberFormat': '{tDisplayName}({tSkillName}: {tSkillValue}): {tDiceDetail}/{tSkillValue} {tResult}',  # 技能检定成员格式
-    'strTeamCheckMemberFormatNoSkill': '{tDisplayName}: {tDiceDetail}/{tSkillValue} {tResult}',  # 无技能名的检定格式
-    'strTeamSCMemberFormat': '{tDisplayName}(SAN:{tCurrentSan}): {tDiceDetail}/{tCurrentSan}\nSAN: {tCurrentSan} -> {tNewSan}(损失{tSanLoss}点)',  # 理智检定成员格式
-    'strTeamSkillUpdateMemberFormat': '-> [{tUserName}] - [{tPcName}]',  # 技能更新成员开头格式
-    'strTeamSkillUpdateResultFormat': '{tSkillName}: {tDetail}',  # 技能更新结果格式，{tDetail}包含完整的计算过程或结果值
-    'strTeamRollMemberFormat': '[{tUserName}] - [{tPcName}]: {tRollResult}',  # 掷骰成员格式
+    'strTeamMemberFormat': '[{tUserName}] - [{tPcName}]',
+    'strTeamMemberFormatWithIndex': '成员{tIndex}: [{tUserName}] - 人物卡: [{tPcName}]',
+    'strTeamSortMemberFormat': '{tIndex}. [{tUserName}] - [{tPcName}]({tSkillName}: {tSkillValue})',
+    'strTeamCheckMemberFormat': '{tDisplayName}({tSkillName}: {tSkillValue}): {tDiceDetail}/{tSkillValue} {tResult}',
+    'strTeamCheckMemberFormatNoSkill': '{tDisplayName}: {tDiceDetail}/{tSkillValue} {tResult}',
+    'strTeamSCMemberFormat': '{tDisplayName}(SAN:{tCurrentSan}): {tDiceDetail}/{tCurrentSan}\nSAN: {tCurrentSan} -> {tNewSan}(损失{tSanLoss}点)',
+    'strTeamSkillUpdateMemberFormat': '-> [{tUserName}] - [{tPcName}]',
+    'strTeamSkillUpdateResultFormat': '{tSkillName}: {tDetail}',
+    'strTeamRollMemberFormat': '[{tUserName}] - [{tPcName}]: {tRollResult}',
 }
 
 dictStrConst = {
