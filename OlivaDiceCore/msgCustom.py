@@ -156,7 +156,7 @@ dictStrCustom = {
     'strDefaultShowOff': '[*]为使用en自动成长技能\n输入[.st defaultshow on]只显示非默认值技能',
     'strDefaultShowOn' : '[*]为使用en自动成长技能\n输入[.st defaultshow off]显示所有技能',
     'strPcList' : '[{tUserName}]的人物卡:\n{tPcList}\n当前选择:{tPcSelection}',
-    'strPcLock' : '本群人物卡已锁定(当前人物卡：{tName})，其他群切换人物卡将不影响本群人物卡状态',
+    'strPcLock' : '本群人物卡已锁定(当前人物卡：{tName})，其他群切换人物卡将不影响本群人物卡状态，本群切换人物卡也不会影响其他群状态',
     'strPcLockError' : '本群锁定人物卡失败，请重试(当前人物卡：{tName})',
     'strPcLockNone' : '[{tUserName}]未设置人物卡，无法锁定',
     'strPcUnLock' : '本群人物卡锁定已解除(当前人物卡：{tName})，其他群切换人物卡将同步至本群',
