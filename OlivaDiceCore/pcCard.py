@@ -719,7 +719,6 @@ def pcCardDataCheckTemplateKey(templateName = 'default', ruleName = 'default', r
 def setPcTemplateByGroupRule(plugin_event, tmp_pc_id = None, tmp_pc_name = None, set_flag = True):
     """
     根据传入参数设置人物卡模板
-    set_flag为True时设置为当前群规的模板，False时直接返回
     """
     if not set_flag:
         return
@@ -752,8 +751,6 @@ def setPcTemplateByGroupRule(plugin_event, tmp_pc_id = None, tmp_pc_name = None,
 def isNewPcCard(plugin_event, tmp_pc_id = None, external_flag = None):
     """
     判断人物卡是否为新卡
-    external_flag: 外部传入的标志（True/False），如果传入则优先使用外部标志
-    返回: True-新卡, False-非新卡
     """
     # 如果外部传入了标志，直接返回外部值
     if external_flag is not None:
@@ -779,7 +776,6 @@ def isNewPcCard(plugin_event, tmp_pc_id = None, external_flag = None):
 def getGroupTemplateRule(plugin_event):
     """
     获取当前群聊的房规模板
-    返回: (template_name, rule_name) 元组
     """
     tmp_hagID = getHagIDFromMsg(plugin_event, OlivaDiceCore.data.global_Proc)
     tmp_user_platform = plugin_event.platform['platform']
@@ -808,7 +804,7 @@ def getGroupTemplateRule(plugin_event):
 
 def getHagIDFromMsg(plugin_event, Proc):
     """
-    从消息中获取群组/频道ID（从原代码中提取）
+    从消息中获取群组/频道ID
     """
     tmp_hagID = None
     flag_is_from_host = False
@@ -831,11 +827,6 @@ def getHagIDFromMsg(plugin_event, Proc):
 def pcCardDataSetHiyKey(pcHash, pcCardName, hiyKey, value):
     '''
     设置人物卡骰点统计数据
-    Args:
-        pcHash: 人物卡哈希值
-        pcCardName: 人物卡名称
-        hiyKey: 统计键（普通成功、困难成功、极难成功、大成功、失败、大失败）
-        value: 增加的数值
     '''
     global dictPcCardHiy
     hostKey = 'unity'
@@ -855,12 +846,6 @@ def pcCardDataSetHiyKey(pcHash, pcCardName, hiyKey, value):
 def pcCardDataGetHiyKey(pcHash, pcCardName, hiyKey):
     '''
     获取人物卡骰点统计数据
-    Args:
-        pcHash: 人物卡哈希值
-        pcCardName: 人物卡名称
-        hiyKey: 统计键（普通成功、困难成功、极难成功、大成功、失败、大失败）
-    Returns:
-        int: 对应的统计数值，如果不存在则返回0
     '''
     global dictPcCardHiy
     hostKey = 'unity'
@@ -879,11 +864,6 @@ def pcCardDataGetHiyKey(pcHash, pcCardName, hiyKey):
 def pcCardDataGetAllHiyKeys(pcHash, pcCardName):
     '''
     获取人物卡所有骰点统计数据
-    Args:
-        pcHash: 人物卡哈希值
-        pcCardName: 人物卡名称
-    Returns:
-        dict: 包含所有统计数据的字典
     '''
     global dictPcCardHiy
     hostKey = 'unity'
