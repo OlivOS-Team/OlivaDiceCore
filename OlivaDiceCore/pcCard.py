@@ -245,8 +245,12 @@ def pcCardRebase(pcHash, pcCardName, hagId = None):
     if pcHash not in dictPcCardSelection['unity']:
         dictPcCardSelection['unity'][pcHash] = {}
     pcCardNameOld = pcCardDataGetSelectionKey(pcHash, hagId)
-    if None == pcCardDataGetSelectionKeyLock(pcHash, hagId):
+    # 获取全局selection的旧名字
+    pcCardNameOldGlobal = pcCardDataGetSelectionKey(pcHash)
+    # 如果全局selection和当前selection的旧名字相同，也更新全局selection
+    if pcCardNameOldGlobal == pcCardNameOld:
         pcCardDataSetSelectionKey(pcHash, pcCardName, forceSwitch = True)
+    # 更新lockList中所有匹配旧名字的条目
     if lockList_key in dictPcCardSelection['unity'][pcHash]:
         for hagId_this in dictPcCardSelection['unity'][pcHash][lockList_key]:
             if pcCardNameOld == dictPcCardSelection['unity'][pcHash][lockList_key][hagId_this]:
