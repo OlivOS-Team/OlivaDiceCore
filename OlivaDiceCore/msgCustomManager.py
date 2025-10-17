@@ -126,6 +126,13 @@ def formatReplySTRReplace(data:str, valDict:dict, flagPure:bool = False):
                     if reg_res_this != None:
                         reg_res += reg_res_this
                         flag_hit = True
+                # 转义字符处理（如 {\f} -> 分页符）
+                if not flag_hit:
+                    reg_key_unescaped = processEscapeSequences(reg_key)
+                    if reg_key_unescaped != reg_key:
+                        # 如果发生了转义转换，直接输出转义后的字符
+                        reg_res += reg_key_unescaped
+                        flag_hit = True
                 # 缺省确保原样返回
                 if not flag_hit:
                     reg_res += '{%s}' % reg_key
@@ -143,6 +150,24 @@ def formatReplySTRReplace(data:str, valDict:dict, flagPure:bool = False):
     if flagType == 'key':
         reg_res += '{%s' % reg_key
     res = reg_res
+    return res
+
+def processEscapeSequences(data:str):
+    """
+    处理字符串中的转义序列
+    """
+    res = data
+    escape_map = {
+        '\\n': '\n',
+        '\\r': '\r',
+        '\\t': '\t',
+        '\\f': '\f',
+        '\\b': '\b',
+        '\\a': '\a',
+        '\\v': '\v',
+    }
+    for escape_seq, actual_char in escape_map.items():
+        res = res.replace(escape_seq, actual_char)
     return res
 
 def dictTValueInit(plugin_event, dictTValue):
