@@ -188,7 +188,7 @@ def dataPcCardLoad(hostKey, pcHash):
             dictPcCardTemplate[hostKey][pcHash] = jsonDataLoadSafe(pcCardTemplatePath_f, "人物卡", f"{hostKey}/{pcHash}")
     if os.path.exists(pcCardHiyPath):
         with open(pcCardHiyPath, 'r', encoding = 'utf-8') as pcCardHiyPath_f:
-            dictPcCardHiy[hostKey][pcHash] = jsonDataLoadSafe(pcCardHiyPath_f, "骰点统计", f"{hostKey}/{pcHash}")
+            dictPcCardHiy[hostKey][pcHash] = jsonDataLoadSafe(pcCardHiyPath_f, "人物卡", f"{hostKey}/{pcHash}")
 
 def jsonDataLoadSafe(data_f, dataType, dataName):
     tmp_userConfigData = {}
@@ -315,7 +315,6 @@ def pcCardDataSetBySkillName(pcHash, skillName, skillValue, pcCardName = 'defaul
     if tmp_hitList == None:
         tmp_hitList = []
     tmp_pc_card_name_key = pcCardName
-    # 检查是否有锁定的人物卡
     locked_pc = pcCardDataGetSelectionKeyLock(pcHash, hagId)
     if locked_pc is not None:
         # 如果有锁定的人物卡,只更新lockList中的人物卡,不修改全局selection
@@ -513,8 +512,8 @@ def pcCardDataDelSelectionKey(pcHash, pcCardName, skipDel = False):
         if not skipDel:
             # 处理lockList: 如果被删除的卡被某个群锁定,则切换到其他卡但保持锁定状态
             if lockList_key in dictPcCardSelection['unity'][pcHash]:
-                lockList_updates = {}  # 记录需要更新的群
-                lockList_deletes = []  # 记录需要删除锁定的群
+                lockList_updates = {}
+                lockList_deletes = []
                 for hagId_this in dictPcCardSelection['unity'][pcHash][lockList_key]:
                     if pcCardName == dictPcCardSelection['unity'][pcHash][lockList_key][hagId_this]:
                         # 该群锁定的是被删除的卡,需要切换到其他卡
@@ -829,8 +828,15 @@ def pcCardDataSetHiyKey(pcHash, pcCardName, hiyKey, value):
     设置人物卡骰点统计数据
     '''
     global dictPcCardHiy
+    global dictPcCardData
     hostKey = 'unity'
-    
+    # 检查人物卡是否存在,只有存在时才记录hiy统计数据
+    if hostKey not in dictPcCardData:
+        return
+    if pcHash not in dictPcCardData[hostKey]:
+        return
+    if pcCardName not in dictPcCardData[hostKey][pcHash]:
+        return
     if hostKey not in dictPcCardHiy:
         dictPcCardHiy[hostKey] = {}
     if pcHash not in dictPcCardHiy[hostKey]:

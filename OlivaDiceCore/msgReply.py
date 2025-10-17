@@ -6137,14 +6137,6 @@ def trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, 
     tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
     if not tmp_pc_name:
         return
-    tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
-        tmp_pc_id,
-        tmp_pc_platform
-    )
-    tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
-        tmp_pcHash,
-        tmp_hagID
-    )
     tmp_template_name = None
     tmp_template_rule_name = None
     tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
