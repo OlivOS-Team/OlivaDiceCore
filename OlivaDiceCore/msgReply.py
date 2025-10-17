@@ -1401,19 +1401,14 @@ def unity_reply(plugin_event, Proc):
                     dictTValue['tHelpDocResult'] = '\n'.join(tmp_dataList_new)
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDoc'], dictTValue)
                 else:
-                    tmp_reply_str = OlivaDiceCore.helpDoc.getHelp(
-                        tmp_reast_str,
-                        plugin_event.bot_info.hash,
-                        plugin_event = plugin_event
-                    )
+                    replyMsgLazyHelpByEvent(plugin_event, tmp_reast_str)
             else:
-                tmp_reply_str = OlivaDiceCore.helpDoc.getHelp('default', plugin_event.bot_info.hash)
+                replyMsgLazyHelpByEvent(plugin_event, 'default')
             if tmp_reply_str != None:
                 replyMsg(plugin_event, tmp_reply_str)
             return
         elif isMatchWordStart(tmp_reast_str, 'dismiss', isCommand = True):
-            tmp_reply_str = OlivaDiceCore.helpDoc.getHelp('dismiss', plugin_event.bot_info.hash)
-            replyMsg(plugin_event, tmp_reply_str)
+            replyMsgLazyHelpByEvent(plugin_event, 'dismiss')
         elif isMatchWordStart(tmp_reast_str, 'draw', isCommand = True):
             flag_hide = False
             tmp_card_count = 1
@@ -1449,7 +1444,7 @@ def unity_reply(plugin_event, Proc):
                     replyMsg(plugin_event, tmp_reply_str)
                     return
             else:
-                tmp_reply_str = OlivaDiceCore.helpDoc.getHelp('draw', plugin_event.bot_info.hash)
+                replyMsgLazyHelpByEvent(plugin_event, 'draw')
             if tmp_reply_str != None:
                 replyMsg(plugin_event, tmp_reply_str)
             return
@@ -4249,8 +4244,7 @@ def unity_reply(plugin_event, Proc):
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             if not tmp_reply_str:
-                tmp_reply_str = OlivaDiceCore.helpDoc.getHelp('st', plugin_event.bot_info.hash)
-                replyMsg(plugin_event, tmp_reply_str)
+                replyMsgLazyHelpByEvent(plugin_event, 'st')
                 return
         elif isMatchWordStart(tmp_reast_str, 'set', isCommand = True):
             OlivaDiceCore.msgReplyModel.replySET_command(plugin_event, Proc, valDict)
@@ -6303,7 +6297,7 @@ def replyMsgPrivateForObByEvent(plugin_event, message):
     return
 
 def replyMsgLazyHelpByEvent(plugin_event, help_key):
-    tmp_reply_str = OlivaDiceCore.helpDoc.getHelp(str(help_key), plugin_event.bot_info.hash)
+    tmp_reply_str = OlivaDiceCore.helpDoc.getHelp(str(help_key), plugin_event.bot_info.hash, plugin_event)
     if tmp_reply_str == None or tmp_reply_str == '':
         return None
     return replyMsg(plugin_event, str(tmp_reply_str))

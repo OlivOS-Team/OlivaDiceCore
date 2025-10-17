@@ -315,6 +315,14 @@ def pcCardDataSetBySkillName(pcHash, skillName, skillValue, pcCardName = 'defaul
     if tmp_hitList == None:
         tmp_hitList = []
     tmp_pc_card_name_key = pcCardName
+    # 先确保卡片数据存在
+    if pcHash in dictPcCardData['unity']:
+        pass
+    else:
+        dictPcCardData['unity'][pcHash] = {}
+    if tmp_pc_card_name_key not in dictPcCardData['unity'][pcHash]:
+        dictPcCardData['unity'][pcHash][tmp_pc_card_name_key] = {}
+    # 然后再处理 selection 和 lock
     locked_pc = pcCardDataGetSelectionKeyLock(pcHash, hagId)
     if locked_pc is not None:
         # 如果有锁定的人物卡,只更新lockList中的人物卡,不修改全局selection
@@ -323,12 +331,6 @@ def pcCardDataSetBySkillName(pcHash, skillName, skillValue, pcCardName = 'defaul
     else:
         # 如果没有锁定的人物卡,按原逻辑修改全局selection
         pcCardDataSetSelectionKey(pcHash, tmp_pc_card_name_key, forceSwitch = True)
-    if pcHash in dictPcCardData['unity']:
-        pass
-    else:
-        dictPcCardData['unity'][pcHash] = {}
-    if tmp_pc_card_name_key not in dictPcCardData['unity'][pcHash]:
-        dictPcCardData['unity'][pcHash][tmp_pc_card_name_key] = {}
     tmp_pc_card_synonyms = {}
     tmp_pc_card_mapping = {}
     tmp_pc_card_forceMapping = []
