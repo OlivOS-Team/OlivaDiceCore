@@ -6899,18 +6899,8 @@ def parse_at_user(plugin_event, tmp_reast_str, valDict, flag_is_from_group_admin
     for part in tmp_reast_str_para.data:
         if isinstance(part, OlivOS.messageAPI.PARA.at):
             at_user_id = part.data['id']
-            tmp_userName01 = OlivaDiceCore.userConfig.getUserConfigByKey(
-                userId = at_user_id,
-                userType = 'user',
-                platform = plugin_event.platform['platform'],
-                userConfigKey = 'userName',
-                botHash = plugin_event.bot_info.hash
-            )
-            plres = plugin_event.get_stranger_info(at_user_id)
-            if plres['active']:
-                dictTValue['tUserName01'] = plres['data']['name']
-            else:
-                dictTValue['tUserName01'] = tmp_userName01
+            tmp_userName01 = OlivaDiceCore.msgReplyModel.get_user_name(plugin_event, at_user_id)
+            dictTValue['tUserName01'] = tmp_userName01
             is_at = True
         else:
             if isinstance(part, OlivOS.messageAPI.PARA.text):

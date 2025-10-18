@@ -24,6 +24,26 @@ import copy
 
 contextFeq = 0.1
 
+def get_user_name(plugin_event, user_id):
+    """
+    获取用户名称
+    """
+    user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId = user_id,
+        userType = 'user',
+        platform = plugin_event.platform['platform'],
+        userConfigKey = 'userName',
+        botHash = plugin_event.bot_info.hash
+    )
+    # 没获取到再用api获取
+    if user_name == None:
+        plres = plugin_event.get_stranger_info(user_id)
+        if plres['active']:
+            user_name = plres['data']['name']
+        else:
+            user_name = f'用户{user_id}'
+    return user_name
+
 def op_list_get():
     return ['+', '-', '*', '/', '^']
 
@@ -713,19 +733,8 @@ def replyRAV_command(plugin_event, Proc, valDict):
     if len(tmp_reast_str_para.data) >= 2:
         if type(tmp_reast_str_para.data[-1]) == OlivOS.messageAPI.PARA.at:
             tmp_userID_1 = tmp_reast_str_para.data[-1].data['id']
-            tmp_userName01 = OlivaDiceCore.userConfig.getUserConfigByKey(
-                userId = tmp_userID_1,
-                userType = 'user',
-                platform = plugin_event.platform['platform'],
-                userConfigKey = 'userName',
-                botHash = plugin_event.bot_info.hash
-            )
-            plres_1 = plugin_event.get_stranger_info(tmp_userID_1)
-            if plres_1['active']:
-                dictTValue['tUserName01'] = plres_1['data']['name']
-            else:
-                dictTValue['tUserName01'] = tmp_userName01
-            
+            tmp_userName01 = get_user_name(plugin_event, tmp_userID_1)
+            dictTValue['tUserName01'] = tmp_userName01
             # 提取所有文本部分并拼接
             text_parts = []
             for item in tmp_reast_str_para.data:
@@ -997,11 +1006,7 @@ def replyRAV_command(plugin_event, Proc, valDict):
                             tmp_enhanceList
                         )
                 if tmp_pc_name_1 == None:
-                    res_1 = plugin_event.get_stranger_info(tmp_userID_1)
-                    if res_1['active']:
-                        dictTValue['tName01'] = res_1['data']['name']
-                    else:
-                        dictTValue['tName01'] = tmp_userName01
+                    dictTValue['tName01'] = tmp_userName01
                 dictTValue['tSkillName'] = tmp_skill_name_0 if not difficulty_0 else f'{tmp_skill_name_0}({difficulty_0})'
                 dictTValue['tSkillName01'] = tmp_skill_name_1 if not difficulty_1 else f'{tmp_skill_name_1}({difficulty_1})'
                 if flag_rav_type == '0':
@@ -1734,17 +1739,7 @@ def team_create(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCusto
     else:
         for member_id in members:
             # 获取用户名称
-            plres = plugin_event.get_stranger_info(member_id)
-            user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
-                userId = member_id,
-                userType = 'user',
-                platform = plugin_event.platform['platform'],
-                userConfigKey = 'userName',
-                botHash = plugin_event.bot_info.hash,
-                default = plres['data']['name'] if plres['active'] else f"用户{member_id}"
-            )
-            if plres['active'] and user_name == f'用户{member_id}':
-                user_name = plres['data']['name']
+            user_name = get_user_name(plugin_event, member_id)
             # 获取当前人物卡
             pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
             pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
@@ -1806,17 +1801,7 @@ def team_show(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom,
     index = 1
     for member_id in members:
         # 获取用户名称
-        plres = plugin_event.get_stranger_info(member_id)
-        user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
-            userId = member_id,
-            userType = 'user',
-            platform = plugin_event.platform['platform'],
-            userConfigKey = 'userName',
-            botHash = plugin_event.bot_info.hash,
-            default = plres['data']['name'] if plres['active'] else f"用户{member_id}"
-        )
-        if plres['active'] and user_name == f'用户{member_id}':
-            user_name = plres['data']['name']
+        user_name = get_user_name(plugin_event, member_id)
         # 获取当前人物卡
         pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
         pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
@@ -1955,17 +1940,7 @@ def team_remove(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin
     removed_names = []
     for member_id in removed_members:
         # 获取用户名称
-        plres = plugin_event.get_stranger_info(member_id)
-        user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
-            userId = member_id,
-            userType = 'user',
-            platform = plugin_event.platform['platform'],
-            userConfigKey = 'userName',
-            botHash = plugin_event.bot_info.hash,
-            default = plres['data']['name'] if plres['active'] else f"用户{member_id}"
-        )
-        if plres['active'] and user_name == f'用户{member_id}':
-            user_name = plres['data']['name']
+        user_name = get_user_name(plugin_event, member_id)
         # 获取人物卡名
         pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
         pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
@@ -1982,17 +1957,7 @@ def team_remove(plugin_event, tmp_reast_str, tmp_hagID, flag_is_from_group_admin
     else:
         for member_id in members:
             # 获取用户名称
-            plres = plugin_event.get_stranger_info(member_id)
-            user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
-                userId = member_id,
-                userType = 'user',
-                platform = plugin_event.platform['platform'],
-                userConfigKey = 'userName',
-                botHash = plugin_event.bot_info.hash,
-                default = plres['data']['name'] if plres['active'] else f"用户{member_id}"
-            )
-            if plres['active'] and user_name == f'用户{member_id}':
-                user_name = plres['data']['name']
+            user_name = get_user_name(plugin_event, member_id)
             # 获取当前人物卡
             pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
             pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
@@ -2354,17 +2319,7 @@ def team_sort(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom,
     # 收集成员信息并获取技能值
     member_info_list = []
     for original_index, member_id in enumerate(members):
-        plres = plugin_event.get_stranger_info(member_id)
-        user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
-            userId = member_id,
-            userType = 'user',
-            platform = plugin_event.platform['platform'],
-            userConfigKey = 'userName',
-            botHash = plugin_event.bot_info.hash,
-            default = plres['data']['name'] if plres['active'] else f"用户{member_id}"
-        )
-        if plres['active'] and user_name == f'用户{member_id}':
-            user_name = plres['data']['name']
+        user_name = get_user_name(plugin_event, member_id)
         
         pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
         pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
@@ -2721,17 +2676,7 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
             else:
                 member_results.append(f"{skill_name}: 表达式错误 '{op}{expr_str}'")
         OlivaDiceCore.msgReply.trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
-        plres = plugin_event.get_stranger_info(member_id)
-        user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
-            userId = tmp_pc_id,
-            userType = 'user',
-            platform = tmp_pc_platform,
-            userConfigKey = 'userName',
-            botHash = plugin_event.bot_info.hash,
-            default = plres['data']['name'] if plres['active'] else f"用户{member_id}"
-        )
-        if plres['active'] and user_name == f'用户{member_id}':
-            user_name = plres['data']['name']
+        user_name = get_user_name(plugin_event, member_id)
         if member_results:
             member_header = format_team_member_display(user_name, tmp_pc_name, dictStrCustom, 'strTeamSkillUpdateMemberFormat')
             results.append(member_header + ':\n' + '\n'.join(member_results))
@@ -2880,17 +2825,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
     # 为每个成员进行检定
     results = []
     for member_id in members:
-        plres = plugin_event.get_stranger_info(member_id)
-        user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
-            userId = member_id,
-            userType = 'user',
-            platform = plugin_event.platform['platform'],
-            userConfigKey = 'userName',
-            botHash = plugin_event.bot_info.hash,
-            default = plres['data']['name'] if plres['active'] else f"用户{member_id}"
-        )
-        if plres['active'] and user_name == f'用户{member_id}':
-            user_name = plres['data']['name']
+        user_name = get_user_name(plugin_event, member_id)
         pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
         pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
         display_name = format_team_member_display(user_name, pc_name, dictStrCustom, 'strTeamMemberFormat')
@@ -3182,17 +3117,7 @@ def team_sc(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
     for member_id in members:
         tmp_pc_platform = plugin_event.platform['platform']
         # 获取用户信息
-        plres = plugin_event.get_stranger_info(member_id)
-        user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
-            userId = member_id,
-            userType = 'user',
-            platform = plugin_event.platform['platform'],
-            userConfigKey = 'userName',
-            botHash = plugin_event.bot_info.hash,
-            default = plres['data']['name'] if plres['active'] else f"用户{member_id}"
-        )
-        if plres['active'] and user_name == f'用户{member_id}':
-            user_name = plres['data']['name']
+        user_name = get_user_name(plugin_event, member_id)
         pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
         pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
         # 构建显示名称
@@ -3401,17 +3326,7 @@ def team_r(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, te
     # 为每个团队成员执行骰
     roll_results = []
     for member_id in members:
-        plres = plugin_event.get_stranger_info(member_id)
-        user_name = OlivaDiceCore.userConfig.getUserConfigByKey(
-            userId=member_id,
-            userType='user',
-            platform=plugin_event.platform['platform'],
-            userConfigKey='userName',
-            botHash=plugin_event.bot_info.hash,
-            default=plres['data']['name'] if plres['active'] else f"用户{member_id}"
-        )
-        if plres['active'] and user_name == f'用户{member_id}':
-            user_name = plres['data']['name']
+        user_name = get_user_name(plugin_event, member_id)
         # 获取角色卡信息
         pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
         pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
