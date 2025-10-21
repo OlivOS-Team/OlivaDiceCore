@@ -2475,7 +2475,10 @@ def unity_reply(plugin_event, Proc):
                 dictTValue['tPcShow'] = tmp_reply_str_1
                 # 根据defaultshow状态设置不同的说明文字
                 if not tmp_reply_str_1:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowNone'], dictTValue)
+                    if is_at:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowNoneAtOther'], dictTValue)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowNone'], dictTValue)
                 else:
                     if show_default_enabled:
                         dictTValue['tDefaultShow'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDefaultShowOn'], dictTValue)
@@ -2509,7 +2512,10 @@ def unity_reply(plugin_event, Proc):
                     special_skills = OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[tmp_pcCardRule]
                 all_skills = pc_skill_names + special_skills
                 if tmp_pc_name is None:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowNone'], dictTValue)
+                    if is_at:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowNoneAtOther'], dictTValue)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowNone'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
                 elif not tmp_reast_str:
@@ -4145,7 +4151,10 @@ def unity_reply(plugin_event, Proc):
                     special_skills = OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[tmp_pcCardRule]
                 all_skills = pc_skill_names + special_skills
                 if tmp_pc_name is None:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowNone'], dictTValue)
+                    if is_at:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowNoneAtOther'], dictTValue)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowNone'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
                 elif not tmp_reast_str_new_2:
