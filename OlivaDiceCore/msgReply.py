@@ -2506,7 +2506,7 @@ def unity_reply(plugin_event, Proc):
                     special_skills = OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[tmp_pcCardRule]
                 all_skills = pc_skill_names + special_skills
                 if tmp_pc_name is None:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRmCardNone'], dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowCardNone'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
                 elif not tmp_reast_str:
@@ -2652,7 +2652,10 @@ def unity_reply(plugin_event, Proc):
                 if tmp_pc_name_1 != None:
                     dictTValue['tPcSelection'] = tmp_pc_name_1
                 dictTValue['tPcList'] = tmp_reply_str_1
-                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcList'], dictTValue)
+                if not tmp_reply_str_1:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcListNone'], dictTValue)
+                else:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcList'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'lock', fullMatch = True):
@@ -4139,7 +4142,7 @@ def unity_reply(plugin_event, Proc):
                     special_skills = OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[tmp_pcCardRule]
                 all_skills = pc_skill_names + special_skills
                 if tmp_pc_name is None:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRmCardNone'], dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowCardNone'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
                 elif not tmp_reast_str_new_2:
