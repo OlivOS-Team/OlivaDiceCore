@@ -150,6 +150,7 @@ dictStrCustom = {
     'strPcShow' : '[{tUserName}]的人物卡[{tName}]:\n{tPcShow}\n\n{tDefaultShow}',
     'strPcShowAtOther' : '[{tUserName01}]的人物卡[{tName}]:\n{tPcShow}\n\n{tDefaultShow}',
     'strPcShowNone' : '当前没有人物卡',
+    'strPcShowNoneAtOther' : '目标人物没有人物卡',
     'strShowDefaultOn' : '[{tUserName}]已开启非默认值显示模式，st show将只显示与模板默认值不同的技能',
     'strShowDefaultAlreadyOn' : '[{tUserName}]的非默认值显示模式已处于开启状态',
     'strShowDefaultOff' : '[{tUserName}]已关闭非默认值显示模式，st show将显示所有技能',
