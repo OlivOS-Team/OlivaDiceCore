@@ -162,7 +162,7 @@ dictStrCustom = {
     'strPcLockNone' : '[{tUserName}]未设置人物卡，无法锁定',
     'strPcUnLock' : '本群人物卡锁定已解除(当前人物卡：{tName})，其他群切换人物卡将同步至本群',
     'strPcUnLockNone' : '本群未启用人物卡锁定功能',
-    'strPclistNone' : '当前没有人物卡',
+    'strPcListNone' : '当前没有人物卡',
     'strPcInitSt' : '人物卡[{tName}]已按照[{tPcTempName}]完成人物卡作成:{tPcInitResult}',
     'strPcSetRecommend' : '未找到人物卡[{tPcSelection}]，你是想找以下人物卡吗？\n{tSearchResult}\n请输入序号以切换对应人物卡',
     'strPcSet' : '人物卡已切换至[{tPcSelection}]',
