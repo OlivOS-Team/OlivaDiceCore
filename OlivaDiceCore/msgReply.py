@@ -2474,14 +2474,20 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str_1 = '\n'.join(tmp_reply_str_1_list)
                 dictTValue['tPcShow'] = tmp_reply_str_1
                 # 根据defaultshow状态设置不同的说明文字
-                if show_default_enabled:
-                    dictTValue['tDefaultShow'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDefaultShowOn'], dictTValue)
+                if not tmp_reply_str_1:
+                    if is_at:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowNoneAtOther'], dictTValue)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowNone'], dictTValue)
                 else:
-                    dictTValue['tDefaultShow'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDefaultShowOff'], dictTValue)
-                if is_at:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowAtOther'], dictTValue)
-                else:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShow'], dictTValue)
+                    if show_default_enabled:
+                        dictTValue['tDefaultShow'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDefaultShowOn'], dictTValue)
+                    else:
+                        dictTValue['tDefaultShow'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDefaultShowOff'], dictTValue)
+                    if is_at:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowAtOther'], dictTValue)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShow'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'show'):
@@ -2506,7 +2512,10 @@ def unity_reply(plugin_event, Proc):
                     special_skills = OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[tmp_pcCardRule]
                 all_skills = pc_skill_names + special_skills
                 if tmp_pc_name is None:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRmCardNone'], dictTValue)
+                    if is_at:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowNoneAtOther'], dictTValue)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowNone'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
                 elif not tmp_reast_str:
@@ -2652,7 +2661,10 @@ def unity_reply(plugin_event, Proc):
                 if tmp_pc_name_1 != None:
                     dictTValue['tPcSelection'] = tmp_pc_name_1
                 dictTValue['tPcList'] = tmp_reply_str_1
-                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcList'], dictTValue)
+                if not tmp_reply_str_1:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcListNone'], dictTValue)
+                else:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcList'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'lock', fullMatch = True):
@@ -2788,7 +2800,13 @@ def unity_reply(plugin_event, Proc):
                             OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                         trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
-                return
+                    return
+                else:
+                    dictTValue['tUserName'] = plugin_event.data.sender['name']
+                    dictTValue['tPcSelection'] = ''
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetError'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
             elif isMatchWordStart(tmp_reast_str, 'init'):
                 if is_at: return
                 is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
@@ -4139,7 +4157,10 @@ def unity_reply(plugin_event, Proc):
                     special_skills = OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[tmp_pcCardRule]
                 all_skills = pc_skill_names + special_skills
                 if tmp_pc_name is None:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcRmCardNone'], dictTValue)
+                    if is_at:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowNoneAtOther'], dictTValue)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowNone'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
                 elif not tmp_reast_str_new_2:
@@ -5074,6 +5095,14 @@ def unity_reply(plugin_event, Proc):
                         flag_bp_count = tmp_reast_str[0]
                         tmp_reast_str = tmp_reast_str[1:]
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            # 检查是否没有指定技能
+            if tmp_reast_str == '' or tmp_reast_str == None:
+                if is_at:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckNoneAtOther'], dictTValue)
+                else:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckNone'], dictTValue)
+                OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+                return
             tmp_skill_name = None
             tmp_skill_value = None
             difficulty = None

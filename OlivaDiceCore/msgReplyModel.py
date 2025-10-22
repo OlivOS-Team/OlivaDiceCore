@@ -2760,7 +2760,12 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
             skill_expr = skill_expr[1:]
         bp_count = int(bp_digits) if bp_digits else 1
     skill_expr = OlivaDiceCore.msgReply.skipSpaceStart(skill_expr)
-
+    # 检查是否没有指定技能
+    if skill_expr == '' or skill_expr is None:
+        OlivaDiceCore.msgReply.replyMsg(plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(
+            dictStrCustom['strTeamCheckResultNone'], dictTValue
+        ))
+        return
     # 解析难度前缀
     difficulty, skill_expr = difficulty_analyze(skill_expr)
     # 解析技能名和表达式
