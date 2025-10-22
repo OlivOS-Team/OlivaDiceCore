@@ -577,7 +577,9 @@ def pcCardDataDelSelectionKeyLock(pcHash, hagID):
 
 def pcCardDataResolveTemplateMapping(templateName):
     """
-    解析模板映射，处理 tempMapping 字段的重定向
+    解析模板映射,处理 tempMapping 字段的重定向
+    注意: 此函数要求 templateName 参数必须是精确的模板名
+    调用前应先通过 getKeyWithUpper 获取正确的模板名
     """
     global dictPcCardTemplateDefault
     if templateName not in dictPcCardTemplateDefault['unity']:
@@ -603,16 +605,28 @@ def pcCardDataResolveTemplateMapping(templateName):
         # 记录已访问的模板
         visited_templates.add(current_name)
         # 检查目标模板是否存在
-        if mapping_target not in dictPcCardTemplateDefault['unity']:
+        mapping_target_matched = getKeyWithUpper(
+            data = dictPcCardTemplateDefault['unity'],
+            key = mapping_target
+        )
+        if mapping_target_matched is None:
             return None
         # 切换到目标模板
-        current_name = mapping_target
-        tmp_template = dictPcCardTemplateDefault['unity'][mapping_target]
+        current_name = mapping_target_matched
+        tmp_template = dictPcCardTemplateDefault['unity'][mapping_target_matched]
     return current_name
 
 def pcCardDataGetTemplateByKey(templateName):
     global dictPcCardTemplateDefault
-    resolved_name = pcCardDataResolveTemplateMapping(templateName)
+    # 先进行大小写不敏感匹配
+    templateName_matched = getKeyWithUpper(
+        data = dictPcCardTemplateDefault['unity'],
+        key = templateName
+    )
+    if templateName_matched is None:
+        return None
+    # 再解析模板映射
+    resolved_name = pcCardDataResolveTemplateMapping(templateName_matched)
     if resolved_name in dictPcCardTemplateDefault['unity']:
         return dictPcCardTemplateDefault['unity'][resolved_name]
     else:
@@ -653,14 +667,18 @@ def pcCardDataSetTemplateKey(pcHash, pcCardName, templateName = 'default', ruleN
     tmp_pc_card_name_key = pcCardName
     templateName_core = None
     ruleName_core = None
-    # 先解析模板映射
-    templateName_resolved = pcCardDataResolveTemplateMapping(templateName)
-    templateName_core = getKeyWithUpper(
+    # 先进行大小写不敏感匹配,获取正确的模板名称
+    templateName_matched = getKeyWithUpper(
         data = dictPcCardTemplateDefault['unity'],
-        key = templateName_resolved
+        key = templateName
     )
-    if templateName_core == None:
+    if templateName_matched == None:
         return False
+    # 再解析模板映射
+    templateName_resolved = pcCardDataResolveTemplateMapping(templateName_matched)
+    if templateName_resolved == None:
+        return False
+    templateName_core = templateName_resolved
     if selection_key_2 not in dictPcCardTemplateDefault['unity'][templateName_core]:
         return False
     ruleName_core = getKeyWithUpper(
@@ -694,14 +712,18 @@ def pcCardDataCheckTemplateKey(templateName = 'default', ruleName = 'default', r
         res = None
     selection_key = 'template'
     selection_key_2 = 'checkRules'
-    # 先解析模板映射
-    templateName_resolved = pcCardDataResolveTemplateMapping(templateName)
-    templateName_core = getKeyWithUpper(
+    # 先进行大小写不敏感匹配
+    templateName_matched = getKeyWithUpper(
         data = dictPcCardTemplateDefault['unity'],
-        key = templateName_resolved
+        key = templateName
     )
-    if templateName_core == None:
+    if templateName_matched == None:
         return res
+    # 再解析模板映射
+    templateName_resolved = pcCardDataResolveTemplateMapping(templateName_matched)
+    if templateName_resolved == None:
+        return res
+    templateName_core = templateName_resolved
     if templateName_core not in dictPcCardTemplateDefault['unity']:
         return res
     if selection_key_2 not in dictPcCardTemplateDefault['unity'][templateName_core]:
