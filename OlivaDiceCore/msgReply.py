@@ -3250,7 +3250,14 @@ def unity_reply(plugin_event, Proc):
                         ):
                             dictTValue['tPcSelection'] = tmp_pc_name
                             # 显示实际模板名而不是别名
-                            actual_template_name = OlivaDiceCore.pcCard.pcCardDataResolveTemplateMapping(tmp_template_name)
+                            # 先进行大小写不敏感匹配
+                            tmp_template_matched = OlivaDiceCore.pcCard.getKeyWithUpper(
+                                data = OlivaDiceCore.pcCard.dictPcCardTemplateDefault['unity'],
+                                key = tmp_template_name
+                            )
+                            actual_template_name = None
+                            if tmp_template_matched is not None:
+                                actual_template_name = OlivaDiceCore.pcCard.pcCardDataResolveTemplateMapping(tmp_template_matched)
                             dictTValue['tPcTempName'] = actual_template_name
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcTemp'], dictTValue)
                         else:
