@@ -2800,7 +2800,13 @@ def unity_reply(plugin_event, Proc):
                             OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event, tmp_pc_id)
                         trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
-                return
+                    return
+                else:
+                    dictTValue['tUserName'] = plugin_event.data.sender['name']
+                    dictTValue['tPcSelection'] = ''
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetError'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
             elif isMatchWordStart(tmp_reast_str, 'init'):
                 if is_at: return
                 is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
