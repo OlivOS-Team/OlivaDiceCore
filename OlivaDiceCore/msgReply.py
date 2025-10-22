@@ -5089,6 +5089,14 @@ def unity_reply(plugin_event, Proc):
                         flag_bp_count = tmp_reast_str[0]
                         tmp_reast_str = tmp_reast_str[1:]
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            # 检查是否没有指定技能
+            if tmp_reast_str == '' or tmp_reast_str == None:
+                if is_at:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckNoneAtOther'], dictTValue)
+                else:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckNone'], dictTValue)
+                OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+                return
             tmp_skill_name = None
             tmp_skill_value = None
             difficulty = None
