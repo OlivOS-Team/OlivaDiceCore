@@ -397,19 +397,40 @@ def unity_reply(plugin_event, Proc):
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['exit','bye'])
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
                     tmp_reast_str = tmp_reast_str.rstrip(' ')
-                    tmp_group_id = None
-                    if tmp_reast_str.isdecimal():
-                        tmp_group_id = int(tmp_reast_str)
-                    elif tmp_reast_str[0] == '-' and tmp_reast_str[1:].isdecimal():
-                        tmp_group_id = (-1) * int(tmp_reast_str[1:])
-                    if tmp_group_id != None:
-                        dictTValue['tGroupId'] = str(tmp_group_id)
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotExitRemote'], dictTValue)
-                        sendMsgByEvent(plugin_event, tmp_reply_str, tmp_group_id, 'group')
+                    # 用空格分割群号部分和附加消息部分
+                    tmp_parts = tmp_reast_str.split(' ', 1)
+                    tmp_group_ids_str = tmp_parts[0] if len(tmp_parts) > 0 else ''
+                    tmp_extra_msg = tmp_parts[1] if len(tmp_parts) > 1 else ''
+                    tmp_group_ids_str = tmp_group_ids_str.replace('；', ';').replace('，', ';')
+                    # 用分号分隔群号列表
+                    tmp_group_id_str_list = tmp_group_ids_str.split(';')
+                    # 收集所有有效的群号
+                    tmp_valid_group_ids = []
+                    for tmp_group_id_str in tmp_group_id_str_list:
+                        tmp_group_id_str = tmp_group_id_str.strip()
+                        if not tmp_group_id_str:
+                            continue
+                        tmp_group_id = None
+                        if tmp_group_id_str.isdecimal():
+                            tmp_group_id = int(tmp_group_id_str)
+                        elif tmp_group_id_str[0] == '-' and tmp_group_id_str[1:].isdecimal():
+                            tmp_group_id = (-1) * int(tmp_group_id_str[1:])
+                        if tmp_group_id != None:
+                            tmp_valid_group_ids.append(tmp_group_id)
+                    if len(tmp_valid_group_ids) > 0:
+                        dictTValue['tGroupId'] = ', '.join([str(gid) for gid in tmp_valid_group_ids])
+                        if tmp_extra_msg:
+                            dictTValue['tExtraMsg'] = tmp_extra_msg
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotExitRemoteShow'], dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
-                        time.sleep(1)
-                        plugin_event.set_group_leave(tmp_group_id)
+                        # 然后逐个退群
+                        for tmp_group_id in tmp_valid_group_ids:
+                            dictTValue['tGroupId'] = str(tmp_group_id)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotExitRemote'], dictTValue)
+                            sendMsgByEvent(plugin_event, tmp_reply_str, tmp_group_id, 'group')
+                            time.sleep(1)
+                            # 执行退群操作
+                            plugin_event.set_group_leave(tmp_group_id)
                 elif isMatchWordStart(tmp_reast_str, 'remote'):
                     tmp_user_platform = plugin_event.platform['platform']
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'remote')
