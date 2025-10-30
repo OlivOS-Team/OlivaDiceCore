@@ -401,7 +401,8 @@ def unity_reply(plugin_event, Proc):
                     tmp_parts = tmp_reast_str.split(' ', 1)
                     tmp_group_ids_str = tmp_parts[0] if len(tmp_parts) > 0 else ''
                     tmp_extra_msg = tmp_parts[1] if len(tmp_parts) > 1 else ''
-                    tmp_group_ids_str = tmp_group_ids_str.replace('；', ';').replace('，', ';')
+                    # 将群号部分的全角和半角逗号、全角分号都转换为半角分号
+                    tmp_group_ids_str = tmp_group_ids_str.replace('；', ';').replace('，', ';').replace(',', ';')
                     # 用分号分隔群号列表
                     tmp_group_id_str_list = tmp_group_ids_str.split(';')
                     # 收集所有有效的群号
