@@ -4570,7 +4570,9 @@ def unity_reply(plugin_event, Proc):
                     # 使用统一的技能检查结果函数，自动记录hiy统计数据
                     pc_hash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
                     dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgReplyModel.get_SkillCheckResult(
-                        tmpSkillCheckType, dictStrCustom, dictTValue, pc_hash, tmp_pc_name
+                        tmpSkillCheckType, dictStrCustom, dictTValue, pc_hash, tmp_pc_name,
+                        user_id=tmp_pc_id, skill_name='SAN',
+                        platform=tmp_pc_platform, botHash=plugin_event.bot_info.hash, hagId=tmp_hagID
                     )
                     
                     # 根据检查结果决定使用成功还是失败的SAN值损失
@@ -5295,7 +5297,9 @@ def unity_reply(plugin_event, Proc):
                         dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgReplyModel.get_SkillCheckResult(
                             tmpSkillCheckType, dictStrCustom, dictTValue,
                             pcHash=OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
-                            pcCardName=tmp_pc_name_1
+                            pcCardName=tmp_pc_name_1,
+                            user_id=tmp_pc_id, skill_name=tmp_skill_name,
+                            platform=tmp_pc_platform, botHash=plugin_event.bot_info.hash, hagId=tmp_hagID
                         )
                         if tmpSkillCheckType in [
                             OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS,
@@ -5334,7 +5338,9 @@ def unity_reply(plugin_event, Proc):
                             tmp_tSkillCheckReasult += OlivaDiceCore.msgReplyModel.get_SkillCheckResult(
                                 tmpSkillCheckType, dictStrCustom, dictTValue,
                                 pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
-                                pcCardName = tmp_pc_name_1
+                                pcCardName = tmp_pc_name_1,
+                                user_id=tmp_pc_id, skill_name=tmp_skill_name,
+                                platform=tmp_pc_platform, botHash=plugin_event.bot_info.hash, hagId=tmp_hagID
                             )
                             if tmpSkillCheckType in [
                                 OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS,

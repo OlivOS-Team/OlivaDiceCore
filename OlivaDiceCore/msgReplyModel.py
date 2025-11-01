@@ -596,7 +596,7 @@ dictSkillCheckRank = {
     OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_FAIL: 0
 }
 
-def get_SkillCheckResult(tmpSkillCheckType, dictStrCustom, dictTValue, pcHash = None, pcCardName = None):
+def get_SkillCheckResult(tmpSkillCheckType, dictStrCustom, dictTValue, pcHash = None, pcCardName = None, user_id = None, skill_name = None, platform = None, botHash = None, hagId = None):
     res = dictStrCustom['strPcSkillCheckError']
     # 存储hiy统计数据
     if pcHash and pcCardName:
@@ -616,6 +616,18 @@ def get_SkillCheckResult(tmpSkillCheckType, dictStrCustom, dictTValue, pcHash = 
         
         if hiy_key:
             OlivaDiceCore.pcCard.pcCardDataSetHiyKey(pcHash, pcCardName, hiy_key, 1)
+        
+        # 记录技能检定结果到 logStatus
+        if user_id and skill_name and platform and botHash and hagId:
+            is_success = tmpSkillCheckType in [
+                OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS,
+                OlivaDiceCore.skillCheck.resultType.SKILLCHECK_HARD_SUCCESS,
+                OlivaDiceCore.skillCheck.resultType.SKILLCHECK_EXTREME_HARD_SUCCESS,
+                OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_SUCCESS
+            ]
+            record_skill_check_result(
+                user_id, pcCardName, skill_name, is_success, platform, botHash, hagId
+            )
     if tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS:
         res = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSkillCheckSucceed'], dictTValue)
     elif tmpSkillCheckType == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_HARD_SUCCESS:
@@ -684,6 +696,104 @@ def get_SkillCheckError(resError, dictStrCustom, dictTValue):
     else:
         tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollErrorUnknown'], dictTValue)
     return tmp_reply_str_1
+
+def record_skill_check_result(user_id, pc_name, skill_name, is_success, platform, botHash, hagId):
+    """
+    记录技能检定结果到logStatus
+    """
+    try:
+        # 获取logStatus
+        log_status = OlivaDiceCore.userConfig.getUserConfigByKey(
+            userId=hagId,
+            userType='group',
+            platform=platform,
+            userConfigKey='logStatus',
+            botHash=botHash
+        )
+        
+        if log_status is None:
+            return
+        
+        # 获取当前活跃日志的UUID
+        log_enable = OlivaDiceCore.userConfig.getUserConfigByKey(
+            userId=hagId,
+            userType='group',
+            platform=platform,
+            userConfigKey='logEnable',
+            botHash=botHash
+        )
+        
+        if not log_enable:
+            return
+        
+        log_active_name = OlivaDiceCore.userConfig.getUserConfigByKey(
+            userId=hagId,
+            userType='group',
+            platform=platform,
+            userConfigKey='logActiveName',
+            botHash=botHash
+        )
+        
+        if not log_active_name:
+            return
+        
+        log_name_dict = OlivaDiceCore.userConfig.getUserConfigByKey(
+            userId=hagId,
+            userType='group',
+            platform=platform,
+            userConfigKey='logNameDict',
+            botHash=botHash
+        )
+        
+        if not log_name_dict or log_active_name not in log_name_dict:
+            return
+        
+        log_uuid = log_name_dict[log_active_name]
+        
+        # 确保UUID条目存在
+        if log_uuid not in log_status:
+            log_status[log_uuid] = {}
+        
+        # 计算用户哈希
+        user_hash = OlivaDiceCore.userConfig.getUserHash(user_id, 'user', platform)
+        
+        # 确保用户条目存在
+        if user_hash not in log_status[log_uuid]:
+            log_status[log_uuid][user_hash] = {
+                'id': str(user_id),
+                '人物卡': {}
+            }
+        
+        # 确保人物卡条目存在
+        if pc_name not in log_status[log_uuid][user_hash]['人物卡']:
+            log_status[log_uuid][user_hash]['人物卡'][pc_name] = {
+                '成功': {},
+                '失败': {}
+            }
+        
+        # 将技能名转换为主键名
+        pc_hash = OlivaDiceCore.pcCard.getPcHash(user_id, platform)
+        main_skill_name = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(pc_hash, skill_name, flagShow=False, hagId=hagId)
+        
+        # 记录结果
+        result_key = '成功' if is_success else '失败'
+        if main_skill_name not in log_status[log_uuid][user_hash]['人物卡'][pc_name][result_key]:
+            log_status[log_uuid][user_hash]['人物卡'][pc_name][result_key][main_skill_name] = 0
+        log_status[log_uuid][user_hash]['人物卡'][pc_name][result_key][main_skill_name] += 1
+        
+        # 更新logStatus
+        OlivaDiceCore.userConfig.setUserConfigByKey(
+            userId=hagId,
+            userType='group',
+            platform=platform,
+            userConfigKey='logStatus',
+            userConfigValue=log_status,
+            botHash=botHash
+        )
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
 
 def difficulty_analyze(res):
     difficulty = None
@@ -913,11 +1023,15 @@ def replyRAV_command(plugin_event, Proc, valDict):
                 if tmpSkillCheckType in dictSkillCheckRank and tmpSkillCheckType_1 in dictSkillCheckRank:
                     dictTValue['tSkillCheckReasult'] = get_SkillCheckResult(
                         tmpSkillCheckType, dictStrCustom, dictTValue,
-                        pcHash=tmp_pcHash_0, pcCardName=tmp_pc_name_0
+                        pcHash=tmp_pcHash_0, pcCardName=tmp_pc_name_0,
+                        user_id=tmp_userID, skill_name=tmp_skill_name_0,
+                        platform=tmp_platform, botHash=plugin_event.bot_info.hash, hagId=tmp_hagID
                     )
                     dictTValue['tSkillCheckReasult01'] = get_SkillCheckResult(
                         tmpSkillCheckType_1, dictStrCustom, dictTValue,
-                        pcHash=tmp_pcHash_1, pcCardName=tmp_pc_name_1
+                        pcHash=tmp_pcHash_1, pcCardName=tmp_pc_name_1,
+                        user_id=tmp_userID_1, skill_name=tmp_skill_name_1,
+                        platform=tmp_platform, botHash=plugin_event.bot_info.hash, hagId=tmp_hagID
                     )
                     if dictSkillCheckRank[tmpSkillCheckType] > dictSkillCheckRank[tmpSkillCheckType_1]:
                         flag_rav_type = '0'
@@ -2916,7 +3030,11 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
             skill_value_str = f"{skill_threshold}({expr_result_str})"
         
         # 使用模板构造结果字符串
-        skill_check_result = get_SkillCheckResult(skill_check_type, dictStrCustom, dictTValue, pc_hash, pc_name)
+        skill_check_result = get_SkillCheckResult(
+            skill_check_type, dictStrCustom, dictTValue, pc_hash, pc_name,
+            user_id=member_id, skill_name=skill_name,
+            platform=plugin_event.platform['platform'], botHash=plugin_event.bot_info.hash, hagId=tmp_hagID
+        )
         if skill_name:
             result_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                 dictStrCustom.get('strTeamCheckMemberFormat', '{tDisplayName}({tSkillName}: {tSkillValue}): {tDiceDetail}/{tSkillValue} {tResult}'),
@@ -3223,7 +3341,11 @@ def team_sc(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
         
         # 计算损失参数
         san_loss_expr = san_success if roll_value < current_san else san_fail
-        skill_check_result = get_SkillCheckResult(skill_check_type, dictStrCustom, dictTValue, pc_hash, pc_name)
+        skill_check_result = get_SkillCheckResult(
+            skill_check_type, dictStrCustom, dictTValue, pc_hash, pc_name,
+            user_id=member_id, skill_name='SAN',
+            platform=tmp_pc_platform, botHash=plugin_event.bot_info.hash, hagId=tmp_hagID
+        )
         
         # 使用模板构造结果字符串
         result_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
