@@ -74,26 +74,32 @@ def initHelpDoc(bot_info_dict):
             pass
 
 def setHelpDocByBotHash(botHash, helpdocKey, helpdocVal):
-    if botHash not in OlivaDiceCore.helpDocData.dictHelpDocDefault:
-        OlivaDiceCore.helpDocData.dictHelpDocDefault[botHash] = {}
-    if botHash not in OlivaDiceCore.helpDocData.dictHelpDoc:
-        OlivaDiceCore.helpDocData.dictHelpDoc[botHash] = {}
-    OlivaDiceCore.helpDocData.dictHelpDocDefault[botHash][helpdocKey] = helpdocVal
-    OlivaDiceCore.helpDocData.dictHelpDoc[botHash].update(
-        OlivaDiceCore.helpDocData.dictHelpDocDefault[botHash]
+    # 应用重定向逻辑
+    redirected_bot_hash = OlivaDiceCore.userConfig.getRedirectedBotHash(botHash)
+    
+    if redirected_bot_hash not in OlivaDiceCore.helpDocData.dictHelpDocDefault:
+        OlivaDiceCore.helpDocData.dictHelpDocDefault[redirected_bot_hash] = {}
+    if redirected_bot_hash not in OlivaDiceCore.helpDocData.dictHelpDoc:
+        OlivaDiceCore.helpDocData.dictHelpDoc[redirected_bot_hash] = {}
+    OlivaDiceCore.helpDocData.dictHelpDocDefault[redirected_bot_hash][helpdocKey] = helpdocVal
+    OlivaDiceCore.helpDocData.dictHelpDoc[redirected_bot_hash].update(
+        OlivaDiceCore.helpDocData.dictHelpDocDefault[redirected_bot_hash]
     )
-    saveHelpDocByBotHash(botHash)
+    saveHelpDocByBotHash(redirected_bot_hash)
 
 def delHelpDocByBotHash(botHash, helpdocKey):
-    if botHash not in OlivaDiceCore.helpDocData.dictHelpDocDefault:
-        OlivaDiceCore.helpDocData.dictHelpDocDefault[botHash] = {}
-    if botHash not in OlivaDiceCore.helpDocData.dictHelpDoc:
-        OlivaDiceCore.helpDocData.dictHelpDoc[botHash] = {}
-    if helpdocKey in OlivaDiceCore.helpDocData.dictHelpDocDefault[botHash]:
-        OlivaDiceCore.helpDocData.dictHelpDocDefault[botHash].pop(helpdocKey)
-    if helpdocKey in OlivaDiceCore.helpDocData.dictHelpDoc[botHash]:
-        OlivaDiceCore.helpDocData.dictHelpDoc[botHash].pop(helpdocKey)
-    saveHelpDocByBotHash(botHash)
+    # 应用重定向逻辑
+    redirected_bot_hash = OlivaDiceCore.userConfig.getRedirectedBotHash(botHash)
+    
+    if redirected_bot_hash not in OlivaDiceCore.helpDocData.dictHelpDocDefault:
+        OlivaDiceCore.helpDocData.dictHelpDocDefault[redirected_bot_hash] = {}
+    if redirected_bot_hash not in OlivaDiceCore.helpDocData.dictHelpDoc:
+        OlivaDiceCore.helpDocData.dictHelpDoc[redirected_bot_hash] = {}
+    if helpdocKey in OlivaDiceCore.helpDocData.dictHelpDocDefault[redirected_bot_hash]:
+        OlivaDiceCore.helpDocData.dictHelpDocDefault[redirected_bot_hash].pop(helpdocKey)
+    if helpdocKey in OlivaDiceCore.helpDocData.dictHelpDoc[redirected_bot_hash]:
+        OlivaDiceCore.helpDocData.dictHelpDoc[redirected_bot_hash].pop(helpdocKey)
+    saveHelpDocByBotHash(redirected_bot_hash)
 
 def saveHelpDocByBotHash(botHash):
     if botHash in OlivaDiceCore.helpDocData.dictHelpDocDefault:
@@ -122,19 +128,23 @@ def getHelp(key_str, bot_hash, plugin_event = None):
     tmp_recommend_list = []
     tmp_recommend_str = ''
     key_str_new = key_str
+    
     if plugin_event is not None:
         dictTValue['tUserName'] = plugin_event.data.sender['name']
+    # 应用重定向逻辑（仅用于帮助文档数据）
+    redirected_bot_hash = OlivaDiceCore.userConfig.getRedirectedBotHash(bot_hash)
+    
     if bot_hash in OlivaDiceCore.msgCustom.dictStrCustomDict:
         dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[bot_hash]
-    if bot_hash in OlivaDiceCore.helpDocData.dictHelpDoc:
+    if redirected_bot_hash in OlivaDiceCore.helpDocData.dictHelpDoc:
         while True:
-            if key_str_new in OlivaDiceCore.helpDocData.dictHelpDoc[bot_hash]:
-                tmp_tHelpDocResult = OlivaDiceCore.helpDocData.dictHelpDoc[bot_hash][key_str_new]
+            if key_str_new in OlivaDiceCore.helpDocData.dictHelpDoc[redirected_bot_hash]:
+                tmp_tHelpDocResult = OlivaDiceCore.helpDocData.dictHelpDoc[redirected_bot_hash][key_str_new]
                 if len(tmp_tHelpDocResult) > 1:
                     if tmp_tHelpDocResult[0] == '&' and tmp_tHelpDocResult[1:] != key_str_new:
                         tmp_reply_str = getHelp(tmp_tHelpDocResult[1:], bot_hash, plugin_event)
                         return tmp_reply_str
-                dictTValue['tHelpDocResult'] = OlivaDiceCore.helpDocData.dictHelpDoc[bot_hash][key_str_new]
+                dictTValue['tHelpDocResult'] = OlivaDiceCore.helpDocData.dictHelpDoc[redirected_bot_hash][key_str_new]
                 if key_str_new == 'default':
                     bot_info_str = OlivaDiceCore.data.bot_info
                     if type(plugin_event) is OlivOS.API.Event:
@@ -148,7 +158,7 @@ def getHelp(key_str, bot_hash, plugin_event = None):
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDoc'], dictTValue)
                 for count_index in range(100):
                     tmp_reply_str_old = tmp_reply_str
-                    tmp_reply_str = formatSTRReplace(tmp_reply_str, OlivaDiceCore.helpDocData.dictHelpDoc[bot_hash])
+                    tmp_reply_str = formatSTRReplace(tmp_reply_str, OlivaDiceCore.helpDocData.dictHelpDoc[redirected_bot_hash])
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(tmp_reply_str, dictTValue)
                     if tmp_reply_str_old == tmp_reply_str:
                         break
@@ -216,8 +226,11 @@ def getHelpRecommend(key_str:str, bot_hash:str):
     if helpRecommendGate == None:
         helpRecommendGate = 25
 
-    if bot_hash in OlivaDiceCore.helpDocData.dictHelpDoc:
-        for dictHelpDoc_this in OlivaDiceCore.helpDocData.dictHelpDoc[bot_hash]:
+    # 应用重定向逻辑
+    redirected_bot_hash = OlivaDiceCore.userConfig.getRedirectedBotHash(bot_hash)
+
+    if redirected_bot_hash in OlivaDiceCore.helpDocData.dictHelpDoc:
+        for dictHelpDoc_this in OlivaDiceCore.helpDocData.dictHelpDoc[redirected_bot_hash]:
             tmp_RecommendRank_list.append([
                 getRecommendRank(
                     key_str,

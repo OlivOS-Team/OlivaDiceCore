@@ -48,6 +48,10 @@ def unity_init(plugin_event, Proc):
     OlivaDiceCore.console.initBackupConfig()
     OlivaDiceCore.console.readBackupConfig()
     OlivaDiceCore.console.saveBackupConfig()
+    # 初始化主从关系配置
+    OlivaDiceCore.console.initAccountRelationConfig()
+    OlivaDiceCore.console.readAccountRelationConfig()
+    OlivaDiceCore.console.saveAccountRelationConfig()
     OlivaDiceCore.onediceOverride.initOnedice()
     OlivaDiceCore.msgCustomManager.initMsgCustom(Proc.Proc_data['bot_info_dict'])
     OlivaDiceCore.msgCustomManager.saveMsgCustom(Proc.Proc_data['bot_info_dict'])

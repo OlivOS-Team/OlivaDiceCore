@@ -64,6 +64,15 @@ dictBackupConfigTemplate = {
 
 dictBackupConfig = {}
 
+# 主从关系配置相关
+dictAccountRelationConfigTemplate = {
+    'default': {
+        'relations': {}
+    }
+}
+
+dictAccountRelationConfig = {}
+
 def getConsoleSwitchByHash(switchKey, botHash = 'unity'):
     global dictConsoleSwitch
     tmp_res = None
@@ -206,3 +215,81 @@ def readBackupConfig():
     except:
         # 如果文件不存在或读取失败，使用默认配置
         pass
+
+# 主从关系配置管理函数
+def initAccountRelationConfig():
+    """初始化主从关系配置"""
+    global dictAccountRelationConfig
+    global dictAccountRelationConfigTemplate
+    if 'unity' not in dictAccountRelationConfig:
+        dictAccountRelationConfig['unity'] = {}
+    for template_key_this in dictAccountRelationConfigTemplate['default']:
+        if template_key_this not in dictAccountRelationConfig['unity']:
+            dictAccountRelationConfig['unity'][template_key_this] = dictAccountRelationConfigTemplate['default'][template_key_this].copy()
+
+def saveAccountRelationConfig():
+    """保存主从关系配置"""
+    global dictAccountRelationConfig
+    releaseDir(OlivaDiceCore.data.dataDirRoot)
+    releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity')
+    releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity/console')
+    accountRelationConfigDir = OlivaDiceCore.data.dataDirRoot + '/unity/console'
+    accountRelationConfigFile = 'accountRelation.json'
+    accountRelationConfigPath = accountRelationConfigDir + '/' + accountRelationConfigFile
+    if 'unity' in dictAccountRelationConfig:
+        with open(accountRelationConfigPath, 'w', encoding='utf-8') as accountRelationConfigPath_f:
+            accountRelationConfigPath_f.write(json.dumps(dictAccountRelationConfig['unity'], ensure_ascii=False, indent=4))
+
+def readAccountRelationConfig():
+    """读取主从关系配置"""
+    global dictAccountRelationConfig
+    releaseDir(OlivaDiceCore.data.dataDirRoot)
+    releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity')
+    releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity/console')
+    accountRelationConfigDir = OlivaDiceCore.data.dataDirRoot + '/unity/console'
+    accountRelationConfigFile = 'accountRelation.json'
+    accountRelationConfigPath = accountRelationConfigDir + '/' + accountRelationConfigFile
+    # 初始化unity配置
+    if 'unity' not in dictAccountRelationConfig:
+        dictAccountRelationConfig['unity'] = {}
+    
+    try:
+        with open(accountRelationConfigPath, 'r', encoding='utf-8') as accountRelationConfigPath_f:
+            dictAccountRelationConfig['unity'].update(json.loads(accountRelationConfigPath_f.read()))
+    except:
+        # 如果文件不存在或读取失败，使用默认配置
+        pass
+
+def getMasterBotHash(slaveBotHash):
+    """获取从账号对应的主账号Hash"""
+    global dictAccountRelationConfig
+    if 'unity' in dictAccountRelationConfig:
+        if 'relations' in dictAccountRelationConfig['unity']:
+            if slaveBotHash in dictAccountRelationConfig['unity']['relations']:
+                return dictAccountRelationConfig['unity']['relations'][slaveBotHash]
+    return None
+
+def setAccountRelation(slaveBotHash, masterBotHash):
+    """设置主从关系"""
+    global dictAccountRelationConfig
+    if 'unity' not in dictAccountRelationConfig:
+        dictAccountRelationConfig['unity'] = {}
+    if 'relations' not in dictAccountRelationConfig['unity']:
+        dictAccountRelationConfig['unity']['relations'] = {}
+    dictAccountRelationConfig['unity']['relations'][slaveBotHash] = masterBotHash
+
+def removeAccountRelation(slaveBotHash):
+    """删除主从关系"""
+    global dictAccountRelationConfig
+    if 'unity' in dictAccountRelationConfig:
+        if 'relations' in dictAccountRelationConfig['unity']:
+            if slaveBotHash in dictAccountRelationConfig['unity']['relations']:
+                del dictAccountRelationConfig['unity']['relations'][slaveBotHash]
+
+def getAllAccountRelations():
+    """获取所有主从关系"""
+    global dictAccountRelationConfig
+    if 'unity' in dictAccountRelationConfig:
+        if 'relations' in dictAccountRelationConfig['unity']:
+            return dictAccountRelationConfig['unity']['relations'].copy()
+    return {}

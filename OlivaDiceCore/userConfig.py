@@ -85,6 +85,31 @@ dictUserConfigNoteType = {
     ]
 }
 
+# 重定向黑名单：这些数据必须保持独立性，不应被重定向
+dictRedirectBlacklist = {
+    'groupEnable',
+    'hostEnable',
+    'hostLocalEnable',
+    'groupWithHostEnable',
+    'lastHit'
+}
+
+def getRedirectedBotHash(botHash, dataKey=None):
+    """
+    获取重定向后的botHash
+    如果当前botHash是从账号，且dataKey不在黑名单中，返回主账号的botHash
+    否则返回原botHash
+    """
+    # 如果dataKey在黑名单中，直接返回原botHash
+    if dataKey and dataKey in dictRedirectBlacklist:
+        return botHash
+    # 检查是否存在主从关系
+    masterBotHash = OlivaDiceCore.console.getMasterBotHash(botHash)
+    if masterBotHash:
+        return masterBotHash
+    
+    return botHash
+
 def setUserConfigByKey(userId, userType, platform, userConfigKey, userConfigValue, botHash):
     global dictUserConfigData
     global dictUserConfigNoteDefault
@@ -92,6 +117,9 @@ def setUserConfigByKey(userId, userType, platform, userConfigKey, userConfigValu
     userConfigNoteKey = 'configNote'
     if userConfigKey not in dictUserConfigNoteDefault:
         return
+    # 应用重定向逻辑
+    redirectedBotHash = getRedirectedBotHash(botHash, userConfigKey)
+    
     userHash = getUserHash(
         userId = userId,
         userType = userType,
@@ -101,16 +129,16 @@ def setUserConfigByKey(userId, userType, platform, userConfigKey, userConfigValu
         listUserConfigDataUpdate.append(userHash)
     if userHash not in dictUserConfigData:
         dictUserConfigData[userHash] = {}
-    if botHash not in dictUserConfigData[userHash]:
-        dictUserConfigData[userHash][botHash] = {}
-    if userConfigNoteKey not in dictUserConfigData[userHash][botHash]:
-        dictUserConfigData[userHash][botHash][userConfigNoteKey] = {}
-    dictUserConfigData[userHash][botHash]['userId'] = userId
-    dictUserConfigData[userHash][botHash]['userType'] = userType
-    dictUserConfigData[userHash][botHash]['platform'] = platform
-    if 'lastHit' not in dictUserConfigData[userHash][botHash]:
-        dictUserConfigData[userHash][botHash]['lastHit'] = dictUserConfigDefault['lastHit']
-    dictUserConfigData[userHash][botHash][userConfigNoteKey][userConfigKey] = userConfigValue
+    if redirectedBotHash not in dictUserConfigData[userHash]:
+        dictUserConfigData[userHash][redirectedBotHash] = {}
+    if userConfigNoteKey not in dictUserConfigData[userHash][redirectedBotHash]:
+        dictUserConfigData[userHash][redirectedBotHash][userConfigNoteKey] = {}
+    dictUserConfigData[userHash][redirectedBotHash]['userId'] = userId
+    dictUserConfigData[userHash][redirectedBotHash]['userType'] = userType
+    dictUserConfigData[userHash][redirectedBotHash]['platform'] = platform
+    if 'lastHit' not in dictUserConfigData[userHash][redirectedBotHash]:
+        dictUserConfigData[userHash][redirectedBotHash]['lastHit'] = dictUserConfigDefault['lastHit']
+    dictUserConfigData[userHash][redirectedBotHash][userConfigNoteKey][userConfigKey] = userConfigValue
 
 def getUserConfigByKey(userId, userType, platform, userConfigKey, botHash, default=None):
     global dictUserConfigData
@@ -119,16 +147,19 @@ def getUserConfigByKey(userId, userType, platform, userConfigKey, botHash, defau
     userConfigValue = default if default is not None else False
     if userConfigKey in dictUserConfigNoteDefault and default is None:
         userConfigValue = dictUserConfigNoteDefault[userConfigKey]
+    # 应用重定向逻辑
+    redirectedBotHash = getRedirectedBotHash(botHash, userConfigKey)
+    
     userHash = getUserHash(
         userId = userId,
         userType = userType,
         platform = platform
     )
     if userHash in dictUserConfigData:
-        if botHash in dictUserConfigData[userHash]:
-            if userConfigNoteKey in dictUserConfigData[userHash][botHash]:
-                if userConfigKey in dictUserConfigData[userHash][botHash][userConfigNoteKey]:
-                    userConfigValue = dictUserConfigData[userHash][botHash][userConfigNoteKey][userConfigKey]
+        if redirectedBotHash in dictUserConfigData[userHash]:
+            if userConfigNoteKey in dictUserConfigData[userHash][redirectedBotHash]:
+                if userConfigKey in dictUserConfigData[userHash][redirectedBotHash][userConfigNoteKey]:
+                    userConfigValue = dictUserConfigData[userHash][redirectedBotHash][userConfigNoteKey][userConfigKey]
     return userConfigValue
 
 def getUserConfigByKeyWithHash(userHash, userConfigKey, botHash):
@@ -138,11 +169,14 @@ def getUserConfigByKeyWithHash(userHash, userConfigKey, botHash):
     userConfigValue = False
     if userConfigKey in dictUserConfigNoteDefault:
         userConfigValue = dictUserConfigNoteDefault[userConfigKey]
+    # 应用重定向逻辑
+    redirectedBotHash = getRedirectedBotHash(botHash, userConfigKey)
+    
     if userHash in dictUserConfigData:
-        if botHash in dictUserConfigData[userHash]:
-            if userConfigNoteKey in dictUserConfigData[userHash][botHash]:
-                if userConfigKey in dictUserConfigData[userHash][botHash][userConfigNoteKey]:
-                    userConfigValue = dictUserConfigData[userHash][botHash][userConfigNoteKey][userConfigKey]
+        if redirectedBotHash in dictUserConfigData[userHash]:
+            if userConfigNoteKey in dictUserConfigData[userHash][redirectedBotHash]:
+                if userConfigKey in dictUserConfigData[userHash][redirectedBotHash][userConfigNoteKey]:
+                    userConfigValue = dictUserConfigData[userHash][redirectedBotHash][userConfigNoteKey][userConfigKey]
     return userConfigValue
 
 def getUserDataByKeyWithHash(userHash, userDataKey, botHash):
@@ -151,10 +185,13 @@ def getUserDataByKeyWithHash(userHash, userDataKey, botHash):
     userDataValue = None
     if userDataKey in dictUserConfigDefault:
         userDataValue = dictUserConfigDefault[userDataKey]
+    # 应用重定向逻辑
+    redirectedBotHash = getRedirectedBotHash(botHash, userDataKey)
+    
     if userHash in dictUserConfigData:
-        if botHash in dictUserConfigData[userHash]:
-            if userDataKey in dictUserConfigData[userHash][botHash]:
-                userDataValue = dictUserConfigData[userHash][botHash][userDataKey]
+        if redirectedBotHash in dictUserConfigData[userHash]:
+            if userDataKey in dictUserConfigData[userHash][redirectedBotHash]:
+                userDataValue = dictUserConfigData[userHash][redirectedBotHash][userDataKey]
     return userDataValue
 
 #basic
