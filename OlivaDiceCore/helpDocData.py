@@ -33,8 +33,25 @@ dictHelpDocTemp = {
 [.help手册] 查看完整手册
 [.help链接] 查看源码文档
 [.help更新] 查看更新日志
+[.help频道] 查看频道帮助
 有问题请联系(请优先加群)
 青果核心用户群：772730969''',
+
+    '频道': '''频道(Host)相关功能
+频道是一个平台内的多个群组的集合，例如QQ频道、米游社大别野等。
+
+频道相关的管理指令：
+.master remote host [on/off] [频道ID]  远程在频道中停用/启用骰子
+.master remote host default [on/off] [频道ID]  设置频道内默认是否启用骰子
+.bot host on/off 在当前频道启用/停用骰子
+.bot host default on/off 设置当前频道默认是否启用骰子
+
+注意事项：
+1. 频道管理员可以在子频道内使用.bot on/off控制骰子
+2. 骰主可以远程控制频道内骰子状态
+3. 如果频道被设置为默认关闭，新加入的子频道会自动关闭骰子
+4. 需要在每个子频道单独开启骰子功能
+5. 频道主可以通过.master指令成为骰主''',
 
     'OlivaDiceCore': '''[OlivaDiceCore]
 OlivaDice核心模块
@@ -540,4 +557,5 @@ https://github.com/OlivOS-Team/onedice
     '欢迎词': '&welcome',
     '小队': '&team',
     '组队': '&team',
+    'host': '&频道',
 }

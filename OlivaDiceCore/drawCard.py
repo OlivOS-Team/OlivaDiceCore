@@ -66,6 +66,9 @@ def initDeckHelp(bot_info_dict):
     ]
     deck_name_tmp_list_str = '/'.join(deck_name_tmp_list)
     for bot_hash in bot_info_dict:
+        # 应用重定向逻辑（读取牌堆数据时使用重定向后的botHash）
+        redirected_bot_hash = OlivaDiceCore.userConfig.getRedirectedBotHash(bot_hash)
+        
         helpdoc_patch = {}
         flag_drawListMode = OlivaDiceCore.console.getConsoleSwitchByHash(
             'drawListMode',
@@ -74,8 +77,8 @@ def initDeckHelp(bot_info_dict):
         if flag_drawListMode == 0:
             pass
         elif flag_drawListMode == 1:
-            if bot_hash in OlivaDiceCore.drawCardData.dictDeck and type(OlivaDiceCore.drawCardData.dictDeck[bot_hash]) == dict:
-                deck_name_list = list(OlivaDiceCore.drawCardData.dictDeck[bot_hash].keys())
+            if redirected_bot_hash in OlivaDiceCore.drawCardData.dictDeck and type(OlivaDiceCore.drawCardData.dictDeck[redirected_bot_hash]) == dict:
+                deck_name_list = list(OlivaDiceCore.drawCardData.dictDeck[redirected_bot_hash].keys())
                 deck_name_list = [
                     deck_name_list_this
                     for deck_name_list_this in deck_name_list
@@ -92,19 +95,19 @@ def initDeckHelp(bot_info_dict):
                     '扩展牌堆': '/'.join(deck_name_extend_list)
                 }
         elif flag_drawListMode == 2:
-            if bot_hash in OlivaDiceCore.drawCardData.dictDeckIndex and type(OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash]) == dict:
+            if redirected_bot_hash in OlivaDiceCore.drawCardData.dictDeckIndex and type(OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash]) == dict:
                 deck_name_tmp_list_index = {'内置牌堆': '内置牌堆:\n%s' % deck_name_tmp_list_str}
                 deck_name_list_index = {
                     '扩展牌堆 %s' % deck_name_list_this: '%s:\n%s' % (
                         deck_name_list_this,
                         '/'.join([
                             deck_name_list_this_this
-                            for deck_name_list_this_this in OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash][deck_name_list_this]
+                            for deck_name_list_this_this in OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash][deck_name_list_this]
                             if type(deck_name_list_this_this) == str and not deck_name_list_this_this.startswith('_')
                         ])
                     )
-                    for deck_name_list_this in OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash]
-                    if type(deck_name_list_this) == str and type(OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash][deck_name_list_this]) == list
+                    for deck_name_list_this in OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash]
+                    if type(deck_name_list_this) == str and type(OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash][deck_name_list_this]) == list
                 }
                 deck_name_tmp_list_index_check = [
                     deck_name_tmp_list_index_key
@@ -113,8 +116,8 @@ def initDeckHelp(bot_info_dict):
                 ]
                 deck_name_list_index_check = [
                     deck_name_list_this
-                    for deck_name_list_this in OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash]
-                    if type(deck_name_list_this) == str and type(OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash][deck_name_list_this]) == list
+                    for deck_name_list_this in OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash]
+                    if type(deck_name_list_this) == str and type(OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash][deck_name_list_this]) == list
                 ]
                 helpdoc_patch.update(deck_name_tmp_list_index)
                 helpdoc_patch.update(deck_name_list_index)
@@ -123,19 +126,19 @@ def initDeckHelp(bot_info_dict):
                     '扩展牌堆': '/'.join(deck_name_list_index_check)
                 })
         elif flag_drawListMode == 3:
-            if bot_hash in OlivaDiceCore.drawCardData.dictDeckIndex and type(OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash]) == dict:
+            if redirected_bot_hash in OlivaDiceCore.drawCardData.dictDeckIndex and type(OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash]) == dict:
                 deck_name_tmp_list_index = ['内置牌堆:\n%s' % deck_name_tmp_list_str]
                 deck_name_list_index = [
                     '%s:\n%s' % (
                         deck_name_list_this,
                         '/'.join([
                             deck_name_list_this_this
-                            for deck_name_list_this_this in OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash][deck_name_list_this]
+                            for deck_name_list_this_this in OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash][deck_name_list_this]
                             if type(deck_name_list_this_this) == str and not deck_name_list_this_this.startswith('_')
                         ])
                     )
-                    for deck_name_list_this in OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash]
-                    if type(OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash][deck_name_list_this]) == list
+                    for deck_name_list_this in OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash]
+                    if type(OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash][deck_name_list_this]) == list
                 ]
                 helpdoc_patch = {
                     '全牌堆列表': '\n'.join(deck_name_tmp_list_index + deck_name_list_index),
@@ -147,17 +150,20 @@ def initDeckHelp(bot_info_dict):
 
 def setDeckIndex(bot_hash:str, deck_name:str, deck_data:dict):
     if type(bot_hash) == str and type(deck_name) == str and type(deck_data) == dict:
-        if bot_hash not in OlivaDiceCore.drawCardData.dictDeckIndex:
-            OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash] = {}
-        if deck_name not in OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash]:
-            OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash][deck_name] = []
+        # 应用重定向逻辑
+        redirected_bot_hash = OlivaDiceCore.userConfig.getRedirectedBotHash(bot_hash)
+        
+        if redirected_bot_hash not in OlivaDiceCore.drawCardData.dictDeckIndex:
+            OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash] = {}
+        if deck_name not in OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash]:
+            OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash][deck_name] = []
         deck_data_list = list(deck_data.keys())
         deck_data_list = [
             deck_data_list_this
             for deck_data_list_this in deck_data_list
             if type(deck_data_list_this) == str and not deck_data_list_this.startswith('_')
         ]
-        OlivaDiceCore.drawCardData.dictDeckIndex[bot_hash][deck_name] = deck_data_list
+        OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash][deck_name] = deck_data_list
 
 # 清空牌堆数据
 def cleanDeck():
@@ -565,10 +571,14 @@ def getDrawDeck(key_str, bot_hash, count = 1, valDict = None):
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
     dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustom
     tmp_reply_str = None
+    
+    # 应用重定向逻辑（仅用于牌堆数据，自定义回复不重定向）
+    redirected_bot_hash = OlivaDiceCore.userConfig.getRedirectedBotHash(bot_hash)
+    
     if bot_hash in OlivaDiceCore.msgCustom.dictStrCustomDict:
         dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[bot_hash]
-    if bot_hash in OlivaDiceCore.drawCardData.dictDeck:
-        if key_str in OlivaDiceCore.drawCardData.dictDeck[bot_hash]:
+    if redirected_bot_hash in OlivaDiceCore.drawCardData.dictDeck:
+        if key_str in OlivaDiceCore.drawCardData.dictDeck[redirected_bot_hash]:
             if count >= 1 and count <= 10:
                 tmp_for_list = range(count)
                 tmp_card_list = []
@@ -605,8 +615,12 @@ def getDrawDeck(key_str, bot_hash, count = 1, valDict = None):
 def getDeckRecommend(key_str:str, bot_hash:str):
     res = []
     tmp_RecommendRank_list = []
-    if bot_hash in OlivaDiceCore.drawCardData.dictDeck:
-        for dictDeck_this in OlivaDiceCore.drawCardData.dictDeck[bot_hash]:
+    
+    # 应用重定向逻辑
+    redirected_bot_hash = OlivaDiceCore.userConfig.getRedirectedBotHash(bot_hash)
+    
+    if redirected_bot_hash in OlivaDiceCore.drawCardData.dictDeck:
+        for dictDeck_this in OlivaDiceCore.drawCardData.dictDeck[redirected_bot_hash]:
             tmp_RecommendRank_list.append([
                 OlivaDiceCore.helpDoc.getRecommendRank(
                     key_str,
@@ -630,17 +644,21 @@ def draw(key_str:str, bot_hash:str, flag_need_give_back:bool = True, mark_dict:'
     tmp_deck_this = []
     tmp_deck_this_len = 1
     tmp_deck_this_hit = 0
-    if bot_hash in OlivaDiceCore.drawCardData.dictDeck:
-        if key_str in OlivaDiceCore.drawCardData.dictDeck[bot_hash]:
+    
+    # 应用重定向逻辑
+    redirected_bot_hash = OlivaDiceCore.userConfig.getRedirectedBotHash(bot_hash)
+    
+    if redirected_bot_hash in OlivaDiceCore.drawCardData.dictDeck:
+        if key_str in OlivaDiceCore.drawCardData.dictDeck[redirected_bot_hash]:
             if mark_dict == None:
                 tmp_mark_dict = {}
             else:
                 tmp_mark_dict = mark_dict
             if key_str in tmp_mark_dict:
                 if len(tmp_mark_dict[key_str]) <= 0:
-                    tmp_mark_dict[key_str] = initCloneDeckList(OlivaDiceCore.drawCardData.dictDeck[bot_hash][key_str])
+                    tmp_mark_dict[key_str] = initCloneDeckList(OlivaDiceCore.drawCardData.dictDeck[redirected_bot_hash][key_str])
             else:
-                tmp_mark_dict[key_str] = initCloneDeckList(OlivaDiceCore.drawCardData.dictDeck[bot_hash][key_str])
+                tmp_mark_dict[key_str] = initCloneDeckList(OlivaDiceCore.drawCardData.dictDeck[redirected_bot_hash][key_str])
             tmp_deck_this = tmp_mark_dict[key_str]
             if type(tmp_deck_this) == list:
                 tmp_deck_this_len = len(tmp_deck_this)

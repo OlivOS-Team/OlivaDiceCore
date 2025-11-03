@@ -48,6 +48,10 @@ def unity_init(plugin_event, Proc):
     OlivaDiceCore.console.initBackupConfig()
     OlivaDiceCore.console.readBackupConfig()
     OlivaDiceCore.console.saveBackupConfig()
+    # 初始化主从关系配置
+    OlivaDiceCore.console.initAccountRelationConfig()
+    OlivaDiceCore.console.readAccountRelationConfig()
+    OlivaDiceCore.console.saveAccountRelationConfig()
     OlivaDiceCore.onediceOverride.initOnedice()
     OlivaDiceCore.msgCustomManager.initMsgCustom(Proc.Proc_data['bot_info_dict'])
     OlivaDiceCore.msgCustomManager.saveMsgCustom(Proc.Proc_data['bot_info_dict'])
@@ -5844,6 +5848,21 @@ def unity_reply(plugin_event, Proc):
                         tmp_pcCardRule = 'WW'
                     elif flag_roll_mode in ['dx', 'dxx']:
                         tmp_pcCardRule = 'DX3'
+                        
+                    # 处理表达式中的优势/劣势
+                    def replace_advantage(match):
+                        full_match = match.group(0)
+                        dice_num = match.group(1) or "1"
+                        dice_type = match.group(2)
+                        is_advantage = "优势" in full_match
+                        # 如果是1dX或dX格式，转换为2dXk[h/l]
+                        if dice_num == "1":
+                            return f"2D{dice_type}k{'h' if is_advantage else 'l'}"
+                        # 如果是2dX及以上，直接加k[h/l]
+                        return f"{dice_num}D{dice_type}k{'h' if is_advantage else 'l'}"
+                    pattern = r'(?:^|[+\-*/])(?:\s*)(\d+)?[dD](\d+)(?:\s+)?(?:优势|劣势)'
+                    tmp_reast_str_old = re.sub(pattern, replace_advantage, tmp_reast_str_old)
+
                     [tmp_rd_para_str, tmp_reast_str] = getExpression(
                         tmp_reast_str_old,
                         valueTable = skill_valueTable,
