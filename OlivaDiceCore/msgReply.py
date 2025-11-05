@@ -964,24 +964,27 @@ def unity_reply(plugin_event, Proc):
                     replyMsgLazyHelpByEvent(plugin_event, 'system')
                 return
             elif isMatchWordStart(tmp_reast_str, 'str'):
-                tmp_reast_str = tmp_reast_str.strip(' ')
-                tmp_reast_list = tmp_reast_str.split(' ')
-                if len(tmp_reast_list) == 1 and len(tmp_reast_list[0]) > 0:
-                    if plugin_event.bot_info.hash in OlivaDiceCore.msgCustom.dictStrCustomDict:
-                        if tmp_reast_list[0] in OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]:
-                            tmp_reply_str = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash][tmp_reast_list[0]]
-                            replyMsg(plugin_event, tmp_reply_str)
-                elif len(tmp_reast_list) >= 2:
-                    tmp_new_str = ' '.join(tmp_reast_list[1:])
-                    OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[plugin_event.bot_info.hash][tmp_reast_list[0]] = tmp_new_str
-                    OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash][tmp_reast_list[0]] = tmp_new_str
-                    OlivaDiceCore.msgCustomManager.saveMsgCustomByBotHash(plugin_event.bot_info.hash)
-                    dictTValue['tStrName'] = tmp_reast_list[0]
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSetStr'], dictTValue)
-                    replyMsg(plugin_event, tmp_reply_str)
+                if isMatchWordStart(tmp_reast_str, 'strm'):
+                    pass
                 else:
-                    replyMsgLazyHelpByEvent(plugin_event, 'str')
-                return
+                    tmp_reast_str = tmp_reast_str.strip(' ')
+                    tmp_reast_list = tmp_reast_str.split(' ')
+                    if len(tmp_reast_list) == 1 and len(tmp_reast_list[0]) > 0:
+                        if plugin_event.bot_info.hash in OlivaDiceCore.msgCustom.dictStrCustomDict:
+                            if tmp_reast_list[0] in OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]:
+                                tmp_reply_str = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash][tmp_reast_list[0]]
+                                replyMsg(plugin_event, tmp_reply_str)
+                    elif len(tmp_reast_list) >= 2:
+                        tmp_new_str = ' '.join(tmp_reast_list[1:])
+                        OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[plugin_event.bot_info.hash][tmp_reast_list[0]] = tmp_new_str
+                        OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash][tmp_reast_list[0]] = tmp_new_str
+                        OlivaDiceCore.msgCustomManager.saveMsgCustomByBotHash(plugin_event.bot_info.hash)
+                        dictTValue['tStrName'] = tmp_reast_list[0]
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSetStr'], dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
+                    else:
+                        replyMsgLazyHelpByEvent(plugin_event, 'str')
+                    return
             elif isMatchWordStart(tmp_reast_str, 'helpdoc'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'helpdoc')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)

@@ -107,7 +107,6 @@ def getRedirectedBotHash(botHash, dataKey=None):
     masterBotHash = OlivaDiceCore.console.getMasterBotHash(botHash)
     if masterBotHash:
         return masterBotHash
-    
     return botHash
 
 def setUserConfigByKey(userId, userType, platform, userConfigKey, userConfigValue, botHash):
@@ -119,7 +118,6 @@ def setUserConfigByKey(userId, userType, platform, userConfigKey, userConfigValu
         return
     # 应用重定向逻辑
     redirectedBotHash = getRedirectedBotHash(botHash, userConfigKey)
-    
     userHash = getUserHash(
         userId = userId,
         userType = userType,
@@ -149,7 +147,6 @@ def getUserConfigByKey(userId, userType, platform, userConfigKey, botHash, defau
         userConfigValue = dictUserConfigNoteDefault[userConfigKey]
     # 应用重定向逻辑
     redirectedBotHash = getRedirectedBotHash(botHash, userConfigKey)
-    
     userHash = getUserHash(
         userId = userId,
         userType = userType,
@@ -171,7 +168,6 @@ def getUserConfigByKeyWithHash(userHash, userConfigKey, botHash):
         userConfigValue = dictUserConfigNoteDefault[userConfigKey]
     # 应用重定向逻辑
     redirectedBotHash = getRedirectedBotHash(botHash, userConfigKey)
-    
     if userHash in dictUserConfigData:
         if redirectedBotHash in dictUserConfigData[userHash]:
             if userConfigNoteKey in dictUserConfigData[userHash][redirectedBotHash]:
@@ -187,7 +183,6 @@ def getUserDataByKeyWithHash(userHash, userDataKey, botHash):
         userDataValue = dictUserConfigDefault[userDataKey]
     # 应用重定向逻辑
     redirectedBotHash = getRedirectedBotHash(botHash, userDataKey)
-    
     if userHash in dictUserConfigData:
         if redirectedBotHash in dictUserConfigData[userHash]:
             if userDataKey in dictUserConfigData[userHash][redirectedBotHash]:
