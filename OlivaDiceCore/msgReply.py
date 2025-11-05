@@ -2661,6 +2661,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_dict_pc_card = OlivaDiceCore.pcCard.pcCardDataGetUserAll(
                     tmp_pcHash
                 )
+                tmp_reply_str_1 = ''
                 flag_begin = True
                 for tmp_dict_pc_card_this in tmp_dict_pc_card:
                     if flag_begin:
@@ -2693,7 +2694,26 @@ def unity_reply(plugin_event, Proc):
                 if not tmp_reply_str_1:
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcListNone'], dictTValue)
                 else:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcList'], dictTValue)
+                    # 检查本群是否锁定了人物卡
+                    tmp_is_locked = False
+                    tmp_global_pc_name = None
+                    if flag_is_from_group:
+                        tmp_locked_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKeyLock(
+                            tmp_pcHash,
+                            tmp_hagID
+                        )
+                        if tmp_locked_pc_name != None:
+                            # 本群已锁定，获取全局使用的人物卡
+                            tmp_is_locked = True
+                            tmp_global_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
+                                tmp_pcHash,
+                                None
+                            )
+                            dictTValue['tGlobalPcSelection'] = tmp_global_pc_name
+                    if tmp_is_locked:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcListLocked'], dictTValue)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcList'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'lock', fullMatch = True):
