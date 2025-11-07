@@ -749,23 +749,17 @@ def setPcTemplateByGroupRule(plugin_event, tmp_pc_id = None, tmp_pc_name = None,
     """
     if not set_flag:
         return
-    
     # 获取当前群规的模板
     group_template, group_rule = getGroupTemplateRule(plugin_event)
     if not group_template:
         return
-    
-    # 获取当前用户和群组信息
     if not tmp_pc_id:
         tmp_pc_id = plugin_event.data.user_id
     tmp_pc_platform = plugin_event.platform['platform']
     tmp_hagID = getHagIDFromMsg(plugin_event, OlivaDiceCore.data.global_Proc)
-    
-    # 获取人物卡哈希和当前选择的人物卡名
     tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
     if not tmp_pc_name:
         tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
-    
     if tmp_pc_name:
         # 设置人物卡模板
         OlivaDiceCore.pcCard.pcCardDataSetTemplateKey(
@@ -782,21 +776,24 @@ def isNewPcCard(plugin_event, tmp_pc_id = None, external_flag = None):
     # 如果外部传入了标志，直接返回外部值
     if external_flag is not None:
         return external_flag
-    
     # 获取当前用户和群组信息
     if not tmp_pc_id:
         tmp_pc_id = plugin_event.data.user_id
     tmp_pc_platform = plugin_event.platform['platform']
     tmp_hagID = getHagIDFromMsg(plugin_event, OlivaDiceCore.data.global_Proc)
-    
-    # 获取人物卡哈希和当前选择的人物卡数据
     tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
-    pc_skills = OlivaDiceCore.pcCard.pcCardDataGetByPcName(tmp_pcHash, hagId=tmp_hagID)
-    
+    # 直接访问原始数据，避免自动填充模板默认值
+    tmp_pc_card_name_key = pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
+    # 如果没有选中的卡片，认为是新卡
+    if tmp_pc_card_name_key == None:
+        return True
+    pc_skills = {}
+    if tmp_pcHash in dictPcCardData['unity']:
+        if tmp_pc_card_name_key in dictPcCardData['unity'][tmp_pcHash]:
+            pc_skills = dictPcCardData['unity'][tmp_pcHash][tmp_pc_card_name_key].copy()
     # 过滤掉系统字段，检查是否为空
     valid_skills = {k: v for k, v in pc_skills.items() 
                    if not k.startswith('__') and k != 'template'}
-    
     # 如果没有任何有效技能，则为新卡
     return len(valid_skills) == 0
 

@@ -2392,7 +2392,7 @@ class RD(object):
                     if tmp_main_val_right[0] <= 1 or tmp_main_val_right[0] >= 1000:
                         self.resError = self.resErrorType.NODE_RIGHT_VAL_INVALID
                         return resNoneTemplate
-                    if tmp_main_val_left[0] <= 0 or tmp_main_val_left[0] >= 1000:
+                    if tmp_main_val_left[0] <= 0 or tmp_main_val_left[0] >= 10000:
                         self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
                         return resNoneTemplate
                     if tmp_node_this.vals['m'] != None and (tmp_node_this.vals['m'] <= 0 or tmp_node_this.vals['m'] >= 1000):
@@ -2546,7 +2546,7 @@ class RD(object):
                     if tmp_main_val_right[0] <= 1 or tmp_main_val_right[0] >= 1000:
                         self.resError = self.resErrorType.NODE_RIGHT_VAL_INVALID
                         return resNoneTemplate
-                    if tmp_main_val_left[0] <= 0 or tmp_main_val_left[0] >= 1000:
+                    if tmp_main_val_left[0] <= 0 or tmp_main_val_left[0] >= 10000:
                         self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
                         return resNoneTemplate
                     if tmp_node_this.vals['m'] <= 0 or tmp_node_this.vals['m'] >= 1000:

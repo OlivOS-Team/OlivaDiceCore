@@ -964,24 +964,27 @@ def unity_reply(plugin_event, Proc):
                     replyMsgLazyHelpByEvent(plugin_event, 'system')
                 return
             elif isMatchWordStart(tmp_reast_str, 'str'):
-                tmp_reast_str = tmp_reast_str.strip(' ')
-                tmp_reast_list = tmp_reast_str.split(' ')
-                if len(tmp_reast_list) == 1 and len(tmp_reast_list[0]) > 0:
-                    if plugin_event.bot_info.hash in OlivaDiceCore.msgCustom.dictStrCustomDict:
-                        if tmp_reast_list[0] in OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]:
-                            tmp_reply_str = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash][tmp_reast_list[0]]
-                            replyMsg(plugin_event, tmp_reply_str)
-                elif len(tmp_reast_list) >= 2:
-                    tmp_new_str = ' '.join(tmp_reast_list[1:])
-                    OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[plugin_event.bot_info.hash][tmp_reast_list[0]] = tmp_new_str
-                    OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash][tmp_reast_list[0]] = tmp_new_str
-                    OlivaDiceCore.msgCustomManager.saveMsgCustomByBotHash(plugin_event.bot_info.hash)
-                    dictTValue['tStrName'] = tmp_reast_list[0]
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSetStr'], dictTValue)
-                    replyMsg(plugin_event, tmp_reply_str)
+                if isMatchWordStart(tmp_reast_str, 'strm'):
+                    pass
                 else:
-                    replyMsgLazyHelpByEvent(plugin_event, 'str')
-                return
+                    tmp_reast_str = tmp_reast_str.strip(' ')
+                    tmp_reast_list = tmp_reast_str.split(' ')
+                    if len(tmp_reast_list) == 1 and len(tmp_reast_list[0]) > 0:
+                        if plugin_event.bot_info.hash in OlivaDiceCore.msgCustom.dictStrCustomDict:
+                            if tmp_reast_list[0] in OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]:
+                                tmp_reply_str = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash][tmp_reast_list[0]]
+                                replyMsg(plugin_event, tmp_reply_str)
+                    elif len(tmp_reast_list) >= 2:
+                        tmp_new_str = ' '.join(tmp_reast_list[1:])
+                        OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[plugin_event.bot_info.hash][tmp_reast_list[0]] = tmp_new_str
+                        OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash][tmp_reast_list[0]] = tmp_new_str
+                        OlivaDiceCore.msgCustomManager.saveMsgCustomByBotHash(plugin_event.bot_info.hash)
+                        dictTValue['tStrName'] = tmp_reast_list[0]
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSetStr'], dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
+                    else:
+                        replyMsgLazyHelpByEvent(plugin_event, 'str')
+                    return
             elif isMatchWordStart(tmp_reast_str, 'helpdoc'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'helpdoc')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -2500,20 +2503,14 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str_1 = '\n'.join(tmp_reply_str_1_list)
                 dictTValue['tPcShow'] = tmp_reply_str_1
                 # 根据defaultshow状态设置不同的说明文字
-                if not tmp_reply_str_1:
-                    if is_at:
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowNoneAtOther'], dictTValue)
-                    else:
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowNone'], dictTValue)
+                if show_default_enabled:
+                    dictTValue['tDefaultShow'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDefaultShowOn'], dictTValue)
                 else:
-                    if show_default_enabled:
-                        dictTValue['tDefaultShow'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDefaultShowOn'], dictTValue)
-                    else:
-                        dictTValue['tDefaultShow'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDefaultShowOff'], dictTValue)
-                    if is_at:
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowAtOther'], dictTValue)
-                    else:
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShow'], dictTValue)
+                    dictTValue['tDefaultShow'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDefaultShowOff'], dictTValue)
+                if is_at:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShowAtOther'], dictTValue)
+                else:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcShow'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'show'):
@@ -2658,6 +2655,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_dict_pc_card = OlivaDiceCore.pcCard.pcCardDataGetUserAll(
                     tmp_pcHash
                 )
+                tmp_reply_str_1 = ''
                 flag_begin = True
                 for tmp_dict_pc_card_this in tmp_dict_pc_card:
                     if flag_begin:
@@ -2690,7 +2688,26 @@ def unity_reply(plugin_event, Proc):
                 if not tmp_reply_str_1:
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcListNone'], dictTValue)
                 else:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcList'], dictTValue)
+                    # 检查本群是否锁定了人物卡
+                    tmp_is_locked = False
+                    tmp_global_pc_name = None
+                    if flag_is_from_group:
+                        tmp_locked_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKeyLock(
+                            tmp_pcHash,
+                            tmp_hagID
+                        )
+                        if tmp_locked_pc_name != None:
+                            # 本群已锁定，获取全局使用的人物卡
+                            tmp_is_locked = True
+                            tmp_global_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
+                                tmp_pcHash,
+                                None
+                            )
+                            dictTValue['tGlobalPcSelection'] = tmp_global_pc_name
+                    if tmp_is_locked:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcListLocked'], dictTValue)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcList'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
                 return
             elif isMatchWordStart(tmp_reast_str, 'lock', fullMatch = True):
@@ -2945,6 +2962,7 @@ def unity_reply(plugin_event, Proc):
                         # 只有当新建的人物卡是空卡时才应用群规则模板
                         is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
                         if is_new_card:
+                            print('确认是新卡，看看有没有进入这里')
                             OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event)
                         dictTValue['tPcSelection'] = tmp_pc_name
                         if is_at:
