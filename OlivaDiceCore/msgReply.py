@@ -2072,7 +2072,6 @@ def unity_reply(plugin_event, Proc):
                 replyMsgLazyHelpByEvent(plugin_event, 'nn')
             return
         elif isMatchWordStart(tmp_reast_str_original, 'mh', isCommand = True):
-            # .mh 神话淬炼命令
             tmp_reast_str_original = getMatchWordStartRight(tmp_reast_str_original, 'mh')
             tmp_reast_str_original = skipSpaceStart(tmp_reast_str_original)
             tmp_pc_id = plugin_event.data.user_id
