@@ -22,6 +22,7 @@ import time
 import uuid
 import re
 import copy
+import math
 
 def logProc(Proc, level, message, segment):
     Proc.log(
@@ -2070,6 +2071,128 @@ def unity_reply(plugin_event, Proc):
             else:
                 replyMsgLazyHelpByEvent(plugin_event, 'nn')
             return
+        elif isMatchWordStart(tmp_reast_str_original, 'mh', isCommand = True):
+            # .mh 神话淬炼命令
+            tmp_reast_str_original = getMatchWordStartRight(tmp_reast_str_original, 'mh')
+            tmp_reast_str_original = skipSpaceStart(tmp_reast_str_original)
+            tmp_pc_id = plugin_event.data.user_id
+            tmp_pc_platform = plugin_event.platform['platform']
+            pc_hash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+            
+            if not tmp_reast_str_original:
+                current_state = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = plugin_event.platform['platform'],
+                    userConfigKey = 'mythicHardeningEnable',
+                    botHash = plugin_event.bot_info.hash
+                )
+                new_state = not current_state
+                OlivaDiceCore.userConfig.setUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = plugin_event.platform['platform'],
+                    userConfigKey = 'mythicHardeningEnable',
+                    userConfigValue = new_state,
+                    botHash = plugin_event.bot_info.hash
+                )
+                if new_state:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHOn'], dictTValue)
+                else:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHOff'], dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
+            elif isMatchWordStart(tmp_reast_str_original, 'on'):
+                current_state = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = plugin_event.platform['platform'],
+                    userConfigKey = 'mythicHardeningEnable',
+                    botHash = plugin_event.bot_info.hash
+                )
+                if current_state:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHAlreadyOn'], dictTValue)
+                else:
+                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                        userId = tmp_hagID,
+                        userType = 'group',
+                        platform = plugin_event.platform['platform'],
+                        userConfigKey = 'mythicHardeningEnable',
+                        userConfigValue = True,
+                        botHash = plugin_event.bot_info.hash
+                    )
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHOn'], dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
+            elif isMatchWordStart(tmp_reast_str_original, 'off'):
+                current_state = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = plugin_event.platform['platform'],
+                    userConfigKey = 'mythicHardeningEnable',
+                    botHash = plugin_event.bot_info.hash
+                )
+                if not current_state:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHAlreadyOff'], dictTValue)
+                else:
+                    OlivaDiceCore.userConfig.setUserConfigByKey(
+                        userId = tmp_hagID,
+                        userType = 'group',
+                        platform = plugin_event.platform['platform'],
+                        userConfigKey = 'mythicHardeningEnable',
+                        userConfigValue = False,
+                        botHash = plugin_event.bot_info.hash
+                    )
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHOff'], dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
+            elif isMatchWordStart(tmp_reast_str_original, 'list'):
+                mh_cards = OlivaDiceCore.pcCard.getAllMythicHardeningCards(pc_hash)
+                if len(mh_cards) == 0:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHListEmpty'], dictTValue)
+                else:
+                    card_list = [OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHListTitle'], dictTValue)]
+                    for i, card in enumerate(mh_cards, 1):
+                        dictTValue['tIndex'] = str(i)
+                        dictTValue['tPcName'] = card['name']
+                        card_list.append(OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHListItem'], dictTValue))
+                    tmp_reply_str = "\n".join(card_list)
+                replyMsg(plugin_event, tmp_reply_str)
+            elif isMatchWordStart(tmp_reast_str_original, 'add'):
+                tmp_reast_str_original = getMatchWordStartRight(tmp_reast_str_original, 'add')
+                tmp_reast_str_original = skipSpaceStart(tmp_reast_str_original)
+                pc_name = tmp_reast_str_original
+                if pc_name:
+                    pc_name = OlivaDiceCore.pcCard.fixName(pc_name)
+                    if OlivaDiceCore.pcCard.checkPcName(pc_name):
+                        OlivaDiceCore.pcCard.setMythicHardeningStatus(pc_hash, pc_name, True)
+                        dictTValue['tPcName'] = pc_name
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHAdd'], dictTValue)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHAddInvalid'], dictTValue)
+                else:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHNeedName'], dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
+            elif isMatchWordStart(tmp_reast_str_original, 'del'):
+                tmp_reast_str_original = getMatchWordStartRight(tmp_reast_str_original, 'del')
+                tmp_reast_str_original = skipSpaceStart(tmp_reast_str_original)
+                pc_name = tmp_reast_str_original
+                if pc_name:
+                    pc_name = OlivaDiceCore.pcCard.fixName(pc_name)
+                    dictTValue['tPcName'] = pc_name
+                    if OlivaDiceCore.pcCard.delMythicHardeningStatus(pc_hash, pc_name):
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHDel'], dictTValue)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHDelNotFound'], dictTValue)
+                else:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHNeedName'], dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
+            elif isMatchWordStart(tmp_reast_str_original, 'clear'):
+                if OlivaDiceCore.pcCard.clearMythicHardeningStatus(pc_hash):
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHClear'], dictTValue)
+                else:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHClearEmpty'], dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
+            else:
+                replyMsgLazyHelpByEvent(plugin_event, 'mh')
+            return
         elif isMatchWordStart(tmp_reast_str, 'sn', isCommand = True):
             is_at, at_user_id, tmp_reast_str = parse_at_user(plugin_event, tmp_reast_str, valDict, flag_is_from_group_admin)
             if is_at and not at_user_id:
@@ -2657,7 +2780,7 @@ def unity_reply(plugin_event, Proc):
                 )
                 tmp_reply_str_1 = ''
                 flag_begin = True
-                for tmp_dict_pc_card_this in tmp_dict_pc_card:
+                for i, tmp_dict_pc_card_this in enumerate(tmp_dict_pc_card, 1):
                     if flag_begin:
                         flag_begin = False
                     else:
@@ -2676,8 +2799,9 @@ def unity_reply(plugin_event, Proc):
                         tmp_template_name = 'default'
                     if tmp_rule_name is None:
                         tmp_rule_name = 'default'
-                    # 格式化显示：人物卡名 [template/rule]
-                    tmp_reply_str_1 += '%s [%s/%s]' % (
+                    # 格式化显示：序号. 人物卡名 [template/rule]
+                    tmp_reply_str_1 += '%d. %s [%s/%s]' % (
+                        i,
                         tmp_dict_pc_card_this,
                         tmp_template_name,
                         tmp_rule_name
@@ -4621,18 +4745,39 @@ def unity_reply(plugin_event, Proc):
                     rd_para_2 = OlivaDiceCore.onedice.RD(tmp_sancheck_para_final)
                     rd_para_2.roll()
                     if rd_para_2.resError == None:
+                        # 计算原始损失
+                        original_loss = 0
                         if flag_GreatFailed:
                             if rd_para_2.resIntMaxType == OlivaDiceCore.onedice.RD.resExtremeType.INT_POSITIVE_INFINITE:
                                 tmp_skill_value = 0
                                 dictTValue['tRollSubResult'] = tmp_sancheck_para_final
                                 dictTValue['tRollSubResultIntMax'] = dictStrCustom['strIntPositiveInfinite']
                             else:
-                                tmp_skill_value -= rd_para_2.resIntMax
+                                original_loss = rd_para_2.resIntMax
                                 dictTValue['tRollSubResult'] = tmp_sancheck_para_final
                                 dictTValue['tRollSubResultIntMax'] = str(rd_para_2.resIntMax)
                         else:
-                            tmp_skill_value -= rd_para_2.resInt
+                            original_loss = rd_para_2.resInt
                             dictTValue['tRollSubResult'] = tmp_sancheck_para_final + '=' + str(rd_para_2.resInt)
+                        # 检查神话淬炼状态
+                        pc_hash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+                        is_mh_enabled = OlivaDiceCore.userConfig.getUserConfigByKey(
+                            userId = tmp_hagID,
+                            userType = 'group',
+                            platform = plugin_event.platform['platform'],
+                            userConfigKey = 'mythicHardeningEnable',
+                            botHash = plugin_event.bot_info.hash
+                        )
+                        OlivaDiceCore.pcCard.checkMythicHardening(pc_hash, tmp_pc_name, tmp_hagID)
+                        is_mythic_hardened = OlivaDiceCore.pcCard.getMythicHardeningStatus(pc_hash, tmp_pc_name)
+                        actual_loss = original_loss
+                        if is_mh_enabled and is_mythic_hardened and original_loss > 0:
+                            actual_loss = math.ceil(original_loss / 2.0)
+                        # 应用损失
+                        if flag_GreatFailed and rd_para_2.resIntMaxType != OlivaDiceCore.onedice.RD.resExtremeType.INT_POSITIVE_INFINITE:
+                            tmp_skill_value -= actual_loss
+                        elif not flag_GreatFailed or rd_para_2.resIntMaxType != OlivaDiceCore.onedice.RD.resExtremeType.INT_POSITIVE_INFINITE:
+                            tmp_skill_value -= actual_loss
                         if tmp_skill_value < 0:
                             tmp_skill_value = 0
                         OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
@@ -4663,6 +4808,11 @@ def unity_reply(plugin_event, Proc):
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSanCheckGreatFailed'], dictTValue)
                             else:
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSanCheck'], dictTValue)
+                        # 添加神话淬炼提示
+                        if is_mh_enabled and is_mythic_hardened and original_loss > 0 and actual_loss != original_loss:
+                            dictTValue['tOriginalLoss'] = str(original_loss)
+                            dictTValue['tActualLoss'] = str(actual_loss)
+                            tmp_reply_str += OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHEffect'], dictTValue)
                         trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                         replyMsg(plugin_event, tmp_reply_str)
                     else:

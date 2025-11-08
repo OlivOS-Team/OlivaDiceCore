@@ -45,6 +45,10 @@ dictPcCardHiy = {
     'unity' : {}
 }
 
+dictPcCardMH = {
+    'unity' : {}
+}
+
 def releaseDir(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
@@ -109,6 +113,7 @@ def dataPcCardSave(hostKey, pcHash):
     global dictPcCardSelection
     global dictPcCardTemplate
     global dictPcCardHiy
+    global dictPcCardMH
     dataDirRoot_this = OlivaDiceCore.data.dataDirRoot
     releaseDir(dataDirRoot_this)
     if hostKey in dictPcCardData:
@@ -143,12 +148,21 @@ def dataPcCardSave(hostKey, pcHash):
             pcCardHiyPath = dataDirRoot_this + '/' + hostKey + '/pcCard/hiy/' + pcHash
             with open(pcCardHiyPath, 'w', encoding = 'utf-8') as pcCardHiyPath_f:
                 pcCardHiyPath_f.write(json.dumps(dictPcCardHiy[hostKey][pcHash], ensure_ascii = False, indent = 4))
+    if hostKey in dictPcCardMH:
+        if pcHash in dictPcCardMH[hostKey]:
+            releaseDir(dataDirRoot_this + '/' + hostKey)
+            releaseDir(dataDirRoot_this + '/' + hostKey + '/pcCard')
+            releaseDir(dataDirRoot_this + '/' + hostKey + '/pcCard/mh')
+            pcCardMHPath = dataDirRoot_this + '/' + hostKey + '/pcCard/mh/' + pcHash
+            with open(pcCardMHPath, 'w', encoding = 'utf-8') as pcCardMHPath_f:
+                pcCardMHPath_f.write(json.dumps(dictPcCardMH[hostKey][pcHash], ensure_ascii = False, indent = 4))
 
 def dataPcCardLoad(hostKey, pcHash):
     global dictPcCardData
     global dictPcCardSelection
     global dictPcCardTemplate
     global dictPcCardHiy
+    global dictPcCardMH
     dataDirRoot_this = OlivaDiceCore.data.dataDirRoot
     releaseDir(dataDirRoot_this)
     releaseDir(dataDirRoot_this + '/' + hostKey)
@@ -157,10 +171,12 @@ def dataPcCardLoad(hostKey, pcHash):
     releaseDir(dataDirRoot_this + '/' + hostKey + '/pcCard/selection')
     releaseDir(dataDirRoot_this + '/' + hostKey + '/pcCard/template')
     releaseDir(dataDirRoot_this + '/' + hostKey + '/pcCard/hiy')
+    releaseDir(dataDirRoot_this + '/' + hostKey + '/pcCard/mh')
     pcCardDataPath = dataDirRoot_this + '/' + hostKey + '/pcCard/data/' + pcHash
     pcCardSelectionPath = dataDirRoot_this + '/' + hostKey + '/pcCard/selection/' + pcHash
     pcCardTemplatePath = dataDirRoot_this + '/' + hostKey + '/pcCard/template/' + pcHash
     pcCardHiyPath = dataDirRoot_this + '/' + hostKey + '/pcCard/hiy/' + pcHash
+    pcCardMHPath = dataDirRoot_this + '/' + hostKey + '/pcCard/mh/' + pcHash
     if hostKey not in dictPcCardData:
         dictPcCardData[hostKey] = {}
     if pcHash not in dictPcCardData[hostKey]:
@@ -177,6 +193,10 @@ def dataPcCardLoad(hostKey, pcHash):
         dictPcCardHiy[hostKey] = {}
     if pcHash not in dictPcCardHiy[hostKey]:
         dictPcCardHiy[hostKey][pcHash] = {}
+    if hostKey not in dictPcCardMH:
+        dictPcCardMH[hostKey] = {}
+    if pcHash not in dictPcCardMH[hostKey]:
+        dictPcCardMH[hostKey][pcHash] = {}
     if os.path.exists(pcCardDataPath):
         with open(pcCardDataPath, 'r', encoding = 'utf-8') as pcCardDataPath_f:
             dictPcCardData[hostKey][pcHash] = jsonDataLoadSafe(pcCardDataPath_f, "人物卡", f"{hostKey}/{pcHash}")
@@ -189,6 +209,9 @@ def dataPcCardLoad(hostKey, pcHash):
     if os.path.exists(pcCardHiyPath):
         with open(pcCardHiyPath, 'r', encoding = 'utf-8') as pcCardHiyPath_f:
             dictPcCardHiy[hostKey][pcHash] = jsonDataLoadSafe(pcCardHiyPath_f, "人物卡", f"{hostKey}/{pcHash}")
+    if os.path.exists(pcCardMHPath):
+        with open(pcCardMHPath, 'r', encoding = 'utf-8') as pcCardMHPath_f:
+            dictPcCardMH[hostKey][pcHash] = jsonDataLoadSafe(pcCardMHPath_f, "人物卡", f"{hostKey}/{pcHash}")
 
 def jsonDataLoadSafe(data_f, dataType, dataName):
     tmp_userConfigData = {}
@@ -242,6 +265,7 @@ def pcCardRebase(pcHash, pcCardName, hagId = None):
     dict_pcCardNameOld = {}
     dict_pcCardTemplateOld = {}
     dict_pcCardHiyOld = {}
+    dict_pcCardMHOld = {}
     if pcHash not in dictPcCardSelection['unity']:
         dictPcCardSelection['unity'][pcHash] = {}
     pcCardNameOld = pcCardDataGetSelectionKey(pcHash, hagId)
@@ -286,6 +310,17 @@ def pcCardRebase(pcHash, pcCardName, hagId = None):
     else:
         dictPcCardHiy['unity'][pcHash] = {}
     dictPcCardHiy['unity'][pcHash][pcCardName] = dict_pcCardHiyOld
+    # 处理神话淬炼数据的重命名
+    if pcCardNameOld != None:
+        if pcHash in dictPcCardMH['unity']:
+            if pcCardNameOld in dictPcCardMH['unity'][pcHash]:
+                dict_pcCardMHOld = dictPcCardMH['unity'][pcHash][pcCardNameOld].copy()
+                dictPcCardMH['unity'][pcHash].pop(pcCardNameOld)
+        else:
+            dictPcCardMH['unity'][pcHash] = {}
+    else:
+        dictPcCardMH['unity'][pcHash] = {}
+    dictPcCardMH['unity'][pcHash][pcCardName] = dict_pcCardMHOld
     dataPcCardSave('unity', pcHash)
     return True
 
@@ -909,6 +944,96 @@ def pcCardDataGetAllHiyKeys(pcHash, pcCardName):
     return dictPcCardHiy[hostKey][pcHash][pcCardName].copy()
 
 
+# 神话淬炼相关函数
+def checkMythicHardening(pcHash, pcName, hagId = None):
+    """
+    检查人物卡是否符合神话淬炼条件（克苏鲁神话技能点数 > 理智值）
+    同时自动记录状态
+    """
+    global dictPcCardMH
+    cthulhu_myth = pcCardDataGetBySkillName(pcHash, '克苏鲁神话', hagId)
+    if cthulhu_myth is None:
+        cthulhu_myth = 0
+    san = pcCardDataGetBySkillName(pcHash, 'SAN', hagId)
+    if san is None:
+        san = 0
+    is_hardened = cthulhu_myth > san
+    if 'unity' not in dictPcCardMH:
+        dictPcCardMH['unity'] = {}
+    if pcHash not in dictPcCardMH['unity']:
+        dictPcCardMH['unity'][pcHash] = {}
+    if pcName not in dictPcCardMH['unity'][pcHash]:
+        dictPcCardMH['unity'][pcHash][pcName] = {
+            'status': False
+        }
+    dictPcCardMH['unity'][pcHash][pcName]['status'] = is_hardened
+    dataPcCardSave('unity', pcHash)
+    return is_hardened
+
+def getMythicHardeningStatus(pcHash, pcName):
+    """
+    获取人物卡的神话淬炼状态
+    """
+    global dictPcCardMH
+    
+    if 'unity' in dictPcCardMH:
+        if pcHash in dictPcCardMH['unity']:
+            if pcName in dictPcCardMH['unity'][pcHash]:
+                return dictPcCardMH['unity'][pcHash][pcName].get('status', False)
+    return False
+
+def setMythicHardeningStatus(pcHash, pcName, status):
+    """
+    手动设置人物卡的神话淬炼状态
+    """
+    global dictPcCardMH
+    if 'unity' not in dictPcCardMH:
+        dictPcCardMH['unity'] = {}
+    if pcHash not in dictPcCardMH['unity']:
+        dictPcCardMH['unity'][pcHash] = {}
+    dictPcCardMH['unity'][pcHash][pcName] = {
+        'status': status
+    }
+    dataPcCardSave('unity', pcHash)
+
+def delMythicHardeningStatus(pcHash, pcName):
+    """
+    删除人物卡的神话淬炼状态
+    """
+    global dictPcCardMH
+    if 'unity' in dictPcCardMH:
+        if pcHash in dictPcCardMH['unity']:
+            if pcName in dictPcCardMH['unity'][pcHash]:
+                dictPcCardMH['unity'][pcHash].pop(pcName)
+                dataPcCardSave('unity', pcHash)
+                return True
+    return False
+
+def clearMythicHardeningStatus(pcHash):
+    """
+    清空某个用户的所有神话淬炼状态
+    """
+    global dictPcCardMH
+    
+    if 'unity' in dictPcCardMH:
+        if pcHash in dictPcCardMH['unity']:
+            dictPcCardMH['unity'][pcHash] = {}
+            dataPcCardSave('unity', pcHash)
+            return True
+    return False
+
+def getAllMythicHardeningCards(pcHash):
+    """
+    获取某个用户所有处于神话淬炼状态的人物卡
+    """
+    global dictPcCardMH
+    result = []
+    if 'unity' in dictPcCardMH:
+        if pcHash in dictPcCardMH['unity']:
+            for pcName, data in dictPcCardMH['unity'][pcHash].items():
+                if data.get('status', False):
+                    result.append({'name': pcName})
+    return result
 
 #更通用的接口
 

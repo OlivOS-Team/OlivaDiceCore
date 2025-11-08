@@ -21,6 +21,7 @@ import time
 import hashlib
 import re
 import copy
+import math
 
 contextFeq = 0.1
 
@@ -3328,6 +3329,20 @@ def team_sc(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
         elif skill_check_type == OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_FAIL:
             if fail_rd.resError is None:
                 san_loss = fail_rd.resIntMax
+        # 保存原始损失值
+        original_san_loss = san_loss
+        # 检查神话淬炼状态
+        is_mh_enabled = OlivaDiceCore.userConfig.getUserConfigByKey(
+            userId = tmp_hagID,
+            userType = 'group',
+            platform = plugin_event.platform['platform'],
+            userConfigKey = 'mythicHardeningEnable',
+            botHash = plugin_event.bot_info.hash
+        )
+        OlivaDiceCore.pcCard.checkMythicHardening(pc_hash, pc_name, tmp_hagID)
+        is_mythic_hardened = OlivaDiceCore.pcCard.getMythicHardeningStatus(pc_hash, pc_name)
+        if is_mh_enabled and is_mythic_hardened and san_loss > 0:
+            san_loss = math.ceil(san_loss / 2.0)
         # 更新SAN值
         new_san = max(0, current_san - san_loss)
         OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
@@ -3359,6 +3374,13 @@ def team_sc(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
                 'tSanLossExpr': san_loss_expr
             }
         ) + skill_check_result
+        # 添加神话淬炼提示
+        if is_mh_enabled and is_mythic_hardened and original_san_loss > 0 and san_loss != original_san_loss:
+            mh_dict = {
+                'tOriginalLoss': str(original_san_loss),
+                'tActualLoss': str(san_loss)
+            }
+            result_str += OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHEffect'], mh_dict)
         success_level = 0
         if skill_check_type in [
             OlivaDiceCore.skillCheck.resultType.SKILLCHECK_GREAT_SUCCESS,
