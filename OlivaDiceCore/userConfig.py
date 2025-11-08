@@ -64,6 +64,7 @@ dictUserConfigNoteDefault = {
     'showDefault' : False,
     'teamConfig': {},
     'activeTeam': None,
+    'mythicHardeningEnable' : False,
 }
 
 dictUserConfigNoteMapping = {
