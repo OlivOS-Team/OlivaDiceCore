@@ -51,6 +51,7 @@ dictUserConfigNoteDefault = {
     'groupInitParaList' : None,
     'groupInitUserList' : None,
     'groupInitCurrentPlayer' : None,
+    'groupInitRound' : 1,
     'userObList' : None,
     'welcomeMsg' : None,
     'RDRecord' : None,
