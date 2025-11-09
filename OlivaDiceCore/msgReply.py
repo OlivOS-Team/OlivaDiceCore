@@ -5570,8 +5570,8 @@ def unity_reply(plugin_event, Proc):
                         else:
                             flag_need_reply = False
                             break
-                    dictTValue['tRollResult'] = ''
-                    dictTValue['tSkillCheckReasult'] = tmp_tSkillCheckReasult.strip()
+                    dictTValue['tRollResult'] = tmp_tSkillCheckReasult.strip()
+                    dictTValue['tSkillCheckReasult'] = ''
                 if flag_check_success:
                     if tmp_pc_name_1 != None and tmp_skill_name != None:
                         tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
