@@ -2147,12 +2147,11 @@ def unity_reply(plugin_event, Proc):
                 if len(mh_cards) == 0:
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHListEmpty'], dictTValue)
                 else:
-                    card_list = [OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHListTitle'], dictTValue)]
+                    card_list = []
                     for i, card in enumerate(mh_cards, 1):
-                        dictTValue['tIndex'] = str(i)
-                        dictTValue['tPcName'] = card['name']
-                        card_list.append(OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHListItem'], dictTValue))
-                    tmp_reply_str = "\n".join(card_list)
+                        card_list.append(f"{i}. {card['name']}")
+                    dictTValue['tCardList'] = "\n".join(card_list)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHList'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str_original, 'add'):
                 tmp_reast_str_original = getMatchWordStartRight(tmp_reast_str_original, 'add')
@@ -2183,7 +2182,7 @@ def unity_reply(plugin_event, Proc):
                 else:
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHNeedName'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
-            elif isMatchWordStart(tmp_reast_str_original, 'clear'):
+            elif isMatchWordStart(tmp_reast_str_original, ['clear', 'clr']):
                 if OlivaDiceCore.pcCard.clearMythicHardeningStatus(pc_hash):
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMHClear'], dictTValue)
                 else:
@@ -5013,6 +5012,15 @@ def unity_reply(plugin_event, Proc):
                     userConfigValue = current_player_index,
                     botHash = bot_hash
                 )
+                # 重置轮次为1
+                OlivaDiceCore.userConfig.setUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitRound',
+                    userConfigValue = 1,
+                    botHash = bot_hash
+                )
                 tmp_groupHash = OlivaDiceCore.userConfig.getUserHash(
                     userId = tmp_hagID,
                     userType = 'group',
@@ -5078,6 +5086,15 @@ def unity_reply(plugin_event, Proc):
                     userConfigValue = None,
                     botHash = bot_hash
                 )
+                # 重置轮次为1
+                OlivaDiceCore.userConfig.setUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitRound',
+                    userConfigValue = 1,
+                    botHash = bot_hash
+                )
                 tmp_groupHash = OlivaDiceCore.userConfig.getUserHash(
                     userId = tmp_hagID,
                     userType = 'group',
@@ -5117,6 +5134,16 @@ def unity_reply(plugin_event, Proc):
                     userConfigKey = 'groupInitCurrentPlayer',
                     botHash = bot_hash
                 )
+                # 获取当前轮次
+                tmp_currentRound = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitRound',
+                    botHash = bot_hash
+                )
+                if tmp_currentRound is None:
+                    tmp_currentRound = 1
                 # 排序先攻列表
                 tmp_groupInitList_list_sort = [
                     [tmp_groupInitList_list_this, tmp_groupInitList_list[tmp_groupInitList_list_this]]
@@ -5128,7 +5155,19 @@ def unity_reply(plugin_event, Proc):
                     tmp_currentPlayerIndex = 0
                 else:
                     # 轮换到下一个玩家
-                    tmp_currentPlayerIndex = (tmp_currentPlayerIndex + 1) % len(tmp_groupInitList_list_sort)
+                    next_player_index = (tmp_currentPlayerIndex + 1) % len(tmp_groupInitList_list_sort)
+                    # 如果回到0，表示一轮结束，轮次+1
+                    if next_player_index == 0:
+                        tmp_currentRound += 1
+                        OlivaDiceCore.userConfig.setUserConfigByKey(
+                            userId = tmp_hagID,
+                            userType = 'group',
+                            platform = tmp_pc_platform,
+                            userConfigKey = 'groupInitRound',
+                            userConfigValue = tmp_currentRound,
+                            botHash = bot_hash
+                        )
+                    tmp_currentPlayerIndex = next_player_index
                 # 更新当前玩家索引
                 OlivaDiceCore.userConfig.setUserConfigByKey(
                     userId = tmp_hagID,
@@ -5152,6 +5191,7 @@ def unity_reply(plugin_event, Proc):
                 # 准备回复消息
                 dictTValue['tSubName'] = current_player_name
                 dictTValue['tSubResult'] = str(current_player_value)
+                dictTValue['tRound'] = str(tmp_currentRound)
                 # 检查是否有用户信息可以at
                 at_str = ""
                 if current_player_name in tmp_groupInitUserList_list:
@@ -5187,6 +5227,16 @@ def unity_reply(plugin_event, Proc):
                     userConfigKey = 'groupInitCurrentPlayer',
                     botHash = bot_hash
                 )
+                # 获取当前轮次
+                tmp_currentRound = OlivaDiceCore.userConfig.getUserConfigByKey(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform,
+                    userConfigKey = 'groupInitRound',
+                    botHash = bot_hash
+                )
+                if tmp_currentRound is None:
+                    tmp_currentRound = 1
                 tmp_groupInitList_list_sort = [
                     [tmp_groupInitList_list_this, tmp_groupInitList_list[tmp_groupInitList_list_this]]
                     for tmp_groupInitList_list_this in tmp_groupInitList_list
@@ -5228,12 +5278,7 @@ def unity_reply(plugin_event, Proc):
                     tmp_groupInitList_list_final.append(node_str)
                     count += 1
                 dictTValue['tResult'] = '\n'.join(tmp_groupInitList_list_final)
-                # 显示当前回合信息
-                if tmp_currentPlayerIndex is not None and len(tmp_groupInitList_list_sort) > 0:
-                    current_player_name = tmp_groupInitList_list_sort[tmp_currentPlayerIndex][0]
-                    dictTValue['tCurrentPlayer'] = current_player_name
-                else:
-                    dictTValue['tCurrentPlayer'] = "无"
+                dictTValue['tRound'] = str(tmp_currentRound)
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitShow'], dictTValue)
                 OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
                 return
@@ -5525,8 +5570,8 @@ def unity_reply(plugin_event, Proc):
                         else:
                             flag_need_reply = False
                             break
-                    dictTValue['tRollResult'] = ''
-                    dictTValue['tSkillCheckReasult'] = tmp_tSkillCheckReasult.strip()
+                    dictTValue['tRollResult'] = tmp_tSkillCheckReasult.strip()
+                    dictTValue['tSkillCheckReasult'] = ''
                 if flag_check_success:
                     if tmp_pc_name_1 != None and tmp_skill_name != None:
                         tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(
