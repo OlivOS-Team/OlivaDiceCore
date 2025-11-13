@@ -5356,6 +5356,8 @@ def unity_reply(plugin_event, Proc):
             # 解析难度前缀（困难/极难/大成功）
             difficulty, tmp_reast_str = OlivaDiceCore.msgReplyModel.difficulty_analyze(tmp_reast_str)
             tmp_skill_value_str = None
+            # 保存表达式信息，用于多次掷骰时重新计算
+            tmp_expr_info = None
             if tmp_reast_str:
                 op_list = OlivaDiceCore.msgReplyModel.op_list_get()
                 skill_end_pos = len(tmp_reast_str)
@@ -5407,12 +5409,19 @@ def unity_reply(plugin_event, Proc):
                                 hagId=tmp_hagID
                             )
                         if base_value is not None:
+                            # 保存表达式信息供多次掷骰使用
+                            has_dice = "D" in expr_str.upper()
+                            tmp_expr_info = {
+                                'base_value': base_value,
+                                'expr_str': expr_str,
+                                'has_dice': has_dice
+                            }
                             full_expr = f"{base_value}{expr_str}"
                             rd_para = OlivaDiceCore.onedice.RD(full_expr)
                             rd_para.roll()
                             if rd_para.resError is None:
                                 tmp_skill_value = rd_para.resInt
-                                if "D" in full_expr.upper():
+                                if has_dice:
                                     tmp_skill_value_str = (
                                         f"{full_expr}={rd_para.resDetail}={tmp_skill_value}"
                                     )
@@ -5505,9 +5514,16 @@ def unity_reply(plugin_event, Proc):
                             tmp_TemplateRuleName,
                             difficulty_prefix=difficulty
                         )
-                        dictTValue['tSkillValue'] = tmp_skill_value_str if not difficulty else f'{tmpSkillThreshold}({tmp_skill_value_str})'
+                        # 单次掷骰时，如果有表达式，只显示最终结果
+                        if tmp_expr_info is not None:
+                            dictTValue['tSkillValue'] = f"{tmp_expr_info['base_value']}{tmp_expr_info['expr_str']}={tmp_skill_value}"
+                        else:
+                            dictTValue['tSkillValue'] = tmp_skill_value_str if not difficulty else f'{tmpSkillThreshold}({tmp_skill_value_str})'
                         if tmpSkillThreshold == None:
-                            dictTValue['tSkillValue'] = tmp_skill_value_str
+                            if tmp_expr_info is not None:
+                                dictTValue['tSkillValue'] = f"{tmp_expr_info['base_value']}{tmp_expr_info['expr_str']}={tmp_skill_value}"
+                            else:
+                                dictTValue['tSkillValue'] = tmp_skill_value_str
                             tmpSkillThreshold = tmp_skill_value
                         dictTValue['tRollResult'] = '%s/%s' % (dictTValue['tRollResult'], tmpSkillThreshold)
                         dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgReplyModel.get_SkillCheckResult(
@@ -5528,17 +5544,33 @@ def unity_reply(plugin_event, Proc):
                 else:
                     flag_begin = True
                     tmp_tSkillCheckReasult = ''
+                    # 多次掷骰时，tSkillValue只显示基础值+表达式（不显示详细计算）
+                    if tmp_expr_info is not None:
+                        dictTValue['tSkillValue'] = f"{tmp_expr_info['base_value']}{tmp_expr_info['expr_str']}"
+                    else:
+                        dictTValue['tSkillValue'] = tmp_skill_value_str
+                    
                     for i in range(roll_times_count):
+                        # 如果有表达式信息，每次重新计算技能值
+                        current_skill_value = tmp_skill_value
+                        if tmp_expr_info is not None:
+                            full_expr = f"{tmp_expr_info['base_value']}{tmp_expr_info['expr_str']}"
+                            rd_para_expr = OlivaDiceCore.onedice.RD(full_expr)
+                            rd_para_expr.roll()
+                            if rd_para_expr.resError is None:
+                                current_skill_value = rd_para_expr.resInt
                         rd_para = OlivaDiceCore.onedice.RD(rd_para_str)
                         rd_para.roll()
                         if rd_para.resError == None:
+                            # 构建掷骰结果显示
                             if flag_bp_type == 0:
                                 tmp_tSkillCheckReasult += '%s=%d' % (rd_para_str, rd_para.resInt)
                             else:
                                 tmp_tSkillCheckReasult += '%s=%s=%d' % (rd_para_str, rd_para.resDetail, rd_para.resInt)
+                            
                             dictRuleTempData = {
                                 'roll': rd_para.resInt,
-                                'skill': tmp_skill_value
+                                'skill': current_skill_value
                             }
                             tmpSkillCheckType, tmpSkillThreshold = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
                                 dictRuleTempData,
@@ -5546,11 +5578,16 @@ def unity_reply(plugin_event, Proc):
                                 tmp_TemplateRuleName,
                                 difficulty_prefix=difficulty
                             )
-                            dictTValue['tSkillValue'] = tmp_skill_value_str if not difficulty else f'{tmpSkillThreshold}({tmp_skill_value_str})'
                             if tmpSkillThreshold == None:
-                                dictTValue['tSkillValue'] = tmp_skill_value_str
-                                tmpSkillThreshold = tmp_skill_value
-                            tmp_tSkillCheckReasult = '%s/%s ' % (tmp_tSkillCheckReasult, tmpSkillThreshold)
+                                tmpSkillThreshold = current_skill_value
+                            # 在 /后面显示技能值（基础值+表达式=结果）
+                            if tmp_expr_info is not None:
+                                tmp_tSkillCheckReasult += '/%s=%d ' % (
+                                    f"{tmp_expr_info['base_value']}{tmp_expr_info['expr_str']}", 
+                                    tmpSkillThreshold
+                                )
+                            else:
+                                tmp_tSkillCheckReasult += '/%s ' % tmpSkillThreshold
                             tmp_tSkillCheckReasult += OlivaDiceCore.msgReplyModel.get_SkillCheckResult(
                                 tmpSkillCheckType, dictStrCustom, dictTValue,
                                 pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
