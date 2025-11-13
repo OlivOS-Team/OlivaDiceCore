@@ -503,7 +503,10 @@ dictAdapterMapper = {
             'napcat_hide': 'NapCat',
             'napcat_show': 'NapCat',
             'napcat_show_new': 'NapCat',
-            'napcat_show_old': 'NapCat'
+            'napcat_show_old': 'NapCat',
+            'napcat_default': 'NapCat',
+            'llonebot_default': 'LLOneBot/LLTwoBot',
+            'lagrange_default': 'LagrangeV1',
         }
     },
     'kaiheila': {
