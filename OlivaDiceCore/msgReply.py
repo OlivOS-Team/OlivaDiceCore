@@ -1449,12 +1449,45 @@ def unity_reply(plugin_event, Proc):
                 flag_hide = True
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             tmp_reast_str = tmp_reast_str.rstrip(' ')
-            [tmp_reast_str, tmp_card_count_str] = getNumberPara(tmp_reast_str, reverse = True)
+            # 先尝试匹配现有牌堆名，再从右边逐步提取数字（优先匹配更长的牌堆名）
+            tmp_deck_name_candidate = tmp_reast_str
+            tmp_card_count_str = None
+            redirected_bot_hash = OlivaDiceCore.userConfig.getRedirectedBotHash(plugin_event.bot_info.hash)
+            if len(tmp_deck_name_candidate) > 0:
+                # 计算右边连续数字的总长度
+                total_digit_count = 0
+                for i in range(len(tmp_deck_name_candidate) - 1, -1, -1):
+                    if tmp_deck_name_candidate[i].isdecimal():
+                        total_digit_count += 1
+                    else:
+                        break
+                # 如果有数字，从最少分离开始尝试（优先匹配更长的牌堆名）
+                if total_digit_count > 0:
+                    found_match = False
+                    for digit_count in range(1, total_digit_count + 1):
+                        tmp_potential_deck_name = tmp_deck_name_candidate[:-digit_count]
+                        tmp_potential_count_str = tmp_deck_name_candidate[-digit_count:]
+                        tmp_check_deck_name = re.sub(r'\s+', r':', tmp_potential_deck_name)
+                        deck_exists = False
+                        if redirected_bot_hash in OlivaDiceCore.drawCardData.dictDeck:
+                            if tmp_check_deck_name in OlivaDiceCore.drawCardData.dictDeck[redirected_bot_hash]:
+                                deck_exists = True
+                        if not deck_exists and tmp_check_deck_name in OlivaDiceCore.drawCardData.dictDeckTemp:
+                            deck_exists = True
+                        if deck_exists:
+                            tmp_deck_name_candidate = tmp_potential_deck_name
+                            tmp_card_count_str = tmp_potential_count_str
+                            found_match = True
+                            break
+                    # 如果都没匹配到，使用最后一次尝试的结果（分离所有数字）
+                    if not found_match and total_digit_count > 0:
+                        tmp_deck_name_candidate = tmp_reast_str[:-total_digit_count]
+                        tmp_card_count_str = tmp_reast_str[-total_digit_count:]
             if tmp_card_count_str == '':
                 tmp_card_count_str = None
             if tmp_card_count_str != None:
                 tmp_card_count = int(tmp_card_count_str)
-            tmp_reast_str = tmp_reast_str.rstrip(' ')
+            tmp_reast_str = tmp_deck_name_candidate.rstrip(' ')
             tmp_reast_str = tmp_reast_str.lstrip('_')
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             tmp_reply_str = None
@@ -2226,6 +2259,7 @@ def unity_reply(plugin_event, Proc):
             tmp_pc_card_snTitle = None
             sn_title = None
             sn_title_new = None
+            flag_group_scope = None
             if tmp_hagID == None:
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strForGroupOnly'], dictTValue)
                 OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
@@ -2312,15 +2346,32 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnAutoOff'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
+            # 检测group/global前置参数
+            if isMatchWordStart(tmp_reast_str, 'group'):
+                flag_group_scope = True
+                flag_force = True
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'group')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            elif isMatchWordStart(tmp_reast_str, 'global'):
+                flag_group_scope = False
+                flag_force = True
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'global')
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            
+            # 解析名片格式参数
             if '' == tmp_reast_str.lower():
                 tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
                 if 'snTitle' in tmp_template:
                     tmp_pc_card_snTitle = tmp_template['snTitle']
                     flag_mode = 'template'
-                    flag_force = False
+                    # 只有在没有使用group/global时才设置为False
+                    if flag_group_scope is None:
+                        flag_force = False
                 else:
                     flag_mode = 'coc'
-                    flag_force = False
+                    # 只有在没有使用group/global时才设置为False
+                    if flag_group_scope is None:
+                        flag_force = False
             elif tmp_reast_str.lower() in ['dnd', 'dnd5e']:
                 flag_mode = 'dnd'
             elif tmp_reast_str.lower() in ['coc', 'coc6', 'coc7']:
@@ -2336,6 +2387,14 @@ def unity_reply(plugin_event, Proc):
                 flag_mode = 'custom'
                 sn_title_new = tmp_reast_str
             tmp_Record = {}
+            # 获取群 hash 前8位用于分群名片
+            tmp_groupHash = OlivaDiceCore.userConfig.getUserHash(
+                userId = tmp_hagID,
+                userType = 'group',
+                platform = tmp_pc_platform
+            )
+            tmp_group_sn_key = '名片' + tmp_groupHash[:8] if tmp_groupHash else '名片'
+            
             if tmp_pc_name != None:
                 tmp_Record = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
                     pcHash = tmp_pcHash,
@@ -2343,8 +2402,16 @@ def unity_reply(plugin_event, Proc):
                     dataKey = 'noteRecord',
                     resDefault = {}
                 )
-                if '名片' in tmp_Record:
-                    sn_title = tmp_Record['名片']
+                # 如果是global命令,只读取全局名片
+                # 否则优先读取群名片,再读取全局名片
+                if flag_group_scope == False:
+                    if '名片' in tmp_Record:
+                        sn_title = tmp_Record['名片']
+                else:
+                    if tmp_group_sn_key in tmp_Record:
+                        sn_title = tmp_Record[tmp_group_sn_key]
+                    elif '名片' in tmp_Record:
+                        sn_title = tmp_Record['名片']
             if flag_force or sn_title == None:
                 if 'coc' == flag_mode:
                     sn_title = '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}'
@@ -2356,6 +2423,26 @@ def unity_reply(plugin_event, Proc):
                     sn_title = tmp_pc_card_snTitle
             if sn_title != None:
                 if flag_force:
+                    # 如果是.sn global，删除当前群的名片记录
+                    if flag_group_scope == False:
+                        OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
+                            plugin_event = plugin_event,
+                            tmp_pc_id = tmp_pc_id,
+                            tmp_pc_platform = tmp_pc_platform,
+                            tmp_hagID = tmp_hagID,
+                            dictTValue = dictTValue,
+                            dictStrCustom = dictStrCustom,
+                            keyName = 'noteRecord',
+                            tmp_key = tmp_group_sn_key,
+                            tmp_value = None,
+                            flag_mode = 'note',
+                            enableFalse = False,
+                            is_remove = True
+                        )
+                    if flag_group_scope == False:
+                        store_key = '名片'
+                    else:
+                        store_key = tmp_group_sn_key
                     OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
                         plugin_event = plugin_event,
                         tmp_pc_id = tmp_pc_id,
@@ -2364,7 +2451,7 @@ def unity_reply(plugin_event, Proc):
                         dictTValue = dictTValue,
                         dictStrCustom = dictStrCustom,
                         keyName = 'noteRecord',
-                        tmp_key = '名片',
+                        tmp_key = store_key,
                         tmp_value = sn_title,
                         flag_mode = 'note',
                         enableFalse = False
@@ -2610,7 +2697,7 @@ def unity_reply(plugin_event, Proc):
                                     keyName_key,
                                     '\n'.join(
                                         [
-                                            '%s:%s' % (
+                                            '%s: %s' % (
                                                 tmp_Record_this, OlivaDiceCore.msgReplyModel.getNoteFormat(
                                                     data = tmp_Record[tmp_Record_this],
                                                     pcHash = tmp_pcHash,
@@ -6485,11 +6572,21 @@ def trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, 
         dataKey = 'noteRecord',
         resDefault = {}
     )
+    # 获取群 hash 前8位用于分群名片key
+    tmp_groupHash = OlivaDiceCore.userConfig.getUserHash(
+        userId = tmp_hagID,
+        userType = 'group',
+        platform = tmp_pc_platform
+    )
+    tmp_group_sn_key = '名片' + tmp_groupHash[:8] if tmp_groupHash else '名片'
     tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
     if 'snTitle' in tmp_template:
         tmp_pc_card_snTitle = tmp_template['snTitle']
         sn_title = tmp_pc_card_snTitle
-    if '名片' in tmp_Record:
+    # 优先读取群名片,其次全局名片
+    if tmp_group_sn_key in tmp_Record:
+        sn_title = tmp_Record[tmp_group_sn_key]
+    elif '名片' in tmp_Record:
         sn_title = tmp_Record['名片']
     if not sn_title:
         sn_title = '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}'

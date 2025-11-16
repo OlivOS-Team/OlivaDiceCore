@@ -376,9 +376,18 @@ https://wiki.dice.center/OlivOS_Login.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9B%9E%
 .sn dnd  套用dnd跑团名片
 .sn template  套用人物卡模板名片
 .sn [自定义名片]  套用任意自定义名片
+.sn group [自定义名片]  设置当前群专属名片
+.sn global [自定义名片]  设置全局名片（全局通用）
 .sn auto 切换自动群名片功能
 .sn auto on 开启自动群名片功能
 .sn auto off 关闭自动群名片功能
+
+分群名片说明：
+- 默认情况下,.sn会设置当前群的专属名片
+- 使用.sn group可显式设置当前群的名片
+- 使用.sn global可设置全局名片，并清除当前群的专属名片
+- 群名片优先级高于全局名片
+- group/global可与格式参数组合，如: .sn group coc, .sn global template
 
 sn指令中除自动群名片的指令均可由管理员及以上权限的人代骰。
 代骰方式：在指令的末尾@目标用户''',
