@@ -94,7 +94,8 @@ dictRedirectBlacklist = {
     'hostLocalEnable',
     'groupWithHostEnable',
     'lastHit', # 这个主要是控制群hit，用于group_clear
-    'logEnable' # 这里是让log on的时候不走从账号，从而使得不会重复记录
+    # 这个注释掉是因为已经在log on里面处理了，这里就不处理，否则会在og on之后无法log off
+    # 'logEnable' # 这里是让log on的时候不走从账号，从而使得不会重复记录
 }
 
 def getRedirectedBotHash(botHash, dataKey=None):
