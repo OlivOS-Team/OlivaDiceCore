@@ -103,16 +103,11 @@ def getRedirectedBotHash(botHash, dataKey=None):
     获取重定向后的botHash
     如果当前botHash是从账号，且dataKey不在黑名单中，返回主账号的botHash
     否则返回原botHash
-    
-    当有多个主账号时，返回列表中第一个主账号（优先级最高）
     """
-    # 如果dataKey在黑名单中，直接返回原botHash
     if dataKey and dataKey in dictRedirectBlacklist:
         return botHash
-    # 检查是否存在主从关系
     masterBotHashList = OlivaDiceCore.console.getMasterBotHashList(botHash)
     if masterBotHashList and len(masterBotHashList) > 0:
-        # 返回第一个主账号作为重定向目标
         return masterBotHashList[0]
     return botHash
 
