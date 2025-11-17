@@ -2790,6 +2790,10 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
                 ))
             else:
                 member_results.append(f"{skill_name}: 表达式错误 '{op}{expr_str}'")
+        # 检查是否修改了SAN或克苏鲁神话技能，如果是则更新神话淬炼状态
+        modified_skills = [skill_name for skill_name, op, expr_str in skill_updates]
+        if 'SAN' in modified_skills or '克苏鲁神话' in modified_skills:
+            OlivaDiceCore.pcCard.checkMythicHardening(tmp_pcHash, tmp_pc_name, tmp_hagID)
         OlivaDiceCore.msgReply.trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
         user_name = get_user_name(plugin_event, member_id)
         if member_results:

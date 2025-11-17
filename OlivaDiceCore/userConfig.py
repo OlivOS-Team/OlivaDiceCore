@@ -89,29 +89,32 @@ dictUserConfigNoteType = {
 
 # 重定向黑名单：这些数据必须保持独立性，不应被重定向
 dictRedirectBlacklist = {
-    'groupEnable',
+    'groupEnable', # 这个是控制群开关
     'hostEnable',
     'hostLocalEnable',
     'groupWithHostEnable',
-    'lastHit'
+    'lastHit', # 这个主要是控制群hit，用于group_clear
+    # 这个注释掉是因为已经在log on里面处理了，这里就不处理，否则会在og on之后无法log off
+    # 'logEnable' # 这里是让log on的时候不走从账号，从而使得不会重复记录
 }
 
-def getRedirectedBotHash(botHash, dataKey=None):
+def getRedirectedBotHash(botHash, dataKey=None, forceNoRedirect=False):
     """
     获取重定向后的botHash
     如果当前botHash是从账号，且dataKey不在黑名单中，返回主账号的botHash
     否则返回原botHash
     """
-    # 如果dataKey在黑名单中，直接返回原botHash
+    # 强制不重定向
+    if forceNoRedirect:
+        return botHash
     if dataKey and dataKey in dictRedirectBlacklist:
         return botHash
-    # 检查是否存在主从关系
-    masterBotHash = OlivaDiceCore.console.getMasterBotHash(botHash)
-    if masterBotHash:
-        return masterBotHash
+    masterBotHashList = OlivaDiceCore.console.getMasterBotHashList(botHash)
+    if masterBotHashList and len(masterBotHashList) > 0:
+        return masterBotHashList[0]
     return botHash
 
-def setUserConfigByKey(userId, userType, platform, userConfigKey, userConfigValue, botHash):
+def setUserConfigByKey(userId, userType, platform, userConfigKey, userConfigValue, botHash, forceNoRedirect=False):
     global dictUserConfigData
     global dictUserConfigNoteDefault
     global listUserConfigDataUpdate
@@ -119,7 +122,7 @@ def setUserConfigByKey(userId, userType, platform, userConfigKey, userConfigValu
     if userConfigKey not in dictUserConfigNoteDefault:
         return
     # 应用重定向逻辑
-    redirectedBotHash = getRedirectedBotHash(botHash, userConfigKey)
+    redirectedBotHash = getRedirectedBotHash(botHash, userConfigKey, forceNoRedirect)
     userHash = getUserHash(
         userId = userId,
         userType = userType,
@@ -140,7 +143,7 @@ def setUserConfigByKey(userId, userType, platform, userConfigKey, userConfigValu
         dictUserConfigData[userHash][redirectedBotHash]['lastHit'] = dictUserConfigDefault['lastHit']
     dictUserConfigData[userHash][redirectedBotHash][userConfigNoteKey][userConfigKey] = userConfigValue
 
-def getUserConfigByKey(userId, userType, platform, userConfigKey, botHash, default=None):
+def getUserConfigByKey(userId, userType, platform, userConfigKey, botHash, default=None, forceNoRedirect=False):
     global dictUserConfigData
     global dictUserConfigNoteDefault
     userConfigNoteKey = 'configNote'
@@ -148,7 +151,7 @@ def getUserConfigByKey(userId, userType, platform, userConfigKey, botHash, defau
     if userConfigKey in dictUserConfigNoteDefault and default is None:
         userConfigValue = dictUserConfigNoteDefault[userConfigKey]
     # 应用重定向逻辑
-    redirectedBotHash = getRedirectedBotHash(botHash, userConfigKey)
+    redirectedBotHash = getRedirectedBotHash(botHash, userConfigKey, forceNoRedirect)
     userHash = getUserHash(
         userId = userId,
         userType = userType,
@@ -161,7 +164,7 @@ def getUserConfigByKey(userId, userType, platform, userConfigKey, botHash, defau
                     userConfigValue = dictUserConfigData[userHash][redirectedBotHash][userConfigNoteKey][userConfigKey]
     return userConfigValue
 
-def getUserConfigByKeyWithHash(userHash, userConfigKey, botHash):
+def getUserConfigByKeyWithHash(userHash, userConfigKey, botHash, forceNoRedirect=False):
     global dictUserConfigData
     global dictUserConfigNoteDefault
     userConfigNoteKey = 'configNote'
@@ -169,7 +172,7 @@ def getUserConfigByKeyWithHash(userHash, userConfigKey, botHash):
     if userConfigKey in dictUserConfigNoteDefault:
         userConfigValue = dictUserConfigNoteDefault[userConfigKey]
     # 应用重定向逻辑
-    redirectedBotHash = getRedirectedBotHash(botHash, userConfigKey)
+    redirectedBotHash = getRedirectedBotHash(botHash, userConfigKey, forceNoRedirect)
     if userHash in dictUserConfigData:
         if redirectedBotHash in dictUserConfigData[userHash]:
             if userConfigNoteKey in dictUserConfigData[userHash][redirectedBotHash]:

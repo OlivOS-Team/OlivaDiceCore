@@ -118,7 +118,7 @@ dictStrCustom = {
     'strShowGroupMainDice' : '本群已套用主骰[{tResult}]',
     'strShowGroupMainDiceNone' : '本群未设置主骰',
     'strDelGroupMainDice' : '已清除本群套用主骰',
-    'strSnSet' : '已将[{tUserName}]的群名片修改为[{tResult}]\n若误设置群名片，请使用指令[.st note rm 名片]来清除自定义名片\n若需开启自动更改群名片功能，请使用命令[.sn auto on]',
+    'strSnSet' : '已将[{tUserName}]的群名片修改为[{tResult}]\n若误设置群名片，请使用指令[.st blockrm 记录]来清除自定义名片\n若需开启自动更改群名片功能，请使用命令[.sn auto on]',
     'strSnPcCardNone' : '[{tUserName}]未设置人物卡，无法进行名片设置',
     'strSnSetAtOther' : '已将[{tUserName01}]的群名片修改为[{tResult}]',
     'strSnPcCardNoneAtOther' : '[{tUserName01}]未设置人物卡，无法进行名片设置',

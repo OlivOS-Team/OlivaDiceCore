@@ -252,10 +252,31 @@ def readAccountRelationConfig():
     # 初始化unity配置
     if 'unity' not in dictAccountRelationConfig:
         dictAccountRelationConfig['unity'] = {}
-    
     try:
         with open(accountRelationConfigPath, 'r', encoding='utf-8') as accountRelationConfigPath_f:
-            dictAccountRelationConfig['unity'].update(json.loads(accountRelationConfigPath_f.read()))
+            loaded_config = json.loads(accountRelationConfigPath_f.read())
+            # 检查是否需要转换旧格式
+            if 'relations' in loaded_config:
+                relations = loaded_config['relations']
+                needs_conversion = False
+                for key, value in relations.items():
+                    if isinstance(value, str):
+                        needs_conversion = True
+                        break
+                if needs_conversion:
+                    new_relations = {}
+                    for slave, master in relations.items():
+                        if isinstance(master, str):
+                            if master not in new_relations:
+                                new_relations[master] = []
+                            new_relations[master].append(slave)
+                    loaded_config['relations'] = new_relations
+                    dictAccountRelationConfig['unity'] = loaded_config
+                    saveAccountRelationConfig()
+                else:
+                    dictAccountRelationConfig['unity'].update(loaded_config)
+            else:
+                dictAccountRelationConfig['unity'].update(loaded_config)
     except:
         # 如果文件不存在或读取失败，使用默认配置
         pass
@@ -265,26 +286,50 @@ def getMasterBotHash(slaveBotHash):
     global dictAccountRelationConfig
     if 'unity' in dictAccountRelationConfig:
         if 'relations' in dictAccountRelationConfig['unity']:
-            if slaveBotHash in dictAccountRelationConfig['unity']['relations']:
-                return dictAccountRelationConfig['unity']['relations'][slaveBotHash]
+            relations = dictAccountRelationConfig['unity']['relations']
+            # 遍历所有主账号，查找哪个主账号包含这个从账号
+            for masterHash, slaveList in relations.items():
+                if slaveBotHash in slaveList:
+                    return masterHash
     return None
 
+def getMasterBotHashList(slaveBotHash):
+    """获取从账号对应的主账号Hash列表"""
+    result = getMasterBotHash(slaveBotHash)
+    return [result] if result else []
+
 def setAccountRelation(slaveBotHash, masterBotHash):
-    """设置主从关系"""
+    """设置主从关系（将从账号添加到主账号的从账号列表）"""
     global dictAccountRelationConfig
     if 'unity' not in dictAccountRelationConfig:
         dictAccountRelationConfig['unity'] = {}
     if 'relations' not in dictAccountRelationConfig['unity']:
         dictAccountRelationConfig['unity']['relations'] = {}
-    dictAccountRelationConfig['unity']['relations'][slaveBotHash] = masterBotHash
+    # 获取主账号的从账号列表
+    if masterBotHash in dictAccountRelationConfig['unity']['relations']:
+        slave_list = dictAccountRelationConfig['unity']['relations'][masterBotHash]
+        # 添加新从账号（如果不存在）
+        if slaveBotHash not in slave_list:
+            slave_list.append(slaveBotHash)
+    else:
+        # 新建关系
+        dictAccountRelationConfig['unity']['relations'][masterBotHash] = [slaveBotHash]
 
-def removeAccountRelation(slaveBotHash):
+def removeAccountRelation(slaveBotHash, masterBotHash=None):
     """删除主从关系"""
     global dictAccountRelationConfig
     if 'unity' in dictAccountRelationConfig:
         if 'relations' in dictAccountRelationConfig['unity']:
-            if slaveBotHash in dictAccountRelationConfig['unity']['relations']:
-                del dictAccountRelationConfig['unity']['relations'][slaveBotHash]
+            relations = dictAccountRelationConfig['unity']['relations']
+            # 如果未指定主账号，先查找
+            if masterBotHash is None:
+                masterBotHash = getMasterBotHash(slaveBotHash)
+            if masterBotHash and masterBotHash in relations:
+                slave_list = relations[masterBotHash]
+                if slaveBotHash in slave_list:
+                    slave_list.remove(slaveBotHash)
+                if not slave_list:
+                    del relations[masterBotHash]
 
 def getAllAccountRelations():
     """获取所有主从关系"""
