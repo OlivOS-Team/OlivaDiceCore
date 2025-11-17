@@ -3171,7 +3171,6 @@ def unity_reply(plugin_event, Proc):
                         # 只有当新建的人物卡是空卡时才应用群规则模板
                         is_new_card = OlivaDiceCore.pcCard.isNewPcCard(plugin_event, tmp_pc_id)
                         if is_new_card:
-                            print('确认是新卡，看看有没有进入这里')
                             OlivaDiceCore.pcCard.setPcTemplateByGroupRule(plugin_event)
                         dictTValue['tPcSelection'] = tmp_pc_name
                         if is_at:
@@ -4390,6 +4389,11 @@ def unity_reply(plugin_event, Proc):
                         )
                     else:
                         tmp_notice = ''
+                    # 检查是否修改了SAN或克苏鲁神话技能，如果是则更新神话淬炼状态
+                    modified_skills = [skill[0] for skill in tmp_skill_pair_list]
+                    if 'SAN' in modified_skills or '克苏鲁神话' in modified_skills:
+                        tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+                        OlivaDiceCore.pcCard.checkMythicHardening(tmp_pcHash, dictTValue['tName'], tmp_hagID)
                     if is_at:
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetSkillValueAtOther'], dictTValue)
                     else:
