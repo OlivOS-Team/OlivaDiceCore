@@ -4,8 +4,8 @@
     "namespace" : "OlivaDiceCore",
     "message_mode" : "old_string",
     "info" : "本模块为OlivaDice的核心模块，提供了所有必须的骰子功能以及基础的管理支持，几乎所有的其它模块都依赖这个模块。",
-    "version" : "3.4.38",
-    "svn" : 1118,
+    "version" : "3.4.39",
+    "svn" : 1119,
     "compatible_svn" : 190,
     "priority" : 20000,
     "support" : [
