@@ -519,7 +519,11 @@ https://github.com/OlivOS-Team/onedice
 
     'welcome': '''设置欢迎词：
 .welcome [欢迎词]  设置欢迎词
-.welcome  删除欢迎词''',
+.welcome  删除欢迎词
+
+若需要at新入群成员，请在欢迎词中添加[{tAtNewMember}]
+若需要获取新成员名称，请在欢迎词中添加[{tNewMemberName}]
+如[.welcome {tAtNewMember}，欢迎[{tNewMemberName}]加入本群！]''',
 
     'team':'''.team (小队) [@成员1][@成员2]…… 创建/更新小队
 .team (小队) show (小队) 展示小队成员

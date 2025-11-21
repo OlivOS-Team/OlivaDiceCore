@@ -2493,14 +2493,17 @@ def unity_reply(plugin_event, Proc):
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
             tmp_reply_str_1 = ''
+            tmp_card_name_original = ''
             # 如果有AT用户，使用parse_at_user处理后的字符串，否则使用原始字符串
             if is_at:
                 tmp_reast_str_original = getMatchWordStartRight(tmp_reast_str, ['st','pc'])
                 tmp_reast_str_original = skipSpaceStart(tmp_reast_str_original)
+                tmp_card_name_original = tmp_reast_str_original
                 tmp_reast_str = to_half_width(tmp_reast_str_original)
             else:
                 tmp_reast_str_original = getMatchWordStartRight(tmp_reast_str_original, ['st','pc'])
                 tmp_reast_str_original = skipSpaceStart(tmp_reast_str_original)
+                tmp_card_name_original = tmp_reast_str_original
                 tmp_reast_str = to_half_width(tmp_reast_str_original)
             forced_is_new_card = False
             forced_is_new_card_time = 0
@@ -3985,19 +3988,41 @@ def unity_reply(plugin_event, Proc):
                 if not any(op in tmp_reast_str_new for op in op_list) or tmp_reast_str_new.startswith('&'):
                     is_pass = True
                 # 检查是否是录卡格式（字符串-字符串）
-                dash_pos = tmp_reast_str_new.find('-')
-                if dash_pos > 0:
-                    rest_after_dash = tmp_reast_str_new[dash_pos+1:].strip()
-                    card_name = tmp_reast_str_new[:dash_pos].strip()
+                dash_pos_original = -1
+                dash_char = None
+                dash_pos_half = tmp_reast_str_original.find('-')
+                dash_pos_full = tmp_reast_str_original.find('－')
+                if dash_pos_half > 0 and dash_pos_full > 0:
+                    if dash_pos_half < dash_pos_full:
+                        dash_pos_original = dash_pos_half
+                        dash_char = '-'
+                    else:
+                        dash_pos_original = dash_pos_full
+                        dash_char = '－'
+                elif dash_pos_half > 0:
+                    dash_pos_original = dash_pos_half
+                    dash_char = '-'
+                elif dash_pos_full > 0:
+                    dash_pos_original = dash_pos_full
+                    dash_char = '－'
+                if dash_pos_original > 0:
+                    rest_after_dash_original = tmp_reast_str_original[dash_pos_original+1:].strip()
+                    card_name_original = tmp_reast_str_original[:dash_pos_original].strip()
+                    # 转半角后的部分用于判断
+                    rest_after_dash_half = to_half_width(rest_after_dash_original)
                     # 录卡格式判断 - 只有当后面跟着非数字、非运算符、非d且不是表达式时才跳过
-                    if rest_after_dash and not (rest_after_dash[0].isdigit() or rest_after_dash[0] in op_list + [assign_op] or 
-                                              (len(rest_after_dash) > 1 and rest_after_dash[0].upper() == 'D' and rest_after_dash[1].isdigit())):
+                    if rest_after_dash_half and not (rest_after_dash_half[0].isdigit() or rest_after_dash_half[0] in op_list + [assign_op] or 
+                                              (len(rest_after_dash_half) > 1 and rest_after_dash_half[0].upper() == 'D' and rest_after_dash_half[1].isdigit())):
                         is_pass = True
-                        # 检查人物卡是否存在
+                        # 保存原始卡名，后面的转半角
+                        tmp_card_name_original = card_name_original
+                        # 重新构建字符串: 原始卡名 + '-' + 半角后面部分
+                        tmp_reast_str_new = card_name_original + '-' + rest_after_dash_half
+                        tmp_reast_str = tmp_reast_str_new
                         tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
                         existing_cards = OlivaDiceCore.pcCard.pcCardDataGetUserAll(tmp_pcHash)
                         # 如果人物卡不存在或者是空的，才设置forced_is_new_card为True
-                        if card_name not in existing_cards or not existing_cards[card_name]:
+                        if card_name_original not in existing_cards or not existing_cards[card_name_original]:
                             forced_is_new_card = True
                 if is_pass:
                     pass
@@ -4036,13 +4061,13 @@ def unity_reply(plugin_event, Proc):
                         # 查找技能名结束位置（遇到符号或数字）
                         skill_end_pos = -1
                         for i in range(current_pos, len(processed_str)):
-                            if processed_str[i] in op_list + [assign_op] or processed_str[i].isdigit():
+                            if processed_str[i] in op_list + [assign_op, ':', '：'] or processed_str[i].isdigit():
                                 skill_end_pos = i
                                 break
                         if skill_end_pos == -1:
                             break  # 没有找到符号或数字，结束解析
                         # 处理技能名和表达式
-                        if processed_str[skill_end_pos].isdigit() or processed_str[skill_end_pos] in op_list:
+                        if processed_str[skill_end_pos].isdigit() or processed_str[skill_end_pos] in op_list + [assign_op, ':', '：']:
                             # 检查是否是d后面跟着数字的情况
                             tmp_skill_name_part = processed_str[current_pos:skill_end_pos].strip()
                             if (tmp_skill_name_part.upper() == 'D' and 
@@ -4053,6 +4078,9 @@ def unity_reply(plugin_event, Proc):
                             # 查找完整的表达式
                             expr_end_pos = skill_end_pos
                             in_dice_expr = False
+                            # 如果是赋值符号(= : ：)，跳过它
+                            if processed_str[skill_end_pos] in [assign_op, ':', '：']:
+                                expr_end_pos += 1
                             while expr_end_pos < len(processed_str):
                                 char = processed_str[expr_end_pos]
                                 if char.upper() == 'D':
@@ -4066,9 +4094,14 @@ def unity_reply(plugin_event, Proc):
                                 
                             tmp_skill_name = processed_str[current_pos:skill_end_pos].strip()
                             tmp_skill_value = processed_str[skill_end_pos:expr_end_pos].strip()
-                            # 自动补 = 如果没有运算符
-                            if tmp_skill_value[0].isdigit() or tmp_skill_value[0].upper() == 'D':
-                                tmp_skill_value = '=' + tmp_skill_value
+                            # 如果以 = : ： 开头，说明是赋值操作，保留符号
+                            if len(tmp_skill_value) > 0 and tmp_skill_value[0] not in [assign_op, ':', '：']:
+                                # 自动补 = 如果没有运算符
+                                if tmp_skill_value[0].isdigit() or tmp_skill_value[0].upper() == 'D':
+                                    tmp_skill_value = '=' + tmp_skill_value
+                            elif len(tmp_skill_value) > 0 and tmp_skill_value[0] in [':', '：']:
+                                # 将 : 或 ： 转换为 =
+                                tmp_skill_value = '=' + tmp_skill_value[1:]
                             if tmp_skill_name:
                                 tmp_skill_updates.append([tmp_skill_name, tmp_skill_value])
                             current_pos = expr_end_pos
@@ -4137,7 +4170,11 @@ def unity_reply(plugin_event, Proc):
                                         tmp_skill_value_new = rd_para.resInt
                                         # 显示详细计算过程
                                         if "D" in tmp_original_str.upper():
-                                            update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new} ({tmp_original_str}={rd_para.resDetail})"
+                                            detail_str = f"{tmp_original_str}={rd_para.resDetail}"
+                                            if len(detail_str) > 50:
+                                                update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new} ({tmp_original_str}={tmp_skill_value_new})"
+                                            else:
+                                                update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new} ({tmp_original_str}={rd_para.resDetail})"
                                         else:
                                             update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new} ({tmp_original_str})"
                                         OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
@@ -4292,11 +4329,15 @@ def unity_reply(plugin_event, Proc):
                     tmp_skill_value = int(tmp_skill_value)
                 if tmp_skill_name != None:
                     # 先判断负数，再判断赋值
-                    if tmp_skill_name[-1] == '-':
+                    if len(tmp_skill_name) > 0 and tmp_skill_name[-1] == '-':
                         if not flag_is_mapping:
                             tmp_skill_name = tmp_skill_name[:-1]
                             tmp_skill_value = -int(tmp_skill_value)
-                    if tmp_skill_name[-1] in ['=', ':', '：']:
+                    if len(tmp_skill_name) > 0 and tmp_skill_name[-1] == '+':
+                        if not flag_is_mapping:
+                            tmp_skill_name = tmp_skill_name[:-1]
+                            tmp_skill_value = int(tmp_skill_value)
+                    if len(tmp_skill_name) > 0 and tmp_skill_name[-1] in ['=', ':', '：']:
                         if not flag_is_mapping:
                             tmp_skill_name = tmp_skill_name[:-1]
                     tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name)

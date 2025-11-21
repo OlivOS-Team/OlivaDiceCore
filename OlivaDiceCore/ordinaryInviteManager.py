@@ -143,4 +143,16 @@ def unity_group_member_increase(plugin_event, Proc):
         platform = plugin_event.platform['platform']
     )
     if reply_msg != None:
-        replyMsg(fake_plugin_event, reply_msg)
+        # 支持 AT 新成员
+        dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
+        dictGValue = OlivaDiceCore.msgCustom.dictGValue
+        dictTValue.update(dictGValue)
+        at_para = OlivOS.messageAPI.PARA.at(str(new_member_id))
+        at_str = at_para.get_string_by_key('CQ')
+        dictTValue['tAtNewMember'] = at_str
+        dictTValue['tNewMemberId'] = str(new_member_id)
+        # 获取新成员名称
+        new_member_name = OlivaDiceCore.msgReplyModel.get_user_name(plugin_event, new_member_id)
+        dictTValue['tNewMemberName'] = new_member_name
+        formatted_reply_msg = OlivaDiceCore.msgCustomManager.formatReplySTR(reply_msg, dictTValue)
+        replyMsg(fake_plugin_event, formatted_reply_msg)
