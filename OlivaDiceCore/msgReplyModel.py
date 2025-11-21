@@ -2649,71 +2649,66 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
     while current_pos < len(processed_skill_ops):
         # 查找技能名结束位置（遇到操作符或数字）
         skill_end_pos = -1
-        op = ''  # 默认为空（直接赋值）
         for i in range(current_pos, len(processed_skill_ops)):
-            # 如果遇到操作符
-            if processed_skill_ops[i] in all_op_list:
+            # 如果遇到操作符或数字
+            if processed_skill_ops[i] in all_op_list or processed_skill_ops[i].isdigit():
                 skill_end_pos = i
-                op = processed_skill_ops[i]
-                break
-            # 如果遇到数字（且前面不是D）
-            elif processed_skill_ops[i].isdigit():
-                # 检查前一个字符是否是D（骰子表达式）
-                if i > current_pos and processed_skill_ops[i-1].upper() == 'D':
-                    continue
-                skill_end_pos = i
-                op = ''  # 直接赋值
                 break
         if skill_end_pos == -1:
             break
-        skill_name = processed_skill_ops[current_pos:skill_end_pos].strip()
-        if not skill_name:
-            if op in all_op_list:
-                current_pos = skill_end_pos + 1
-            else:
-                current_pos = skill_end_pos
-            continue
-        # 检查是否是d后面跟着数字的情况
-        if skill_name.upper() == 'D' and skill_end_pos < len(processed_skill_ops) and processed_skill_ops[skill_end_pos:].strip() and processed_skill_ops[skill_end_pos:].strip()[0].isdigit():
-            current_pos = skill_end_pos
-            continue
-        skill_name = OlivaDiceCore.pcCard.fixName(skill_name, flagMode = 'skillName')
-        # 如果技能名最后一个字符是赋值符号，移除它
-        if skill_name and skill_name[-1] in assignment_symbols:
-            skill_name = skill_name[:-1]
-        # 确定从哪里开始提取表达式
-        if op in all_op_list:
-            rest_str = processed_skill_ops[skill_end_pos+1:]
-        else:
-            rest_str = processed_skill_ops[skill_end_pos:]
-        # 提取表达式
-        expr_end_pos = 0
-        in_dice_expr = False
-        for i in range(len(rest_str)):
-            char = rest_str[i]
-            if char.upper() == 'D':
-                in_dice_expr = True
-            if char.isdigit() or (in_dice_expr and char in op_list) or char.upper() == 'D':
-                expr_end_pos = i + 1
-            else:
-                if i > 0:
-                    expr_end_pos = i
-                break
-        if expr_end_pos == 0 and len(rest_str) > 0:
-            expr_end_pos = 1
-        expr_str = rest_str[:expr_end_pos]
-        # 更新当前位置
-        if op in all_op_list:
-            current_pos = skill_end_pos + expr_end_pos + 1
-        else:
-            current_pos = skill_end_pos + expr_end_pos
-        if skill_name and expr_str:
-            # 移除技能名中的数字
-            clean_skill_name = re.sub(r'\d+', '', skill_name).upper()
-            # 如果操作符是赋值符号，将其转换为空字符串（直接赋值）
-            if op in assignment_symbols:
+        
+        # 处理技能名和表达式
+        if processed_skill_ops[skill_end_pos].isdigit() or processed_skill_ops[skill_end_pos] in all_op_list:
+            # 检查是否是d后面跟着数字的情况
+            tmp_skill_name_part = processed_skill_ops[current_pos:skill_end_pos].strip()
+            if (tmp_skill_name_part.upper() == 'D' and 
+                skill_end_pos < len(processed_skill_ops) and 
+                processed_skill_ops[skill_end_pos].isdigit()):
+                current_pos = skill_end_pos  # 跳过这个d，不视为技能名
+                continue
+            # 查找完整的表达式
+            expr_end_pos = skill_end_pos
+            in_dice_expr = False
+            op = ''
+            # 如果是赋值符号(= : ：)，记录并跳过它
+            if processed_skill_ops[skill_end_pos] in assignment_symbols:
                 op = ''
-            skill_updates.append((clean_skill_name, op, expr_str))
+                expr_end_pos += 1
+            elif processed_skill_ops[skill_end_pos] in op_list:
+                op = processed_skill_ops[skill_end_pos]
+                expr_end_pos += 1
+            else:
+                op = ''
+            # 继续提取表达式的数值部分
+            while expr_end_pos < len(processed_skill_ops):
+                char = processed_skill_ops[expr_end_pos]
+                if char.upper() == 'D':
+                    in_dice_expr = True
+                    expr_end_pos += 1
+                    continue
+                if char.isdigit() or (in_dice_expr and char in op_list) or char in op_list:
+                    expr_end_pos += 1
+                else:
+                    break
+            
+            skill_name = processed_skill_ops[current_pos:skill_end_pos].strip()
+            
+            # 根据操作符确定表达式的起始位置
+            if processed_skill_ops[skill_end_pos] in all_op_list:
+                # 如果是操作符,表达式从操作符后面开始(已经在上面 expr_end_pos += 1 跳过了)
+                expr_str = processed_skill_ops[skill_end_pos + 1:expr_end_pos].strip()
+            else:
+                # 如果直接是数字,表达式从当前位置开始
+                expr_str = processed_skill_ops[skill_end_pos:expr_end_pos].strip()
+            
+            if skill_name and expr_str:
+                skill_name = OlivaDiceCore.pcCard.fixName(skill_name, flagMode = 'skillName')
+                # 移除技能名中的数字
+                clean_skill_name = re.sub(r'\d+', '', skill_name).upper()
+                skill_updates.append((clean_skill_name, op, expr_str))
+            current_pos = expr_end_pos
+        else:
+            current_pos = skill_end_pos + 1
     if not skill_updates:
         OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'team')
         return
@@ -2775,14 +2770,31 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
                 if tmp_pcCardRule in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial:
                     if skill_name in [skill for skill in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[tmp_pcCardRule]]:
                         special_skills.append(skill_name)
-                # 有运算符或包含骰子表达式时显示过程，直接赋值时不显示过程
-                if op != '' or 'D' in expr_str.upper():
-                    if 'D' in expr_str.upper():
-                        # 包含骰子表达式，显示掷骰结果
-                        skill_update_detail = f"{current_value}{op}{expr_str}={rd_para.resDetail}={new_value}"
-                    else:
-                        skill_update_detail = f"{current_value}{op}{expr_str}={new_value}"
+                # 构建计算过程字符串
+                if op != '':
+                    calculation_detail = f"{current_value}{op}{expr_str}"
                 else:
+                    calculation_detail = expr_str    
+                # 判断是否显示详细计算过程
+                has_calc_in_expr = False
+                if len(expr_str) > 1:
+                    for i, char in enumerate(expr_str):
+                        if char in op_list and i > 0:
+                            has_calc_in_expr = True
+                            break
+                if op != '' or 'D' in expr_str.upper() or has_calc_in_expr:
+                    if 'D' in expr_str.upper():
+                        # 包含骰子表达式，显示骰子结果
+                        detail_str = f"{calculation_detail}={rd_para.resDetail}"
+                        if len(detail_str) > 50:
+                            skill_update_detail = f"{current_value} -> {new_value} ({calculation_detail}={new_value})"
+                        else:
+                            skill_update_detail = f"{current_value} -> {new_value} ({calculation_detail}={rd_para.resDetail})"
+                    else:
+                        # 普通计算表达式
+                        skill_update_detail = f"{current_value} -> {new_value} ({calculation_detail})"
+                else:
+                    # 直接赋值
                     skill_update_detail = f"{current_value} -> {new_value}"
                 member_results.append(OlivaDiceCore.msgCustomManager.formatReplySTR(
                     dictStrCustom.get('strTeamSkillUpdateResultFormat', '{tSkillName}: {tDetail}'),

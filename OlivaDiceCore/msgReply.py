@@ -4061,13 +4061,13 @@ def unity_reply(plugin_event, Proc):
                         # 查找技能名结束位置（遇到符号或数字）
                         skill_end_pos = -1
                         for i in range(current_pos, len(processed_str)):
-                            if processed_str[i] in op_list + [assign_op] or processed_str[i].isdigit():
+                            if processed_str[i] in op_list + [assign_op, ':', '：'] or processed_str[i].isdigit():
                                 skill_end_pos = i
                                 break
                         if skill_end_pos == -1:
                             break  # 没有找到符号或数字，结束解析
                         # 处理技能名和表达式
-                        if processed_str[skill_end_pos].isdigit() or processed_str[skill_end_pos] in op_list:
+                        if processed_str[skill_end_pos].isdigit() or processed_str[skill_end_pos] in op_list + [assign_op, ':', '：']:
                             # 检查是否是d后面跟着数字的情况
                             tmp_skill_name_part = processed_str[current_pos:skill_end_pos].strip()
                             if (tmp_skill_name_part.upper() == 'D' and 
@@ -4078,6 +4078,9 @@ def unity_reply(plugin_event, Proc):
                             # 查找完整的表达式
                             expr_end_pos = skill_end_pos
                             in_dice_expr = False
+                            # 如果是赋值符号(= : ：)，跳过它
+                            if processed_str[skill_end_pos] in [assign_op, ':', '：']:
+                                expr_end_pos += 1
                             while expr_end_pos < len(processed_str):
                                 char = processed_str[expr_end_pos]
                                 if char.upper() == 'D':
@@ -4091,9 +4094,14 @@ def unity_reply(plugin_event, Proc):
                                 
                             tmp_skill_name = processed_str[current_pos:skill_end_pos].strip()
                             tmp_skill_value = processed_str[skill_end_pos:expr_end_pos].strip()
-                            # 自动补 = 如果没有运算符
-                            if tmp_skill_value[0].isdigit() or tmp_skill_value[0].upper() == 'D':
-                                tmp_skill_value = '=' + tmp_skill_value
+                            # 如果以 = : ： 开头，说明是赋值操作，保留符号
+                            if len(tmp_skill_value) > 0 and tmp_skill_value[0] not in [assign_op, ':', '：']:
+                                # 自动补 = 如果没有运算符
+                                if tmp_skill_value[0].isdigit() or tmp_skill_value[0].upper() == 'D':
+                                    tmp_skill_value = '=' + tmp_skill_value
+                            elif len(tmp_skill_value) > 0 and tmp_skill_value[0] in [':', '：']:
+                                # 将 : 或 ： 转换为 =
+                                tmp_skill_value = '=' + tmp_skill_value[1:]
                             if tmp_skill_name:
                                 tmp_skill_updates.append([tmp_skill_name, tmp_skill_value])
                             current_pos = expr_end_pos
@@ -4162,7 +4170,11 @@ def unity_reply(plugin_event, Proc):
                                         tmp_skill_value_new = rd_para.resInt
                                         # 显示详细计算过程
                                         if "D" in tmp_original_str.upper():
-                                            update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new} ({tmp_original_str}={rd_para.resDetail})"
+                                            detail_str = f"{tmp_original_str}={rd_para.resDetail}"
+                                            if len(detail_str) > 50:
+                                                update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new} ({tmp_original_str}={tmp_skill_value_new})"
+                                            else:
+                                                update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new} ({tmp_original_str}={rd_para.resDetail})"
                                         else:
                                             update_msg = f"[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new} ({tmp_original_str})"
                                         OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
