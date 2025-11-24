@@ -37,7 +37,7 @@ def get_user_name(plugin_event, user_id):
         botHash = plugin_event.bot_info.hash
     )
     # 没获取到再用api获取
-    if user_name == None:
+    if user_name == None or user_name == '用户':
         plres = plugin_event.get_stranger_info(user_id)
         if plres['active']:
             user_name = plres['data']['name']
