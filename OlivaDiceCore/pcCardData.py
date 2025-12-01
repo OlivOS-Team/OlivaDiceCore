@@ -238,6 +238,7 @@ dictPcCardTemplateDefaultTemp = {
                 'HPMAXADD',
                 'MPMAXADD',
                 'SANMAXADD',
+                'MOV',
                 '克苏鲁神话',
                 '信用'
             ],
@@ -287,6 +288,7 @@ dictPcCardTemplateDefaultTemp = {
             'SANMAXADD': ['SANMAXADD','理智上限加值'],
             'HPMAXADD': ['HPMAXADD','生命值上限加值','生命上限加值','血量上限加值','体力上限加值'],
             'MPMAXADD': ['MPMAXADD','魔法上限加值'],
+            'MOV': ['MOV','MOVE','移动速度','移动力'],
             'IDEA': ['灵感', 'IDEA'],
             'KNOW': ['知识', 'KNOW'],
             'MOV': ['移动力','MOV'],
@@ -435,7 +437,8 @@ dictPcCardTemplateDefaultTemp = {
             '幸运': 'LUC',
             '理智': 'SAN',
             '灵感': 'IDEA',
-            '知识': 'KNOW'
+            '知识': 'KNOW',
+            '移动速度': 'MOV'
         },
         'showName': {
             'STR': '力量',
@@ -448,7 +451,8 @@ dictPcCardTemplateDefaultTemp = {
             'EDU': '教育',
             'LUC': '幸运',
             'IDEA': '灵感',
-            'KNOW': '知识'
+            'KNOW': '知识',
+            'MOV': '移动速度'
         },
         'snTitle': '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}',
         'defaultSkillValue': {
@@ -818,6 +822,7 @@ dictPcCardTemplateDefaultTemp = {
                 'HPMAXADD',
                 'MPMAXADD',
                 'SANMAXADD',
+                'MOV',
                 '克苏鲁神话',
                 '信用'
             ],
@@ -867,6 +872,7 @@ dictPcCardTemplateDefaultTemp = {
             'SANMAXADD': ['SANMAXADD','理智上限加值'],
             'HPMAXADD': ['HPMAXADD','生命值上限加值','生命上限加值','血量上限加值','体力上限加值'],
             'MPMAXADD': ['MPMAXADD','魔法上限加值'],
+            'MOV': ['MOV','MOVE','移动速度','移动力'],
             'IDEA': ['灵感', 'IDEA'],
             'KNOW': ['知识', 'KNOW'],
             'MOV': ['移动力','MOV'],
@@ -1015,7 +1021,8 @@ dictPcCardTemplateDefaultTemp = {
             '幸运': 'LUC',
             '理智': 'SAN',
             '灵感': 'IDEA',
-            '知识': 'KNOW'
+            '知识': 'KNOW',
+            '移动速度': 'MOV'
         },
         'showName': {
             'STR': '力量',
@@ -1028,7 +1035,8 @@ dictPcCardTemplateDefaultTemp = {
             'EDU': '教育',
             'LUC': '幸运',
             'IDEA': '灵感',
-            'KNOW': '知识'
+            'KNOW': '知识',
+            'MOV': '移动速度'
         },
         'snTitle': '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}',
         'defaultSkillValue': {
@@ -1716,6 +1724,7 @@ dictPcCardTemplateDefaultTemp = {
                 'HPMAXADD',
                 'MPMAXADD',
                 'SANMAXADD',
+                'MOV',
                 '克苏鲁神话',
                 '信用'
             ],
@@ -1763,6 +1772,7 @@ dictPcCardTemplateDefaultTemp = {
             'SANMAXADD': ['SANMAXADD','理智上限加值'],
             'HPMAXADD': ['HPMAXADD','生命值上限加值','生命上限加值','血量上限加值','体力上限加值'],
             'MPMAXADD': ['MPMAXADD','魔法上限加值'],
+            'MOV': ['MOV','MOVE','移动速度','移动力'],
             'IDEA': ['灵感', 'IDEA'],
             'KNOW': ['知识', 'KNOW'],
             'MOV': ['移动力','MOV'],
@@ -1911,7 +1921,8 @@ dictPcCardTemplateDefaultTemp = {
             '幸运': 'LUC',
             '理智': 'SAN',
             '灵感': 'IDEA',
-            '知识': 'KNOW'
+            '知识': 'KNOW',
+            '移动速度': 'MOV'
         },
         'showName': {
             'STR': '力量',
@@ -1924,7 +1935,8 @@ dictPcCardTemplateDefaultTemp = {
             'EDU': '教育',
             'LUC': '幸运',
             'IDEA': '灵感',
-            'KNOW': '知识'
+            'KNOW': '知识',
+            'MOV': '移动速度'
         },
         'snTitle': '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}',
         'defaultSkillValue': {},
@@ -2509,6 +2521,7 @@ dictPcCardTemplateDefaultTemp = {
                 'HPMAXADD',
                 'MPMAXADD',
                 'SANMAXADD',
+                'MOV',
                 '克苏鲁神话',
                 '信用'
             ],
@@ -2558,6 +2571,7 @@ dictPcCardTemplateDefaultTemp = {
             'SANMAXADD': ['SANMAXADD','理智上限加值'],
             'HPMAXADD': ['HPMAXADD','生命值上限加值','生命上限加值','血量上限加值','体力上限加值'],
             'MPMAXADD': ['MPMAXADD','魔法上限加值'],
+            'MOV': ['MOV','MOVE','移动速度','移动力'],
             'IDEA': ['灵感', 'IDEA'],
             'KNOW': ['知识', 'KNOW'],
             'MOV': ['移动力','MOV'],
@@ -2706,7 +2720,8 @@ dictPcCardTemplateDefaultTemp = {
             '幸运': 'LUC',
             '理智': 'SAN',
             '灵感': 'IDEA',
-            '知识': 'KNOW'
+            '知识': 'KNOW',
+            '移动速度': 'MOV'
         },
         'showName': {
             'STR': '力量',
@@ -2719,7 +2734,8 @@ dictPcCardTemplateDefaultTemp = {
             'EDU': '教育',
             'LUC': '幸运',
             'IDEA': '灵感',
-            'KNOW': '知识'
+            'KNOW': '知识',
+            'MOV': '移动速度'
         },
         'snTitle': '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}',
         'checkRules': {
