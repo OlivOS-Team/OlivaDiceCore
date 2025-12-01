@@ -138,6 +138,9 @@ def getHelp(key_str, bot_hash, plugin_event = None):
         dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[bot_hash]
     if redirected_bot_hash in OlivaDiceCore.helpDocData.dictHelpDoc:
         while True:
+            # 以下划线开头的键值只能被帮助文档内部引用，无法直接搜索
+            if key_str_new.startswith('_'):
+                break
             if key_str_new in OlivaDiceCore.helpDocData.dictHelpDoc[redirected_bot_hash]:
                 tmp_tHelpDocResult = OlivaDiceCore.helpDocData.dictHelpDoc[redirected_bot_hash][key_str_new]
                 if len(tmp_tHelpDocResult) > 1:
@@ -231,6 +234,9 @@ def getHelpRecommend(key_str:str, bot_hash:str):
 
     if redirected_bot_hash in OlivaDiceCore.helpDocData.dictHelpDoc:
         for dictHelpDoc_this in OlivaDiceCore.helpDocData.dictHelpDoc[redirected_bot_hash]:
+            # 以下划线开头的键值只能被帮助文档内部引用，不参与模糊搜索
+            if type(dictHelpDoc_this) == str and dictHelpDoc_this.startswith('_'):
+                continue
             tmp_RecommendRank_list.append([
                 getRecommendRank(
                     key_str,
