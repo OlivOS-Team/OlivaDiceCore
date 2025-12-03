@@ -143,13 +143,32 @@ def setUserConfigByKey(userId, userType, platform, userConfigKey, userConfigValu
         dictUserConfigData[userHash][redirectedBotHash]['lastHit'] = dictUserConfigDefault['lastHit']
     dictUserConfigData[userHash][redirectedBotHash][userConfigNoteKey][userConfigKey] = userConfigValue
 
+dictConfigKeyToConsoleSwitchMapping = {
+    'showDefault': 'defaultShowDefault',
+    'autoSnEnabled': 'defaultAutoSn'
+}
+
+def getDefaultValueByConfigKey(userConfigKey):
+    """
+    获取配置项的默认值，优先从全局开关中读取
+    """
+    global dictUserConfigNoteDefault
+    if userConfigKey in dictConfigKeyToConsoleSwitchMapping:
+        consoleSwitchKey = dictConfigKeyToConsoleSwitchMapping[userConfigKey]
+        consoleSwitchValue = OlivaDiceCore.console.getConsoleSwitchByHash(consoleSwitchKey, 'unity')
+        if consoleSwitchValue is not None:
+            return consoleSwitchValue == 1
+    if userConfigKey in dictUserConfigNoteDefault:
+        return dictUserConfigNoteDefault[userConfigKey]
+    return False
+
 def getUserConfigByKey(userId, userType, platform, userConfigKey, botHash, default=None, forceNoRedirect=False):
     global dictUserConfigData
     global dictUserConfigNoteDefault
     userConfigNoteKey = 'configNote'
     userConfigValue = default if default is not None else False
     if userConfigKey in dictUserConfigNoteDefault and default is None:
-        userConfigValue = dictUserConfigNoteDefault[userConfigKey]
+        userConfigValue = getDefaultValueByConfigKey(userConfigKey)
     # 应用重定向逻辑
     redirectedBotHash = getRedirectedBotHash(botHash, userConfigKey, forceNoRedirect)
     userHash = getUserHash(
@@ -170,7 +189,7 @@ def getUserConfigByKeyWithHash(userHash, userConfigKey, botHash, forceNoRedirect
     userConfigNoteKey = 'configNote'
     userConfigValue = False
     if userConfigKey in dictUserConfigNoteDefault:
-        userConfigValue = dictUserConfigNoteDefault[userConfigKey]
+        userConfigValue = getDefaultValueByConfigKey(userConfigKey)
     # 应用重定向逻辑
     redirectedBotHash = getRedirectedBotHash(botHash, userConfigKey, forceNoRedirect)
     if userHash in dictUserConfigData:

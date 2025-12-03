@@ -1674,8 +1674,7 @@ def unity_reply(plugin_event, Proc):
                         userType = 'user',
                         platform = tmp_pc_platform,
                         userConfigKey = 'autoSnEnabled',
-                        botHash = plugin_event.bot_info.hash,
-                        default = False
+                        botHash = plugin_event.bot_info.hash
                     )
                     dictTValue['tUserName'] = tmp_userName
                     if tmp_groupObList_list == None:
@@ -1781,8 +1780,7 @@ def unity_reply(plugin_event, Proc):
                         userType = 'user',
                         platform = tmp_pc_platform,
                         userConfigKey = 'autoSnEnabled',
-                        botHash = plugin_event.bot_info.hash,
-                        default = False
+                        botHash = plugin_event.bot_info.hash
                     )
                     if tmp_userObList_list == None:
                         tmp_userObList_list = []
@@ -2271,8 +2269,7 @@ def unity_reply(plugin_event, Proc):
                     userType = 'user',
                     platform = tmp_pc_platform,
                     userConfigKey = 'autoSnEnabled',
-                    botHash = plugin_event.bot_info.hash,
-                    default = False
+                    botHash = plugin_event.bot_info.hash
                 )
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'auto')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
@@ -2546,8 +2543,7 @@ def unity_reply(plugin_event, Proc):
                     userType = 'user',
                     platform = tmp_pc_platform,
                     userConfigKey = 'showDefault',
-                    botHash = plugin_event.bot_info.hash,
-                    default = False
+                    botHash = plugin_event.bot_info.hash
                 )
                 # 保存原始数据用于标记比较
                 tmp_dict_pc_card_original = tmp_dict_pc_card.copy()
@@ -3227,8 +3223,7 @@ def unity_reply(plugin_event, Proc):
                     userType = 'user',
                     platform = tmp_pc_platform,
                     userConfigKey = 'showDefault',
-                    botHash = plugin_event.bot_info.hash,
-                    default = False
+                    botHash = plugin_event.bot_info.hash
                 )
                 if isMatchWordStart(tmp_reast_str, 'on', fullMatch = True):
                     # defaultshow on 命令
@@ -6586,8 +6581,7 @@ def trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, 
         userType = 'user',
         platform = tmp_pc_platform,
         userConfigKey = 'autoSnEnabled',
-        botHash = plugin_event.bot_info.hash,
-        default = False
+        botHash = plugin_event.bot_info.hash
     )
     if not auto_sn_enabled:
         return
