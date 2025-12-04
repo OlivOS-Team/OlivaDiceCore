@@ -43,6 +43,8 @@ dictConsoleSwitchTemplate = {
         'helpRecommendGate' : 25,
         'censorMode' : 1,
         'censorMatchMode' : 1,
+        'defaultShowDefault' : 0,
+        'defaultAutoSn' : 0,
         'masterList' : [],
         'noticeGroupList' : [],
         'pulseUrlList' : []
