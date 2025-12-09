@@ -505,7 +505,7 @@ dictAdapterMapper = {
             'napcat_show_new': 'NapCat',
             'napcat_show_old': 'NapCat',
             'napcat_default': 'NapCat',
-            'llonebot_default': 'LLOneBot/LLTwoBot',
+            'llonebot_default': 'LuckyLilliaBot/LLOneBot/LLTwoBot',
             'lagrange_default': 'LagrangeV1',
         }
     },
