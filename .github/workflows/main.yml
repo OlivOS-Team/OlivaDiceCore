@@ -1,4 +1,4 @@
-name: releaseWithOlivOS
+name: CI
 on:
   push:
     branches: [ main ]
@@ -146,6 +146,7 @@ jobs:
       - name: Artifact OlivaDiceCore.opk
         uses: actions/upload-artifact@v4
         with:
+          name: OlivaDiceCore
           path: ./release-final/OlivaDiceCore.opk
       - name: Pack OlivaDice With Version
         if: github.ref_type == 'tag'
