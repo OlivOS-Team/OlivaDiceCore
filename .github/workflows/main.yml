@@ -118,6 +118,7 @@ jobs:
           cd ./OlivaDiceNativeGUI/OlivaDiceNativeGUI
           zip -r ../../../unpack/OlivaDiceNativeGUI.opk ./
           cd ../../
+          cd ../
           echo "Pack OlivaDiceNativeGUI Done"
           cp ./unpack/*.opk ./release/OlivOS/plugin/app
           cp ./unpack/*.opk ./release/OlivOS-Linux/plugin/app
