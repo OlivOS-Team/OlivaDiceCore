@@ -2,39 +2,52 @@ name: releaseWithOlivOS
 on:
   push:
     branches: [ main ]
+    tags:
+      - '*.*.*'
+      - '*.*.*-*.*'
   pull_request:
     branches: [ main ]
   workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      OlivOSTag: ""
     steps:
+      - name: Get OlivOS Latest Release Version Tag
+        id: OlivOSTag
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const release_tag_name = await github.rest.repos.getLatestRelease({
+              owner: 'OlivOS-Team',
+              repo: 'OlivOS',
+            });
+            return response.data.tag_name;
+            core.exportVariable('OlivOSTag', release_tag_name);
       - uses: actions/checkout@v3
       - name: Download & Unpack OlivOS
         run: |
           mkdir ./download
           mkdir ./unpack
           mkdir ./release
+          mkdir ./release-final
           curl -L https://github.com/OlivOS-Team/OlivOS/releases/latest/download/OlivOS-Win.zip -o ./download/OlivOS-Win.zip
-          curl -L https://github.com/OlivOS-Team/OlivOS/releases/latest/download/OlivOS-Win-32-old.zip -o ./download/OlivOS-Win-32-old.zip
           curl -L https://github.com/OlivOS-Team/OlivOS/releases/latest/download/OlivOS-Linux.zip -o ./download/OlivOS-Linux.zip
           echo "Download OlivOS Done"
           curl -L https://github.com/OlivOS-Team/ChanceCustom/releases/latest/download/ChanceCustom.opk -o ./download/ChanceCustom.opk
           cp ./download/ChanceCustom.opk ./unpack
           echo "Download ChanceCustom Done"
           mkdir ./unpack/OlivOS
-          mkdir ./unpack/OlivOS-Win-32-old
           mkdir ./unpack/OlivOS-Linux
           unzip ./download/OlivOS-Win.zip -d ./unpack/OlivOS
-          unzip ./download/OlivOS-Win-32-old.zip -d ./unpack/OlivOS-Win-32-old
           unzip ./download/OlivOS-Linux.zip -d ./unpack/OlivOS-Linux
           cp -r ./unpack/OlivOS ./release/OlivOS
-          cp -r ./unpack/OlivOS-Win-32-old ./release/OlivOS-Win-32-old
           cp -r ./unpack/OlivOS-Linux ./release/OlivOS-Linux
           mkdir ./release/OlivOS/plugin
           mkdir ./release/OlivOS/plugin/app
-          mkdir ./release/OlivOS-Win-32-old/plugin
-          mkdir ./release/OlivOS-Win-32-old/plugin/app
           mkdir ./release/OlivOS-Linux/plugin
           mkdir ./release/OlivOS-Linux/plugin/app
           echo "Unpack OlivOS Done"
@@ -104,20 +117,42 @@ jobs:
           zip -r ../../../unpack/OlivaDiceNativeGUI.opk ./
           cd ../../
           echo "Pack OlivaDiceNativeGUI Done"
-          cd ../
           cp ./unpack/*.opk ./release/OlivOS/plugin/app
-          cp ./unpack/*.opk ./release/OlivOS-Win-32-old/plugin/app
           cp ./unpack/*.opk ./release/OlivOS-Linux/plugin/app
           echo "Setup OlivaDice Done"
-      - uses: actions/upload-artifact@v4
+          cd ./release/OlivOS/
+          zip -r ../../release-final/OlivaDice-OlivOS-Win.zip ./
+          cd ../../
+          cd ./release/OlivOS-Linux/
+          zip -r ../../release-final/OlivaDice-OlivOS-Linux.zip ./
+          cd ../../
+          cp ./unpack/OlivaDiceCore.opk ./release-final
+          echo "Pack OlivaDice Done"
+      - name: Artifact OlivaDice-OlivOS-Win
+        uses: actions/upload-artifact@v4
         with:
-          name: OlivaDice-OlivOS-Win
-          path: ./release/OlivOS
-      - uses: actions/upload-artifact@v4
+          path: ./release-final/OlivaDice-OlivOS-Win.zip
+      - name: Artifact OlivaDice-OlivOS-Linux
+        uses: actions/upload-artifact@v4
         with:
-          name: OlivaDice-OlivOS-Win-32-old
-          path: ./release/OlivOS-Win-32-old
-      - uses: actions/upload-artifact@v4
+          path: ./release-final/OlivaDice-OlivOS-Linux.zip
+      - name: Artifact OlivaDiceCore.opk
+        uses: actions/upload-artifact@v4
         with:
-          name: OlivaDice-OlivOS-Linux
-          path: ./release/OlivOS-Linux
+          path: ./release-final/OlivaDiceCore.opk
+      - name: Pack OlivaDice With Version
+        if: github.ref_type == 'tag'
+        run: |
+          cp ./release-final/OlivaDice-OlivOS-Win.zip ./release-final/OlivaDice-${{ github.ref_name }}-OlivOS-Win-${{ env.OlivOSTag }}.zip
+          cp ./release-final/OlivaDice-OlivOS-Linux.zip ./release-final/OlivaDice-${{ github.ref_name }}-OlivOS-Linux-${{ env.OlivOSTag }}.zip
+      - name: Draft Release
+        if: github.ref_type == 'tag'
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+          draft: true
+          allowUpdates: true
+          removeArtifacts: true
+          artifacts: |
+            ./release-final/*
