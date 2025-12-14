@@ -131,14 +131,18 @@ jobs:
           cd ../../
           cp ./unpack/OlivaDiceCore.opk ./release-final
           echo "Pack OlivaDice Done"
+          echo "ls -R :"
+          ls -R
       - name: Artifact OlivaDice-OlivOS-Win
         uses: actions/upload-artifact@v4
         with:
-          path: ./release-final/OlivaDice-OlivOS-Win.zip
+          name: OlivaDice-OlivOS-Win
+          path: ./release/OlivOS
       - name: Artifact OlivaDice-OlivOS-Linux
         uses: actions/upload-artifact@v4
         with:
-          path: ./release-final/OlivaDice-OlivOS-Linux.zip
+          name: OlivaDice-OlivOS-Linux
+          path: ./release/OlivOS-Linux
       - name: Artifact OlivaDiceCore.opk
         uses: actions/upload-artifact@v4
         with:
