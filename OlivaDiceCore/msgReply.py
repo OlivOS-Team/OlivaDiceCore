@@ -2413,7 +2413,7 @@ def unity_reply(plugin_event, Proc):
                 if 'coc' == flag_mode:
                     sn_title = '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}'
                 elif 'dnd' == flag_mode:
-                    sn_title = '{tName} hp{HP}/{HPMAX} mp{MP}/{MPMAX} dex{DEX}'
+                    sn_title = '{tName} AC{护甲等级} DC{法术豁免} PP{被动察觉}'
                 elif 'custom' == flag_mode:
                     sn_title = sn_title_new
                 elif 'template' == flag_mode:
