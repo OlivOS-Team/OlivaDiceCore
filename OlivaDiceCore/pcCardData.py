@@ -2811,7 +2811,9 @@ dictPcCardTemplateDefaultTemp = {
             '状态': [
                 '载重',
                 '负重',
-                '护甲等级'
+                '护甲等级',
+                '法术豁免',
+                '被动察觉'
             ],
             '技能': [
                 '运动',
@@ -2924,6 +2926,8 @@ dictPcCardTemplateDefaultTemp = {
             '载重': ['载重', 'Carring_Capacity'],
             '负重': ['负重', 'Encumbrance'],
             '护甲等级': ['AC', 'Armor_Class', '护甲等级'],
+            '法术豁免': ['Spell_Save_DC', 'DC', '法术豁免'],
+            '被动察觉': ['Passive_Perception', 'PP', '被动察觉'],
 
             '金币': ['Gold_Piece', '金币', 'GP'],
             '银币': ['Silver_Piece', '银币', 'SP'],
@@ -2971,7 +2975,11 @@ dictPcCardTemplateDefaultTemp = {
             'WIS': '感知',
             'CHA': '魅力',
         },
-        'snTitle': '{tName} hp{HP}/{HPMAX} mp{MP}/{MPMAX} dex{DEX}',
+        'snTitle': '{tName} AC{护甲等级} DC{法术豁免} PP{被动察觉}',
+        'defaultSkillValue': {
+            '法术豁免': 8,
+            '被动察觉': 10
+        },
         'checkRules': {
             'default': {
                 'checkList': [
