@@ -2432,12 +2432,12 @@ def unity_reply(plugin_event, Proc):
                         trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearGlobal'], dictTValue)
                     else:
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearNoneAll'], dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearNone'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
+            
+            # 检测group/global前置参数
             elif isMatchWordStart(tmp_reast_str, 'group'):
-                flag_group_scope = True
-                flag_force = True
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'group')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 # 处理 group clr
@@ -2462,7 +2462,7 @@ def unity_reply(plugin_event, Proc):
                             if key.startswith('名片') and key != '名片':
                                 group_sn_keys_to_remove.append(key)
                         if len(group_sn_keys_to_remove) == 0:
-                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearNoneGroupAll'], dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearNone'], dictTValue)
                         else:
                             for key in group_sn_keys_to_remove:
                                 OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
@@ -2510,9 +2510,13 @@ def unity_reply(plugin_event, Proc):
                         trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearGroup'], dictTValue)
                     else:
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearNoneGroup'], dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearNone'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
+                else:
+                    # 不是 clr，设置为 group 模式并继续处理
+                    flag_group_scope = True
+                    flag_force = True
             elif isMatchWordStart(tmp_reast_str, 'global'):
                 flag_group_scope = False
                 flag_force = True
@@ -2548,7 +2552,7 @@ def unity_reply(plugin_event, Proc):
                         trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearGlobal'], dictTValue)
                     else:
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearNoneGlobal'], dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearNone'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
             # 解析名片格式参数
