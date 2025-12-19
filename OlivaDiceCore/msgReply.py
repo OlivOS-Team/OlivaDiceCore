@@ -2370,7 +2370,7 @@ def unity_reply(plugin_event, Proc):
                         if key.startswith('名片'):
                             sn_keys_to_remove.append(key)
                     if len(sn_keys_to_remove) == 0:
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearNoneAll'], dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearNone'], dictTValue)
                     else:
                         for key in sn_keys_to_remove:
                             OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
