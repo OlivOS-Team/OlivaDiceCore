@@ -2343,18 +2343,214 @@ def unity_reply(plugin_event, Proc):
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnAutoOff'], dictTValue)
                     replyMsg(plugin_event, tmp_reply_str)
                     return
-            # 检测group/global前置参数
-            if isMatchWordStart(tmp_reast_str, 'group'):
+            elif isMatchWordStart(tmp_reast_str, ['clear', 'clr']):
+                if is_at: return
+                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['clear', 'clr'])
+                tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                # 获取群 hash 前8位用于分群名片
+                tmp_groupHash = OlivaDiceCore.userConfig.getUserHash(
+                    userId = tmp_hagID,
+                    userType = 'group',
+                    platform = tmp_pc_platform
+                )
+                tmp_group_sn_key = '名片' + tmp_groupHash[:8] if tmp_groupHash else '名片'
+                if tmp_pc_name != None:
+                    tmp_Record = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                        pcHash = tmp_pcHash,
+                        pcCardName = tmp_pc_name,
+                        dataKey = 'noteRecord',
+                        resDefault = {}
+                    )
+                else:
+                    tmp_Record = {}
+                if isMatchWordStart(tmp_reast_str, 'all', fullMatch = True):
+                    # 清除所有名片记录（只清除以"名片"开头的记录）
+                    sn_keys_to_remove = []
+                    for key in tmp_Record.keys():
+                        if key.startswith('名片'):
+                            sn_keys_to_remove.append(key)
+                    if len(sn_keys_to_remove) == 0:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearNoneAll'], dictTValue)
+                    else:
+                        for key in sn_keys_to_remove:
+                            OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
+                                plugin_event = plugin_event,
+                                tmp_pc_id = tmp_pc_id,
+                                tmp_pc_platform = tmp_pc_platform,
+                                tmp_hagID = tmp_hagID,
+                                dictTValue = dictTValue,
+                                dictStrCustom = dictStrCustom,
+                                keyName = 'noteRecord',
+                                tmp_key = key,
+                                tmp_value = None,
+                                flag_mode = 'note',
+                                enableFalse = False,
+                                is_remove = True
+                            )
+                        trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearAll'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
+                else:
+                    # 自动判断清除群名片还是全局名片
+                    has_group = tmp_group_sn_key in tmp_Record
+                    has_global = '名片' in tmp_Record
+                    if has_group:
+                        # 优先清除群名片
+                        OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
+                            plugin_event = plugin_event,
+                            tmp_pc_id = tmp_pc_id,
+                            tmp_pc_platform = tmp_pc_platform,
+                            tmp_hagID = tmp_hagID,
+                            dictTValue = dictTValue,
+                            dictStrCustom = dictStrCustom,
+                            keyName = 'noteRecord',
+                            tmp_key = tmp_group_sn_key,
+                            tmp_value = None,
+                            flag_mode = 'note',
+                            enableFalse = False,
+                            is_remove = True
+                        )
+                        trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearGroup'], dictTValue)
+                    elif has_global:
+                        # 没有群名片时清除全局名片
+                        OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
+                            plugin_event = plugin_event,
+                            tmp_pc_id = tmp_pc_id,
+                            tmp_pc_platform = tmp_pc_platform,
+                            tmp_hagID = tmp_hagID,
+                            dictTValue = dictTValue,
+                            dictStrCustom = dictStrCustom,
+                            keyName = 'noteRecord',
+                            tmp_key = '名片',
+                            tmp_value = None,
+                            flag_mode = 'note',
+                            enableFalse = False,
+                            is_remove = True
+                        )
+                        trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearGlobal'], dictTValue)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearNoneAll'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
+            elif isMatchWordStart(tmp_reast_str, 'group'):
                 flag_group_scope = True
                 flag_force = True
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'group')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                # 处理 group clr
+                if isMatchWordStart(tmp_reast_str, ['clear', 'clr']):
+                    if is_at: return
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['clear', 'clr'])
+                    tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                    if tmp_pc_name != None:
+                        tmp_Record = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                            pcHash = tmp_pcHash,
+                            pcCardName = tmp_pc_name,
+                            dataKey = 'noteRecord',
+                            resDefault = {}
+                        )
+                    else:
+                        tmp_Record = {}
+                    # 清除所有群名片记录
+                    if isMatchWordStart(tmp_reast_str, 'all', fullMatch = True):
+                        # 查找所有群名片记录（以"名片"开头但不是"名片"本身）
+                        group_sn_keys_to_remove = []
+                        for key in tmp_Record.keys():
+                            if key.startswith('名片') and key != '名片':
+                                group_sn_keys_to_remove.append(key)
+                        if len(group_sn_keys_to_remove) == 0:
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearNoneGroupAll'], dictTValue)
+                        else:
+                            for key in group_sn_keys_to_remove:
+                                OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
+                                    plugin_event = plugin_event,
+                                    tmp_pc_id = tmp_pc_id,
+                                    tmp_pc_platform = tmp_pc_platform,
+                                    tmp_hagID = tmp_hagID,
+                                    dictTValue = dictTValue,
+                                    dictStrCustom = dictStrCustom,
+                                    keyName = 'noteRecord',
+                                    tmp_key = key,
+                                    tmp_value = None,
+                                    flag_mode = 'note',
+                                    enableFalse = False,
+                                    is_remove = True
+                                )
+                            trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearGroupAll'], dictTValue)
+                        replyMsg(plugin_event, tmp_reply_str)
+                        return
+                    # 清除当前群的名片记录
+                    # 获取群 hash 前8位用于分群名片
+                    tmp_groupHash = OlivaDiceCore.userConfig.getUserHash(
+                        userId = tmp_hagID,
+                        userType = 'group',
+                        platform = tmp_pc_platform
+                    )
+                    tmp_group_sn_key = '名片' + tmp_groupHash[:8] if tmp_groupHash else '名片'
+                    
+                    if tmp_group_sn_key in tmp_Record:
+                        OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
+                            plugin_event = plugin_event,
+                            tmp_pc_id = tmp_pc_id,
+                            tmp_pc_platform = tmp_pc_platform,
+                            tmp_hagID = tmp_hagID,
+                            dictTValue = dictTValue,
+                            dictStrCustom = dictStrCustom,
+                            keyName = 'noteRecord',
+                            tmp_key = tmp_group_sn_key,
+                            tmp_value = None,
+                            flag_mode = 'note',
+                            enableFalse = False,
+                            is_remove = True
+                        )
+                        trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearGroup'], dictTValue)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearNoneGroup'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
             elif isMatchWordStart(tmp_reast_str, 'global'):
                 flag_group_scope = False
                 flag_force = True
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'global')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
-            
+                # 处理 global clr
+                if isMatchWordStart(tmp_reast_str, ['clear', 'clr'], fullMatch = True):
+                    if is_at: return
+                    if tmp_pc_name != None:
+                        tmp_Record = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                            pcHash = tmp_pcHash,
+                            pcCardName = tmp_pc_name,
+                            dataKey = 'noteRecord',
+                            resDefault = {}
+                        )
+                    else:
+                        tmp_Record = {}
+                    if '名片' in tmp_Record:
+                        OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
+                            plugin_event = plugin_event,
+                            tmp_pc_id = tmp_pc_id,
+                            tmp_pc_platform = tmp_pc_platform,
+                            tmp_hagID = tmp_hagID,
+                            dictTValue = dictTValue,
+                            dictStrCustom = dictStrCustom,
+                            keyName = 'noteRecord',
+                            tmp_key = '名片',
+                            tmp_value = None,
+                            flag_mode = 'note',
+                            enableFalse = False,
+                            is_remove = True
+                        )
+                        trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearGlobal'], dictTValue)
+                    else:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSnClearNoneGlobal'], dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
             # 解析名片格式参数
             if '' == tmp_reast_str.lower():
                 tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
@@ -2409,6 +2605,18 @@ def unity_reply(plugin_event, Proc):
                         sn_title = tmp_Record[tmp_group_sn_key]
                     elif '名片' in tmp_Record:
                         sn_title = tmp_Record['名片']
+            
+            # 默认sn跟随现有设置：如果有群名片就用群，如果只有全局就用全局，都没有就不写入
+            if flag_group_scope is None and not flag_force:
+                has_group = tmp_group_sn_key in tmp_Record
+                has_global = '名片' in tmp_Record
+                if has_group:
+                    flag_group_scope = True
+                elif has_global:
+                    flag_group_scope = False
+                else:
+                    # 裸.sn时，如果没有任何名片，不写入，只显示当前模板名片
+                    flag_group_scope = None
             if flag_force or sn_title == None:
                 if 'coc' == flag_mode:
                     sn_title = '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}'
