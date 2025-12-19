@@ -132,7 +132,7 @@ dictStrCustom = {
     'strSnClearGroupAll' : "已清除[{tName}]人物卡在所有群中的名片记录（全局名片保留）",
     'strSnClearNoneGroup' : "[{tName}]人物卡在本群没有设置名片记录",
     'strSnClearNoneGlobal' : "[{tName}]人物卡没有设置全局名片记录",
-    'strSnClearNoneAll' : "[{tName}]人物卡没有任何名片记录",
+    'strSnClearNoneAll' : "[{tName}]人物卡没有目前指令能删除的名片记录",
     'strSnClearNoneGroupAll' : "[{tName}]人物卡没有任何群名片记录",
     'strPcSetMapValueError' : '[{tResult}]不是合法的表达式',
     'strPcInitSet' : '先攻列表已设置:\n{tResult}',
