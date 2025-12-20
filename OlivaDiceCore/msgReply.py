@@ -2558,31 +2558,42 @@ def unity_reply(plugin_event, Proc):
             # 解析名片格式参数
             if '' == tmp_reast_str.lower():
                 tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
-                if 'snTitle' in tmp_template:
+                if tmp_template and 'snTitle' in tmp_template:
                     tmp_pc_card_snTitle = tmp_template['snTitle']
                     flag_mode = 'template'
                     # 只有在没有使用group/global时才设置为False
                     if flag_group_scope is None:
                         flag_force = False
                 else:
-                    flag_mode = 'coc'
+                    # 模板没有 snTitle，尝试使用 default 模板
+                    tmp_default_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey('default')
+                    if tmp_default_template and 'snTitle' in tmp_default_template:
+                        tmp_pc_card_snTitle = tmp_default_template['snTitle']
+                    flag_mode = 'template'
                     # 只有在没有使用group/global时才设置为False
                     if flag_group_scope is None:
                         flag_force = False
-            elif tmp_reast_str.lower() in ['dnd', 'dnd5e']:
-                flag_mode = 'dnd'
-            elif tmp_reast_str.lower() in ['coc', 'coc6', 'coc7']:
-                flag_mode = 'coc'
-            elif tmp_reast_str.lower() in ['default','template']:
+            elif tmp_reast_str.lower() == 'template':
                 tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
-                if 'snTitle' in tmp_template:
+                if tmp_template and 'snTitle' in tmp_template:
                     tmp_pc_card_snTitle = tmp_template['snTitle']
                 else:
-                    tmp_pc_card_snTitle = '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}'
+                    # 模板没有 snTitle，尝试使用 default 模板
+                    tmp_default_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey('default')
+                    if tmp_default_template and 'snTitle' in tmp_default_template:
+                        tmp_pc_card_snTitle = tmp_default_template['snTitle']
                 flag_mode = 'template'
             else:
-                flag_mode = 'custom'
-                sn_title_new = tmp_reast_str
+                # 尝试解析为模板名称
+                tmp_target_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_reast_str)
+                if tmp_target_template is not None and 'snTitle' in tmp_target_template:
+                    # 找到了模板且有snTitle字段，使用模板的snTitle
+                    tmp_pc_card_snTitle = tmp_target_template['snTitle']
+                    flag_mode = 'template'
+                else:
+                    # 不是有效模板名或模板没有snTitle，当作自定义格式处理
+                    flag_mode = 'custom'
+                    sn_title_new = tmp_reast_str
             tmp_Record = {}
             # 获取群 hash 前8位用于分群名片
             tmp_groupHash = OlivaDiceCore.userConfig.getUserHash(
@@ -2629,11 +2640,7 @@ def unity_reply(plugin_event, Proc):
                     else:
                         flag_group_scope = False
             if flag_force or sn_title == None:
-                if 'coc' == flag_mode:
-                    sn_title = '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}'
-                elif 'dnd' == flag_mode:
-                    sn_title = '{tName} AC{护甲等级} DC{法术豁免} PP{被动察觉}'
-                elif 'custom' == flag_mode:
+                if 'custom' == flag_mode:
                     sn_title = sn_title_new
                 elif 'template' == flag_mode:
                     sn_title = tmp_pc_card_snTitle

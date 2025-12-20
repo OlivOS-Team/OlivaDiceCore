@@ -320,8 +320,7 @@ https://wiki.dice.center/OlivOS_Login.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9B%9E%
 
     'sn': '''跑团名片：
 .sn  套用人物卡中的名片记录
-.sn coc  套用coc跑团名片
-.sn dnd  套用dnd跑团名片
+.sn [模板名]  套用指定模板的名片格式（如 .sncoc, .sndnd 等）
 .sn template  套用人物卡模板名片
 .sn [自定义名片]  套用任意自定义名片
 .sn group [自定义名片]  设置当前群专属名片
@@ -336,7 +335,7 @@ https://wiki.dice.center/OlivOS_Login.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9B%9E%
 .sn clr all 清除所有名片记录（包括群名片和全局名片）
 
 默认情况下，.sn会自动判断群名片还是全局名片
-使用.sn group可显式设置当前群的名片
+使用.sn group可设置当前群的名片
 使用.sn global可设置全局名片，并清除当前群的专属名片
 群名片优先级高于全局名片
 group/global可与格式参数组合，如: .sn group coc, .sn global template
