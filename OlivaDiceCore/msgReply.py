@@ -2610,17 +2610,24 @@ def unity_reply(plugin_event, Proc):
                     elif '名片' in tmp_Record:
                         sn_title = tmp_Record['名片']
             
-            # 默认sn跟随现有设置：如果有群名片就用群，如果只有全局就用全局，都没有就不写入
-            if flag_group_scope is None and not flag_force:
+            # 默认sn跟随现有设置
+            if flag_group_scope is None:
                 has_group = tmp_group_sn_key in tmp_Record
                 has_global = '名片' in tmp_Record
-                if has_group:
-                    flag_group_scope = True
-                elif has_global:
-                    flag_group_scope = False
+                if not flag_force:
+                    # 裸.sn：有群写群，有全局写全局，都没有不写入
+                    if has_group:
+                        flag_group_scope = True
+                    elif has_global:
+                        flag_group_scope = False
+                    else:
+                        flag_group_scope = None
                 else:
-                    # 裸.sn时，如果没有任何名片，不写入，只显示当前模板名片
-                    flag_group_scope = None
+                    # .sn带参数：有群写群，否则写入全局
+                    if has_group:
+                        flag_group_scope = True
+                    else:
+                        flag_group_scope = False
             if flag_force or sn_title == None:
                 if 'coc' == flag_mode:
                     sn_title = '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}'
