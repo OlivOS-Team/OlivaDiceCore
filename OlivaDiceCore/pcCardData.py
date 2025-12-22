@@ -1526,6 +1526,9 @@ dictPcCardTemplateDefaultTemp = {
             }
         }
     },
+    'COC' : {
+        'tempMapping': 'COC7'
+    },
     '纯净COC7': {
         'mainDice': '1D100',
         'customDefault': {
@@ -2994,6 +2997,9 @@ dictPcCardTemplateDefaultTemp = {
                 }
             }
         }
+    },
+    'DND': {
+        'tempMapping': 'DND5E'
     },
     'DX3': {
         'mainDice': '10C8',
