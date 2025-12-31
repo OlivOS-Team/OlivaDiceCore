@@ -6435,6 +6435,28 @@ def unity_reply(plugin_event, Proc):
                         tmp_reast_str = tmp_reast_str_list_1[1]
             tmp_rd_para_str = None
             tmp_rd_para_str_show = None
+            # 提前读取主骰设置，用于优势/劣势处理
+            rd_para_main_str = OlivaDiceCore.userConfig.getUserConfigByKey(
+                userId = tmp_hagID,
+                userType = 'group',
+                platform = tmp_user_platform,
+                userConfigKey = 'groupMainDice',
+                botHash = plugin_event.bot_info.hash
+            )
+            rd_para_main_D_right = OlivaDiceCore.userConfig.getUserConfigByKey(
+                userId = tmp_hagID,
+                userType = 'group',
+                platform = tmp_user_platform,
+                userConfigKey = 'groupMainDiceDRight',
+                botHash = plugin_event.bot_info.hash
+            )
+            rd_para_main_D_left = OlivaDiceCore.userConfig.getUserConfigByKey(
+                userId = tmp_hagID,
+                userType = 'group',
+                platform = tmp_user_platform,
+                userConfigKey = 'groupMainDiceDLeft',
+                botHash = plugin_event.bot_info.hash
+            )
             if len(tmp_reast_str) > 0:
                 if flag_roll_mode in ['rx']:
                     [tmp_rd_para_str, tmp_reast_str] = getExpression(tmp_reast_str, valueTable = None)
@@ -6452,17 +6474,25 @@ def unity_reply(plugin_event, Proc):
                         tmp_pcCardRule = 'DX3'
                         
                     # 处理表达式中的优势/劣势
+                    # 使用主骰设置的默认值
+                    default_left = rd_para_main_D_left if type(rd_para_main_D_left) == int else 1
+                    default_right = rd_para_main_D_right if type(rd_para_main_D_right) == int else 100
                     def replace_advantage(match):
                         full_match = match.group(0)
-                        dice_num = match.group(1) or "1"
-                        dice_type = match.group(2)
+                        prefix = match.group(1) or ""
+                        dice_num = match.group(2)
+                        dice_type = match.group(3)
                         is_advantage = "优势" in full_match
-                        # 如果是1dX或dX格式，转换为2dXk[h/l]
+                        if dice_num is None or dice_num == "":
+                            dice_num = str(default_left)
+                        if dice_type is None or dice_type == "":
+                            dice_type = str(default_right)
+                        # 如果是1dx或dx格式，转换为2dXk[h/l]
                         if dice_num == "1":
-                            return f"2D{dice_type}k{'h' if is_advantage else 'l'}"
-                        # 如果是2dX及以上，直接加k[h/l]
-                        return f"{dice_num}D{dice_type}k{'h' if is_advantage else 'l'}"
-                    pattern = r'(?:^|[+\-*/])(?:\s*)(\d+)?[dD](\d+)(?:\s+)?(?:优势|劣势)'
+                            return f"{prefix}2D{dice_type}k{'h' if is_advantage else 'l'}"
+                        # 如果是2dx及以上，直接加k[h/l]
+                        return f"{prefix}{dice_num}D{dice_type}k{'h' if is_advantage else 'l'}"
+                    pattern = r'(^|[+\-*/]\s*)(\d*)[dD](\d*)(?:\s*)(?:优势|劣势)'
                     tmp_reast_str_old = re.sub(pattern, replace_advantage, tmp_reast_str_old)
 
                     [tmp_rd_para_str, tmp_reast_str] = getExpression(
@@ -6535,23 +6565,8 @@ def unity_reply(plugin_event, Proc):
                 if 'mainDice' in tmp_template and not flag_have_para:
                     if flag_roll_mode in ['r', 'rx']:
                         rd_para_str = tmp_template['mainDice']
-            rd_para_main_str = OlivaDiceCore.userConfig.getUserConfigByKey(
-                userId = tmp_hagID,
-                userType = 'group',
-                platform = tmp_user_platform,
-                userConfigKey = 'groupMainDice',
-                botHash = plugin_event.bot_info.hash
-            )
-            rd_para_main_D_right = OlivaDiceCore.userConfig.getUserConfigByKey(
-                userId = tmp_hagID,
-                userType = 'group',
-                platform = tmp_user_platform,
-                userConfigKey = 'groupMainDiceDRight',
-                botHash = plugin_event.bot_info.hash
-            )
             # FATE规则时无视主骰设置
             if tmp_template_name and tmp_template_name.lower() in ['fate']:
-                # FATE规则不使用主骰设置
                 pass
             else:
                 if rd_para_main_str != None and not flag_have_para and flag_roll_mode in ['r', 'rx']:
@@ -6560,14 +6575,17 @@ def unity_reply(plugin_event, Proc):
             if tmp_template_customDefault is None:
                 tmp_template_customDefault = {}
             tmp_template_customDefault = copy.deepcopy(tmp_template_customDefault)
-            # FATE规则时不修改D右值
-            if tmp_template_name and tmp_template_name.lower() not in ['fate']:
-                if type(rd_para_main_D_right) == int:
+            # FATE规则时不修改D左右值，其他情况（包括无人物卡）都应用主骰设置
+            if not (tmp_template_name and tmp_template_name.lower() in ['fate']):
+                if type(rd_para_main_D_right) == int or type(rd_para_main_D_left) == int:
                     if type(tmp_template_customDefault) != dict:
                         tmp_template_customDefault = {}
                     if 'd' not in tmp_template_customDefault:
                         tmp_template_customDefault['d'] = {}
-                    tmp_template_customDefault['d']['rightD'] = rd_para_main_D_right
+                    if type(rd_para_main_D_right) == int:
+                        tmp_template_customDefault['d']['rightD'] = rd_para_main_D_right
+                    if type(rd_para_main_D_left) == int:
+                        tmp_template_customDefault['d']['leftD'] = rd_para_main_D_left
             if roll_times_count == 1:
                 rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_template_customDefault, valueTable = skill_valueTable)
                 rd_para.ruleMode = tmp_ruleMode

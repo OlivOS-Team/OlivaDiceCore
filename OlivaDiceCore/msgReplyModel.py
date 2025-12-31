@@ -157,6 +157,7 @@ def replySET_command(plugin_event, Proc, valDict):
     tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
     tmp_set_para = None
     tmp_set_D_right = None
+    tmp_set_D_left = None
     if tmp_reast_str == 'show':
         tmp_set_para = OlivaDiceCore.userConfig.getUserConfigByKey(
             userId = tmp_hagID,
@@ -457,6 +458,7 @@ def replySET_command(plugin_event, Proc, valDict):
         if len(tmp_reast_str) > 0:
             if tmp_reast_str.isdigit():
                 tmp_set_D_right = int(tmp_reast_str)
+                tmp_set_D_left = 1
                 tmp_set_para = '1D%d' % tmp_set_D_right
             else:
                 tmp_set_para = tmp_reast_str
@@ -467,19 +469,23 @@ def replySET_command(plugin_event, Proc, valDict):
                     tmp_set_para_list = tmp_set_para.split('D')
                     if len(tmp_set_para_list) == 2:
                         if tmp_set_para_list[0].isdigit() and tmp_set_para_list[1].isdigit():
+                            tmp_set_D_left = int(tmp_set_para_list[0])
                             tmp_set_D_right = int(tmp_set_para_list[1])
                         elif tmp_set_para_list[0].isdigit() and tmp_set_para_list[1] == '':
+                            tmp_set_D_left = int(tmp_set_para_list[0])
                             tmp_set_D_right = 100
                             tmp_set_para = '%sD%d' % (
                                 tmp_set_para_list[0],
                                 tmp_set_D_right
                             )
                         elif tmp_set_para_list[0] == '' and tmp_set_para_list[1].isdigit():
+                            tmp_set_D_left = 1
                             tmp_set_D_right = int(tmp_set_para_list[1])
                             tmp_set_para = '1D%d' % (
                                 tmp_set_D_right
                             )
                         elif tmp_set_para_list[0] == '' and tmp_set_para_list[1] == '':
+                            tmp_set_D_left = 1
                             tmp_set_D_right = 100
                             tmp_set_para = '1D%d' % (
                                 tmp_set_D_right
@@ -503,6 +509,14 @@ def replySET_command(plugin_event, Proc, valDict):
                 userType = 'group',
                 platform = tmp_user_platform
             )
+            OlivaDiceCore.userConfig.setUserConfigByKey(
+                userConfigKey = 'groupMainDiceDLeft',
+                userConfigValue = tmp_set_D_left,
+                botHash = plugin_event.bot_info.hash,
+                userId = tmp_hagID,
+                userType = 'group',
+                platform = tmp_user_platform
+            )
             dictTValue['tResult'] = tmp_set_para
             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strSetGroupMainDice'], dictTValue)
         else:
@@ -516,7 +530,15 @@ def replySET_command(plugin_event, Proc, valDict):
             )
             OlivaDiceCore.userConfig.setUserConfigByKey(
                 userConfigKey = 'groupMainDiceDRight',
-                userConfigValue = tmp_set_D_right,
+                userConfigValue = None,
+                botHash = plugin_event.bot_info.hash,
+                userId = tmp_hagID,
+                userType = 'group',
+                platform = tmp_user_platform
+            )
+            OlivaDiceCore.userConfig.setUserConfigByKey(
+                userConfigKey = 'groupMainDiceDLeft',
+                userConfigValue = None,
                 botHash = plugin_event.bot_info.hash,
                 userId = tmp_hagID,
                 userType = 'group',

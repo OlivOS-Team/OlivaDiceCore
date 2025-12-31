@@ -46,6 +46,7 @@ dictUserConfigNoteDefault = {
     'groupRavRule' : None,
     'groupMainDice' : None,
     'groupMainDiceDRight' : None,
+    'groupMainDiceDLeft' : None,
     'groupObList' : None,
     'groupInitList' : None,
     'groupInitParaList' : None,
