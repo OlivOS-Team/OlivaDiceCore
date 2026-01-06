@@ -56,6 +56,7 @@ dictStrCustom = {
     'strBotExit': '即将退出本群',
     'strBotExitRemote': '收到远程控制, 即将退出本群，骰主附加消息：{tExtraMsg}',
     'strBotExitRemoteShow' : '即将远程退出群[{tGroupId}]',
+    'strBotExitRemoteUnit' : '已退出群[{tGroupId}]',
     'strBotAddFriendNotice': '好友添加请求, 来自[{tUserId}]\n备注:{tComment}\n{tResult}',
     'strBotAddGroupNotice' : '群添加请求，来自群[{tGroupId}], 邀请者[{tInvaterId}]\n{tResult}',
     'strBotAddGroupNoticeIgnoreResult' : '已忽略\n请输入[{tAcceptCommand}]以远程接受请求',

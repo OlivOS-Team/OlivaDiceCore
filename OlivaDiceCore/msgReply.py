@@ -437,6 +437,8 @@ def unity_reply(plugin_event, Proc):
                             time.sleep(1)
                             # 执行退群操作
                             plugin_event.set_group_leave(tmp_group_id)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotExitRemoteUnit'], dictTValue)
+                            replyMsg(plugin_event, tmp_reply_str)
                 elif isMatchWordStart(tmp_reast_str, 'remote'):
                     tmp_user_platform = plugin_event.platform['platform']
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'remote')
