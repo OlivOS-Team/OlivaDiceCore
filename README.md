@@ -68,7 +68,12 @@ Latest Release: [![GitHub release](https://img.shields.io/github/release-pre/Oli
 名单还在补完，请加群进行沟通~
 
 ## 开始使用
-教程: [【教程】手把手教你搭建青果骰](https://forum.olivos.run/d/25)  
+教程: 
++ [【教程】小白可用的 OlivaDice 对接 NapCat 分离部署](https://forum.olivos.run/d/832)  
++ [【搬运-教程】新llob教程-小白可学的用 LLOneBot 对接 OlivOS](https://forum.olivos.run/d/835)  
++ [【踩坑指南】论如何在 Windows Server 上搭建 WSL 运行 Linux，实现 Windows 端 OlivOS 与子系统 NapCat 的对接](https://forum.olivos.run/d/880)  
++ [【教程】手把手教你搭建青果骰](https://forum.olivos.run/d/25)
+
 论坛: <https://forum.olivos.run>  
 主页: <http://oliva.dice.center>  
 手册: <https://wiki.dice.center>  
