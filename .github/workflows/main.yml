@@ -182,6 +182,9 @@ jobs:
     - name: Run Flake8 Check
       run: |
         flake8 . > flake8_output.log
+    - name: Show Flake8 Output
+      if: failure()
+      run: |
         cat flake8_output.log
     - name: Upload Flake8 Output
       if: failure()
