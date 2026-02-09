@@ -164,3 +164,28 @@ jobs:
           removeArtifacts: true
           artifacts: |
             ./release-final/*
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+        architecture: x64
+        freethreaded: true
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install flake8
+    - name: Run Flake8 Check
+      run: |
+        touch flake8_output.log
+        flake8 --tee flake8_output.log .
+    - name: Upload Flake8 Output
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: flake8_output
+        path: ./flake8_output.log
