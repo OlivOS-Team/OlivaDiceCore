@@ -181,8 +181,7 @@ jobs:
         python -m pip install flake8
     - name: Run Flake8 Check
       run: |
-        touch flake8_output.log
-        flake8 --tee flake8_output.log .
+        flake8 . > flake8_output.log
     - name: Upload Flake8 Output
       if: failure()
       uses: actions/upload-artifact@v4
