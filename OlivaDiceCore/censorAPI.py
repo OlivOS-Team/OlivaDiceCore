@@ -1,15 +1,15 @@
-'''
+r'''
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
-_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/   
-/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___   
-\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/   
+_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
+/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___
+\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/
 
 @File      :   censorAPI.py
 @Author    :   lunzhiPenxil仑质
 @Contact   :   lunzhipenxil@gmail.com
 @License   :   AGPL
-@Copyright :   (C) 2022-2023, OlivOS-Team
+@Copyright :   (C) 2022-2026, OlivOS-Team
 @Desc      :   None
 '''
 
@@ -33,11 +33,13 @@ gCensorConfigListUnitTemplate = {
     'censorList': []
 }
 
-def formatUTF8WithBOM(data:bytes):
+
+def formatUTF8WithBOM(data: bytes):
     res = data
     if res[:3] == codecs.BOM_UTF8:
         res = res[3:]
     return res
+
 
 def readListFromFile(path):
     res = []
@@ -45,9 +47,10 @@ def readListFromFile(path):
         with open(path, 'rb') as path_f:
             path_fs = formatUTF8WithBOM(path_f.read()).decode('utf-8')
             res = path_fs.replace('\r\n', '\n').split('\n')
-    except:
+    except Exception:
         res = []
     return res
+
 
 def readConfigListByHash(bot_hash):
     global gCensorConfigList, gCensorConfigListUnitTemplate
@@ -62,9 +65,10 @@ def readConfigListByHash(bot_hash):
         with open(path, 'rb') as path_f:
             path_fs = formatUTF8WithBOM(path_f.read()).decode('utf-8')
             res = json.loads(path_fs)
-    except:
+    except Exception:
         res = copy.deepcopy(gCensorConfigListUnitTemplate)
     gCensorConfigList[bot_hash] = res
+
 
 def writeConfigListByHash(bot_hash):
     global gCensorConfigList, gCensorConfigListUnitTemplate
@@ -78,43 +82,52 @@ def writeConfigListByHash(bot_hash):
     if bot_hash in gCensorConfigList:
         res = gCensorConfigList[bot_hash]
     try:
-        with open(path, 'w', encoding = 'utf-8') as path_f:
-            path_fs = json.dumps(res, ensure_ascii = False, indent = 4)
+        with open(path, 'w', encoding='utf-8') as path_f:
+            path_fs = json.dumps(res, ensure_ascii=False, indent=4)
             path_f.write(path_fs)
-    except:
+    except Exception:
         pass
+
 
 def addConfigList(bot_hash, setWord):
     global gCensorConfigList
-    if bot_hash in gCensorConfigList \
-    and 'censorList' in gCensorConfigList[bot_hash] \
-    and type(gCensorConfigList[bot_hash]['censorList']) is list:
+    if (
+        bot_hash in gCensorConfigList
+        and 'censorList' in gCensorConfigList[bot_hash]
+        and type(gCensorConfigList[bot_hash]['censorList']) is list
+    ):
         if setWord not in gCensorConfigList[bot_hash]['censorList']:
             gCensorConfigList[bot_hash]['censorList'].append(setWord)
+
 
 def getConfigList(bot_hash):
     global gCensorConfigList
     res = []
-    if bot_hash in gCensorConfigList \
-    and 'censorList' in gCensorConfigList[bot_hash] \
-    and type(gCensorConfigList[bot_hash]['censorList']) is list:
+    if (
+        bot_hash in gCensorConfigList
+        and 'censorList' in gCensorConfigList[bot_hash]
+        and type(gCensorConfigList[bot_hash]['censorList']) is list
+    ):
         res = gCensorConfigList[bot_hash]['censorList']
     return res
 
+
 def delConfigList(bot_hash, setWord):
     global gCensorConfigList
-    if bot_hash in gCensorConfigList \
-    and 'censorList' in gCensorConfigList[bot_hash] \
-    and type(gCensorConfigList[bot_hash]['censorList']) is list:
+    if (
+        bot_hash in gCensorConfigList
+        and 'censorList' in gCensorConfigList[bot_hash]
+        and type(gCensorConfigList[bot_hash]['censorList']) is list
+    ):
         gCensorConfigList[bot_hash]['censorList']
         if setWord in gCensorConfigList[bot_hash]['censorList']:
             gCensorConfigList[bot_hash]['censorList'].remove(setWord)
+
 
 def initCensor(bot_info_dict):
     global gCensorDFA, gCensorList, gCensorInfoList, gCensorConfigList
 
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
-    dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
     dictGValue = OlivaDiceCore.msgCustom.dictGValue
     dictTValue.update(dictGValue)
 
@@ -189,7 +202,8 @@ def initCensorByHash(bot_hash):
         ]
     )
 
-def patchCensorByHash(bot_hash, patchList:list):
+
+def patchCensorByHash(bot_hash, patchList: list):
     global gCensorDFA
 
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
@@ -217,28 +231,31 @@ def patchCensorByHash(bot_hash, patchList:list):
         ]
     )
 
+
 def doCensorReplace(
-    botHash:str,
-    msg:str,
-    replaceMark:str = '*',
-    mode:str = OlivaDiceCore.censorDFA.maxMatchType
+    botHash: str,
+    msg: str,
+    replaceMark: str = '*',
+    mode: str = OlivaDiceCore.censorDFA.maxMatchType
 ):
     global gCensorDFA
     res = msg
     if botHash in gCensorDFA:
-        res:str = gCensorDFA[botHash].doReplace(
-            inData = msg,
-            replaceMark = replaceMark,
-            mode = mode
+        res: str = gCensorDFA[botHash].doReplace(
+            inData=msg,
+            replaceMark=replaceMark,
+            mode=mode
         )
     return res
+
 
 def releaseDir(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
 
+
 # 外部调用的直接接口
-def doCensorReplaceOlivOSSafe(botHash:str, msg:str):
+def doCensorReplaceOlivOSSafe(botHash: str, msg: str):
     dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
     dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustom
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
@@ -273,17 +290,17 @@ def doCensorReplaceOlivOSSafe(botHash:str, msg:str):
             for msg_para_this in msg_para.data:
                 if type(msg_para_this) is OlivOS.messageAPI.PARA.text:
                     res += OlivaDiceCore.censorAPI.doCensorReplace(
-                        botHash = botHash,
-                        replaceMark = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                        botHash=botHash,
+                        replaceMark=OlivaDiceCore.msgCustomManager.formatReplySTR(
                             dictStrCustom['strCensorReplace'],
                             dictTValue
                         ),
-                        mode = censorMatchModeFlag,
-                        msg = msg_para_this.CQ()
+                        mode=censorMatchModeFlag,
+                        msg=msg_para_this.CQ()
                     )
                 else:
                     res += msg_para_this.CQ()
-        else: # elif censorMode == 0:
+        else:  # elif censorMode == 0:
             res = msg
     except Exception as e:
         dictTValue['tResult'] = '%s\n%s' % (

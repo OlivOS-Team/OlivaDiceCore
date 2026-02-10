@@ -1,26 +1,25 @@
 # -*- encoding: utf-8 -*-
-'''
+r'''
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
-_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/   
-/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___   
-\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/   
+_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
+/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___
+\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/
 
 @File      :   msgCustom.py
 @Author    :   lunzhiPenxil仑质
 @Contact   :   lunzhipenxil@gmail.com
 @License   :   AGPL
-@Copyright :   (C) 2020-2021, OlivOS-Team
+@Copyright :   (C) 2020-2026, OlivOS-Team
 @Desc      :   None
 '''
-
-import OlivOS
-import OlivaDiceCore
 
 dictStrCustomDict = {}
 
 dictStrCustomUpdateDict = {}
 
+# flake8: NOQA
+# ruff: NOQA
 dictStrCustom = {
     'strBotName': 'Bot',
     'strForGroupOnly': '此功能仅对群聊开放',
@@ -474,6 +473,8 @@ dictSetRAVDetail = {
 3. 骰点数字相同时比较属性值
 4. 属性值也相同才平局'''
 }
+# ruff: NOQA OFF
+# flake8: NOQA OFF
 
 dictAdapterMapper = {
     'qq': {

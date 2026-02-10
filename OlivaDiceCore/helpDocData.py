@@ -1,29 +1,25 @@
 # -*- encoding: utf-8 -*-
-'''
+r'''
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
-_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/   
-/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___   
-\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/   
+_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
+/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___
+\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/
 
 @File      :   helpDocData.py
 @Author    :   lunzhiPenxil仑质
 @Contact   :   lunzhipenxil@gmail.com
 @License   :   AGPL
-@Copyright :   (C) 2020-2021, OlivOS-Team
+@Copyright :   (C) 2020-2026, OlivOS-Team
 @Desc      :   None
 '''
-
-import OlivOS
-import OlivaDiceCore
-
-import os
-import json
 
 dictHelpDoc = {}
 
 dictHelpDocDefault = {}
 
+# flake8: NOQA
+# ruff: NOQA
 dictHelpDocTemp = {
     'default': '''若需要使本机器人退群,请使用[.bot exit]
 输入[.bot on]/[.bot off]可以开关骰子功能
@@ -542,3 +538,5 @@ https://github.com/OlivOS-Team/onedice
     '组队': '&team',
     'host': '&频道',
 }
+# ruff: NOQA OFF
+# flake8: NOQA OFF

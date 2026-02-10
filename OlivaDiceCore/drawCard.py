@@ -1,16 +1,16 @@
 # -*- encoding: utf-8 -*-
-'''
+r'''
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
-_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/   
-/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___   
-\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/   
+_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
+/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___
+\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/
 
 @File      :   drawCard.py
 @Author    :   lunzhiPenxil仑质
 @Contact   :   lunzhipenxil@gmail.com
 @License   :   AGPL
-@Copyright :   (C) 2020-2021, OlivOS-Team
+@Copyright :   (C) 2020-2026, OlivOS-Team
 @Desc      :   None
 '''
 
@@ -19,56 +19,58 @@ import OlivaDiceCore
 
 import os
 import json
-#import yaml
-#import openpyxl
+# import yaml
+# import openpyxl
 import re
 import traceback
 import random
 import codecs
-import traceback
 
 # 兼容OlivOS 0.10.2及以下版本
 try:
     import openpyxl
-except:
+except Exception:
     pass
 try:
     import yaml
-except:
+except Exception:
     pass
 try:
     import pyjson5
-except:
+except Exception:
     pass
 
 dictReMappingDrawFormat = {
     'player': 'tName'
 }
 
-def reMappingDrawFormat(data:str):
+
+def reMappingDrawFormat(data: str):
     res = data
     for key in dictReMappingDrawFormat:
         res = res.replace('{%s}' % key, '{%s}' % dictReMappingDrawFormat[key])
     return res
 
-def formatUTF8WithBOM(data:bytes):
+
+def formatUTF8WithBOM(data: bytes):
     res = data
     if res[:3] == codecs.BOM_UTF8:
         res = res[3:]
     return res
+
 
 def initDeckHelp(bot_info_dict):
     deck_name_tmp_list = list(OlivaDiceCore.drawCardData.dictDeckTemp.keys())
     deck_name_tmp_list = [
         deck_name_tmp_list_this
         for deck_name_tmp_list_this in deck_name_tmp_list
-        if type(deck_name_tmp_list_this) == str and not deck_name_tmp_list_this.startswith('_')
+        if type(deck_name_tmp_list_this) is str and not deck_name_tmp_list_this.startswith('_')
     ]
     deck_name_tmp_list_str = '/'.join(deck_name_tmp_list)
     for bot_hash in bot_info_dict:
         # 应用重定向逻辑（读取牌堆数据时使用重定向后的botHash）
         redirected_bot_hash = OlivaDiceCore.userConfig.getRedirectedBotHash(bot_hash)
-        
+
         helpdoc_patch = {}
         flag_drawListMode = OlivaDiceCore.console.getConsoleSwitchByHash(
             'drawListMode',
@@ -77,12 +79,15 @@ def initDeckHelp(bot_info_dict):
         if flag_drawListMode == 0:
             pass
         elif flag_drawListMode == 1:
-            if redirected_bot_hash in OlivaDiceCore.drawCardData.dictDeck and type(OlivaDiceCore.drawCardData.dictDeck[redirected_bot_hash]) == dict:
+            if (
+                redirected_bot_hash in OlivaDiceCore.drawCardData.dictDeck
+                and type(OlivaDiceCore.drawCardData.dictDeck[redirected_bot_hash]) is dict
+            ):
                 deck_name_list = list(OlivaDiceCore.drawCardData.dictDeck[redirected_bot_hash].keys())
                 deck_name_list = [
                     deck_name_list_this
                     for deck_name_list_this in deck_name_list
-                    if type(deck_name_list_this) == str and not deck_name_list_this.startswith('_')
+                    if type(deck_name_list_this) is str and not deck_name_list_this.startswith('_')
                 ]
                 deck_name_extend_list = [
                     deck_name_list_this
@@ -95,29 +100,50 @@ def initDeckHelp(bot_info_dict):
                     '扩展牌堆': '/'.join(deck_name_extend_list)
                 }
         elif flag_drawListMode == 2:
-            if redirected_bot_hash in OlivaDiceCore.drawCardData.dictDeckIndex and type(OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash]) == dict:
+            if (
+                redirected_bot_hash in OlivaDiceCore.drawCardData.dictDeckIndex
+                and type(OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash]) is dict
+            ):
                 deck_name_tmp_list_index = {'内置牌堆': '内置牌堆:\n%s' % deck_name_tmp_list_str}
                 deck_name_list_index = {
                     '扩展牌堆 %s' % deck_name_list_this: '%s:\n%s' % (
                         deck_name_list_this,
                         '/'.join([
                             deck_name_list_this_this
-                            for deck_name_list_this_this in OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash][deck_name_list_this]
-                            if type(deck_name_list_this_this) == str and not deck_name_list_this_this.startswith('_')
+                            for deck_name_list_this_this in (
+                                OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash][deck_name_list_this]
+                            )
+                            if (
+                                type(deck_name_list_this_this) is str
+                                and not deck_name_list_this_this.startswith('_')
+                            )
                         ])
                     )
                     for deck_name_list_this in OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash]
-                    if type(deck_name_list_this) == str and type(OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash][deck_name_list_this]) == list
+                    if (
+                        type(deck_name_list_this) is str
+                        and type(
+                            OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash][deck_name_list_this]
+                        ) is list
+                    )
                 }
                 deck_name_tmp_list_index_check = [
                     deck_name_tmp_list_index_key
                     for deck_name_tmp_list_index_key in deck_name_tmp_list_index
-                    if type(deck_name_tmp_list_index_key) == str and type(deck_name_tmp_list_index[deck_name_tmp_list_index_key]) == str
+                    if (
+                        type(deck_name_tmp_list_index_key) is str
+                        and type(deck_name_tmp_list_index[deck_name_tmp_list_index_key]) is str
+                    )
                 ]
                 deck_name_list_index_check = [
                     deck_name_list_this
                     for deck_name_list_this in OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash]
-                    if type(deck_name_list_this) == str and type(OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash][deck_name_list_this]) == list
+                    if (
+                        type(deck_name_list_this) is str
+                        and type(
+                            OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash][deck_name_list_this]
+                        ) is list
+                    )
                 ]
                 helpdoc_patch.update(deck_name_tmp_list_index)
                 helpdoc_patch.update(deck_name_list_index)
@@ -126,19 +152,29 @@ def initDeckHelp(bot_info_dict):
                     '扩展牌堆': '/'.join(deck_name_list_index_check)
                 })
         elif flag_drawListMode == 3:
-            if redirected_bot_hash in OlivaDiceCore.drawCardData.dictDeckIndex and type(OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash]) == dict:
+            if (
+                redirected_bot_hash in OlivaDiceCore.drawCardData.dictDeckIndex
+                and type(OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash]) is dict
+            ):
                 deck_name_tmp_list_index = ['内置牌堆:\n%s' % deck_name_tmp_list_str]
                 deck_name_list_index = [
                     '%s:\n%s' % (
                         deck_name_list_this,
                         '/'.join([
                             deck_name_list_this_this
-                            for deck_name_list_this_this in OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash][deck_name_list_this]
-                            if type(deck_name_list_this_this) == str and not deck_name_list_this_this.startswith('_')
+                            for deck_name_list_this_this in (
+                                OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash][deck_name_list_this]
+                            )
+                            if (
+                                type(deck_name_list_this_this) is str
+                                and not deck_name_list_this_this.startswith('_')
+                            )
                         ])
                     )
                     for deck_name_list_this in OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash]
-                    if type(OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash][deck_name_list_this]) == list
+                    if type(
+                        OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash][deck_name_list_this]
+                    ) is list
                 ]
                 helpdoc_patch = {
                     '全牌堆列表': '\n'.join(deck_name_tmp_list_index + deck_name_list_index),
@@ -148,11 +184,16 @@ def initDeckHelp(bot_info_dict):
         if bot_hash in OlivaDiceCore.helpDocData.dictHelpDoc:
             OlivaDiceCore.helpDocData.dictHelpDoc[bot_hash].update(helpdoc_patch)
 
-def setDeckIndex(bot_hash:str, deck_name:str, deck_data:dict):
-    if type(bot_hash) == str and type(deck_name) == str and type(deck_data) == dict:
+
+def setDeckIndex(bot_hash: str, deck_name: str, deck_data: dict):
+    if (
+        type(bot_hash) is str
+        and type(deck_name) is str
+        and type(deck_data) is dict
+    ):
         # 应用重定向逻辑
         redirected_bot_hash = OlivaDiceCore.userConfig.getRedirectedBotHash(bot_hash)
-        
+
         if redirected_bot_hash not in OlivaDiceCore.drawCardData.dictDeckIndex:
             OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash] = {}
         if deck_name not in OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash]:
@@ -161,9 +202,13 @@ def setDeckIndex(bot_hash:str, deck_name:str, deck_data:dict):
         deck_data_list = [
             deck_data_list_this
             for deck_data_list_this in deck_data_list
-            if type(deck_data_list_this) == str and not deck_data_list_this.startswith('_')
+            if (
+                type(deck_data_list_this) is str
+                and not deck_data_list_this.startswith('_')
+            )
         ]
         OlivaDiceCore.drawCardData.dictDeckIndex[redirected_bot_hash][deck_name] = deck_data_list
+
 
 # 清空牌堆数据
 def cleanDeck():
@@ -172,18 +217,22 @@ def cleanDeck():
     for botInfo in OlivaDiceCore.drawCardData.dictDeckIndex:
         OlivaDiceCore.drawCardData.dictDeckIndex[botInfo] = {}
 
+
 # 重载牌堆数据
 # 目前不会清理牌堆帮助文档数据，所以如果发生牌堆减量将会导致牌堆帮助文档数据残留
 # 但是我认为这个问题不明显，用户应该不在意 By lunzhiPenxil
 def reloadDeck():
-    if OlivaDiceCore.data.global_Proc != None \
-    and 'bot_info_dict' in OlivaDiceCore.data.global_Proc.Proc_data:
+    if (
+        OlivaDiceCore.data.global_Proc is not None
+        and 'bot_info_dict' in OlivaDiceCore.data.global_Proc.Proc_data
+    ):
         bot_info_dict = OlivaDiceCore.data.global_Proc.Proc_data['bot_info_dict']
         cleanDeck()
-        initDeck(bot_info_dict = bot_info_dict)
+        initDeck(bot_info_dict=bot_info_dict)
+
 
 # 根除指定牌堆
-def removeDeck(deckName:str, botHash:str):
+def removeDeck(deckName: str, botHash: str):
     checkDict = {
         'deckclassic': ['.json', '.json5'],
         'deckyaml': ['', '.yaml'],
@@ -195,8 +244,9 @@ def removeDeck(deckName:str, botHash:str):
             if os.path.exists(deck_path):
                 try:
                     os.remove(deck_path)
-                except Exception as e:
+                except Exception:
                     traceback.print_exc()
+
 
 # 初始化牌堆数据
 def initDeck(bot_info_dict):
@@ -229,9 +279,9 @@ def initDeck(bot_info_dict):
                 customDeckPath_fs = formatUTF8WithBOM(customDeckPath_f.read()).decode('utf-8')
                 try:
                     obj_Deck_this = pyjson5.loads(customDeckPath_fs)
-                except:
+                except Exception:
                     obj_Deck_this = json.loads(customDeckPath_fs)
-        except:
+        except Exception:
             dictTValue['tInitDataName'] = customDeckFile
             OlivaDiceCore.msgReply.globalLog(
                 3,
@@ -241,7 +291,7 @@ def initDeck(bot_info_dict):
                     ('Init', 'default')
                 ]
             )
-        if obj_Deck_this != None:
+        if obj_Deck_this is not None:
             for bot_info_dict_this in OlivaDiceCore.drawCardData.dictDeck:
                 botHash = bot_info_dict_this
                 OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this)
@@ -264,9 +314,9 @@ def initDeck(bot_info_dict):
             with open(customDeckPath, 'rb') as customDeckPath_f:
                 obj_Deck_this = yaml.load(
                     formatUTF8WithBOM(customDeckPath_f.read()).decode('utf-8'),
-                    Loader = yaml.FullLoader
+                    Loader=yaml.FullLoader
                 )
-        except:
+        except Exception:
             dictTValue['tInitDataName'] = customDeckFile
             OlivaDiceCore.msgReply.globalLog(
                 3,
@@ -279,9 +329,9 @@ def initDeck(bot_info_dict):
         customDeckFile_deckName = customDeckFile
         if customDeckFile_deckName.endswith('.yaml'):
             customDeckFile_deckName = customDeckFile_deckName.rstrip('.yaml')
-        if obj_Deck_this != None:
-            obj_Deck_this_new = initYamlDeckData(obj_Deck_this, deckName = customDeckFile_deckName)
-            if obj_Deck_this_new != None:
+        if obj_Deck_this is not None:
+            obj_Deck_this_new = initYamlDeckData(obj_Deck_this, deckName=customDeckFile_deckName)
+            if obj_Deck_this_new is not None:
                 for bot_info_dict_this in OlivaDiceCore.drawCardData.dictDeck:
                     botHash = bot_info_dict_this
                     OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this_new)
@@ -297,7 +347,7 @@ def initDeck(bot_info_dict):
         obj_Deck_this_root = None
         try:
             obj_Deck_this_root = openpyxl.load_workbook(customDeckPath)
-        except:
+        except Exception:
             obj_Deck_this_root = None
             dictTValue['tInitDataName'] = customDeckFile
             OlivaDiceCore.msgReply.globalLog(
@@ -308,16 +358,19 @@ def initDeck(bot_info_dict):
                     ('Init', 'default')
                 ]
             )
-        if obj_Deck_this_root != None:
+        if obj_Deck_this_root is not None:
             obj_Deck_this_new = None
             try:
                 obj_Deck_this_new = initExcelDeckData(obj_Deck_this_root)
-            except:
+            except Exception:
                 obj_Deck_this_new = None
                 dictTValue['tInitDataName'] = customDeckFile
                 OlivaDiceCore.msgReply.globalLog(
                     3,
-                    OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitDeckDataError'], dictTValue),
+                    OlivaDiceCore.msgCustomManager.formatReplySTRConst(
+                        dictStrConst['strInitDeckDataError'],
+                        dictTValue
+                    ),
                     [
                         ('OlivaDice', 'default'),
                         ('Init', 'default')
@@ -325,21 +378,21 @@ def initDeck(bot_info_dict):
                 )
             try:
                 obj_Deck_this_root.close()
-            except:
+            except Exception:
                 pass
             customDeckFile_new = customDeckFile
             if customDeckFile_new.endswith('.xlsx'):
                 customDeckFile_new = customDeckFile_new.rstrip('.xlsx')
             elif customDeckFile_new.endswith('.xls'):
                 customDeckFile_new = customDeckFile_new.rstrip('.xls')
-            if obj_Deck_this_new != None:
+            if obj_Deck_this_new is not None:
                 for bot_info_dict_this in OlivaDiceCore.drawCardData.dictDeck:
                     botHash = bot_info_dict_this
                     OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this_new)
                     setDeckIndex(botHash, customDeckFile_new, obj_Deck_this_new)
                     setDeckIndex('unity', customDeckFile_new, obj_Deck_this_new)
     # 全局 牌堆 日志
-    if botHash != None:
+    if botHash is not None:
         obj_Deck_this_count_total = len(OlivaDiceCore.drawCardData.dictDeck[botHash])
         dictTValue['tInitDataCount'] = str(obj_Deck_this_count_total - obj_Deck_this_count_total_init)
         dictTValue['tInitDataCount01'] = str(obj_Deck_this_count_total)
@@ -375,19 +428,22 @@ def initDeck(bot_info_dict):
                     customDeckPath_fs = formatUTF8WithBOM(customDeckPath_f.read()).decode('utf-8')
                     try:
                         obj_Deck_this = pyjson5.loads(customDeckPath_fs)
-                    except:
+                    except Exception:
                         obj_Deck_this = json.loads(customDeckPath_fs)
-            except:
+            except Exception:
                 dictTValue['tInitDataName'] = customDeckFile
                 OlivaDiceCore.msgReply.globalLog(
                     3,
-                    OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitDeckDataError'], dictTValue),
+                    OlivaDiceCore.msgCustomManager.formatReplySTRConst(
+                        dictStrConst['strInitDeckDataError'],
+                        dictTValue
+                    ),
                     [
                         ('OlivaDice', 'default'),
                         ('Init', 'default')
                     ]
                 )
-            if obj_Deck_this != None:
+            if obj_Deck_this is not None:
                 OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this)
                 if customDeckFile.endswith('.json5'):
                     customDeckFile = customDeckFile.rstrip('.json5')
@@ -406,13 +462,16 @@ def initDeck(bot_info_dict):
                 with open(customDeckPath, 'rb') as customDeckPath_f:
                     obj_Deck_this = yaml.load(
                         formatUTF8WithBOM(customDeckPath_f.read()).decode('utf-8'),
-                        Loader = yaml.FullLoader
+                        Loader=yaml.FullLoader
                     )
-            except:
+            except Exception:
                 dictTValue['tInitDataName'] = customDeckFile
                 OlivaDiceCore.msgReply.globalLog(
                     3,
-                    OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitDeckDataError'], dictTValue),
+                    OlivaDiceCore.msgCustomManager.formatReplySTRConst(
+                        dictStrConst['strInitDeckDataError'],
+                        dictTValue
+                    ),
                     [
                         ('OlivaDice', 'default'),
                         ('Init', 'default')
@@ -421,8 +480,8 @@ def initDeck(bot_info_dict):
             customDeckFile_deckName = customDeckFile
             if customDeckFile_deckName.endswith('.yaml'):
                 customDeckFile_deckName = customDeckFile_deckName.rstrip('.yaml')
-            if obj_Deck_this != None:
-                obj_Deck_this_new = initYamlDeckData(obj_Deck_this, deckName = customDeckFile_deckName)
+            if obj_Deck_this is not None:
+                obj_Deck_this_new = initYamlDeckData(obj_Deck_this, deckName=customDeckFile_deckName)
                 OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this_new)
                 setDeckIndex(botHash, customDeckFile_deckName, obj_Deck_this_new)
         # 全局 excel 牌堆
@@ -435,27 +494,33 @@ def initDeck(bot_info_dict):
             obj_Deck_this_root = None
             try:
                 obj_Deck_this_root = openpyxl.load_workbook(customDeckPath)
-            except:
+            except Exception:
                 obj_Deck_this_root = None
                 dictTValue['tInitDataName'] = customDeckFile
                 OlivaDiceCore.msgReply.globalLog(
                     3,
-                    OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitDeckDataError'], dictTValue),
+                    OlivaDiceCore.msgCustomManager.formatReplySTRConst(
+                        dictStrConst['strInitDeckDataError'],
+                        dictTValue
+                    ),
                     [
                         ('OlivaDice', 'default'),
                         ('Init', 'default')
                     ]
                 )
-            if obj_Deck_this_root != None:
+            if obj_Deck_this_root is not None:
                 obj_Deck_this_new = None
                 try:
                     obj_Deck_this_new = initExcelDeckData(obj_Deck_this_root)
-                except:
+                except Exception:
                     obj_Deck_this_new = None
                     dictTValue['tInitDataName'] = customDeckFile
                     OlivaDiceCore.msgReply.globalLog(
                         3,
-                        OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitDeckDataError'], dictTValue),
+                        OlivaDiceCore.msgCustomManager.formatReplySTRConst(
+                            dictStrConst['strInitDeckDataError'],
+                            dictTValue
+                        ),
                         [
                             ('OlivaDice', 'default'),
                             ('Init', 'default')
@@ -463,14 +528,14 @@ def initDeck(bot_info_dict):
                     )
                 try:
                     obj_Deck_this_root.close()
-                except:
+                except Exception:
                     pass
                 customDeckFile_new = customDeckFile
                 if customDeckFile_new.endswith('.xlsx'):
                     customDeckFile_new = customDeckFile_new.rstrip('.xlsx')
                 elif customDeckFile_new.endswith('.xls'):
                     customDeckFile_new = customDeckFile_new.rstrip('.xls')
-                if obj_Deck_this_new != None:
+                if obj_Deck_this_new is not None:
                     OlivaDiceCore.drawCardData.dictDeck[botHash].update(obj_Deck_this_new)
                     setDeckIndex(botHash, customDeckFile_new, obj_Deck_this_new)
         # 日志
@@ -485,7 +550,8 @@ def initDeck(bot_info_dict):
                 ('Init', 'default')
             ]
         )
-    initDeckHelp(bot_info_dict = bot_info_dict)
+    initDeckHelp(bot_info_dict=bot_info_dict)
+
 
 def initExcelDeckData(data):
     res = {}
@@ -516,12 +582,12 @@ def initExcelDeckData(data):
             if flag_first:
                 flag_first = False
             else:
-                if checkData['Content'] != None:
+                if checkData['Content'] is not None:
                     tmp_deckData_this = checkData['Content']
                     tmp_deckData_this = re.sub(r'DRAW\(\s*(.+?)\s*,\s*0\s*\)', r'{\1}', tmp_deckData_this)
                     tmp_deckData_this = re.sub(r'DRAW\(\s*(.+?)\s*,\s*1\s*\)', r'{%\1}', tmp_deckData_this)
                     tmp_deckData_this = re.sub(r'DRAW\(\s*(.+?)\s*\)', r'{\1}', tmp_deckData_this)
-                    if checkData['Weight'] != None:
+                    if checkData['Weight'] is not None:
                         tmp_deckData_this = '::%s::%s' % (
                             str(checkData['Weight']),
                             tmp_deckData_this
@@ -531,13 +597,14 @@ def initExcelDeckData(data):
             res[obj_Deck_this_name] = deckData
     return res
 
-def initYamlDeckData(data:dict, deckName = None):
+
+def initYamlDeckData(data: dict, deckName=None):
     name = deckName
     includes = ['default']
     default = None
     keyList = ['name', 'author', 'version', 'command', 'desc', 'includes']
     res = {}
-    if name == None and 'name' in data:
+    if name is None and 'name' in data:
         name = data['name']
     if 'includes' in data:
         includes = data['includes']
@@ -567,17 +634,18 @@ def initYamlDeckData(data:dict, deckName = None):
                     res[name] = dataNew
     return res
 
-def getDrawDeck(key_str, bot_hash, count = 1, valDict = None):
+
+def getDrawDeck(key_str, bot_hash, count=1, valDict=None):
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
     dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustom
     tmp_reply_str = None
-    
+
     # 应用重定向逻辑（仅用于牌堆数据，自定义回复不重定向）
     redirected_bot_hash = OlivaDiceCore.userConfig.getRedirectedBotHash(bot_hash)
-    
+
     if bot_hash in OlivaDiceCore.msgCustom.dictStrCustomDict:
         dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[bot_hash]
-    if valDict != None and 'dictTValue' in valDict:
+    if valDict is not None and 'dictTValue' in valDict:
         dictTValue = valDict['dictTValue']
     if redirected_bot_hash in OlivaDiceCore.drawCardData.dictDeck:
         if key_str in OlivaDiceCore.drawCardData.dictDeck[redirected_bot_hash]:
@@ -585,14 +653,29 @@ def getDrawDeck(key_str, bot_hash, count = 1, valDict = None):
                 tmp_for_list = range(count)
                 tmp_card_list = []
                 plugin_event = None
-                if valDict != None and 'dictTValue' in valDict and 'vValDict' in valDict['dictTValue'] and 'vPluginEvent' in valDict['dictTValue']['vValDict']:
+                if (
+                    valDict is not None
+                    and 'dictTValue' in valDict
+                    and 'vValDict' in valDict['dictTValue']
+                    and 'vPluginEvent' in valDict['dictTValue']['vValDict']
+                ):
                     plugin_event = valDict['dictTValue']['vValDict']['vPluginEvent']
                 for tmp_for_list_this in tmp_for_list:
-                    tmp_draw_str = draw(key_str, bot_hash, mark_dict = None, plugin_event = plugin_event)
-                    if tmp_draw_str != None and type(tmp_draw_str) == str:
+                    tmp_draw_str = draw(
+                        key_str, bot_hash,
+                        mark_dict=None,
+                        plugin_event=plugin_event
+                    )
+                    if (
+                        tmp_draw_str is not None
+                        and type(tmp_draw_str) is str
+                    ):
                         tmp_card_list.append(tmp_draw_str)
                 dictTValue['tDrawDeckResult'] = '\n'.join(tmp_card_list)
-                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawDeck'], dictTValue)
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                    dictStrCustom['strDrawDeck'],
+                    dictTValue
+                )
                 return tmp_reply_str
     tmp_recommend_list = []
     if OlivaDiceCore.console.getConsoleSwitchByHash(
@@ -600,24 +683,31 @@ def getDrawDeck(key_str, bot_hash, count = 1, valDict = None):
         bot_hash
     ) == 1:
         tmp_recommend_list = getDeckRecommend(key_str, bot_hash)
-    if type(tmp_recommend_list) == list:
+    if type(tmp_recommend_list) is list:
         if len(tmp_recommend_list) > 0:
             tmp_recommend_str = '\n'.join(
                 ['[.draw %s]' % tmp_recommend_list_this for tmp_recommend_list_this in tmp_recommend_list]
             )
             dictTValue['tDrawDeckResult'] = tmp_recommend_str
-            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawDeckRecommend'], dictTValue)
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                dictStrCustom['strDrawDeckRecommend'],
+                dictTValue
+            )
         else:
-            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawDeckNotFound'], dictTValue)
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                dictStrCustom['strDrawDeckNotFound'],
+                dictTValue
+            )
     return tmp_reply_str
 
-def getDeckRecommend(key_str:str, bot_hash:str):
+
+def getDeckRecommend(key_str: str, bot_hash: str):
     res = []
     tmp_RecommendRank_list = []
-    
+
     # 应用重定向逻辑
     redirected_bot_hash = OlivaDiceCore.userConfig.getRedirectedBotHash(bot_hash)
-    
+
     if redirected_bot_hash in OlivaDiceCore.drawCardData.dictDeck:
         for dictDeck_this in OlivaDiceCore.drawCardData.dictDeck[redirected_bot_hash]:
             tmp_RecommendRank_list.append([
@@ -627,7 +717,7 @@ def getDeckRecommend(key_str:str, bot_hash:str):
                 ),
                 dictDeck_this
             ])
-        tmp_RecommendRank_list.sort(key = lambda x : x[0])
+        tmp_RecommendRank_list.sort(key=lambda x: x[0])
     tmp_count_max = min(8, len(tmp_RecommendRank_list))
     count = 0
     while count < tmp_count_max:
@@ -638,28 +728,39 @@ def getDeckRecommend(key_str:str, bot_hash:str):
         count += 1
     return res
 
-def draw(key_str:str, bot_hash:str, flag_need_give_back:bool = True, mark_dict:'dict|None' = None, plugin_event:'OlivOS.API.Event|None' = None):
+
+def draw(
+    key_str: str,
+    bot_hash: str,
+    flag_need_give_back: bool = True,
+    mark_dict: 'dict|None' = None,
+    plugin_event: 'OlivOS.API.Event|None' = None
+):
     tmp_reply_str = None
     tmp_deck_this = []
     tmp_deck_this_len = 1
     tmp_deck_this_hit = 0
-    
+
     # 应用重定向逻辑
     redirected_bot_hash = OlivaDiceCore.userConfig.getRedirectedBotHash(bot_hash)
-    
+
     if redirected_bot_hash in OlivaDiceCore.drawCardData.dictDeck:
         if key_str in OlivaDiceCore.drawCardData.dictDeck[redirected_bot_hash]:
-            if mark_dict == None:
+            if mark_dict is None:
                 tmp_mark_dict = {}
             else:
                 tmp_mark_dict = mark_dict
             if key_str in tmp_mark_dict:
                 if len(tmp_mark_dict[key_str]) <= 0:
-                    tmp_mark_dict[key_str] = initCloneDeckList(OlivaDiceCore.drawCardData.dictDeck[redirected_bot_hash][key_str])
+                    tmp_mark_dict[key_str] = initCloneDeckList(
+                        OlivaDiceCore.drawCardData.dictDeck[redirected_bot_hash][key_str]
+                    )
             else:
-                tmp_mark_dict[key_str] = initCloneDeckList(OlivaDiceCore.drawCardData.dictDeck[redirected_bot_hash][key_str])
+                tmp_mark_dict[key_str] = initCloneDeckList(
+                    OlivaDiceCore.drawCardData.dictDeck[redirected_bot_hash][key_str]
+                )
             tmp_deck_this = tmp_mark_dict[key_str]
-            if type(tmp_deck_this) == list:
+            if type(tmp_deck_this) is list:
                 tmp_deck_this_len = len(tmp_deck_this)
                 if tmp_deck_this_len > 0:
                     tmp_deck_this_hit = random.randint(0, tmp_deck_this_len - 1)
@@ -688,8 +789,14 @@ def draw(key_str:str, bot_hash:str, flag_need_give_back:bool = True, mark_dict:'
                                     tmp_reply_str_1 = tmp_reply_str_2[tmp_mark_left + 1:tmp_mark_right]
                             else:
                                 tmp_reply_str_1 = tmp_reply_str_2[tmp_mark_left + 1:tmp_mark_right]
-                            tmp_reply_str_1 = draw(tmp_reply_str_1, bot_hash, flag_need_give_back_2, tmp_mark_dict, plugin_event = plugin_event)
-                            if tmp_reply_str_1 != None:
+                            tmp_reply_str_1 = draw(
+                                tmp_reply_str_1,
+                                bot_hash,
+                                flag_need_give_back_2,
+                                tmp_mark_dict,
+                                plugin_event=plugin_event
+                            )
+                            if tmp_reply_str_1 is not None:
                                 tmp_reply_str += tmp_reply_str_1
                             else:
                                 tmp_reply_str += tmp_reply_str_2[tmp_mark_left:tmp_mark_right + 1]
@@ -716,7 +823,7 @@ def draw(key_str:str, bot_hash:str, flag_need_give_back:bool = True, mark_dict:'
                             tmp_reply_str_1 = tmp_reply_str_2[tmp_mark_left + 1:tmp_mark_right]
                             tmp_rd = OlivaDiceCore.onedice.RD(tmp_reply_str_1)
                             tmp_rd.roll()
-                            if tmp_rd.resError == None:
+                            if tmp_rd.resError is None:
                                 tmp_reply_str += str(tmp_rd.resInt)
                             else:
                                 tmp_reply_str += tmp_reply_str_2[tmp_mark_left:tmp_mark_right + 1]
@@ -727,22 +834,24 @@ def draw(key_str:str, bot_hash:str, flag_need_give_back:bool = True, mark_dict:'
                         tmp_mark_left = -1
                         tmp_mark_right = -1
     dictTValue = {}
-    if tmp_reply_str != None and plugin_event != None:
+    if tmp_reply_str is not None and plugin_event is not None:
         tmp_reply_str = OlivaDiceCore.crossHook.dictHookFunc['drawFormatHook'](tmp_reply_str, plugin_event)
         dictTValue = dictTValueGet(plugin_event)
-    if tmp_reply_str != None and type(tmp_reply_str) == str:
+    if tmp_reply_str is not None and type(tmp_reply_str) is str:
         tmp_reply_str = reMappingDrawFormat(tmp_reply_str)
-        if dictTValue != None:
+        if dictTValue is not None:
             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
-                tmp_reply_str, dictTValue, flagCross = False, flagSplit = False
+                tmp_reply_str, dictTValue, flagCross=False, flagSplit=False
             )
     return tmp_reply_str
+
 
 def dictTValueGet(plugin_event):
     res = {}
     if 'name' in plugin_event.data.sender:
         res['tName'] = plugin_event.data.sender['name']
     return res
+
 
 def initCloneDeckList(src_deck):
     res_deck = []
@@ -762,7 +871,7 @@ def initCloneDeckList(src_deck):
                 tmp_reply_str_1 = tmp_reply_str_1[1:-1]
                 tmp_rd = OlivaDiceCore.onedice.RD(tmp_reply_str_1)
                 tmp_rd.roll()
-                if tmp_rd.resError == None:
+                if tmp_rd.resError is None:
                     if tmp_rd.resInt > 0:
                         if tmp_mark_right + 2 < len(tmp_reply_str_2):
                             res_deck += [tmp_reply_str_2[tmp_mark_right + 2:]] * tmp_rd.resInt
@@ -778,6 +887,7 @@ def initCloneDeckList(src_deck):
         else:
             res_deck += [src_deck_this]
     return res_deck
+
 
 def releaseDir(dir_path):
     if not os.path.exists(dir_path):

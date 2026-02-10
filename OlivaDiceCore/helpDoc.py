@@ -1,16 +1,16 @@
 # -*- encoding: utf-8 -*-
-'''
+r'''
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
-_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/   
-/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___   
-\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/   
+_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
+/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___
+\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/
 
 @File      :   helpDoc.py
 @Author    :   lunzhiPenxil仑质
 @Contact   :   lunzhipenxil@gmail.com
 @License   :   AGPL
-@Copyright :   (C) 2020-2021, OlivOS-Team
+@Copyright :   (C) 2020-2026, OlivOS-Team
 @Desc      :   None
 '''
 
@@ -19,6 +19,7 @@ import OlivaDiceCore
 
 import os
 import json
+
 
 def initHelpDoc(bot_info_dict):
     for bot_info_dict_this in bot_info_dict:
@@ -33,13 +34,13 @@ def initHelpDoc(bot_info_dict):
         customHelpDocFile = fileHelpDocList_this
         customHelpDocPath = customHelpDocDir + '/' + customHelpDocFile
         try:
-            with open(customHelpDocPath, 'r', encoding = 'utf-8') as customHelpDocPath_f:
+            with open(customHelpDocPath, 'r', encoding='utf-8') as customHelpDocPath_f:
                 obj_HelpDoc_this = json.loads(customHelpDocPath_f.read())
                 for bot_info_dict_this in OlivaDiceCore.helpDocData.dictHelpDoc:
                     botHash = bot_info_dict_this
                     if 'helpdoc' in obj_HelpDoc_this:
                         OlivaDiceCore.helpDocData.dictHelpDoc[botHash].update(obj_HelpDoc_this['helpdoc'])
-        except:
+        except Exception:
             continue
     for bot_info_dict_this in OlivaDiceCore.helpDocData.dictHelpDoc:
         botHash = bot_info_dict_this
@@ -53,30 +54,31 @@ def initHelpDoc(bot_info_dict):
             customHelpDocFile = fileHelpDocList_this
             customHelpDocPath = customHelpDocDir + '/' + customHelpDocFile
             try:
-                with open(customHelpDocPath, 'r', encoding = 'utf-8') as customHelpDocPath_f:
+                with open(customHelpDocPath, 'r', encoding='utf-8') as customHelpDocPath_f:
                     obj_HelpDoc_this = json.loads(customHelpDocPath_f.read())
                     if 'helpdoc' in obj_HelpDoc_this:
                         OlivaDiceCore.helpDocData.dictHelpDoc[botHash].update(obj_HelpDoc_this['helpdoc'])
-            except:
+            except Exception:
                 continue
         customHelpDocDir = OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/console'
         customHelpDocFile = 'helpdocDefault.json'
         customHelpDocPath = customHelpDocDir + '/' + customHelpDocFile
         try:
-            with open(customHelpDocPath, 'r', encoding = 'utf-8') as customHelpDocPath_f:
+            with open(customHelpDocPath, 'r', encoding='utf-8') as customHelpDocPath_f:
                 obj_HelpDoc_this = json.loads(customHelpDocPath_f.read())
-                if type(obj_HelpDoc_this) == dict:
+                if type(obj_HelpDoc_this) is dict:
                     OlivaDiceCore.helpDocData.dictHelpDocDefault[botHash].update(obj_HelpDoc_this)
                     OlivaDiceCore.helpDocData.dictHelpDoc[botHash].update(
                         OlivaDiceCore.helpDocData.dictHelpDocDefault[botHash]
                     )
-        except:
+        except Exception:
             pass
+
 
 def setHelpDocByBotHash(botHash, helpdocKey, helpdocVal):
     # 应用重定向逻辑
     redirected_bot_hash = OlivaDiceCore.userConfig.getRedirectedBotHash(botHash)
-    
+
     if redirected_bot_hash not in OlivaDiceCore.helpDocData.dictHelpDocDefault:
         OlivaDiceCore.helpDocData.dictHelpDocDefault[redirected_bot_hash] = {}
     if redirected_bot_hash not in OlivaDiceCore.helpDocData.dictHelpDoc:
@@ -87,10 +89,11 @@ def setHelpDocByBotHash(botHash, helpdocKey, helpdocVal):
     )
     saveHelpDocByBotHash(redirected_bot_hash)
 
+
 def delHelpDocByBotHash(botHash, helpdocKey):
     # 应用重定向逻辑
     redirected_bot_hash = OlivaDiceCore.userConfig.getRedirectedBotHash(botHash)
-    
+
     if redirected_bot_hash not in OlivaDiceCore.helpDocData.dictHelpDocDefault:
         OlivaDiceCore.helpDocData.dictHelpDocDefault[redirected_bot_hash] = {}
     if redirected_bot_hash not in OlivaDiceCore.helpDocData.dictHelpDoc:
@@ -101,6 +104,7 @@ def delHelpDocByBotHash(botHash, helpdocKey):
         OlivaDiceCore.helpDocData.dictHelpDoc[redirected_bot_hash].pop(helpdocKey)
     saveHelpDocByBotHash(redirected_bot_hash)
 
+
 def saveHelpDocByBotHash(botHash):
     if botHash in OlivaDiceCore.helpDocData.dictHelpDocDefault:
         releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/console')
@@ -108,38 +112,41 @@ def saveHelpDocByBotHash(botHash):
             customHelpDocDir = OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/console'
             customHelpDocFile = 'helpdocDefault.json'
             customHelpDocPath = customHelpDocDir + '/' + customHelpDocFile
-            with open(customHelpDocPath, 'w', encoding = 'utf-8') as customHelpDocPath_f:
+            with open(customHelpDocPath, 'w', encoding='utf-8') as customHelpDocPath_f:
                 customHelpDocPath_f.write(
                     json.dumps(
                         OlivaDiceCore.helpDocData.dictHelpDocDefault[botHash],
-                        ensure_ascii = False,
-                        indent = 4
+                        ensure_ascii=False,
+                        indent=4
                     )
                 )
-        except:
+        except Exception:
             pass
 
 
 # plugin_event 为 None 时仅返回回复内容，否则接管回复流程
-def getHelp(key_str, bot_hash, plugin_event = None):
+def getHelp(key_str, bot_hash, plugin_event=None):
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
     dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustom
     tmp_reply_str = None
     tmp_recommend_list = []
     tmp_recommend_str = ''
     key_str_new = key_str
-    
+
     if plugin_event is not None:
         dictTValue['tUserName'] = plugin_event.data.sender['name']
     # 应用重定向逻辑（仅用于帮助文档数据）
     redirected_bot_hash = OlivaDiceCore.userConfig.getRedirectedBotHash(bot_hash)
-    
+
     if bot_hash in OlivaDiceCore.msgCustom.dictStrCustomDict:
         dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[bot_hash]
     if redirected_bot_hash in OlivaDiceCore.helpDocData.dictHelpDoc:
         while True:
             # 以下划线开头的键值只能被帮助文档内部引用，无法直接精确匹配搜索
-            if not key_str_new.startswith('_') and key_str_new in OlivaDiceCore.helpDocData.dictHelpDoc[redirected_bot_hash]:
+            if (
+                not key_str_new.startswith('_')
+                and key_str_new in OlivaDiceCore.helpDocData.dictHelpDoc[redirected_bot_hash]
+            ):
                 tmp_tHelpDocResult = OlivaDiceCore.helpDocData.dictHelpDoc[redirected_bot_hash][key_str_new]
                 if len(tmp_tHelpDocResult) > 1:
                     if tmp_tHelpDocResult[0] == '&' and tmp_tHelpDocResult[1:] != key_str_new:
@@ -150,16 +157,22 @@ def getHelp(key_str, bot_hash, plugin_event = None):
                     bot_info_str = OlivaDiceCore.data.bot_info
                     if type(plugin_event) is OlivOS.API.Event:
                         dictTValue['tAdapter'] = OlivaDiceCore.msgCustomManager.loadAdapterType(plugin_event.bot_info)
-                        bot_info_str = OlivaDiceCore.msgCustomManager.formatReplySTR(OlivaDiceCore.data.bot_info_auto, dictTValue)
+                        bot_info_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                            OlivaDiceCore.data.bot_info_auto, dictTValue
+                        )
                     tmp_reply_str = '%s\n%s' % (
                         bot_info_str,
                         dictTValue['tHelpDocResult']
                     )
                 else:
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDoc'], dictTValue)
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                        dictStrCustom['strHelpDoc'], dictTValue
+                    )
                 for count_index in range(100):
                     tmp_reply_str_old = tmp_reply_str
-                    tmp_reply_str = formatSTRReplace(tmp_reply_str, OlivaDiceCore.helpDocData.dictHelpDoc[redirected_bot_hash])
+                    tmp_reply_str = formatSTRReplace(
+                        tmp_reply_str, OlivaDiceCore.helpDocData.dictHelpDoc[redirected_bot_hash]
+                    )
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(tmp_reply_str, dictTValue)
                     if tmp_reply_str_old == tmp_reply_str:
                         break
@@ -167,7 +180,7 @@ def getHelp(key_str, bot_hash, plugin_event = None):
             else:
                 flag_need_loop = False
                 tmp_recommend_list = getHelpRecommend(key_str_new, bot_hash)
-                if type(tmp_recommend_list) == list:
+                if type(tmp_recommend_list) is list:
                     if len(tmp_recommend_list) > 0:
                         flag_is_begin = True
                         tmp_count = 0
@@ -176,47 +189,57 @@ def getHelp(key_str, bot_hash, plugin_event = None):
                                 tmp_recommend_str += '\n'
                             else:
                                 flag_is_begin = False
-                            tmp_recommend_str += '%d. %s' % (tmp_count + 1,tmp_recommend_list_this)
+                            tmp_recommend_str += '%d. %s' % (tmp_count + 1, tmp_recommend_list_this)
                             tmp_count += 1
-                        if plugin_event != None:
+                        if plugin_event is not None:
                             tmp_recommend_str += '\n请输入序号以查看对应选项'
                         dictTValue['tHelpDocResult'] = tmp_recommend_str
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDocRecommend'], dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                            dictStrCustom['strHelpDocRecommend'], dictTValue
+                        )
                         flag_need_loop = True
                     else:
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDocNotFound'], dictTValue)
-                    if plugin_event == None:
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                            dictStrCustom['strHelpDocNotFound'], dictTValue
+                        )
+                    if plugin_event is None:
                         return tmp_reply_str
                     else:
                         if flag_need_loop:
                             OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
-                            tmp_select:'str|None' = OlivaDiceCore.msgReplyModel.replyCONTEXT_regWait(
-                                plugin_event = plugin_event,
-                                flagBlock = 'allowCommand',
-                                hash = OlivaDiceCore.msgReplyModel.contextRegHash([None, plugin_event.data.user_id])
+                            tmp_select: 'str|None' = OlivaDiceCore.msgReplyModel.replyCONTEXT_regWait(
+                                plugin_event=plugin_event,
+                                flagBlock='allowCommand',
+                                hash=OlivaDiceCore.msgReplyModel.contextRegHash([None, plugin_event.data.user_id])
                             )
-                            if type(tmp_select) == str and tmp_select.isdigit():
+                            if (
+                                type(tmp_select) is str
+                                and tmp_select.isdigit()
+                            ):
                                 tmp_select = int(tmp_select) - 1
                                 if tmp_select >= 0 and tmp_select < len(tmp_recommend_list):
                                     key_str_new = tmp_recommend_list[tmp_select]
                                 else:
                                     flag_need_loop = False
-                            elif tmp_select == None:
+                            elif tmp_select is None:
                                 return None
                             else:
                                 flag_need_loop = False
                         if not flag_need_loop:
-                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDocNotFound'], dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                dictStrCustom['strHelpDocNotFound'], dictTValue
+                            )
                             return tmp_reply_str
                         else:
                             continue
-            if plugin_event == None:
+            if plugin_event is None:
                 break
     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strHelpDocNotFound'], dictTValue)
-    if plugin_event == None:
+    if plugin_event is None:
         return tmp_reply_str
 
-def getHelpRecommend(key_str:str, bot_hash:str):
+
+def getHelpRecommend(key_str: str, bot_hash: str):
     res = []
     tmp_RecommendRank_list = []
 
@@ -224,7 +247,7 @@ def getHelpRecommend(key_str:str, bot_hash:str):
         'helpRecommendGate',
         bot_hash
     )
-    if helpRecommendGate == None:
+    if helpRecommendGate is None:
         helpRecommendGate = 25
 
     # 应用重定向逻辑
@@ -233,7 +256,7 @@ def getHelpRecommend(key_str:str, bot_hash:str):
     if redirected_bot_hash in OlivaDiceCore.helpDocData.dictHelpDoc:
         for dictHelpDoc_this in OlivaDiceCore.helpDocData.dictHelpDoc[redirected_bot_hash]:
             # 以下划线开头的键值只能被帮助文档内部引用，不参与模糊搜索
-            if type(dictHelpDoc_this) == str and dictHelpDoc_this.startswith('_'):
+            if type(dictHelpDoc_this) is str and dictHelpDoc_this.startswith('_'):
                 continue
             tmp_RecommendRank_list.append([
                 getRecommendRank(
@@ -242,7 +265,7 @@ def getHelpRecommend(key_str:str, bot_hash:str):
                 ),
                 dictHelpDoc_this
             ])
-        tmp_RecommendRank_list.sort(key = lambda x : x[0])
+        tmp_RecommendRank_list.sort(key=lambda x: x[0])
     tmp_for_list = range(min(8, len(tmp_RecommendRank_list)))
     for tmp_for_list_this in tmp_for_list:
         if tmp_RecommendRank_list[tmp_for_list_this][0] < 1000:
@@ -250,7 +273,8 @@ def getHelpRecommend(key_str:str, bot_hash:str):
                 res.append(tmp_RecommendRank_list[tmp_for_list_this][1])
     return res
 
-def getRecommendRank(word1_in:str, word2_in:str):
+
+def getRecommendRank(word1_in: str, word2_in: str):
     iRank = 1
     find_flag = 1
     word1 = word1_in.lower()
@@ -265,7 +289,7 @@ def getRecommendRank(word1_in:str, word2_in:str):
     if word2.find(word1) != -1:
         find_flag = 0
 
-    #LCS
+    # LCS
     dp1 = []
     dp1_first = [0]
     for word1_this in word1:
@@ -283,7 +307,7 @@ def getRecommendRank(word1_in:str, word2_in:str):
                 dp1[j][i] = max(dp1[j - 1][i], dp1[j][i - 1])
     iRank_1 = dp1[word2_len][word1_len]
 
-    #minDistance
+    # minDistance
     dp2 = []
     dp2_first = [0]
     tmp_counter = 1
@@ -305,7 +329,7 @@ def getRecommendRank(word1_in:str, word2_in:str):
                 dp2[j][i] = min(dp2[j - 1][i - 1], min(dp2[j - 1][i], dp2[j][i - 1])) + 1
     iRank_2 = dp2[word2_len][word1_len]
 
-    iRank = (find_flag) * (word2_len * (word1_len - iRank_1) + iRank_2 + 1);
+    iRank = (find_flag) * (word2_len * (word1_len - iRank_1) + iRank_2 + 1)
     iRank = int(int((iRank * iRank) / word1_len) / word2_len)
 
     if iRank >= word1_len * word2_len:
@@ -313,13 +337,15 @@ def getRecommendRank(word1_in:str, word2_in:str):
 
     return iRank
 
+
 def releaseDir(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
 
+
 # 用状态机实现高宽容度的变量引用
 # 替代Python内置Format
-def formatSTRReplace(data:str, valDict:dict):
+def formatSTRReplace(data: str, valDict: dict):
     raw = data
     res = ''
     reg_res = ''
@@ -365,6 +391,7 @@ def formatSTRReplace(data:str, valDict:dict):
     res = reg_res
     return res
 
+
 # 通用模糊搜索和选择函数
 # 参数：
 #   key_str: 搜索关键词
@@ -378,14 +405,14 @@ def formatSTRReplace(data:str, valDict:dict):
 #   如果 plugin_event 为 None，返回搜索结果列表
 #   如果 plugin_event 不为 None，返回用户选择的项目，或 None（用户未选择/超时/取消）
 def fuzzySearchAndSelect(
-    key_str:str, 
-    item_list:list, 
-    bot_hash:str, 
-    plugin_event = None,
-    strRecommendKey:str = 'strSearchRecommend',
-    strErrorKey:str = None,
-    dictStrCustom = None,
-    dictTValue = None
+    key_str: str,
+    item_list: list,
+    bot_hash: str,
+    plugin_event=None,
+    strRecommendKey: str = 'strSearchRecommend',
+    strErrorKey: str = None,
+    dictStrCustom=None,
+    dictTValue=None
 ):
     """
     使用与 helpDoc 相同的模糊搜索算法，对任意列表进行模糊搜索，
@@ -400,7 +427,7 @@ def fuzzySearchAndSelect(
         'helpRecommendGate',
         bot_hash
     )
-    if helpRecommendGate == None:
+    if helpRecommendGate is None:
         helpRecommendGate = 25
     # 对每个项目计算相似度
     tmp_RecommendRank_list = []
@@ -410,7 +437,7 @@ def fuzzySearchAndSelect(
             item
         ])
     # 按相似度排序
-    tmp_RecommendRank_list.sort(key = lambda x : x[0])
+    tmp_RecommendRank_list.sort(key=lambda x: x[0])
     # 获取前8个最相似的项目
     res = []
     tmp_for_list = range(min(8, len(tmp_RecommendRank_list)))
@@ -451,21 +478,21 @@ def fuzzySearchAndSelect(
     # 按照 getHelp 的逻辑处理等待和选择
     if flag_need_loop:
         OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
-        tmp_select:'str|None' = OlivaDiceCore.msgReplyModel.replyCONTEXT_regWait(
-            plugin_event = plugin_event,
-            flagBlock = 'allowCommand',
-            hash = OlivaDiceCore.msgReplyModel.contextRegHash([None, plugin_event.data.user_id])
+        tmp_select: 'str|None' = OlivaDiceCore.msgReplyModel.replyCONTEXT_regWait(
+            plugin_event=plugin_event,
+            flagBlock='allowCommand',
+            hash=OlivaDiceCore.msgReplyModel.contextRegHash([None, plugin_event.data.user_id])
         )
-        if type(tmp_select) == str and tmp_select.isdigit():
+        if type(tmp_select) is str and tmp_select.isdigit():
             tmp_select = int(tmp_select) - 1
             if tmp_select >= 0 and tmp_select < len(res):
                 # 返回用户选择的项目
                 return res[tmp_select]
             else:
                 flag_need_loop = False
-        elif tmp_select == None:
+        elif tmp_select is None:
             return None
-        elif tmp_select == False:
+        elif tmp_select is False:
             return None
         else:
             flag_need_loop = False
@@ -476,5 +503,4 @@ def fuzzySearchAndSelect(
             )
             OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
         return None
-    
     return None

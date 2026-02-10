@@ -1,15 +1,15 @@
-'''
+r'''
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
-_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/   
-/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___   
-\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/   
+_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
+/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___
+\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/
 
 @File      :   censorDFA.py
 @Author    :   lunzhiPenxil仑质
 @Contact   :   lunzhipenxil@gmail.com
 @License   :   AGPL
-@Copyright :   (C) 2022-2023, lunzhiPenxil
+@Copyright :   (C) 2022-2026, lunzhiPenxil
 @Desc      :   一个基于DFA算法实现的高性能敏感词解析库
 '''
 
@@ -20,29 +20,32 @@ defautDFANode = {
     '_is_end': True
 }
 
+
 def loadListFromFile(path):
     res = []
     try:
-        with open(path, 'r', encoding = 'utf-8') as fileObj:
+        with open(path, 'r', encoding='utf-8') as fileObj:
             res = fileObj.read().replace('\r\n', '\n').split('\n')
-    except:
+    except Exception:
         res = []
     return res
+
 
 minMatchType = 'MIN'  # 最小匹配规则
 maxMatchType = 'MAX'  # 最大匹配规则
 
+
 class DFA(object):
-    def __init__(self, textList:list):
+    def __init__(self, textList: list):
         self.data = {}
         self._initDFAFromList(textList)
 
-    def _initDFAFromList(self, textList:list):
+    def _initDFAFromList(self, textList: list):
         self.data = copy.deepcopy(defautDFANode)
         self.loadl(textList)
         return self.data
 
-    def loadl(self, textList:list):
+    def loadl(self, textList: list):
         for textThis in textList:
             res_this = self.data
             for textThis_i in textThis:
@@ -53,16 +56,16 @@ class DFA(object):
             res_this['_is_break'] = True
         return self.data
 
-    def dumpf(self, path:str, indent = None):
+    def dumpf(self, path: str, indent=None):
         DFAObj = self.data
-        with open(path, 'w', encoding = 'utf-8') as fileObj:
-            fileObj.write(json.dumps(DFAObj, ensure_ascii = False, indent = indent))
+        with open(path, 'w', encoding='utf-8') as fileObj:
+            fileObj.write(json.dumps(DFAObj, ensure_ascii=False, indent=indent))
 
-    def dumps(self, indent = None):
+    def dumps(self, indent=None):
         DFAObj = self.data
-        return json.dumps(DFAObj, ensure_ascii = False, indent = indent)
+        return json.dumps(DFAObj, ensure_ascii=False, indent=indent)
 
-    def _findByOffset(self, rawData:str, offset:int):
+    def _findByOffset(self, rawData: str, offset: int):
         res = []
         DFAData = self.data
         matchData = ''
@@ -82,7 +85,7 @@ class DFA(object):
                 break
         return res
 
-    def find(self, rawData:str, mode = maxMatchType):
+    def find(self, rawData: str, mode=maxMatchType):
         res = []
         rawDataNew = rawData + '\0'
         for i in range(len(rawDataNew)):
@@ -92,12 +95,12 @@ class DFA(object):
                     res.append(res_this_this)
         flagReverse = mode == maxMatchType
         res.sort(
-            key = lambda x: len(x),
-            reverse = flagReverse
+            key=lambda x: len(x),
+            reverse=flagReverse
         )
         return res
 
-    def doReplace(self, inData:str, replaceMark:str = '*', mode = maxMatchType):
+    def doReplace(self, inData: str, replaceMark: str = '*', mode=maxMatchType):
         res = inData
         matchList = self.find(inData, mode)
         for matchList_this in matchList:
