@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-r'''
+r"""
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
 _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
@@ -12,7 +12,7 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @License   :   AGPL
 @Copyright :   (C) 2020-2026, OlivOS-Team
 @Desc      :   None
-'''
+"""
 
 import sys
 import platform
@@ -39,12 +39,12 @@ bot_info_basic_short = 'OlivaDice Ver.%s' % bot_info_Ver
 bot_info = '%s [Python %s For OlivOS %s]' % (
     bot_info_basic,
     str(platform.python_version()),
-    OlivOS.infoAPI.OlivOS_Version
+    OlivOS.infoAPI.OlivOS_Version,
 )
 bot_info_auto = '%s [Python %s For OlivOS %s {tAdapter}]' % (
     bot_info_basic,
     str(platform.python_version()),
-    OlivOS.infoAPI.OlivOS_Version
+    OlivOS.infoAPI.OlivOS_Version,
 )
 
 bot_version_short = 'OlivaDice %s' % bot_info_Ver
@@ -56,9 +56,7 @@ bot_summary += '%s %s\n' % (str(platform.python_implementation()), str(sys.versi
 bot_summary += '%s : %s : %s\n' % (str(os.name), ' '.join(platform.architecture()), str(platform.platform()))
 bot_summary += '%s - %s' % (str(platform.machine()), str(platform.processor()))
 
-bot_content = {
-    'masterKey': str(uuid.uuid4())
-}
+bot_content = {'masterKey': str(uuid.uuid4())}
 
 dataDirRoot = './plugin/data/OlivaDice'
 

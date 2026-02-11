@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-r'''
+r"""
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
 _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
@@ -12,20 +12,14 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @License   :   AGPL
 @Copyright :   (C) 2020-2026, OlivOS-Team
 @Desc      :   None
-'''
+"""
 
 import OlivOS
 import OlivaDiceCore
 
-listModel = [
-    ['OlivaDiceCore', OlivaDiceCore.data.OlivaDiceCore_ver_short]
-]
+listModel = [['OlivaDiceCore', OlivaDiceCore.data.OlivaDiceCore_ver_short]]
 
-listPrefix = [
-    '.',
-    '。',
-    '/'
-]
+listPrefix = ['.', '。', '/']
 
 listReplyContextFliter = []
 
@@ -68,12 +62,12 @@ dictHookList = {
     'prefix': listPrefix,
     'replyContextFliter': listReplyContextFliter,
     'replyContextPrefixFliter': listReplyContextPrefixFliter,
-    'replyContextReg': dictReplyContextReg
+    'replyContextReg': dictReplyContextReg,
 }
 
 dictHookFunc = {
     'msgHook': msgHook,
     'pokeHook': pokeHook,
     'msgFormatHook': msgFormatHook,
-    'drawFormatHook': drawFormatHook
+    'drawFormatHook': drawFormatHook,
 }

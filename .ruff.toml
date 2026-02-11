@@ -1,0 +1,25 @@
+line-length = 120
+indent-width = 4
+target-version = "py311"
+exclude = []
+
+[lint]
+select = [
+    "E",
+    "W",
+    "F",
+    "I",
+    "B",
+    "C4",
+    "UP"
+]
+
+[lint.per-file-ignores]
+"*/__init__.py" = ["F401"]
+
+[format]
+preview = true
+quote-style = "single"
+docstring-code-format = true
+indent-style = "space"
+skip-magic-trailing-comma = false

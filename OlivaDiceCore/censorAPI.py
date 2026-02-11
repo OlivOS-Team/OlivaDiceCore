@@ -1,4 +1,4 @@
-r'''
+r"""
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
 _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
@@ -11,7 +11,7 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @License   :   AGPL
 @Copyright :   (C) 2022-2026, OlivOS-Team
 @Desc      :   None
-'''
+"""
 
 import OlivOS
 import OlivaDiceCore
@@ -29,9 +29,7 @@ gCensorList = {}
 gCensorConfigList = {}
 gCensorInfoList = {}
 
-gCensorConfigListUnitTemplate = {
-    'censorList': []
-}
+gCensorConfigListUnitTemplate = {'censorList': []}
 
 
 def formatUTF8WithBOM(data: bytes):
@@ -150,7 +148,7 @@ def initCensor(bot_info_dict):
         if bot_hash in bot_info_dict:
             dictTValue['tName'] = '%s|%s' % (
                 bot_info_dict[bot_hash].platform['platform'],
-                str(bot_info_dict[bot_hash].id)
+                str(bot_info_dict[bot_hash].id),
             )
         gCensorInfoList[bot_hash] = dictTValue['tName']
         censorList_this = []
@@ -196,10 +194,7 @@ def initCensorByHash(bot_hash):
     OlivaDiceCore.msgReply.globalLog(
         2,
         OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitCensor'], dictTValue),
-        [
-            ('OlivaDice', 'default'),
-            ('Init', 'default')
-        ]
+        [('OlivaDice', 'default'), ('Init', 'default')],
     )
 
 
@@ -225,27 +220,15 @@ def patchCensorByHash(bot_hash, patchList: list):
     OlivaDiceCore.msgReply.globalLog(
         2,
         OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strPatchCensor'], dictTValue),
-        [
-            ('OlivaDice', 'default'),
-            ('Init', 'default')
-        ]
+        [('OlivaDice', 'default'), ('Init', 'default')],
     )
 
 
-def doCensorReplace(
-    botHash: str,
-    msg: str,
-    replaceMark: str = '*',
-    mode: str = OlivaDiceCore.censorDFA.maxMatchType
-):
+def doCensorReplace(botHash: str, msg: str, replaceMark: str = '*', mode: str = OlivaDiceCore.censorDFA.maxMatchType):
     global gCensorDFA
     res = msg
     if botHash in gCensorDFA:
-        res: str = gCensorDFA[botHash].doReplace(
-            inData=msg,
-            replaceMark=replaceMark,
-            mode=mode
-        )
+        res: str = gCensorDFA[botHash].doReplace(inData=msg, replaceMark=replaceMark, mode=mode)
     return res
 
 
@@ -264,19 +247,10 @@ def doCensorReplaceOlivOSSafe(botHash: str, msg: str):
     dictGValue = OlivaDiceCore.msgCustom.dictGValue
     dictTValue.update(dictGValue)
 
-    msg_para = OlivOS.messageAPI.Message_templet(
-        'old_string',
-        msg
-    )
+    msg_para = OlivOS.messageAPI.Message_templet('old_string', msg)
 
-    censorMode = OlivaDiceCore.console.getConsoleSwitchByHash(
-        'censorMode',
-        botHash
-    )
-    censorMatchMode = OlivaDiceCore.console.getConsoleSwitchByHash(
-        'censorMatchMode',
-        botHash
-    )
+    censorMode = OlivaDiceCore.console.getConsoleSwitchByHash('censorMode', botHash)
+    censorMatchMode = OlivaDiceCore.console.getConsoleSwitchByHash('censorMatchMode', botHash)
 
     censorMatchModeFlag = OlivaDiceCore.censorDFA.minMatchType
     if censorMatchMode == 1:
@@ -292,28 +266,21 @@ def doCensorReplaceOlivOSSafe(botHash: str, msg: str):
                     res += OlivaDiceCore.censorAPI.doCensorReplace(
                         botHash=botHash,
                         replaceMark=OlivaDiceCore.msgCustomManager.formatReplySTR(
-                            dictStrCustom['strCensorReplace'],
-                            dictTValue
+                            dictStrCustom['strCensorReplace'], dictTValue
                         ),
                         mode=censorMatchModeFlag,
-                        msg=msg_para_this.CQ()
+                        msg=msg_para_this.CQ(),
                     )
                 else:
                     res += msg_para_this.CQ()
         else:  # elif censorMode == 0:
             res = msg
     except Exception as e:
-        dictTValue['tResult'] = '%s\n%s' % (
-            str(e),
-            traceback.format_exc()
-        )
+        dictTValue['tResult'] = '%s\n%s' % (str(e), traceback.format_exc())
         OlivaDiceCore.msgReply.globalLog(
             4,
             OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strRunCensorError'], dictTValue),
-            [
-                ('OlivaDice', 'default'),
-                ('Censor', 'default')
-            ]
+            [('OlivaDice', 'default'), ('Censor', 'default')],
         )
         res = msg
 

@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-r'''
+r"""
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
 _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
@@ -12,7 +12,7 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @License   :   AGPL
 @Copyright :   (C) 2020-2026, OlivOS-Team
 @Desc      :   None
-'''
+"""
 
 import OlivOS
 import OlivaDiceCore
@@ -114,11 +114,7 @@ def saveHelpDocByBotHash(botHash):
             customHelpDocPath = customHelpDocDir + '/' + customHelpDocFile
             with open(customHelpDocPath, 'w', encoding='utf-8') as customHelpDocPath_f:
                 customHelpDocPath_f.write(
-                    json.dumps(
-                        OlivaDiceCore.helpDocData.dictHelpDocDefault[botHash],
-                        ensure_ascii=False,
-                        indent=4
-                    )
+                    json.dumps(OlivaDiceCore.helpDocData.dictHelpDocDefault[botHash], ensure_ascii=False, indent=4)
                 )
         except Exception:
             pass
@@ -160,10 +156,7 @@ def getHelp(key_str, bot_hash, plugin_event=None):
                         bot_info_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                             OlivaDiceCore.data.bot_info_auto, dictTValue
                         )
-                    tmp_reply_str = '%s\n%s' % (
-                        bot_info_str,
-                        dictTValue['tHelpDocResult']
-                    )
+                    tmp_reply_str = '%s\n%s' % (bot_info_str, dictTValue['tHelpDocResult'])
                 else:
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                         dictStrCustom['strHelpDoc'], dictTValue
@@ -210,12 +203,9 @@ def getHelp(key_str, bot_hash, plugin_event=None):
                             tmp_select: 'str|None' = OlivaDiceCore.msgReplyModel.replyCONTEXT_regWait(
                                 plugin_event=plugin_event,
                                 flagBlock='allowCommand',
-                                hash=OlivaDiceCore.msgReplyModel.contextRegHash([None, plugin_event.data.user_id])
+                                hash=OlivaDiceCore.msgReplyModel.contextRegHash([None, plugin_event.data.user_id]),
                             )
-                            if (
-                                type(tmp_select) is str
-                                and tmp_select.isdigit()
-                            ):
+                            if type(tmp_select) is str and tmp_select.isdigit():
                                 tmp_select = int(tmp_select) - 1
                                 if tmp_select >= 0 and tmp_select < len(tmp_recommend_list):
                                     key_str_new = tmp_recommend_list[tmp_select]
@@ -243,10 +233,7 @@ def getHelpRecommend(key_str: str, bot_hash: str):
     res = []
     tmp_RecommendRank_list = []
 
-    helpRecommendGate = OlivaDiceCore.console.getConsoleSwitchByHash(
-        'helpRecommendGate',
-        bot_hash
-    )
+    helpRecommendGate = OlivaDiceCore.console.getConsoleSwitchByHash('helpRecommendGate', bot_hash)
     if helpRecommendGate is None:
         helpRecommendGate = 25
 
@@ -258,13 +245,7 @@ def getHelpRecommend(key_str: str, bot_hash: str):
             # 以下划线开头的键值只能被帮助文档内部引用，不参与模糊搜索
             if type(dictHelpDoc_this) is str and dictHelpDoc_this.startswith('_'):
                 continue
-            tmp_RecommendRank_list.append([
-                getRecommendRank(
-                    key_str,
-                    dictHelpDoc_this
-                ),
-                dictHelpDoc_this
-            ])
+            tmp_RecommendRank_list.append([getRecommendRank(key_str, dictHelpDoc_this), dictHelpDoc_this])
         tmp_RecommendRank_list.sort(key=lambda x: x[0])
     tmp_for_list = range(min(8, len(tmp_RecommendRank_list)))
     for tmp_for_list_this in tmp_for_list:
@@ -412,7 +393,7 @@ def fuzzySearchAndSelect(
     strRecommendKey: str = 'strSearchRecommend',
     strErrorKey: str = None,
     dictStrCustom=None,
-    dictTValue=None
+    dictTValue=None,
 ):
     """
     使用与 helpDoc 相同的模糊搜索算法，对任意列表进行模糊搜索，
@@ -423,19 +404,13 @@ def fuzzySearchAndSelect(
         dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustom
     if dictTValue is None:
         dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
-    helpRecommendGate = OlivaDiceCore.console.getConsoleSwitchByHash(
-        'helpRecommendGate',
-        bot_hash
-    )
+    helpRecommendGate = OlivaDiceCore.console.getConsoleSwitchByHash('helpRecommendGate', bot_hash)
     if helpRecommendGate is None:
         helpRecommendGate = 25
     # 对每个项目计算相似度
     tmp_RecommendRank_list = []
     for item in item_list:
-        tmp_RecommendRank_list.append([
-            getRecommendRank(key_str, str(item)),
-            item
-        ])
+        tmp_RecommendRank_list.append([getRecommendRank(key_str, str(item)), item])
     # 按相似度排序
     tmp_RecommendRank_list.sort(key=lambda x: x[0])
     # 获取前8个最相似的项目
@@ -465,23 +440,19 @@ def fuzzySearchAndSelect(
         dictTValue['tSearchResult'] = tmp_recommend_str
         # 使用指定的消息模板
         if strRecommendKey in dictStrCustom:
-            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
-                dictStrCustom[strRecommendKey], dictTValue
-            )
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom[strRecommendKey], dictTValue)
         flag_need_loop = True
     else:
         # 没有搜索结果
         if strErrorKey is not None and strErrorKey in dictStrCustom:
-            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
-                dictStrCustom[strErrorKey], dictTValue
-            )
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom[strErrorKey], dictTValue)
     # 按照 getHelp 的逻辑处理等待和选择
     if flag_need_loop:
         OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
         tmp_select: 'str|None' = OlivaDiceCore.msgReplyModel.replyCONTEXT_regWait(
             plugin_event=plugin_event,
             flagBlock='allowCommand',
-            hash=OlivaDiceCore.msgReplyModel.contextRegHash([None, plugin_event.data.user_id])
+            hash=OlivaDiceCore.msgReplyModel.contextRegHash([None, plugin_event.data.user_id]),
         )
         if type(tmp_select) is str and tmp_select.isdigit():
             tmp_select = int(tmp_select) - 1
@@ -498,9 +469,7 @@ def fuzzySearchAndSelect(
             flag_need_loop = False
     if not flag_need_loop:
         if strErrorKey is not None and strErrorKey in dictStrCustom:
-            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
-                dictStrCustom[strErrorKey], dictTValue
-            )
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom[strErrorKey], dictTValue)
             OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
         return None
     return None

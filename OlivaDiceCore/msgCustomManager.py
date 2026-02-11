@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-r'''
+r"""
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
 _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
@@ -12,7 +12,7 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @License   :   AGPL
 @Copyright :   (C) 2020-2021, OlivOS-Team
 @Desc      :   None
-'''
+"""
 
 import OlivOS
 import OlivaDiceCore
@@ -62,11 +62,7 @@ def saveMsgCustomByBotHash(botHash):
         OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[botHash] = {}
     with open(customReplyPath, 'w', encoding='utf-8') as customReplyPath_f:
         customReplyPath_f.write(
-            json.dumps(
-                OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[botHash],
-                ensure_ascii=False,
-                indent=4
-            )
+            json.dumps(OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[botHash], ensure_ascii=False, indent=4)
         )
 
 
@@ -131,10 +127,7 @@ def formatReplySTRReplace(data: str, valDict: dict, flagPure: bool = False):
                     if 'vValDict' in valDict and 'vPluginEvent' in valDict['vValDict']:
                         plugin_event = valDict['vValDict']['vPluginEvent']
                     reg_res_this = OlivaDiceCore.drawCard.draw(
-                        key_str=reg_key,
-                        bot_hash=tmp_bot_hash,
-                        flag_need_give_back=True,
-                        plugin_event=plugin_event
+                        key_str=reg_key, bot_hash=tmp_bot_hash, flag_need_give_back=True, plugin_event=plugin_event
                     )
                     if reg_res_this is not None:
                         reg_res += reg_res_this
@@ -197,24 +190,16 @@ def dictTValueInit(plugin_event, dictTValue):
 def loadAdapterType(botInfo: OlivOS.API.bot_info_T):
     res = 'Native'
     if type(botInfo) is OlivOS.API.bot_info_T:
-        if (
-            'platform' in botInfo.platform
-            and 'sdk' in botInfo.platform
-            and 'model' in botInfo.platform
-        ):
+        if 'platform' in botInfo.platform and 'sdk' in botInfo.platform and 'model' in botInfo.platform:
             if (
                 botInfo.platform['platform'] in OlivaDiceCore.msgCustom.dictAdapterMapper
-                and botInfo.platform['sdk'] in OlivaDiceCore.msgCustom.dictAdapterMapper
-                [botInfo.platform['platform']]
-                and botInfo.platform['model'] in OlivaDiceCore.msgCustom.dictAdapterMapper
-                [botInfo.platform['platform']][botInfo.platform['sdk']]
+                and botInfo.platform['sdk'] in OlivaDiceCore.msgCustom.dictAdapterMapper[botInfo.platform['platform']]
+                and botInfo.platform['model']
+                in OlivaDiceCore.msgCustom.dictAdapterMapper[botInfo.platform['platform']][botInfo.platform['sdk']]
             ):
-                res = (
-                    OlivaDiceCore.msgCustom.dictAdapterMapper
-                    [botInfo.platform['platform']]
-                    [botInfo.platform['sdk']]
-                    [botInfo.platform['model']]
-                )
+                res = OlivaDiceCore.msgCustom.dictAdapterMapper[botInfo.platform['platform']][botInfo.platform['sdk']][
+                    botInfo.platform['model']
+                ]
             else:
                 res = botInfo.platform['platform'].upper()
     return res

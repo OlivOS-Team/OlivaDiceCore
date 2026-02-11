@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
-'''
+"""
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
-_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/   
-/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___   
-\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/   
+_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
+/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___
+\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/
 
 @File      :   ordinaryInviteManager.py
 @Author    :   lunzhiPenxil仑质
@@ -12,11 +12,12 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @License   :   AGPL
 @Copyright :   (C) 2020-2021, OlivOS-Team
 @Desc      :   None
-'''
+"""
 
 import OlivOS
 import OlivaDiceCore
 import hashlib
+
 
 def unity_group_invite_request(plugin_event, Proc):
     flag_enable_default = 1
@@ -37,18 +38,29 @@ def unity_group_invite_request(plugin_event, Proc):
         if bot_hash_this in OlivaDiceCore.console.dictConsoleSwitch:
             if 'noticeGroupList' in OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this]:
                 if type(OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this]['noticeGroupList']) == list:
-                    for noticeGroupList_this in OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this]['noticeGroupList']:
+                    for noticeGroupList_this in OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this][
+                        'noticeGroupList'
+                    ]:
                         if type(noticeGroupList_this) == list and len(noticeGroupList_this) == 2:
                             dictTValue['tGroupId'] = str(plugin_event.data.group_id)
                             dictTValue['tInvaterId'] = str(plugin_event.data.user_id)
                             dictTValue['tComment'] = plugin_event.data.comment
                             if flag_enable == 0:
                                 dictTValue['tAcceptCommand'] = '.master accept %s' % (str(plugin_event.data.flag),)
-                                dictTValue['tResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAddGroupNoticeIgnoreResult'], dictTValue)
+                                dictTValue['tResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                    dictStrCustom['strBotAddGroupNoticeIgnoreResult'], dictTValue
+                                )
                             elif flag_enable == 1:
-                                dictTValue['tResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strAccept'], dictTValue)
-                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAddGroupNotice'], dictTValue)
-                            OlivaDiceCore.msgReply.sendMsgByEvent(plugin_event, tmp_reply_str, noticeGroupList_this[0], 'group')
+                                dictTValue['tResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                    dictStrCustom['strAccept'], dictTValue
+                                )
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                dictStrCustom['strBotAddGroupNotice'], dictTValue
+                            )
+                            OlivaDiceCore.msgReply.sendMsgByEvent(
+                                plugin_event, tmp_reply_str, noticeGroupList_this[0], 'group'
+                            )
+
 
 def unity_friend_add_request(plugin_event, Proc):
     flag_enable_default = 1
@@ -69,16 +81,27 @@ def unity_friend_add_request(plugin_event, Proc):
         if bot_hash_this in OlivaDiceCore.console.dictConsoleSwitch:
             if 'noticeGroupList' in OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this]:
                 if type(OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this]['noticeGroupList']) == list:
-                    for noticeGroupList_this in OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this]['noticeGroupList']:
+                    for noticeGroupList_this in OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this][
+                        'noticeGroupList'
+                    ]:
                         if type(noticeGroupList_this) == list and len(noticeGroupList_this) == 2:
                             dictTValue['tUserId'] = str(plugin_event.data.user_id)
                             dictTValue['tComment'] = plugin_event.data.comment
                             if flag_enable == 0:
-                                dictTValue['tResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strIgnore'], dictTValue)
+                                dictTValue['tResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                    dictStrCustom['strIgnore'], dictTValue
+                                )
                             elif flag_enable == 1:
-                                dictTValue['tResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strAccept'], dictTValue)
-                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAddFriendNotice'], dictTValue)
-                            OlivaDiceCore.msgReply.sendMsgByEvent(plugin_event, tmp_reply_str, noticeGroupList_this[0], 'group')
+                                dictTValue['tResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                    dictStrCustom['strAccept'], dictTValue
+                                )
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                dictStrCustom['strBotAddFriendNotice'], dictTValue
+                            )
+                            OlivaDiceCore.msgReply.sendMsgByEvent(
+                                plugin_event, tmp_reply_str, noticeGroupList_this[0], 'group'
+                            )
+
 
 def isInMasterList(bot_hash, user_hash):
     res = False
@@ -88,7 +111,10 @@ def isInMasterList(bot_hash, user_hash):
                 if type(OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this]['masterList']) == list:
                     for masterList_this in OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this]['masterList']:
                         if type(masterList_this) == list and len(masterList_this) == 2:
-                            if OlivaDiceCore.userConfig.getUserHash(masterList_this[0], 'user', masterList_this[1]) == user_hash:
+                            if (
+                                OlivaDiceCore.userConfig.getUserHash(masterList_this[0], 'user', masterList_this[1])
+                                == user_hash
+                            ):
                                 res = True
     return res
 
@@ -118,12 +144,14 @@ def unity_group_member_increase(plugin_event, Proc):
             if fake_plugin_event.data.host_id != None:
                 tmp_list_hit = [
                     [fake_plugin_event.data.host_id, 'host', plugin_event.platform['platform']],
-                    ['%s|%s' % (str(fake_plugin_event.data.host_id), str(fake_plugin_event.data.group_id)), 'group', plugin_event.platform['platform']]
+                    [
+                        '%s|%s' % (str(fake_plugin_event.data.host_id), str(fake_plugin_event.data.group_id)),
+                        'group',
+                        plugin_event.platform['platform'],
+                    ],
                 ]
             else:
-                tmp_list_hit = [
-                    [fake_plugin_event.data.group_id, 'group', plugin_event.platform['platform']]
-                ]
+                tmp_list_hit = [[fake_plugin_event.data.group_id, 'group', plugin_event.platform['platform']]]
             # 记录机器人加群时间
             OlivaDiceCore.userConfig.releaseUnityMsgCount(tmp_list_hit, plugin_event.bot_info.hash)
         # 发送入群欢迎消息
@@ -136,11 +164,11 @@ def unity_group_member_increase(plugin_event, Proc):
         return
     # 如果不是机器人自己,则处理 welcome 消息
     reply_msg = OlivaDiceCore.userConfig.getUserConfigByKey(
-        userConfigKey = 'welcomeMsg',
-        botHash = plugin_event.bot_info.hash,
-        userId = tmp_hagID,
-        userType = 'group',
-        platform = plugin_event.platform['platform']
+        userConfigKey='welcomeMsg',
+        botHash=plugin_event.bot_info.hash,
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
     )
     if reply_msg != None:
         # 支持 AT 新成员

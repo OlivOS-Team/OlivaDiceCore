@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-r'''
+r"""
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
 _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
@@ -12,7 +12,7 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @License   :   AGPL
 @Copyright :   (C) 2020-2026, OlivOS-Team
 @Desc      :   None
-'''
+"""
 
 import OlivOS  # NOQA: F401
 import OlivaDiceCore
@@ -27,10 +27,7 @@ class Event(object):
 
     def private_message(plugin_event, Proc):
         # 禁用私聊
-        if OlivaDiceCore.console.getConsoleSwitchByHash(
-            'disablePrivate',
-            plugin_event.bot_info.hash
-        ) == 1:
+        if OlivaDiceCore.console.getConsoleSwitchByHash('disablePrivate', plugin_event.bot_info.hash) == 1:
             plugin_event.set_block()
             return
         OlivaDiceCore.msgReply.unity_reply(plugin_event, Proc)

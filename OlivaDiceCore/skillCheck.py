@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
-'''
+"""
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
-_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/   
-/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___   
-\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/   
+_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
+/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___
+\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/
 
 @File      :   skillCheck.py
 @Author    :   lunzhiPenxil仑质
@@ -12,12 +12,13 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @License   :   AGPL
 @Copyright :   (C) 2020-2021, OlivOS-Team
 @Desc      :   None
-'''
+"""
 
 import OlivaDiceCore
 
 from enum import Enum
 import traceback
+
 
 class resultType(Enum):
     SKILLCHECK_NOPE = 0
@@ -39,6 +40,7 @@ class resultType(Enum):
     SKILLCHECK_FATE_10 = 16
     SKILLCHECK_FATE_11 = 17
 
+
 dictSkillCheckResultRouter = {
     'success': resultType.SKILLCHECK_SUCCESS,
     'fail': resultType.SKILLCHECK_FAIL,
@@ -56,26 +58,26 @@ dictSkillCheckResultRouter = {
     'fate08': resultType.SKILLCHECK_FATE_08,
     'fate09': resultType.SKILLCHECK_FATE_09,
     'fate10': resultType.SKILLCHECK_FATE_10,
-    'fate11': resultType.SKILLCHECK_FATE_11
+    'fate11': resultType.SKILLCHECK_FATE_11,
 }
+
 
 class ErrorType(Enum):
     UNKNOWN_ERROR = -1
     TEMPLATE_ERROR = -2
 
-dictSkillCheckTemp = {
-    'roll': 0,
-    'skill': 0
-}
 
-def getSkillCheckByTemplate(data, template = None, ruleKey = 'default', difficulty_prefix = None):
+dictSkillCheckTemp = {'roll': 0, 'skill': 0}
+
+
+def getSkillCheckByTemplate(data, template=None, ruleKey='default', difficulty_prefix=None):
     global dictSkillCheckTemp
     global dictSkillCheckResultRouter
     selection_key = 'checkRules'
     tmp_data = dictSkillCheckTemp.copy()
     tmp_template_dict = None
     tmp_template_rule_dict = None
-    #处理人物卡模板规则
+    # 处理人物卡模板规则
     if template == None:
         tmp_template_dict = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault['default'].copy()
     else:
@@ -87,25 +89,16 @@ def getSkillCheckByTemplate(data, template = None, ruleKey = 'default', difficul
             else:
                 tmp_template_rule_dict = {}
             tmp_template_rule_dict.update(tmp_template_dict[selection_key][ruleKey])
-    #处理临时参数
+    # 处理临时参数
     tmp_data.update(data)
-    difficulty_mapping = {
-        '困难': 'hardSuccess',
-        '极难': 'extremeHardSuccess',
-        '大成功': 'greatSuccess'
-    }
-    
-    difficulty_order = [
-        'greatSuccess',
-        'extremeHardSuccess',
-        'hardSuccess',
-        'success'
-    ]
-    
+    difficulty_mapping = {'困难': 'hardSuccess', '极难': 'extremeHardSuccess', '大成功': 'greatSuccess'}
+
+    difficulty_order = ['greatSuccess', 'extremeHardSuccess', 'hardSuccess', 'success']
+
     current_difficulty_key = difficulty_mapping.get(difficulty_prefix)
     threshold_value = None
     special_text = None
-    
+
     temp_result_enum = resultType.SKILLCHECK_NOPE
     if type(tmp_template_rule_dict) == dict:
         original_check_list = tmp_template_rule_dict.get('checkList', [])
@@ -116,12 +109,14 @@ def getSkillCheckByTemplate(data, template = None, ruleKey = 'default', difficul
             elif difficulty_prefix == '极难':
                 modified_check_list = [x for x in modified_check_list if x not in ['success', 'hardSuccess']]
             elif difficulty_prefix == '大成功':
-                modified_check_list = [x for x in modified_check_list if x not in ['success', 'hardSuccess', 'extremeHardSuccess']]
-        
+                modified_check_list = [
+                    x for x in modified_check_list if x not in ['success', 'hardSuccess', 'extremeHardSuccess']
+                ]
+
         # DeltaGreen规则的特殊处理
-        if ruleKey == 'DeltaGreen' and difficulty_prefix in ['困难','极难','大成功']:
+        if ruleKey == 'DeltaGreen' and difficulty_prefix in ['困难', '极难', '大成功']:
             special_text = '结果为1或小于技巧两骰相同'
-        
+
         if not special_text and current_difficulty_key and current_difficulty_key in tmp_template_rule_dict:
             threshold_value = calculateThreshold(tmp_template_rule_dict[current_difficulty_key], tmp_data)
             if threshold_value == 0:
@@ -133,27 +128,27 @@ def getSkillCheckByTemplate(data, template = None, ruleKey = 'default', difficul
                 elif difficulty_prefix == '极难':
                     if 'greatSuccess' in tmp_template_rule_dict:
                         threshold_value = calculateThreshold(tmp_template_rule_dict['greatSuccess'], tmp_data)
-        
+
         if 'greatFail' in tmp_template_rule_dict:
             great_fail_result = culRule('.node', tmp_template_rule_dict['greatFail'], tmp_data)
             if great_fail_result == True:
                 if special_text and difficulty_prefix == '大成功':
                     threshold_value = special_text
                 return resultType.SKILLCHECK_GREAT_FAIL, threshold_value
-        
+
         for difficulty in difficulty_order:
             if difficulty in modified_check_list and difficulty in tmp_template_rule_dict:
                 temp_result = culRule('.node', tmp_template_rule_dict[difficulty], tmp_data)
                 if temp_result == True:
                     temp_result_enum = dictSkillCheckResultRouter[difficulty]
                     break
-        
+
         if temp_result_enum == resultType.SKILLCHECK_NOPE:
             if 'fail' in tmp_template_rule_dict:
                 fail_result = culRule('.node', tmp_template_rule_dict['fail'], tmp_data)
                 if fail_result == True:
                     temp_result_enum = resultType.SKILLCHECK_FAIL
-        
+
         if temp_result_enum == resultType.SKILLCHECK_NOPE:
             for difficulty in original_check_list:
                 if difficulty in tmp_template_rule_dict:
@@ -161,11 +156,12 @@ def getSkillCheckByTemplate(data, template = None, ruleKey = 'default', difficul
                     if temp_result == True:
                         temp_result_enum = resultType.SKILLCHECK_FAIL
                         break
-                    
+
         if special_text:
             threshold_value = special_text
-            
+
     return temp_result_enum, threshold_value
+
 
 def calculateThreshold(ruleNode, tmp_data):
     threshold_data = tmp_data.copy()
@@ -186,6 +182,7 @@ def calculateThreshold(ruleNode, tmp_data):
             break
     threshold = max(threshold_a, threshold_b)
     return threshold
+
 
 def culRule(nodeKey, nodeData, tempData):
     temp_result = False
@@ -311,14 +308,18 @@ def culRule(nodeKey, nodeData, tempData):
             temp_result = temp_result_1
     return temp_result
 
-def isSpecialSkill(skillName:str, pcCardRule:str):
+
+def isSpecialSkill(skillName: str, pcCardRule: str):
     res = False
-    if pcCardRule in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial \
-    and skillName in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[pcCardRule]:
+    if (
+        pcCardRule in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial
+        and skillName in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[pcCardRule]
+    ):
         res = True
     return res
 
-def getSpecialSkillReplace(srcPara:str, pcCardRule:str, pcCardData:dict):
+
+def getSpecialSkillReplace(srcPara: str, pcCardRule: str, pcCardData: dict):
     res = srcPara
     if pcCardRule in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial:
         for skill_this in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[pcCardRule]:
@@ -328,13 +329,12 @@ def getSpecialSkillReplace(srcPara:str, pcCardRule:str, pcCardData:dict):
                 res = res.replace('%s' % skill_this, res_this)
     return res
 
-def getSpecialSkill(skillName:str, pcCardRule:str, pcCardData:dict):
+
+def getSpecialSkill(skillName: str, pcCardRule: str, pcCardData: dict):
     res = None
     if isSpecialSkill(skillName, pcCardRule):
         if skillName == '体格':
-            if type(pcCardData) is dict \
-            and 'STR' in pcCardData \
-            and 'SIZ' in pcCardData:
+            if type(pcCardData) is dict and 'STR' in pcCardData and 'SIZ' in pcCardData:
                 try:
                     tmp_sum = int(pcCardData['STR']) + int(pcCardData['SIZ'])
                     if tmp_sum <= 64:
@@ -370,9 +370,7 @@ def getSpecialSkill(skillName:str, pcCardRule:str, pcCardData:dict):
             365-444: +4d6
             之后每超过80，再加1d6
             """
-            if type(pcCardData) is dict \
-            and 'STR' in pcCardData \
-            and 'SIZ' in pcCardData:
+            if type(pcCardData) is dict and 'STR' in pcCardData and 'SIZ' in pcCardData:
                 try:
                     tmp_sum = int(pcCardData['STR']) + int(pcCardData['SIZ'])
                     if tmp_sum <= 64:

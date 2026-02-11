@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-r'''
+r"""
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
 _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
@@ -12,7 +12,7 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @License   :   AGPL
 @Copyright :   (C) 2020-2026, OlivOS-Team
 @Desc      :   None
-'''
+"""
 
 import OlivaDiceCore
 
@@ -46,7 +46,7 @@ dictConsoleSwitchTemplate = {
         'defaultAutoSn': 0,
         'masterList': [],
         'noticeGroupList': [],
-        'pulseUrlList': []
+        'pulseUrlList': [],
     }
 }
 
@@ -66,11 +66,7 @@ dictBackupConfigTemplate = {
 dictBackupConfig = {}
 
 # 主从关系配置相关
-dictAccountRelationConfigTemplate = {
-    'default': {
-        'relations': {}
-    }
-}
+dictAccountRelationConfigTemplate = {'default': {'relations': {}}}
 
 dictAccountRelationConfig = {}
 
@@ -98,16 +94,17 @@ def initConsoleSwitch(botHash, templateName='default'):
         if botHash not in dictConsoleSwitch:
             dictConsoleSwitch[botHash] = {}
         for template_key_this in dictConsoleSwitchTemplate[templateName]:
-            if type(dictConsoleSwitchTemplate[templateName][template_key_this]) in [
-                list
-            ] and template_key_this not in dictConsoleSwitch[botHash]:
-                dictConsoleSwitch[botHash][template_key_this] = (
-                    dictConsoleSwitchTemplate[templateName][template_key_this].copy()
-                )
+            if (
+                type(dictConsoleSwitchTemplate[templateName][template_key_this]) in [list]
+                and template_key_this not in dictConsoleSwitch[botHash]
+            ):
+                dictConsoleSwitch[botHash][template_key_this] = dictConsoleSwitchTemplate[templateName][
+                    template_key_this
+                ].copy()
             else:
-                dictConsoleSwitch[botHash][template_key_this] = (
-                    dictConsoleSwitchTemplate[templateName][template_key_this]
-                )
+                dictConsoleSwitch[botHash][template_key_this] = dictConsoleSwitchTemplate[templateName][
+                    template_key_this
+                ]
 
 
 def initConsoleSwitchByBotDict(botDict):
@@ -244,9 +241,9 @@ def initAccountRelationConfig():
         dictAccountRelationConfig['unity'] = {}
     for template_key_this in dictAccountRelationConfigTemplate['default']:
         if template_key_this not in dictAccountRelationConfig['unity']:
-            dictAccountRelationConfig['unity'][template_key_this] = (
-                dictAccountRelationConfigTemplate['default'][template_key_this].copy()
-            )
+            dictAccountRelationConfig['unity'][template_key_this] = dictAccountRelationConfigTemplate['default'][
+                template_key_this
+            ].copy()
 
 
 def saveAccountRelationConfig():

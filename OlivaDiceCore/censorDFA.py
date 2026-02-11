@@ -1,4 +1,4 @@
-r'''
+r"""
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
 _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
@@ -11,14 +11,12 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @License   :   AGPL
 @Copyright :   (C) 2022-2026, lunzhiPenxil
 @Desc      :   一个基于DFA算法实现的高性能敏感词解析库
-'''
+"""
 
 import copy
 import json
 
-defautDFANode = {
-    '_is_end': True
-}
+defautDFANode = {'_is_end': True}
 
 
 def loadListFromFile(path):
@@ -94,10 +92,7 @@ class DFA(object):
                 if res_this_this not in res and len(res_this_this) > 0:
                     res.append(res_this_this)
         flagReverse = mode == maxMatchType
-        res.sort(
-            key=lambda x: len(x),
-            reverse=flagReverse
-        )
+        res.sort(key=lambda x: len(x), reverse=flagReverse)
         return res
 
     def doReplace(self, inData: str, replaceMark: str = '*', mode=maxMatchType):

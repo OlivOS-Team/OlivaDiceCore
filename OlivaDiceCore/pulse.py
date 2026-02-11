@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
-'''
+"""
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
-_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/   
-/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___   
-\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/   
+_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
+/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___
+\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/
 
 @File      :   pulse.py
 @Author    :   lunzhiPenxil仑质
@@ -12,7 +12,7 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @License   :   AGPL
 @Copyright :   (C) 2020-2021, OlivOS-Team
 @Desc      :   None
-'''
+"""
 
 import time
 import requests as req
@@ -21,6 +21,7 @@ import OlivOS
 import OlivaDiceCore
 
 dictPulseTs = {}
+
 
 def unity_heartbeat(plugin_event, Proc):
     global dictPulseTs
@@ -52,7 +53,9 @@ def unity_heartbeat(plugin_event, Proc):
             tmp_master_list_1 = []
             if tmp_res['active'] == True:
                 tmp_nickname = tmp_res['data']['name']
-                OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]['strBotName'] = tmp_res['data']['name']
+                OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]['strBotName'] = tmp_res['data'][
+                    'name'
+                ]
             for tmp_master_list_this in tmp_master_list:
                 tmp_master_list_1.append(str(tmp_master_list_this[0]))
             tmp_master = ','.join(tmp_master_list_1)
@@ -61,18 +64,19 @@ def unity_heartbeat(plugin_event, Proc):
         try:
             for tmp_pulse_url_list_this in tmp_pulse_url_list:
                 do_pulse(
-                    user_id = tmp_user_id,
-                    name = tmp_nickname,
-                    token = tmp_pulse_url_list_this[1],
-                    time_ts = tmp_ts,
-                    masterid = tmp_master,
-                    platform = plugin_event.platform['platform'],
-                    url = tmp_pulse_url_list_this[0]
+                    user_id=tmp_user_id,
+                    name=tmp_nickname,
+                    token=tmp_pulse_url_list_this[1],
+                    time_ts=tmp_ts,
+                    masterid=tmp_master,
+                    platform=plugin_event.platform['platform'],
+                    url=tmp_pulse_url_list_this[0],
                 )
         except:
             pass
 
-def do_pulse(user_id, name, token, time_ts, masterid = '0', platform = 'default', url = None):
+
+def do_pulse(user_id, name, token, time_ts, masterid='0', platform='default', url=None):
     tmp_payload_dict = {
         'token': token,
         'user_id': user_id,
@@ -84,13 +88,13 @@ def do_pulse(user_id, name, token, time_ts, masterid = '0', platform = 'default'
         'isGlobalon': 1,
         'isPublic': 1,
         'isVisible': 1,
-        'platform': platform
+        'platform': platform,
     }
     payload = tmp_payload_dict
     send_url = url
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': OlivaDiceCore.data.bot_version_short_header
+        'User-Agent': OlivaDiceCore.data.bot_version_short_header,
     }
     if send_url != None:
-        msg_res = req.request("POST", send_url, headers = headers, data = payload)
+        msg_res = req.request('POST', send_url, headers=headers, data=payload)
