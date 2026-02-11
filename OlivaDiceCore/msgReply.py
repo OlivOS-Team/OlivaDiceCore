@@ -1,16 +1,16 @@
 # -*- encoding: utf-8 -*-
-'''
+r'''
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
-_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/   
-/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___   
-\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/   
+_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
+/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___
+\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/
 
 @File      :   msgReply.py
 @Author    :   lunzhiPenxil仑质
 @Contact   :   lunzhipenxil@gmail.com
 @License   :   AGPL
-@Copyright :   (C) 2020-2021, OlivOS-Team
+@Copyright :   (C) 2020-2026, OlivOS-Team
 @Desc      :   None
 '''
 
@@ -24,16 +24,19 @@ import re
 import copy
 import math
 
+
 def logProc(Proc, level, message, segment):
     Proc.log(
-        log_level = level,
-        log_message = message,
-        log_segment = segment
+        log_level=level,
+        log_message=message,
+        log_segment=segment
     )
 
+
 def globalLog(level, message, segment):
-    if OlivaDiceCore.data.global_Proc != None:
+    if OlivaDiceCore.data.global_Proc is not None:
         logProc(OlivaDiceCore.data.global_Proc, level, message, segment)
+
 
 def unity_init(plugin_event, Proc):
     OlivaDiceCore.data.global_Proc = Proc
@@ -42,7 +45,7 @@ def unity_init(plugin_event, Proc):
     dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
     dictGValue = OlivaDiceCore.msgCustom.dictGValue
     dictTValue.update(dictGValue)
-    #init start
+    # init start
     OlivaDiceCore.console.initConsoleSwitchByBotDict(Proc.Proc_data['bot_info_dict'])
     OlivaDiceCore.console.readConsoleSwitch()
     OlivaDiceCore.console.saveConsoleSwitch()
@@ -64,7 +67,7 @@ def unity_init(plugin_event, Proc):
     total_count = OlivaDiceCore.pcCard.dataPcCardTotalCount()
     dictTValue['tInitDataCount'] = str(total_count)
     dictTValue['tInitDataType'] = '人物卡'
-    tmp_log_str =  OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitData'], dictTValue)
+    tmp_log_str = OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitData'], dictTValue)
     logProc(Proc, 2, tmp_log_str, [
         ('OlivaDice', 'default'),
         ('Init', 'default')
@@ -73,25 +76,26 @@ def unity_init(plugin_event, Proc):
     total_count = OlivaDiceCore.userConfig.dataUserConfigTotalCount()
     dictTValue['tInitDataCount'] = str(total_count)
     dictTValue['tInitDataType'] = '用户记录'
-    tmp_log_str =  OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitData'], dictTValue)
+    tmp_log_str = OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strInitData'], dictTValue)
     logProc(Proc, 2, tmp_log_str, [
         ('OlivaDice', 'default'),
         ('Init', 'default')
     ])
     OlivaDiceCore.censorAPI.initCensor(Proc.Proc_data['bot_info_dict'])
-    #显示Master认主信息
+    # 显示Master认主信息
     dictTValue['tInitMasterKey'] = '.master %s' % OlivaDiceCore.data.bot_content['masterKey']
-    tmp_log_str =  OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strToBeMaster'], dictTValue)
+    tmp_log_str = OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strToBeMaster'], dictTValue)
     logProc(Proc, 2, tmp_log_str, [
         ('OlivaDice', 'default'),
         ('Init', 'default')
     ])
     dictTValue['tVersion'] = OlivaDiceCore.data.OlivaDiceCore_ver_short
-    tmp_log_str =  OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strShowVersionOnLog'], dictTValue)
+    tmp_log_str = OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strShowVersionOnLog'], dictTValue)
     logProc(Proc, 2, tmp_log_str, [
         ('OlivaDice', 'default'),
         ('Init', 'default')
     ])
+
 
 def unity_init_after(plugin_event, Proc):
     for bot_info_this in Proc.Proc_data['bot_info_dict']:
@@ -107,53 +111,59 @@ def unity_init_after(plugin_event, Proc):
         ]:
             plugin_event_fake = OlivOS.API.Event(
                 OlivOS.contentAPI.fake_sdk_event(
-                    bot_info = bot_info,
-                    fakename = OlivaDiceCore.data.OlivaDiceCore_name
+                    bot_info=bot_info,
+                    fakename=OlivaDiceCore.data.OlivaDiceCore_name
                 ),
                 Proc.log
             )
             res_data = plugin_event_fake.get_login_info(bot_info)
-            if res_data != None:
+            if res_data is not None:
                 if res_data['active']:
                     OlivaDiceCore.msgCustom.dictStrCustomDict[bot_info_this]['strBotName'] = res_data['data']['name']
+
 
 def unity_save(plugin_event, Proc):
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
     dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
     dictGValue = OlivaDiceCore.msgCustom.dictGValue
     dictTValue.update(dictGValue)
-    #save start
+    # save start
     OlivaDiceCore.msgCustomManager.saveMsgCustom(Proc.Proc_data['bot_info_dict'])
     OlivaDiceCore.userConfig.releaseUnityMsgCount([], None, True)
     total_count = OlivaDiceCore.userConfig.dataUserConfigTotalCount()
     dictTValue['tInitDataCount'] = str(total_count)
     dictTValue['tInitDataType'] = '用户记录'
-    tmp_log_str =  OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strSaveData'], dictTValue)
+    tmp_log_str = OlivaDiceCore.msgCustomManager.formatReplySTRConst(dictStrConst['strSaveData'], dictTValue)
     logProc(Proc, 2, tmp_log_str, [
         ('OlivaDice', 'default'),
         ('Save', 'default')
     ])
 
+
 def poke_reply(plugin_event, Proc):
     if plugin_event.data.target_id == plugin_event.base_info['self_id']:
         if plugin_event.data.group_id not in [-1, None, '-1']:
             new_plugin_event = OlivaDiceCore.msgEvent.getReRxEvent_group_message(
-                src = plugin_event,
-                message = '[戳一戳]'
+                src=plugin_event,
+                message='[戳一戳]'
             )
             replyMsg(
                 new_plugin_event,
-                OlivaDiceCore.crossHook.dictHookFunc['pokeHook'](plugin_event = new_plugin_event, type = 'group')
+                OlivaDiceCore.crossHook.dictHookFunc['pokeHook'](
+                    plugin_event=new_plugin_event,
+                    type='group'
+                )
             )
         elif plugin_event.data.group_id in [-1, None, '-1']:
             new_plugin_event = OlivaDiceCore.msgEvent.getReRxEvent_private_message(
-                src = plugin_event,
-                message = '[戳一戳]'
+                src=plugin_event,
+                message='[戳一戳]'
             )
             replyMsg(
                 new_plugin_event,
-                OlivaDiceCore.crossHook.dictHookFunc['pokeHook'](plugin_event = new_plugin_event, type = 'private')
+                OlivaDiceCore.crossHook.dictHookFunc['pokeHook'](plugin_event=new_plugin_event, type='private')
             )
+
 
 def unity_reply(plugin_event, Proc):
     OlivaDiceCore.userConfig.setMsgCount()
@@ -196,7 +206,7 @@ def unity_reply(plugin_event, Proc):
     tmp_at_str_sub = None
     tmp_id_str_sub = None
     if 'sub_self_id' in plugin_event.data.extend:
-        if plugin_event.data.extend['sub_self_id'] != None:
+        if plugin_event.data.extend['sub_self_id'] is not None:
             tmp_at_str_sub = OlivOS.messageAPI.PARA.at(plugin_event.data.extend['sub_self_id']).CQ()
             tmp_id_str_sub = str(plugin_event.data.extend['sub_self_id'])
     tmp_reast_str = plugin_event.data.message
@@ -240,13 +250,13 @@ def unity_reply(plugin_event, Proc):
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
         else:
             tmp_reast_str = tmp_reast_str_old
-    #反实例化临时方案，用于对齐OlivOS不同平台字符串标准
+    # 反实例化临时方案，用于对齐OlivOS不同平台字符串标准
     tmp_reast_str = htmlUnescape(tmp_reast_str)
 
     # 输入流缓存区
     if OlivaDiceCore.msgReplyModel.replyCONTEXT_regGet(
-        plugin_event = plugin_event,
-        tmp_reast_str = tmp_reast_str
+        plugin_event=plugin_event,
+        tmp_reast_str=tmp_reast_str
     ):
         plugin_event.set_block()
 
@@ -270,10 +280,14 @@ def unity_reply(plugin_event, Proc):
         )
         valDict['flag_is_from_master'] = flag_is_from_master
         if plugin_event.plugin_info['func_type'] == 'group_message':
-            if plugin_event.data.host_id != None:
+            if plugin_event.data.host_id is not None:
                 tmp_list_hit = [
                     [plugin_event.data.host_id, 'host', plugin_event.platform['platform']],
-                    ['%s|%s' % (str(plugin_event.data.host_id), str(plugin_event.data.group_id)), 'group', plugin_event.platform['platform']],
+                    [
+                        f"{plugin_event.data.host_id}|{plugin_event.data.group_id}",
+                        'group',
+                        plugin_event.platform['platform']
+                    ],
                     [plugin_event.data.user_id,  'user',  plugin_event.platform['platform']]
                 ]
                 flag_is_from_host = True
@@ -291,15 +305,15 @@ def unity_reply(plugin_event, Proc):
         tmp_user_name = None
         if 'name' in plugin_event.data.sender:
             tmp_user_name = plugin_event.data.sender['name']
-        if tmp_user_name == None:
+        if tmp_user_name is None:
             tmp_user_name = '用户'
         OlivaDiceCore.userConfig.setUserConfigByKey(
-            userConfigKey = 'userName',
-            userConfigValue = tmp_user_name,
-            botHash = plugin_event.bot_info.hash,
-            userId = plugin_event.data.user_id,
-            userType = 'user',
-            platform = plugin_event.platform['platform']
+            userConfigKey='userName',
+            userConfigValue=tmp_user_name,
+            botHash=plugin_event.bot_info.hash,
+            userId=plugin_event.data.user_id,
+            userType='user',
+            platform=plugin_event.platform['platform']
         )
         if flag_is_from_group:
             if 'role' in plugin_event.data.sender:
@@ -319,47 +333,47 @@ def unity_reply(plugin_event, Proc):
         flag_hostEnable = True
         if flag_is_from_host:
             flag_hostEnable = OlivaDiceCore.userConfig.getUserConfigByKey(
-                userId = plugin_event.data.host_id,
-                userType = 'host',
-                platform = plugin_event.platform['platform'],
-                userConfigKey = 'hostEnable',
-                botHash = plugin_event.bot_info.hash
+                userId=plugin_event.data.host_id,
+                userType='host',
+                platform=plugin_event.platform['platform'],
+                userConfigKey='hostEnable',
+                botHash=plugin_event.bot_info.hash
             )
         flag_hostLocalEnable = True
         if flag_is_from_host:
             flag_hostLocalEnable = OlivaDiceCore.userConfig.getUserConfigByKey(
-                userId = plugin_event.data.host_id,
-                userType = 'host',
-                platform = plugin_event.platform['platform'],
-                userConfigKey = 'hostLocalEnable',
-                botHash = plugin_event.bot_info.hash
+                userId=plugin_event.data.host_id,
+                userType='host',
+                platform=plugin_event.platform['platform'],
+                userConfigKey='hostLocalEnable',
+                botHash=plugin_event.bot_info.hash
             )
         flag_groupEnable = True
         if flag_is_from_group:
             if flag_is_from_host:
                 if flag_hostEnable:
                     flag_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKey(
-                        userId = tmp_hagID,
-                        userType = 'group',
-                        platform = plugin_event.platform['platform'],
-                        userConfigKey = 'groupEnable',
-                        botHash = plugin_event.bot_info.hash
+                        userId=tmp_hagID,
+                        userType='group',
+                        platform=plugin_event.platform['platform'],
+                        userConfigKey='groupEnable',
+                        botHash=plugin_event.bot_info.hash
                     )
                 else:
                     flag_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKey(
-                        userId = tmp_hagID,
-                        userType = 'group',
-                        platform = plugin_event.platform['platform'],
-                        userConfigKey = 'groupWithHostEnable',
-                        botHash = plugin_event.bot_info.hash
+                        userId=tmp_hagID,
+                        userType='group',
+                        platform=plugin_event.platform['platform'],
+                        userConfigKey='groupWithHostEnable',
+                        botHash=plugin_event.bot_info.hash
                     )
             else:
                 flag_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKey(
-                    userId = tmp_hagID,
-                    userType = 'group',
-                    platform = plugin_event.platform['platform'],
-                    userConfigKey = 'groupEnable',
-                    botHash = plugin_event.bot_info.hash
+                    userId=tmp_hagID,
+                    userType='group',
+                    platform=plugin_event.platform['platform'],
+                    userConfigKey='groupEnable',
+                    botHash=plugin_event.bot_info.hash
                 )
         valDict['flag_is_from_group'] = flag_is_from_group
         valDict['flag_is_from_group_admin'] = flag_is_from_group_admin
@@ -386,20 +400,24 @@ def unity_reply(plugin_event, Proc):
             tmp_pcHash,
             tmp_hagID
         )
-        if tmp_pc_name_1 != None:
+        if tmp_pc_name_1 is not None:
             dictTValue['tName'] = tmp_pc_name_1
         
         if flag_is_from_master:
             if isMatchWordStart(tmp_reast_str, 'master'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'master')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
-                if re.compile(r'^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$')\
-                    .match(tmp_reast_str):
-                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBecomeMasterAlready'], dictTValue)
+                if (
+                    re.compile(r'^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$')
+                    .match(tmp_reast_str)
+                ):
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                        dictStrCustom['strBecomeMasterAlready'], dictTValue
+                    )
                     replyMsg(plugin_event, tmp_reply_str)
                     return
-                if isMatchWordStart(tmp_reast_str, ['exit','bye']):
-                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['exit','bye'])
+                if isMatchWordStart(tmp_reast_str, ['exit', 'bye']):
+                    tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['exit', 'bye'])
                     tmp_reast_str = skipSpaceStart(tmp_reast_str)
                     tmp_reast_str = tmp_reast_str.rstrip(' ')
                     # 用空格分割群号部分和附加消息部分
@@ -421,23 +439,29 @@ def unity_reply(plugin_event, Proc):
                             tmp_group_id = int(tmp_group_id_str)
                         elif tmp_group_id_str[0] == '-' and tmp_group_id_str[1:].isdecimal():
                             tmp_group_id = (-1) * int(tmp_group_id_str[1:])
-                        if tmp_group_id != None:
+                        if tmp_group_id is not None:
                             tmp_valid_group_ids.append(tmp_group_id)
                     if len(tmp_valid_group_ids) > 0:
                         dictTValue['tGroupId'] = ', '.join([str(gid) for gid in tmp_valid_group_ids])
                         if tmp_extra_msg:
                             dictTValue['tExtraMsg'] = tmp_extra_msg
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotExitRemoteShow'], dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                            dictStrCustom['strBotExitRemoteShow'], dictTValue
+                        )
                         replyMsg(plugin_event, tmp_reply_str)
                         # 然后逐个退群
                         for tmp_group_id in tmp_valid_group_ids:
                             dictTValue['tGroupId'] = str(tmp_group_id)
-                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotExitRemote'], dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                dictStrCustom['strBotExitRemote'], dictTValue
+                            )
                             sendMsgByEvent(plugin_event, tmp_reply_str, tmp_group_id, 'group')
                             time.sleep(1)
                             # 执行退群操作
                             plugin_event.set_group_leave(tmp_group_id)
-                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotExitRemoteUnit'], dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                dictStrCustom['strBotExitRemoteUnit'], dictTValue
+                            )
                             replyMsg(plugin_event, tmp_reply_str)
                 elif isMatchWordStart(tmp_reast_str, 'remote'):
                     tmp_user_platform = plugin_event.platform['platform']
@@ -458,19 +482,19 @@ def unity_reply(plugin_event, Proc):
                             tmp_reast_str = skipSpaceStart(tmp_reast_str)
                             tmp_userId_in = tmp_reast_str
                             flag_will_enable = False
-                        if flag_will_enable != None:
+                        if flag_will_enable is not None:
                             tmp_groupUserHash = OlivaDiceCore.userConfig.getUserHash(
-                                userId = tmp_userId_in,
-                                userType = 'group',
-                                platform = tmp_user_platform
+                                userId=tmp_userId_in,
+                                userType='group',
+                                platform=tmp_user_platform
                             )
                             tmp_groupUserId = OlivaDiceCore.userConfig.getUserDataByKeyWithHash(
-                                userHash = tmp_groupUserHash,
-                                userDataKey = 'userId',
-                                botHash = plugin_event.bot_info.hash
+                                userHash=tmp_groupUserHash,
+                                userDataKey='userId',
+                                botHash=plugin_event.bot_info.hash
                             )
                             dictTValue['tId'] = str(tmp_userId_in)
-                            if tmp_groupUserId != None:
+                            if tmp_groupUserId is not None:
                                 dictTValue['tId'] = str(tmp_groupUserId)
                             else:
                                 tmp_groupUserId = tmp_userId_in
@@ -484,49 +508,57 @@ def unity_reply(plugin_event, Proc):
                                 return
                             elif len(tmp_groupUserId_list) == 1:
                                 tmp_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
-                                    userHash = tmp_groupUserHash,
-                                    userConfigKey = 'groupEnable',
-                                    botHash = plugin_event.bot_info.hash
+                                    userHash=tmp_groupUserHash,
+                                    userConfigKey='groupEnable',
+                                    botHash=plugin_event.bot_info.hash
                                 )
                                 flag_now_enable = tmp_groupEnable
                                 if flag_now_enable != flag_will_enable:
                                     OlivaDiceCore.userConfig.setUserConfigByKey(
-                                        userConfigKey = 'groupEnable',
-                                        userConfigValue = flag_will_enable,
-                                        botHash = plugin_event.bot_info.hash,
-                                        userId = tmp_groupUserId,
-                                        userType = 'group',
-                                        platform = tmp_user_platform
+                                        userConfigKey='groupEnable',
+                                        userConfigValue=flag_will_enable,
+                                        botHash=plugin_event.bot_info.hash,
+                                        userId=tmp_groupUserId,
+                                        userType='group',
+                                        platform=tmp_user_platform
                                     )
                                     OlivaDiceCore.userConfig.writeUserConfigByUserHash(
-                                        userHash = tmp_groupUserHash
+                                        userHash=tmp_groupUserHash
                                     )
                                     if flag_will_enable:
-                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOn'], dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                            dictStrCustom['strMasterRemoteOn'], dictTValue
+                                        )
                                     else:
-                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOff'], dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                            dictStrCustom['strMasterRemoteOff'], dictTValue
+                                        )
                                 elif flag_now_enable == flag_will_enable:
                                     if flag_will_enable:
-                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOnAlready'], dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                            dictStrCustom['strMasterRemoteOnAlready'], dictTValue
+                                        )
                                     else:
-                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOffAlready'], dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                            dictStrCustom['strMasterRemoteOffAlready'], dictTValue
+                                        )
                             elif len(tmp_groupUserId_list) == 2:
                                 tmp_hostUserId_in = tmp_groupUserId_list[0]
                                 tmp_hostUserHash = OlivaDiceCore.userConfig.getUserHash(
-                                    userId = tmp_hostUserId_in,
-                                    userType = 'host',
-                                    platform = tmp_user_platform
+                                    userId=tmp_hostUserId_in,
+                                    userType='host',
+                                    platform=tmp_user_platform
                                 )
                                 tmp_hostUserId = OlivaDiceCore.userConfig.getUserDataByKeyWithHash(
-                                    userHash = tmp_hostUserHash,
-                                    userDataKey = 'userId',
-                                    botHash = plugin_event.bot_info.hash
+                                    userHash=tmp_hostUserHash,
+                                    userDataKey='userId',
+                                    botHash=plugin_event.bot_info.hash
                                 )
-                                if tmp_hostUserId != None:
+                                if tmp_hostUserId is not None:
                                     tmp_hostEnable = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
-                                        userHash = tmp_hostUserHash,
-                                        userConfigKey = 'hostEnable',
-                                        botHash = plugin_event.bot_info.hash
+                                        userHash=tmp_hostUserHash,
+                                        userConfigKey='hostEnable',
+                                        botHash=plugin_event.bot_info.hash
                                     )
                                     flag_userConfigKey = 'groupEnable'
                                     if tmp_hostEnable:
@@ -534,37 +566,49 @@ def unity_reply(plugin_event, Proc):
                                     else:
                                         flag_userConfigKey = 'groupWithHostEnable'
                                     tmp_groupEnable = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
-                                        userHash = tmp_groupUserHash,
-                                        userConfigKey = flag_userConfigKey,
-                                        botHash = plugin_event.bot_info.hash
+                                        userHash=tmp_groupUserHash,
+                                        userConfigKey=flag_userConfigKey,
+                                        botHash=plugin_event.bot_info.hash
                                     )
                                     flag_now_enable = tmp_groupEnable
                                     if flag_now_enable != flag_will_enable:
                                         OlivaDiceCore.userConfig.setUserConfigByKey(
-                                            userConfigKey = flag_userConfigKey,
-                                            userConfigValue = flag_will_enable,
-                                            botHash = plugin_event.bot_info.hash,
-                                            userId = tmp_groupUserId,
-                                            userType = 'group',
-                                            platform = tmp_user_platform
+                                            userConfigKey=flag_userConfigKey,
+                                            userConfigValue=flag_will_enable,
+                                            botHash=plugin_event.bot_info.hash,
+                                            userId=tmp_groupUserId,
+                                            userType='group',
+                                            platform=tmp_user_platform
                                         )
                                         OlivaDiceCore.userConfig.writeUserConfigByUserHash(
-                                            userHash = tmp_groupUserHash
+                                            userHash=tmp_groupUserHash
                                         )
                                         if flag_will_enable:
-                                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOn'], dictTValue)
+                                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                                dictStrCustom['strMasterRemoteOn'], dictTValue
+                                            )
                                         else:
-                                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOff'], dictTValue)
+                                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                                dictStrCustom['strMasterRemoteOff'], dictTValue
+                                            )
                                     elif flag_now_enable == flag_will_enable:
                                         if flag_will_enable:
-                                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOnAlready'], dictTValue)
+                                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                                dictStrCustom['strMasterRemoteOnAlready'], dictTValue
+                                            )
                                         else:
-                                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOffAlready'], dictTValue)
+                                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                                dictStrCustom['strMasterRemoteOffAlready'], dictTValue
+                                            )
                                 else:
-                                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteNone'], dictTValue)
+                                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                        dictStrCustom['strMasterRemoteNone'], dictTValue
+                                    )
                             else:
-                                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteNone'], dictTValue)
-                        if tmp_reply_str != None:
+                                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                    dictStrCustom['strMasterRemoteNone'], dictTValue
+                                )
+                        if tmp_reply_str is not None:
                             replyMsg(plugin_event, tmp_reply_str)
                     elif isMatchWordStart(tmp_reast_str, 'host'):
                         tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'host')
@@ -588,62 +632,78 @@ def unity_reply(plugin_event, Proc):
                             flag_will_enable = False
                         if len(tmp_userId_in) == 0:
                             return
-                        if flag_will_enable != None:
+                        if flag_will_enable is not None:
                             tmp_hostUserHash = OlivaDiceCore.userConfig.getUserHash(
-                                userId = tmp_userId_in,
-                                userType = 'host',
-                                platform = tmp_user_platform
+                                userId=tmp_userId_in,
+                                userType='host',
+                                platform=tmp_user_platform
                             )
                             tmp_hostUserId = OlivaDiceCore.userConfig.getUserDataByKeyWithHash(
-                                userHash = tmp_hostUserHash,
-                                userDataKey = 'userId',
-                                botHash = plugin_event.bot_info.hash
+                                userHash=tmp_hostUserHash,
+                                userDataKey='userId',
+                                botHash=plugin_event.bot_info.hash
                             )
                             dictTValue['tId'] = str(tmp_userId_in)
-                            if tmp_hostUserId != None:
+                            if tmp_hostUserId is not None:
                                 dictTValue['tId'] = str(tmp_hostUserId)
                             else:
                                 tmp_hostUserId = tmp_userId_in
                             tmp_hostLocalEnable = OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
-                                userHash = tmp_hostUserHash,
-                                userConfigKey = flag_userConfigKey,
-                                botHash = plugin_event.bot_info.hash
+                                userHash=tmp_hostUserHash,
+                                userConfigKey=flag_userConfigKey,
+                                botHash=plugin_event.bot_info.hash
                             )
                             flag_now_enable = tmp_hostLocalEnable
                             if flag_now_enable != flag_will_enable:
                                 OlivaDiceCore.userConfig.setUserConfigByKey(
-                                    userConfigKey = flag_userConfigKey,
-                                    userConfigValue = flag_will_enable,
-                                    botHash = plugin_event.bot_info.hash,
-                                    userId = tmp_hostUserId,
-                                    userType = 'host',
-                                    platform = tmp_user_platform
+                                    userConfigKey=flag_userConfigKey,
+                                    userConfigValue=flag_will_enable,
+                                    botHash=plugin_event.bot_info.hash,
+                                    userId=tmp_hostUserId,
+                                    userType='host',
+                                    platform=tmp_user_platform
                                 )
                                 OlivaDiceCore.userConfig.writeUserConfigByUserHash(
-                                    userHash = tmp_hostUserHash
+                                    userHash=tmp_hostUserHash
                                 )
                                 if flag_userConfigKey == 'hostEnable':
                                     if flag_will_enable:
-                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteDefaultOn'], dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                            dictStrCustom['strMasterRemoteDefaultOn'], dictTValue
+                                        )
                                     else:
-                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteDefaultOff'], dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                            dictStrCustom['strMasterRemoteDefaultOff'], dictTValue
+                                        )
                                 else:
                                     if flag_will_enable:
-                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOn'], dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                            dictStrCustom['strMasterRemoteOn'], dictTValue
+                                        )
                                     else:
-                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOff'], dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                            dictStrCustom['strMasterRemoteOff'], dictTValue
+                                        )
                             elif flag_now_enable == flag_will_enable:
                                 if flag_userConfigKey == 'hostEnable':
                                     if flag_will_enable:
-                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteDefaultOnAlready'], dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                            dictStrCustom['strMasterRemoteDefaultOnAlready'], dictTValue
+                                        )
                                     else:
-                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteDefaultOffAlready'], dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                            dictStrCustom['strMasterRemoteDefaultOffAlready'], dictTValue
+                                        )
                                 else:
                                     if flag_will_enable:
-                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOnAlready'], dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                            dictStrCustom['strMasterRemoteOnAlready'], dictTValue
+                                        )
                                     else:
-                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterRemoteOffAlready'], dictTValue)
-                        if tmp_reply_str != None:
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                            dictStrCustom['strMasterRemoteOffAlready'], dictTValue
+                                        )
+                        if tmp_reply_str is not None:
                             replyMsg(plugin_event, tmp_reply_str)
                     return
                 elif isMatchWordStart(tmp_reast_str, 'accept'):
@@ -653,7 +713,9 @@ def unity_reply(plugin_event, Proc):
                     if len(tmp_reast_str) > 0:
                         tmp_flag = tmp_reast_str
                         dictTValue['tInvateFlag'] = str(tmp_flag)
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBotAddGroupRemoteAcceptShow'], dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                            dictStrCustom['strBotAddGroupRemoteAcceptShow'], dictTValue
+                        )
                         replyMsg(plugin_event, tmp_reply_str)
                         time.sleep(1)
                         plugin_event.set_group_add_request(tmp_flag, 'invite', True, '')
@@ -682,7 +744,7 @@ def unity_reply(plugin_event, Proc):
                             flag_action = 'del'
                         else:
                             flag_action = 'add'
-                    if tmp_pulseUrl != None and tmp_pulseToken != None:
+                    if tmp_pulseUrl is not None and tmp_pulseToken is not None:
                         tmp_pulseUrlList_new = []
                         tmp_pulseUrlList = OlivaDiceCore.console.getConsoleSwitchByHash(
                             tmp_editKey,
@@ -717,7 +779,9 @@ def unity_reply(plugin_event, Proc):
                                         tmp_pulseUrlList_new.append(tmp_pulseUrlList_this)
                             flag_done = True
                         else:
-                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleSetInvalid'], dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                dictStrCustom['strMasterConsoleSetInvalid'], dictTValue
+                            )
                             replyMsg(plugin_event, tmp_reply_str)
                             return
                         tmp_pulseUrlList = OlivaDiceCore.console.setConsoleSwitchByHash(
@@ -727,7 +791,9 @@ def unity_reply(plugin_event, Proc):
                         )
                         OlivaDiceCore.console.saveConsoleSwitch()
                         dictTValue['tConsoleKey'] = tmp_editKey
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleAppend'], dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                            dictStrCustom['strMasterConsoleAppend'], dictTValue
+                        )
                         replyMsg(plugin_event, tmp_reply_str)
                     return
                 elif isMatchWordStart(tmp_reast_str, ['notice', 'master']):
@@ -765,8 +831,8 @@ def unity_reply(plugin_event, Proc):
                             flag_action = 'del'
                         elif tmp_reast_str_list[0] == 'show':
                             flag_action = 'show'
-                    if tmp_listValue != None:
-                        if type(tmp_listValue) == str:
+                    if tmp_listValue is not None:
+                        if type(tmp_listValue) is str:
                             if tmp_listValue.isdecimal() and tmp_editKey in [
                                 'noticeGroupList',
                                 'masterList'
@@ -778,8 +844,10 @@ def unity_reply(plugin_event, Proc):
                                 'noticeGroupList'
                             ]:
                                 if 'host_id' in plugin_event.data.__dict__:
-                                    if plugin_event.data.host_id != None:
-                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleSetInvalid'], dictTValue)
+                                    if plugin_event.data.host_id is not None:
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                            dictStrCustom['strMasterConsoleSetInvalid'], dictTValue
+                                        )
                                         replyMsg(plugin_event, tmp_reply_str)
                                         return
                                 tmp_listValue = plugin_event.data.group_id
@@ -787,9 +855,11 @@ def unity_reply(plugin_event, Proc):
                                 'masterList'
                             ]:
                                 tmp_listValue = plugin_event.data.user_id
-                            elif isMatchWordStart(tmp_listValue, '[CQ:at,qq=') and tmp_listValue[-1] == ']' and tmp_editKey in [
-                                'masterList'
-                            ]:
+                            elif (
+                                isMatchWordStart(tmp_listValue, '[CQ:at,qq=')
+                                and tmp_listValue[-1] == ']'
+                                and tmp_editKey in ['masterList']
+                            ):
                                 tmp_listValue_new = tmp_listValue[len('[CQ:at,qq='):-len(']')]
                                 if plugin_event.platform['platform'] not in [
                                     'qqGuild'
@@ -797,16 +867,20 @@ def unity_reply(plugin_event, Proc):
                                     if tmp_listValue_new.isdecimal():
                                         tmp_listValue = int(tmp_listValue_new)
                                     else:
-                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleSetInvalid'], dictTValue)
+                                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                            dictStrCustom['strMasterConsoleSetInvalid'], dictTValue
+                                        )
                                         replyMsg(plugin_event, tmp_reply_str)
                                         return
                                 else:
                                     tmp_listValue = tmp_listValue_new
                             else:
-                                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleSetInvalid'], dictTValue)
+                                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                    dictStrCustom['strMasterConsoleSetInvalid'], dictTValue
+                                )
                                 replyMsg(plugin_event, tmp_reply_str)
                                 return
-                    if tmp_listValue != None and tmp_editKey != None:
+                    if tmp_listValue is not None and tmp_editKey is not None:
                         tmp_dataList_new = []
                         tmp_dataList = OlivaDiceCore.console.getConsoleSwitchByHash(
                             tmp_editKey,
@@ -834,7 +908,9 @@ def unity_reply(plugin_event, Proc):
                                         tmp_dataList_new.append(tmp_dataList_this)
                             flag_done = True
                         else:
-                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleSetInvalid'], dictTValue)
+                            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                dictStrCustom['strMasterConsoleSetInvalid'], dictTValue
+                            )
                             replyMsg(plugin_event, tmp_reply_str)
                             return
                         tmp_dataList = OlivaDiceCore.console.setConsoleSwitchByHash(
@@ -844,9 +920,11 @@ def unity_reply(plugin_event, Proc):
                         )
                         OlivaDiceCore.console.saveConsoleSwitch()
                         dictTValue['tConsoleKey'] = tmp_editKey
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleAppend'], dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                            dictStrCustom['strMasterConsoleAppend'], dictTValue
+                        )
                         replyMsg(plugin_event, tmp_reply_str)
-                    elif flag_action == 'show' and tmp_listValue == None and tmp_editKey != None:
+                    elif flag_action == 'show' and tmp_listValue is None and tmp_editKey is not None:
                         tmp_dataList_new = []
                         tmp_dataList = OlivaDiceCore.console.getConsoleSwitchByHash(
                             tmp_editKey,
@@ -857,7 +935,9 @@ def unity_reply(plugin_event, Proc):
                                 tmp_dataList_new.append(str(tmp_dataList_this[0]))
                         dictTValue['tConsoleKey'] = tmp_editKey
                         dictTValue['tConsoleValue'] = '\n'.join(tmp_dataList_new)
-                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strMasterConsoleShowList'], dictTValue)
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                            dictStrCustom['strMasterConsoleShowList'], dictTValue
+                        )
                         replyMsg(plugin_event, tmp_reply_str)
                     return
                 elif isMatchWordStart(tmp_reast_str, 'host'):
