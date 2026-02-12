@@ -350,7 +350,7 @@ def formatSTRReplace(data: str, valDict: dict):
             if i == '}':
                 flag_hit = False
                 # 变量表替换
-                if not flag_hit and reg_key in valDict and type(valDict[reg_key] == str):
+                if not flag_hit and reg_key in valDict and type(valDict[reg_key] is str):
                     reg_res += str(valDict[reg_key])
                     flag_hit = True
                 # 缺省确保原样返回

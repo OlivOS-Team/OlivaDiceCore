@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-"""
+r"""
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
 _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
@@ -10,7 +10,7 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @Author    :   lunzhiPenxil仑质
 @Contact   :   lunzhipenxil@gmail.com
 @License   :   AGPL
-@Copyright :   (C) 2020-2021, OlivOS-Team
+@Copyright :   (C) 2020-2026, OlivOS-Team
 @Desc      :   None
 """
 
@@ -24,11 +24,11 @@ def unity_group_invite_request(plugin_event, Proc):
     flag_enable = 1
     flag_enable = OlivaDiceCore.console.getConsoleSwitchByHash('autoAcceptGroupAdd', 'unity')
     flag_enable = OlivaDiceCore.console.getConsoleSwitchByHash('autoAcceptGroupAdd', plugin_event.bot_info.hash)
-    if flag_enable == None:
+    if flag_enable is None:
         flag_enable = flag_enable_default
 
     if flag_enable == 1:
-        tmp_data = plugin_event.set_group_add_request(plugin_event.data.flag, 'invite', True, '')
+        tmp_data = plugin_event.set_group_add_request(plugin_event.data.flag, 'invite', True, '')  # NOQA: F841
 
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
     dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]
@@ -37,11 +37,11 @@ def unity_group_invite_request(plugin_event, Proc):
     for bot_hash_this in [plugin_event.bot_info.hash]:
         if bot_hash_this in OlivaDiceCore.console.dictConsoleSwitch:
             if 'noticeGroupList' in OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this]:
-                if type(OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this]['noticeGroupList']) == list:
+                if type(OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this]['noticeGroupList']) is list:
                     for noticeGroupList_this in OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this][
                         'noticeGroupList'
                     ]:
-                        if type(noticeGroupList_this) == list and len(noticeGroupList_this) == 2:
+                        if type(noticeGroupList_this) is list and len(noticeGroupList_this) == 2:
                             dictTValue['tGroupId'] = str(plugin_event.data.group_id)
                             dictTValue['tInvaterId'] = str(plugin_event.data.user_id)
                             dictTValue['tComment'] = plugin_event.data.comment
@@ -67,11 +67,11 @@ def unity_friend_add_request(plugin_event, Proc):
     flag_enable = 1
     flag_enable = OlivaDiceCore.console.getConsoleSwitchByHash('autoAcceptFriendAdd', 'unity')
     flag_enable = OlivaDiceCore.console.getConsoleSwitchByHash('autoAcceptFriendAdd', plugin_event.bot_info.hash)
-    if flag_enable == None:
+    if flag_enable is None:
         flag_enable = flag_enable_default
 
     if flag_enable == 1:
-        tmp_data = plugin_event.set_friend_add_request(plugin_event.data.flag, True, '')
+        tmp_data = plugin_event.set_friend_add_request(plugin_event.data.flag, True, '')  # NOQA: F841
 
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
     dictStrCustom = OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]
@@ -80,11 +80,11 @@ def unity_friend_add_request(plugin_event, Proc):
     for bot_hash_this in [plugin_event.bot_info.hash]:
         if bot_hash_this in OlivaDiceCore.console.dictConsoleSwitch:
             if 'noticeGroupList' in OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this]:
-                if type(OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this]['noticeGroupList']) == list:
+                if type(OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this]['noticeGroupList']) is list:
                     for noticeGroupList_this in OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this][
                         'noticeGroupList'
                     ]:
-                        if type(noticeGroupList_this) == list and len(noticeGroupList_this) == 2:
+                        if type(noticeGroupList_this) is list and len(noticeGroupList_this) == 2:
                             dictTValue['tUserId'] = str(plugin_event.data.user_id)
                             dictTValue['tComment'] = plugin_event.data.comment
                             if flag_enable == 0:
@@ -108,9 +108,9 @@ def isInMasterList(bot_hash, user_hash):
     for bot_hash_this in [bot_hash]:
         if bot_hash_this in OlivaDiceCore.console.dictConsoleSwitch:
             if 'masterList' in OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this]:
-                if type(OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this]['masterList']) == list:
+                if type(OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this]['masterList']) is list:
                     for masterList_this in OlivaDiceCore.console.dictConsoleSwitch[bot_hash_this]['masterList']:
-                        if type(masterList_this) == list and len(masterList_this) == 2:
+                        if type(masterList_this) is list and len(masterList_this) == 2:
                             if (
                                 OlivaDiceCore.userConfig.getUserHash(masterList_this[0], 'user', masterList_this[1])
                                 == user_hash
@@ -123,7 +123,7 @@ def unity_group_member_increase(plugin_event, Proc):
     replyMsg = OlivaDiceCore.msgReply.replyMsg
     tmp_hagID = str(plugin_event.data.group_id)
     fake_plugin_event = OlivaDiceCore.msgEvent.getReRxEvent_group_message(plugin_event, '[加群]')
-    if fake_plugin_event.data.host_id != None:
+    if fake_plugin_event.data.host_id is not None:
         tmp_hagID = '%s|%s' % (str(plugin_event.data.host_id), str(plugin_event.data.group_id))
     else:
         tmp_hagID = str(plugin_event.data.group_id)
@@ -141,7 +141,7 @@ def unity_group_member_increase(plugin_event, Proc):
         # 如果启用了记录,则记录时间
         if record_bot_join == 1:
             tmp_list_hit = []
-            if fake_plugin_event.data.host_id != None:
+            if fake_plugin_event.data.host_id is not None:
                 tmp_list_hit = [
                     [fake_plugin_event.data.host_id, 'host', plugin_event.platform['platform']],
                     [
@@ -170,7 +170,7 @@ def unity_group_member_increase(plugin_event, Proc):
         userType='group',
         platform=plugin_event.platform['platform'],
     )
-    if reply_msg != None:
+    if reply_msg is not None:
         # 支持 AT 新成员
         dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
         dictGValue = OlivaDiceCore.msgCustom.dictGValue

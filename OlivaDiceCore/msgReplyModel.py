@@ -1076,7 +1076,7 @@ def replyRAV_command(plugin_event, Proc, valDict):
                         flag_rav_type = '0'
                     elif dictSkillCheckRank[tmpSkillCheckType] < dictSkillCheckRank[tmpSkillCheckType_1]:
                         flag_rav_type = '1'
-                    elif dictSkillCheckRank[tmpSkillCheckType] == dictSkillCheckRank[tmpSkillCheckType_1]:
+                    elif dictSkillCheckRank[tmpSkillCheckType] is dictSkillCheckRank[tmpSkillCheckType_1]:
                         # 难度相同时，根据规则判断
                         if flag_groupRavRule == '1':
                             # 规则1：官方规则 - 比较属性值，不比较骰点
@@ -1093,12 +1093,12 @@ def replyRAV_command(plugin_event, Proc, valDict):
                                 flag_rav_type = '0'
                             elif dictRuleTempData['roll'] > dictRuleTempData_1['roll']:
                                 flag_rav_type = '1'
-                            elif dictRuleTempData['roll'] == dictRuleTempData_1['roll']:
+                            elif dictRuleTempData['roll'] is dictRuleTempData_1['roll']:
                                 if dictRuleTempData['skill'] > dictRuleTempData_1['skill']:
                                     flag_rav_type = '0'
                                 elif dictRuleTempData['skill'] < dictRuleTempData_1['skill']:
                                     flag_rav_type = '1'
-                                elif dictRuleTempData['skill'] == dictRuleTempData_1['skill']:
+                                elif dictRuleTempData['skill'] is dictRuleTempData_1['skill']:
                                     flag_rav_type = '-'
                 if flag_rav_type == '0' and tmpSkillCheckType in [
                     OlivaDiceCore.skillCheck.resultType.SKILLCHECK_SUCCESS,

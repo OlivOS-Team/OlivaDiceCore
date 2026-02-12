@@ -10,7 +10,7 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @Author    :   lunzhiPenxil仑质
 @Contact   :   lunzhipenxil@gmail.com
 @License   :   AGPL
-@Copyright :   (C) 2020-2021, OlivOS-Team
+@Copyright :   (C) 2020-2026, OlivOS-Team
 @Desc      :   None
 """
 
@@ -115,7 +115,7 @@ def formatReplySTRReplace(data: str, valDict: dict, flagPure: bool = False):
             if i == '}':
                 flag_hit = False
                 # 变量表替换
-                if not flag_hit and reg_key in valDict and type(valDict[reg_key] == str):
+                if not flag_hit and reg_key in valDict and type(valDict[reg_key] is str):
                     reg_res += str(valDict[reg_key])
                     flag_hit = True
                 # 牌堆抽取

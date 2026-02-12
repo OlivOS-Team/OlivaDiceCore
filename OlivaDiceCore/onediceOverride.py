@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-"""
+r"""
    ____  _   ____________  ________________
   / __ \/ | / / ____/ __ \/  _/ ____/ ____/
  / / / /  |/ / __/ / / / // // /   / __/
@@ -10,14 +10,13 @@
 @Author    :   lunzhiPenxil仑质
 @Contact   :   lunzhipenxil@gmail.com
 @License   :   AGPL
-@Copyright :   (C) 2020-2021, OlivOS-Team
+@Copyright :   (C) 2020-2026, OlivOS-Team
 @Desc      :   None
 """
 
 import random
 import requests as req
 import json
-import traceback
 
 import OlivaDiceCore
 
@@ -65,7 +64,7 @@ class RD(OlivaDiceCore.onedice.RD):
     def random(self, nMin, nMax, mode=None):
         global dictRandomInt
         global random_default_mode
-        if mode == None:
+        if mode is None:
             mode = random_default_mode
         res = None
         if mode == 'default':
@@ -75,7 +74,7 @@ class RD(OlivaDiceCore.onedice.RD):
             if len(dictRandomInt['default']) <= 0:
                 try:
                     tmp_random_int_list = get_data_from_random_org()
-                    if tmp_random_int_list == None:
+                    if tmp_random_int_list is None:
                         random_default_mode = 'default'
                         res = random.randint(nMin, nMax)
                         return res
@@ -84,13 +83,13 @@ class RD(OlivaDiceCore.onedice.RD):
                     else:
                         res = random.randint(nMin, nMax)
                         return res
-                except:
+                except Exception:
                     random_default_mode = 'default'
                     res = random.randint(nMin, nMax)
                     return res
             tmp_random_int_this = dictRandomInt['default'].pop()
             tmp_random_int_data = None
-            if type(tmp_random_int_this) == str:
+            if type(tmp_random_int_this) is str:
                 if tmp_random_int_this.isdigit() or (
                     len(tmp_random_int_this) > 2 and tmp_random_int_this[0] == '-' and tmp_random_int_this[1:].isdigit()
                 ):
@@ -107,7 +106,7 @@ OlivaDiceCore.onedice.RD = RD
 def saveRDDataUser(
     data: OlivaDiceCore.onedice.RD, botHash: str, userId: str, platform: str, skillValue: 'None|int' = None
 ):
-    if data.resError == None:
+    if data.resError is None:
         OlivaDiceCore.userConfig.setUserConfigByKey(
             userConfigKey='RDRecord',
             userConfigValue=data.resDetailData,
@@ -205,7 +204,7 @@ def RDDataFormat(data: 'list|None', mode: str = 'default'):
     mode_real = mode
     if mode in dictFormatMappingMode:
         mode_real = dictFormatMappingMode[mode]
-    if data != None and type(data) == list:
+    if data is not None and type(data) is list:
         if mode_real == 'debug':
             res = RDDataFormat_debug(data)
         elif mode_real == 'default':
@@ -225,47 +224,47 @@ def RDDataFormat_debug(data: list):
     res = str(data)
     try:
         res = json.dumps(data, ensure_ascii=False, indent=4)
-    except:
+    except Exception:
         pass
     return res
 
 
 def RDDataFormat_default_is1step(data: list):
     res = False
-    if len(data) == 1 and type(data[0]) == dict:
-        if 'key' in data[0] and type(data[0]['key']) == dict:
+    if len(data) == 1 and type(data[0]) is dict:
+        if 'key' in data[0] and type(data[0]['key']) is dict:
             if (
-                ('op' in data[0]['key'] and type(data[0]['key']['op']) == str and data[0]['key']['op'] == 'd')
-                and ('l' in data[0]['key'] and type(data[0]['key']['l']) == int)
-                and ('r' in data[0]['key'] and type(data[0]['key']['r']) == int)
-                and ('v' in data[0]['key'] and type(data[0]['key']['v']) == dict)
+                ('op' in data[0]['key'] and type(data[0]['key']['op']) is str and data[0]['key']['op'] == 'd')
+                and ('l' in data[0]['key'] and type(data[0]['key']['l']) is int)
+                and ('r' in data[0]['key'] and type(data[0]['key']['r']) is int)
+                and ('v' in data[0]['key'] and type(data[0]['key']['v']) is dict)
             ):
                 if data[0]['key']['l'] == 1:
                     res = 1
                 else:
                     res = 2
                 for v_this in data[0]['key']['v']:
-                    if data[0]['key']['v'][v_this] != None:
+                    if data[0]['key']['v'][v_this] is not None:
                         res = False
     elif len(data) == 3:
         if (
             (
-                type(data[0]) == dict
-                and ('key' in data[0] and type(data[0]['key']) == dict)
-                and ('op' in data[0]['key'] and type(data[0]['key']['op']) == str and data[0]['key']['op'] == 'd')
-                and ('l' in data[0]['key'] and type(data[0]['key']['l']) == int)
-                and ('r' in data[0]['key'] and type(data[0]['key']['r']) == int)
-                and ('v' in data[0]['key'] and type(data[0]['key']['v']) == dict)
+                type(data[0]) is dict
+                and ('key' in data[0] and type(data[0]['key']) is dict)
+                and ('op' in data[0]['key'] and type(data[0]['key']['op']) is str and data[0]['key']['op'] == 'd')
+                and ('l' in data[0]['key'] and type(data[0]['key']['l']) is int)
+                and ('r' in data[0]['key'] and type(data[0]['key']['r']) is int)
+                and ('v' in data[0]['key'] and type(data[0]['key']['v']) is dict)
             )
             and (
-                type(data[1]) == dict
-                and ('op' in data[1] and type(data[1]['op']) == str and data[1]['op'] in ['+', '-', '*', '/'])
+                type(data[1]) is dict
+                and ('op' in data[1] and type(data[1]['op']) is str and data[1]['op'] in ['+', '-', '*', '/'])
             )
-            and (type(data[2]) == int)
+            and (type(data[2]) is int)
         ):
             res = 3
             for v_this in data[0]['key']['v']:
-                if data[0]['key']['v'][v_this] != None:
+                if data[0]['key']['v'][v_this] is not None:
                     res = False
     return res
 
@@ -273,7 +272,7 @@ def RDDataFormat_default_is1step(data: list):
 def RDDataFormat_default_1step(data: list):
     res = None
     res_1step = RDDataFormat_default_is1step(data)
-    if res_1step != False:
+    if res_1step is not False:
         if res_1step in [1, 2]:
             res = '%dD%d' % (data[0]['key']['l'], data[0]['key']['r'])
         elif res_1step == 3:
@@ -311,7 +310,7 @@ def RDDataFormat_default(data: list, mode='default'):
                         if checkRDdataNodeResult(data_this, 0):
                             tmp_data_this_list = []
                             for data_this_this in data_this['result'][0]:
-                                if type(data_this_this) == list and len(data_this_this) == 1:
+                                if type(data_this_this) is list and len(data_this_this) == 1:
                                     tmp_data_this_list.append(RDDataFormat_default(data_this_this))
                             if mode == 'pretty':
                                 res += '{\n%s\n}' % (',\n'.join(tmp_data_this_list))
@@ -438,7 +437,7 @@ def RDDataFormat_default(data: list, mode='default'):
                     ):
                         tmp_data_this_list_0 = []
                         for data_this_this_0 in data_this['result'][0]:
-                            if type(data_this_this_0) == int:
+                            if type(data_this_this_0) is int:
                                 if data_this_this_0 > 0:
                                     tmp_data_this_list_0.append('+')
                                 elif data_this_this_0 < 0:
@@ -448,7 +447,7 @@ def RDDataFormat_default(data: list, mode='default'):
                         tmp_data_this_str_1 = ''
                         flag_first = True
                         for data_this_this_1 in data_this['result'][1]:
-                            if type(data_this_this_1) == int:
+                            if type(data_this_this_1) is int:
                                 if data_this_this_1 >= 0:
                                     if not flag_first:
                                         tmp_data_this_str_1 += '+'
@@ -479,7 +478,7 @@ def RDDataFormat_default(data: list, mode='default'):
                     ):
                         tmp_data_this_list = []
                         for data_this_this in data_this['result'][0]:
-                            if type(data_this_this) == list and len(data_this_this) == 1:
+                            if type(data_this_this) is list and len(data_this_this) == 1:
                                 tmp_data_this_list.append(RDDataFormat_default(data_this_this))
                         res += '{%s}' % ('|'.join(tmp_data_this_list))
                         res += '[%s]' % ('|'.join(getRDdataNodeResultListStr(data_this, 1)))
@@ -524,7 +523,7 @@ def RDDataFormat_default(data: list, mode='default'):
                                         res_list_this.append(str(data_this['result'][0][data_i]))
                                     else:
                                         raise Exception('not int')
-                                except:
+                                except Exception:
                                     res_list_this.append(
                                         '%s = %s'
                                         % (str(data_this['result'][1][data_i]), str(data_this['result'][0][data_i]))
@@ -569,9 +568,9 @@ def RDDataFormat_default(data: list, mode='default'):
 
 def RDDataFormat_default_getMark(data: 'int|dict'):
     res = ''
-    if type(data) == int:
+    if type(data) is int:
         res = str(data)
-    elif type(data) == dict:
+    elif type(data) is dict:
         if 'op' in data and 'v' in data:
             if data['op'] == 'mark01':
                 res = '[%s]' % RDDataFormat_default_getMark(data['v'])
@@ -618,7 +617,7 @@ def checkRDdataNodeKeyV(data: dict, key: str):
 
 
 def checkRDdataNodeKeyVActive(data: dict, key: str):
-    return 'key' in data and 'v' in data['key'] and key in data['key']['v'] and data['key']['v'][key] != None
+    return 'key' in data and 'v' in data['key'] and key in data['key']['v'] and data['key']['v'][key] is not None
 
 
 def getRDdataNodeResultListStr(data: dict, offset: int, callback=None):
@@ -628,12 +627,12 @@ def getRDdataNodeResultListStr(data: dict, offset: int, callback=None):
 def getRDResultFromList(data: list):
     res = []
     for data_this in data:
-        if type(data_this) == int:
+        if type(data_this) is int:
             res.append(str(data_this))
-        elif type(data_this) == str:
+        elif type(data_this) is str:
             tmp_para = OlivaDiceCore.onedice.RD(data_this)
             tmp_para.roll()
-            if tmp_para.resError == None:
+            if tmp_para.resError is None:
                 res.append(str(tmp_para.resInt))
             else:
                 res.append('出错')

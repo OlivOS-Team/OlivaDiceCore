@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-"""
+r"""
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
 _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
@@ -10,14 +10,13 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @Author    :   lunzhiPenxil仑质
 @Contact   :   lunzhipenxil@gmail.com
 @License   :   AGPL
-@Copyright :   (C) 2020-2021, OlivOS-Team
+@Copyright :   (C) 2020-2026, OlivOS-Team
 @Desc      :   None
 """
 
 import time
 import requests as req
 
-import OlivOS
 import OlivaDiceCore
 
 dictPulseTs = {}
@@ -32,7 +31,9 @@ def unity_heartbeat(plugin_event, Proc):
     flag_need_pulse = False
     if plugin_event.bot_info.hash in OlivaDiceCore.console.dictConsoleSwitch:
         if 'pulseInterval' in OlivaDiceCore.console.dictConsoleSwitch[plugin_event.bot_info.hash]:
-            tmp_pulse_interval = OlivaDiceCore.console.dictConsoleSwitch[plugin_event.bot_info.hash]['pulseInterval']
+            tmp_pulse_interval = (  # NOQA: F841
+                OlivaDiceCore.console.dictConsoleSwitch[plugin_event.bot_info.hash]['pulseInterval']
+            )
         if 'pulseUrlList' in OlivaDiceCore.console.dictConsoleSwitch[plugin_event.bot_info.hash]:
             tmp_pulse_url_list = OlivaDiceCore.console.dictConsoleSwitch[plugin_event.bot_info.hash]['pulseUrlList']
         if 'masterList' in OlivaDiceCore.console.dictConsoleSwitch[plugin_event.bot_info.hash]:
@@ -51,7 +52,7 @@ def unity_heartbeat(plugin_event, Proc):
             tmp_user_id = plugin_event.bot_info.id
             tmp_master = ''
             tmp_master_list_1 = []
-            if tmp_res['active'] == True:
+            if tmp_res['active'] is True:
                 tmp_nickname = tmp_res['data']['name']
                 OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash]['strBotName'] = tmp_res['data'][
                     'name'
@@ -59,7 +60,7 @@ def unity_heartbeat(plugin_event, Proc):
             for tmp_master_list_this in tmp_master_list:
                 tmp_master_list_1.append(str(tmp_master_list_this[0]))
             tmp_master = ','.join(tmp_master_list_1)
-        except:
+        except Exception:
             pass
         try:
             for tmp_pulse_url_list_this in tmp_pulse_url_list:
@@ -72,7 +73,7 @@ def unity_heartbeat(plugin_event, Proc):
                     platform=plugin_event.platform['platform'],
                     url=tmp_pulse_url_list_this[0],
                 )
-        except:
+        except Exception:
             pass
 
 
@@ -96,5 +97,5 @@ def do_pulse(user_id, name, token, time_ts, masterid='0', platform='default', ur
         'Content-Type': 'application/x-www-form-urlencoded',
         'User-Agent': OlivaDiceCore.data.bot_version_short_header,
     }
-    if send_url != None:
-        msg_res = req.request('POST', send_url, headers=headers, data=payload)
+    if send_url is not None:
+        msg_res = req.request('POST', send_url, headers=headers, data=payload)  # NOQA: F841

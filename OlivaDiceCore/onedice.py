@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-"""
+r"""
    ____  _   ____________  ________________
   / __ \/ | / / ____/ __ \/  _/ ____/ ____/
  / / / /  |/ / __/ / / / // // /   / __/
@@ -10,7 +10,7 @@
 @Author    :   lunzhiPenxil仑质
 @Contact   :   lunzhipenxil@gmail.com
 @License   :   AGPL
-@Copyright :   (C) 2020-2021, OlivOS-Team
+@Copyright :   (C) 2020-2026, OlivOS-Team
 @Desc      :   None
 """
 
@@ -91,7 +91,7 @@ lenOperationMax = 3
 
 class Stack(object):
     def __init__(self, initList=None):
-        if initList == None:
+        if initList is None:
             self.data = []
         else:
             self.data = initList
@@ -134,7 +134,7 @@ class calNodeStack(Stack):
     def popTo(self, but, priority=0, saveBut=False):
         res = []
         while self.size() > 0 and self.peek().data != but:
-            if self.peek().getPriority() != None:
+            if self.peek().getPriority() is not None:
                 if self.peek().getPriority() < priority:
                     break
             res.append(self.pop())
@@ -296,7 +296,7 @@ class calOperationNode(calNode):
         elif self.data == '$t':
             self.valLeftDefault = 1
             self.vals['='] = None
-        if self.customDefault != None:
+        if self.customDefault is not None:
             if self.data in self.customDefault:
                 if 'leftD' in self.customDefault[self.data]:
                     self.valLeftDefault = self.customDefault[self.data]['leftD']
@@ -356,29 +356,29 @@ class RD(object):
 
     def roll(self):
         try:
-            if type(self.valueTable) == dict:
+            if type(self.valueTable) is dict:
                 self.__replace()
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
-            if self.resError == None:
+            if self.resError is None:
                 self.resError = self.resErrorType.UNKNOWN_REPLACE_FATAL
-        if self.resError != None:
+        if self.resError is not None:
             return
         try:
             self.__getCalTree()
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
-            if self.resError == None:
+            if self.resError is None:
                 self.resError = self.resErrorType.UNKNOWN_GENERATE_FATAL
-        if self.resError != None:
+        if self.resError is not None:
             return
         try:
             resRecursiveObj = self.__calculate()
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
-            if self.resError == None:
+            if self.resError is None:
                 self.resError = self.resErrorType.UNKNOWN_COMPLETE_FATAL
-        if self.resError != None:
+        if self.resError is not None:
             return
         else:
             self.resInt = resRecursiveObj.resInt
@@ -517,8 +517,8 @@ class RD(object):
                     continue
                 tmp_data_this = tmp_data[it_offset : it_offset + lenOperation_this]
                 tmp_op_peek_this = op_stack.peek()
-                if lenOperation_this == 1 and tmp_op_peek_this != None:
-                    if tmp_op_peek_this.getPriority() != None:
+                if lenOperation_this == 1 and tmp_op_peek_this is not None:
+                    if tmp_op_peek_this.getPriority() is not None:
                         if tmp_data_this in tmp_op_peek_this.vals:
                             flag_is_op_val = True
                 if lenOperation_this == 1 and tmp_data_this.isdigit():
@@ -569,9 +569,9 @@ class RD(object):
                     tmp_offset = tmp_tuple_len
                 elif lenOperation_this == 1 and flag_is_op_val and op_stack.size() > 0:
                     tmp_op_peek_this = op_stack.peek()
-                    if tmp_op_peek_this != None:
+                    if tmp_op_peek_this is not None:
                         if not flag_left_as_number:
-                            if tmp_op_peek_this.valRightDefault != None:
+                            if tmp_op_peek_this.valRightDefault is not None:
                                 tmp_res.push(calNumberNode(str(tmp_op_peek_this.valRightDefault)))
                                 flag_left_as_number = True
                             else:
@@ -595,7 +595,7 @@ class RD(object):
                                         else:
                                             tmp_number_offset -= 1
                                             break
-                                    if tmp_number != None:
+                                    if tmp_number is not None:
                                         op_stack.pop()
                                         tmp_op_peek_this.vals[tmp_data_this] = tmp_number
                                         op_stack.push(tmp_op_peek_this)
@@ -623,7 +623,7 @@ class RD(object):
                                             valueTable=self.valueTable,
                                         )
                                         tmp_rd_child_para.roll()
-                                        if tmp_rd_child_para.resError == None:
+                                        if tmp_rd_child_para.resError is None:
                                             op_stack.pop()
                                             tmp_op_peek_this.vals[tmp_data_this] = tmp_rd_child_para.resInt
                                             op_stack.push(tmp_op_peek_this)
@@ -655,7 +655,7 @@ class RD(object):
                         self.resError = self.resErrorType.INPUT_RAW_INVALID
                         break
                 elif self.inOperation(tmp_data_this):
-                    if self.getPriority(tmp_data_this) != None:
+                    if self.getPriority(tmp_data_this) is not None:
                         tmp_op_peek_this = op_stack.peek()
                         tmp_data_this_real = tmp_data_this
                         if tmp_data_this.lower() in dictOperationMapping:
@@ -669,44 +669,44 @@ class RD(object):
                             data=tmp_data_this_real, customDefault=self.customDefault, ruleMode=self.ruleMode
                         )
                         if not flag_left_as_number:
-                            if tmp_op_peek_this == None:
-                                if tmp_calOperationNode_this.valStarterLeftDefault != None:
+                            if tmp_op_peek_this is None:
+                                if tmp_calOperationNode_this.valStarterLeftDefault is not None:
                                     tmp_res.push(calNumberNode(str(tmp_calOperationNode_this.valStarterLeftDefault)))
                                     flag_left_as_number = True
-                                elif tmp_calOperationNode_this.valLeftDefault != None:
+                                elif tmp_calOperationNode_this.valLeftDefault is not None:
                                     tmp_res.push(calNumberNode(str(tmp_calOperationNode_this.valLeftDefault)))
                                     flag_left_as_number = True
                                 else:
                                     self.resError = self.resErrorType.INPUT_RAW_INVALID
                                     break
                             elif tmp_op_peek_this.data == '(':
-                                if tmp_calOperationNode_this.valStarterLeftDefault != None:
+                                if tmp_calOperationNode_this.valStarterLeftDefault is not None:
                                     tmp_res.push(calNumberNode(str(tmp_calOperationNode_this.valStarterLeftDefault)))
                                     flag_left_as_number = True
-                                elif tmp_calOperationNode_this.valLeftDefault != None:
+                                elif tmp_calOperationNode_this.valLeftDefault is not None:
                                     tmp_res.push(calNumberNode(str(tmp_calOperationNode_this.valLeftDefault)))
                                     flag_left_as_number = True
                                 else:
                                     self.resError = self.resErrorType.INPUT_RAW_INVALID
                                     break
-                            elif tmp_op_peek_this.getPriority() == None:
-                                if tmp_calOperationNode_this.valLeftDefault != None:
+                            elif tmp_op_peek_this.getPriority() is None:
+                                if tmp_calOperationNode_this.valLeftDefault is not None:
                                     tmp_res.push(calNumberNode(str(tmp_calOperationNode_this.valLeftDefault)))
                                     flag_left_as_number = True
                                 else:
                                     self.resError = self.resErrorType.INPUT_RAW_INVALID
                                     break
-                            elif tmp_op_peek_this.valRightDefault != None:
+                            elif tmp_op_peek_this.valRightDefault is not None:
                                 tmp_res.push(calNumberNode(str(tmp_op_peek_this.valRightDefault)))
                                 flag_left_as_number = True
-                            elif tmp_calOperationNode_this.valLeftDefault != None:
+                            elif tmp_calOperationNode_this.valLeftDefault is not None:
                                 tmp_res.push(calNumberNode(str(tmp_calOperationNode_this.valLeftDefault)))
                                 flag_left_as_number = True
                             else:
                                 self.resError = self.resErrorType.INPUT_RAW_INVALID
                                 break
-                        if tmp_op_peek_this != None:
-                            if tmp_op_peek_this.getPriority() == None:
+                        if tmp_op_peek_this is not None:
+                            if tmp_op_peek_this.getPriority() is None:
                                 pass
                             elif self.getPriority(tmp_data_this_real) <= tmp_op_peek_this.getPriority():
                                 tmp_res.pushList(op_stack.popTo('(', self.getPriority(tmp_data_this_real), True))
@@ -731,8 +731,8 @@ class RD(object):
                     elif tmp_data_this == ')':
                         if not flag_left_as_number:
                             tmp_op_peek_this = op_stack.peek()
-                            if tmp_op_peek_this != None:
-                                if tmp_op_peek_this.valRightDefault != None:
+                            if tmp_op_peek_this is not None:
+                                if tmp_op_peek_this.valRightDefault is not None:
                                     tmp_res.push(calNumberNode(str(tmp_op_peek_this.valRightDefault)))
                                     flag_left_as_number = True
                                 else:
@@ -755,12 +755,12 @@ class RD(object):
                 if lenOperation_this == 1 and count_child_para < 0:
                     self.resError = self.resErrorType.INPUT_CHILD_PARA_INVALID
                     break
-            if self.resError != None:
+            if self.resError is not None:
                 return
             it_offset += tmp_offset
         if not flag_left_as_number:
             tmp_op_peek_this = op_stack.peek()
-            if tmp_op_peek_this.valRightDefault != None:
+            if tmp_op_peek_this.valRightDefault is not None:
                 tmp_res.push(calNumberNode(str(tmp_op_peek_this.valRightDefault)))
                 flag_left_as_number = True
             else:
@@ -820,13 +820,13 @@ class RD(object):
             elif self.calTree.peek().isOperation():
                 tmp_node_this = self.calTree.pop()
                 tmp_priority_this = tmp_node_this.getPriority()
-                if tmp_priority_this == None:
+                if tmp_priority_this is None:
                     tmp_priority_this = 0
                 tmp_main_val_right_obj = self.__calculate(tmp_priority_this, True, tmp_node_this.data)
-                if self.resError != None:
+                if self.resError is not None:
                     return resNoneTemplate
                 tmp_main_val_left_obj = self.__calculate(tmp_priority_this, False, tmp_node_this.data)
-                if self.resError != None:
+                if self.resError is not None:
                     return resNoneTemplate
                 tmp_main_val_right = [tmp_main_val_right_obj.resInt, tmp_main_val_right_obj.resDetail]
                 tmp_main_val_right_data = tmp_main_val_right_obj.resDetailData
@@ -2256,7 +2256,7 @@ class RD(object):
                     tmp_node_this_output_data_2 = []
                     tmp_node_this_output_data_3 = []
                     tmp_node_this_output_data_final = []
-                    if tmp_node_this.vals['a'] != None:
+                    if tmp_node_this.vals['a'] is not None:
                         tmp_RD = RD(
                             '%sa(%s+1)k%sm%s'
                             % (
@@ -2268,7 +2268,7 @@ class RD(object):
                             self.customDefault,
                         )
                         tmp_RD.roll()
-                        if tmp_RD.resError != None:
+                        if tmp_RD.resError is not None:
                             return tmp_RD.resError
                         else:
                             resRecursiveObj = self.resRecursive()
@@ -2279,22 +2279,22 @@ class RD(object):
                             resRecursiveObj.resIntMinType = tmp_RD.resIntMinType
                             resRecursiveObj.resDetail = tmp_RD.resDetail
                             return resRecursiveObj
-                    if tmp_node_this.vals['k'] != None and tmp_node_this.vals['q'] != None:
+                    if tmp_node_this.vals['k'] is not None and tmp_node_this.vals['q'] is not None:
                         self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
                         return resNoneTemplate
-                    if tmp_node_this.vals['b'] != None and tmp_node_this.vals['p'] != None:
+                    if tmp_node_this.vals['b'] is not None and tmp_node_this.vals['p'] is not None:
                         self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
                         return resNoneTemplate
-                    if tmp_node_this.vals['k'] != None or tmp_node_this.vals['q'] != None:
-                        if tmp_node_this.vals['b'] != None or tmp_node_this.vals['p'] != None:
+                    if tmp_node_this.vals['k'] is not None or tmp_node_this.vals['q'] is not None:
+                        if tmp_node_this.vals['b'] is not None or tmp_node_this.vals['p'] is not None:
                             self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
                             return resNoneTemplate
-                    if tmp_node_this.vals['k'] != None or tmp_node_this.vals['q'] != None:
+                    if tmp_node_this.vals['k'] is not None or tmp_node_this.vals['q'] is not None:
                         for tmp_it_this in tmp_range_list:
                             tmp_node_this_output_this = self.random(1, tmp_main_val_right[0])
                             tmp_node_this_output_list.append(tmp_node_this_output_this)
                             tmp_node_this_output_data_1.append(tmp_node_this_output_this)
-                        if tmp_node_this.vals['k'] != None:
+                        if tmp_node_this.vals['k'] is not None:
                             if tmp_node_this.vals['k'] > len(tmp_node_this_output_list):
                                 self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
                                 return resNoneTemplate
@@ -2306,7 +2306,7 @@ class RD(object):
                                 tmp_node_this_output += tmp_node_this_output_list[tmp_it_this_2]
                                 tmp_node_this_output_list_2.append(tmp_node_this_output_list[tmp_it_this_2])
                                 tmp_node_this_output_data_2.append(tmp_node_this_output_list[tmp_it_this_2])
-                        elif tmp_node_this.vals['q'] != None:
+                        elif tmp_node_this.vals['q'] is not None:
                             if tmp_node_this.vals['q'] > len(tmp_node_this_output_list):
                                 self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
                                 return resNoneTemplate
@@ -2318,8 +2318,8 @@ class RD(object):
                                 tmp_node_this_output += tmp_node_this_output_list[tmp_it_this_2]
                                 tmp_node_this_output_list_2.append(tmp_node_this_output_list[tmp_it_this_2])
                                 tmp_node_this_output_data_2.append(tmp_node_this_output_list[tmp_it_this_2])
-                    elif tmp_node_this.vals['b'] != None or tmp_node_this.vals['p'] != None:
-                        if tmp_node_this.vals['b'] != None:
+                    elif tmp_node_this.vals['b'] is not None or tmp_node_this.vals['p'] is not None:
+                        if tmp_node_this.vals['b'] is not None:
                             if tmp_node_this.vals['b'] <= 0 or tmp_node_this.vals['b'] * tmp_main_val_left[0] > 10000:
                                 self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
                                 return resNoneTemplate
@@ -2327,7 +2327,7 @@ class RD(object):
                             for tmp_it_this in tmp_range_list:
                                 tmp_rd_this = RD('1b%d' % (tmp_node_this.vals['b'],))
                                 tmp_rd_this.roll()
-                                if tmp_rd_this.resError != None:
+                                if tmp_rd_this.resError is not None:
                                     self.resError = tmp_rd_this.resError
                                     return
                                 else:
@@ -2343,7 +2343,7 @@ class RD(object):
                                     tmp_node_this_output_str_2 += str(tmp_node_this_output_this)
                                     tmp_node_this_output_data_1.append(tmp_rd_this.resDetailData)
                                     tmp_node_this_output_data_2.append(tmp_node_this_output_this)
-                        elif tmp_node_this.vals['p'] != None:
+                        elif tmp_node_this.vals['p'] is not None:
                             if tmp_node_this.vals['p'] <= 0 or tmp_node_this.vals['p'] * tmp_main_val_left[0] > 10000:
                                 self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
                                 return resNoneTemplate
@@ -2351,7 +2351,7 @@ class RD(object):
                             for tmp_it_this in tmp_range_list:
                                 tmp_rd_this = RD('1p%d' % (tmp_node_this.vals['p'],))
                                 tmp_rd_this.roll()
-                                if tmp_rd_this.resError != None:
+                                if tmp_rd_this.resError is not None:
                                     self.resError = tmp_rd_this.resError
                                     return
                                 else:
@@ -2394,7 +2394,7 @@ class RD(object):
                     tmp_node_this_output_data_final = [tmp_node_this_output_data]
                     tmp_node_this_output_meta_tuple = tmp_node_this_output_data_4
                     # str主要处理流程
-                    if tmp_node_this.vals['b'] == None and tmp_node_this.vals['p'] == None:
+                    if tmp_node_this.vals['b'] is None and tmp_node_this.vals['p'] is None:
                         flag_begin = True
                         for tmp_node_this_output_list_this in tmp_node_this_output_list:
                             if flag_begin:
@@ -2410,10 +2410,10 @@ class RD(object):
                                 tmp_node_this_output_str_2 += '+'
                             tmp_node_this_output_str_2 += str(tmp_node_this_output_list_this)
                     if (
-                        tmp_node_this.vals['k'] == None
-                        and tmp_node_this.vals['q'] == None
-                        and tmp_node_this.vals['b'] == None
-                        and tmp_node_this.vals['p'] == None
+                        tmp_node_this.vals['k'] is None
+                        and tmp_node_this.vals['q'] is None
+                        and tmp_node_this.vals['b'] is None
+                        and tmp_node_this.vals['p'] is None
                     ):
                         if len(tmp_node_this_output_list_2) == 1:
                             if rootPriority != 0:
@@ -2431,13 +2431,13 @@ class RD(object):
                             tmp_node_this_output_str_2,
                             tmp_node_this_output,
                         )
-                    if tmp_node_this.vals['b'] != None or tmp_node_this.vals['p'] != None:
+                    if tmp_node_this.vals['b'] is not None or tmp_node_this.vals['p'] is not None:
                         tmp_node_this_output_Max = tmp_main_val_left_obj.resIntMax * tmp_main_val_right_obj.resIntMax
                         tmp_node_this_output_Min = max(tmp_main_val_left_obj.resIntMin * 1, 1)
-                    elif tmp_node_this.vals['k'] != None:
+                    elif tmp_node_this.vals['k'] is not None:
                         tmp_node_this_output_Max = tmp_node_this.vals['k'] * tmp_main_val_right_obj.resIntMax
                         tmp_node_this_output_Min = tmp_node_this.vals['k'] * 1
-                    elif tmp_node_this.vals['q'] != None:
+                    elif tmp_node_this.vals['q'] is not None:
                         tmp_node_this_output_Max = tmp_node_this.vals['q'] * tmp_main_val_right_obj.resIntMax
                         tmp_node_this_output_Min = tmp_node_this.vals['q'] * 1
                     else:
@@ -2456,25 +2456,25 @@ class RD(object):
                     if tmp_main_val_left[0] <= 0 or tmp_main_val_left[0] >= 10000:
                         self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
                         return resNoneTemplate
-                    if tmp_node_this.vals['m'] != None and (
+                    if tmp_node_this.vals['m'] is not None and (
                         tmp_node_this.vals['m'] <= 0 or tmp_node_this.vals['m'] >= 1000
                     ):
                         self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
                         return resNoneTemplate
-                    if tmp_node_this.vals['k'] != None and (
+                    if tmp_node_this.vals['k'] is not None and (
                         tmp_node_this.vals['k'] <= 0 or tmp_node_this.vals['k'] >= 1000
                     ):
                         self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
                         return resNoneTemplate
-                    if tmp_node_this.vals['q'] != None and (
+                    if tmp_node_this.vals['q'] is not None and (
                         tmp_node_this.vals['q'] <= 0 or tmp_node_this.vals['q'] >= 1000
                     ):
                         self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
                         return resNoneTemplate
                     flag_if_k_work = (
-                        tmp_node_this.vals['k'] != None and tmp_node_this.vals['m'] >= tmp_node_this.vals['k']
+                        tmp_node_this.vals['k'] is not None and tmp_node_this.vals['m'] >= tmp_node_this.vals['k']
                     )
-                    flag_if_q_work = tmp_node_this.vals['q'] != None and 1 <= tmp_node_this.vals['q']
+                    flag_if_q_work = tmp_node_this.vals['q'] is not None and 1 <= tmp_node_this.vals['q']
                     if flag_if_k_work or flag_if_q_work:
                         if (
                             tmp_node_this.vals['m'] >= tmp_main_val_right_obj.resIntMin
@@ -2536,10 +2536,10 @@ class RD(object):
                         for tmp_it_this in tmp_range_list:
                             tmp_node_this_output_this = self.random(1, tmp_add_roll_m)
                             tmp_node_this_output_list.append(tmp_node_this_output_this)
-                            if tmp_add_roll_k != None and tmp_node_this_output_this >= tmp_add_roll_k:
+                            if tmp_add_roll_k is not None and tmp_node_this_output_this >= tmp_add_roll_k:
                                 tmp_node_this_output += 1
                                 tmp_node_this_output_1_this += 1
-                            if tmp_add_roll_q != None and tmp_node_this_output_this <= tmp_add_roll_q:
+                            if tmp_add_roll_q is not None and tmp_node_this_output_this <= tmp_add_roll_q:
                                 tmp_node_this_output += 1
                                 tmp_node_this_output_1_this += 1
                             if tmp_node_this_output_this >= tmp_add_roll_threshold:
@@ -2564,10 +2564,10 @@ class RD(object):
                             else:
                                 tmp_node_this_output_str += ','
                             tmp_node_this_output_str_this = str(tmp_node_this_output_this)
-                            if tmp_add_roll_k != None and tmp_node_this_output_this >= tmp_add_roll_k:
+                            if tmp_add_roll_k is not None and tmp_node_this_output_this >= tmp_add_roll_k:
                                 tmp_node_this_output_str_this = '[' + tmp_node_this_output_str_this + ']'
                                 tmp_node_this_output_data_1_1_1 = {'op': 'mark01', 'v': tmp_node_this_output_data_1_1_1}
-                            if tmp_add_roll_q != None and tmp_node_this_output_this <= tmp_add_roll_q:
+                            if tmp_add_roll_q is not None and tmp_node_this_output_this <= tmp_add_roll_q:
                                 tmp_node_this_output_str_this = '[' + tmp_node_this_output_str_this + ']'
                                 tmp_node_this_output_data_1_1_1 = {'op': 'mark01', 'v': tmp_node_this_output_data_1_1_1}
                             if tmp_node_this_output_this >= tmp_add_roll_threshold:
@@ -2933,7 +2933,7 @@ class RD(object):
                     tmp_node_this_output_str = ''
                     tmp_node_this_output_str_1 = ''
                     tmp_node_this_output_str_2 = ''
-                    tmp_node_this_output_str_3 = ''
+                    tmp_node_this_output_str_3 = ''  # NOQA: F841
                     tmp_node_this_output_data = {}
                     tmp_node_this_output_data_1 = []
                     tmp_node_this_output_data_2 = []
@@ -2981,7 +2981,7 @@ class RD(object):
                     tmp_node_this_output_data_final = [tmp_node_this_output_data]
                     tmp_node_this_output_meta_tuple = tmp_node_this_output_data_1
                 elif tmp_node_this.data == '?':
-                    if tmp_node_this.vals[':'] != None:
+                    if tmp_node_this.vals[':'] is not None:
                         tmp_flag_True = True
                         if tmp_main_val_left[0] == 0:
                             tmp_flag_True = False
@@ -3047,7 +3047,7 @@ class RD(object):
                     tmp_last_resMetaTuple_raw = tmp_main_val_left_obj.resMetaTuple
                     tmp_last_resMetaTuple_raw_new = tmp_last_resMetaTuple_raw
                     tmp_last_resMetaTuple = tmp_last_resMetaTuple_raw
-                    if type(tmp_last_resMetaTuple) == list and len(tmp_last_resMetaTuple) > 0:
+                    if type(tmp_last_resMetaTuple) is list and len(tmp_last_resMetaTuple) > 0:
                         tmp_last_resMetaTuple = self.get_from_metaTuple(tmp_last_resMetaTuple_raw)
                     else:
                         tmp_last_resMetaTuple_raw = [tmp_main_val_left[0]]
@@ -3136,7 +3136,7 @@ class RD(object):
                     tmp_last_resMetaTuple_raw = tmp_main_val_left_obj.resMetaTuple
                     tmp_last_resMetaTuple_raw_new = tmp_last_resMetaTuple_raw
                     tmp_last_resMetaTuple = tmp_last_resMetaTuple_raw
-                    if type(tmp_last_resMetaTuple) == list and len(tmp_last_resMetaTuple) > 0:
+                    if type(tmp_last_resMetaTuple) is list and len(tmp_last_resMetaTuple) > 0:
                         tmp_last_resMetaTuple = self.get_from_metaTuple(tmp_last_resMetaTuple_raw)
                     else:
                         tmp_last_resMetaTuple_raw = [tmp_main_val_left[0]]
@@ -3181,7 +3181,7 @@ class RD(object):
                                 tmp_last_resMetaTuple_raw[tmp_last_resMetaTuple_i],
                             ])
                     tmp_node_this_output = 0
-                    tmp_node_this_output_meta_tuple_res = []
+                    tmp_node_this_output_meta_tuple_res = []  # NOQA: F841
                     if flag_cut:
                         tmp_last_resMetaTuple_list_new_2 = []
                         tmp_last_resMetaTuple_list_new = tmp_last_resMetaTuple_list[tmp_start - 1 : tmp_end]
@@ -3231,7 +3231,7 @@ class RD(object):
                     ]
                 elif tmp_node_this.data == '$t':
                     tmp_key = 't%d' % tmp_main_val_right[0]
-                    if tmp_node_this.vals['='] != None:
+                    if tmp_node_this.vals['='] is not None:
                         self.valueTable[tmp_key] = tmp_node_this.vals['=']
                         tmp_node_this_output = tmp_node_this.vals['=']
                     else:
@@ -3315,12 +3315,12 @@ class RD(object):
     def get_from_metaTuple(self, data, flag_last=False, flag_update=True):
         res = []
         for data_this in data:
-            if type(data_this) == int:
+            if type(data_this) is int:
                 res.append(data_this)
-            elif type(data_this) == str:
+            elif type(data_this) is str:
                 para_this = RD(data_this, customDefault=self.customDefault, valueTable=self.valueTable)
                 para_this.roll()
-                if para_this.resError == None:
+                if para_this.resError is None:
                     res.append(para_this.resInt)
                 if flag_update:
                     self.valueTable.update(para_this.valueTable)
@@ -3337,7 +3337,7 @@ class RD(object):
     def check_metaTuple(self, data):
         res = False
         for data_this in data:
-            if type(data_this) == str:
+            if type(data_this) is str:
                 res = True
                 break
         return res
@@ -3345,15 +3345,15 @@ class RD(object):
     def get_str_from_metaTuple(self, data_raw, data):
         res = []
         for data_i in range(len(data)):
-            if type(data_raw[data_i]) == int:
+            if type(data_raw[data_i]) is int:
                 res.append(str(data[data_i]))
-            elif type(data_raw[data_i]) == str:
+            elif type(data_raw[data_i]) is str:
                 try:
                     if int(data_raw[data_i]) == data[data_i]:
                         res.append(str(data[data_i]))
                     else:
                         raise Exception('not int')
-                except:
+                except Exception:
                     res.append('%s=%s' % (str(data_raw[data_i]), str(data[data_i])))
         return res
 
@@ -3424,7 +3424,7 @@ if __name__ == '__main__':
         print(rd_para.originData)
         rd_para.roll()
         print('----------------')
-        if rd_para.resError != None:
+        if rd_para.resError is not None:
             print(rd_para.resError)
         else:
             print(rd_para.resInt)

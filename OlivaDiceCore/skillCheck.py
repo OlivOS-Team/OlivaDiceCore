@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-"""
+r"""
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
 _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
@@ -10,14 +10,13 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @Author    :   lunzhiPenxil仑质
 @Contact   :   lunzhipenxil@gmail.com
 @License   :   AGPL
-@Copyright :   (C) 2020-2021, OlivOS-Team
+@Copyright :   (C) 2020-2026, OlivOS-Team
 @Desc      :   None
 """
 
 import OlivaDiceCore
 
 from enum import Enum
-import traceback
 
 
 class resultType(Enum):
@@ -78,7 +77,7 @@ def getSkillCheckByTemplate(data, template=None, ruleKey='default', difficulty_p
     tmp_template_dict = None
     tmp_template_rule_dict = None
     # 处理人物卡模板规则
-    if template == None:
+    if template is None:
         tmp_template_dict = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault['default'].copy()
     else:
         tmp_template_dict = template.copy()
@@ -100,7 +99,7 @@ def getSkillCheckByTemplate(data, template=None, ruleKey='default', difficulty_p
     special_text = None
 
     temp_result_enum = resultType.SKILLCHECK_NOPE
-    if type(tmp_template_rule_dict) == dict:
+    if type(tmp_template_rule_dict) is dict:
         original_check_list = tmp_template_rule_dict.get('checkList', [])
         modified_check_list = original_check_list.copy()
         if difficulty_prefix:
@@ -131,7 +130,7 @@ def getSkillCheckByTemplate(data, template=None, ruleKey='default', difficulty_p
 
         if 'greatFail' in tmp_template_rule_dict:
             great_fail_result = culRule('.node', tmp_template_rule_dict['greatFail'], tmp_data)
-            if great_fail_result == True:
+            if great_fail_result is True:
                 if special_text and difficulty_prefix == '大成功':
                     threshold_value = special_text
                 return resultType.SKILLCHECK_GREAT_FAIL, threshold_value
@@ -139,21 +138,21 @@ def getSkillCheckByTemplate(data, template=None, ruleKey='default', difficulty_p
         for difficulty in difficulty_order:
             if difficulty in modified_check_list and difficulty in tmp_template_rule_dict:
                 temp_result = culRule('.node', tmp_template_rule_dict[difficulty], tmp_data)
-                if temp_result == True:
+                if temp_result is True:
                     temp_result_enum = dictSkillCheckResultRouter[difficulty]
                     break
 
         if temp_result_enum == resultType.SKILLCHECK_NOPE:
             if 'fail' in tmp_template_rule_dict:
                 fail_result = culRule('.node', tmp_template_rule_dict['fail'], tmp_data)
-                if fail_result == True:
+                if fail_result is True:
                     temp_result_enum = resultType.SKILLCHECK_FAIL
 
         if temp_result_enum == resultType.SKILLCHECK_NOPE:
             for difficulty in original_check_list:
                 if difficulty in tmp_template_rule_dict:
                     temp_result = culRule('.node', tmp_template_rule_dict[difficulty], tmp_data)
-                    if temp_result == True:
+                    if temp_result is True:
                         temp_result_enum = resultType.SKILLCHECK_FAIL
                         break
 
@@ -186,16 +185,16 @@ def calculateThreshold(ruleNode, tmp_data):
 
 def culRule(nodeKey, nodeData, tempData):
     temp_result = False
-    if nodeData == None:
+    if nodeData is None:
         temp_result = False
-    elif type(nodeData) == int:
+    elif type(nodeData) is int:
         temp_result = nodeData
-    elif type(nodeData) == str:
+    elif type(nodeData) is str:
         if len(nodeData) > 1:
             if nodeData[0] == '$':
                 if nodeData[1:] in tempData:
                     temp_result = tempData[nodeData[1:]]
-    elif type(nodeData) == dict:
+    elif type(nodeData) is dict:
         if nodeKey == '.node':
             for nodeData_this in nodeData:
                 temp_result = culRule(nodeData_this, nodeData[nodeData_this], tempData)
@@ -203,17 +202,17 @@ def culRule(nodeKey, nodeData, tempData):
             temp_result_1 = True
             for nodeData_this in nodeData:
                 temp_result_2 = culRule(nodeData_this, nodeData[nodeData_this], tempData)
-                if temp_result_2 == False:
+                if temp_result_2 is False:
                     temp_result_1 = False
             temp_result = temp_result_1
         elif nodeKey == '.or':
             temp_result_1 = False
             for nodeData_this in nodeData:
                 temp_result_2 = culRule(nodeData_this, nodeData[nodeData_this], tempData)
-                if temp_result_2 == True:
+                if temp_result_2 is True:
                     temp_result_1 = True
             temp_result = temp_result_1
-    elif type(nodeData) == list:
+    elif type(nodeData) is list:
         if nodeKey == '.node':
             for nodeData_this in nodeData:
                 temp_result = culRule('.node', nodeData_this, tempData)
@@ -221,14 +220,14 @@ def culRule(nodeKey, nodeData, tempData):
             temp_result_1 = True
             for nodeData_this in nodeData:
                 temp_result_2 = culRule('.node', nodeData_this, tempData)
-                if temp_result_2 == False:
+                if temp_result_2 is False:
                     temp_result_1 = False
             temp_result = temp_result_1
         elif nodeKey == '.or':
             temp_result_1 = False
             for nodeData_this in nodeData:
                 temp_result_2 = culRule('.node', nodeData_this, tempData)
-                if temp_result_2 == True:
+                if temp_result_2 is True:
                     temp_result_1 = True
             temp_result = temp_result_1
         elif nodeKey == '.==':
@@ -349,7 +348,7 @@ def getSpecialSkill(skillName: str, pcCardRule: str, pcCardData: dict):
                         res = 2
                     else:
                         res = int((tmp_sum - 205) / 80) + 2
-                except:
+                except Exception:
                     res = None
             else:
                 res = 0
@@ -357,7 +356,7 @@ def getSpecialSkill(skillName: str, pcCardRule: str, pcCardData: dict):
             """
             根据COC7th规则计算DB
             如果缺少任何属性或计算失败，返回0
-            
+
             COC7th规则:
             STR+SIZ的和为左侧，DB为右侧
             2-64: -2
@@ -385,10 +384,10 @@ def getSpecialSkill(skillName: str, pcCardRule: str, pcCardData: dict):
                         res = '1D6'
                     else:
                         res = '%dD6' % (int((tmp_sum - 205) / 80) + 1)
-                except:
+                except Exception:
                     res = None
             else:
                 res = 0
     res = f'({res})' if type(res) in (int,) and res < 0 else res
-    res = res if res == None else str(res)
+    res = res if res is None else str(res)
     return res

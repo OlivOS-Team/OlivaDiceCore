@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-"""
+r"""
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
 _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
@@ -14,7 +14,6 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @Desc      :   None
 """
 
-import OlivOS
 import OlivaDiceCore
 
 import json
@@ -328,14 +327,14 @@ def dataUserConfigTotalCount():
 
 def getUserHash(userId, userType, platform, subId=None):
     hash_tmp = hashlib.new('md5')
-    if subId != None:
+    if subId is not None:
         tmp_strID = '%s|%s' % (str(subId), str(userId))
         hash_tmp.update(tmp_strID.encode(encoding='UTF-8'))
     else:
         hash_tmp.update(str(userId).encode(encoding='UTF-8'))
     hash_tmp.update(str(userType).encode(encoding='UTF-8'))
     hash_tmp.update(str(platform).encode(encoding='UTF-8'))
-    if subId != None:
+    if subId is not None:
         hash_tmp.update(str(subId).encode(encoding='UTF-8'))
     return hash_tmp.hexdigest()
 
@@ -375,5 +374,5 @@ def setDelUTF8WithBom(filePath):
         if flag_is_bom:
             with open(filePath, 'w', encoding='utf-8') as filePath_f:
                 filePath_f.write(bom_data)
-    except:
+    except Exception:
         pass

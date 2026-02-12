@@ -6886,7 +6886,7 @@ def unity_reply(plugin_event, Proc):
                         tmp_resInt_str = str(rd_para.resInt)
                         if tmp_resDetail_str is None:
                             tmp_resDetail_str = ''
-                        if tmp_resDetail_str == str(tmp_resInt_str):
+                        if tmp_resDetail_str is str(tmp_resInt_str):
                             tmp_resDetail_str = ''
                         if rd_para_str_new is None:
                             rd_para_str_new = tmp_rd_para_str_show
@@ -6980,7 +6980,7 @@ def unity_reply(plugin_event, Proc):
                             tmp_resInt_str = str(rd_para.resInt)
                             if tmp_resDetail_str is None:
                                 tmp_resDetail_str = ''
-                            if tmp_resDetail_str == str(tmp_resInt_str):
+                            if tmp_resDetail_str is str(tmp_resInt_str):
                                 tmp_resDetail_str = ''
                             if rd_para_str_new is None:
                                 rd_para_str_new = tmp_rd_para_str_show
