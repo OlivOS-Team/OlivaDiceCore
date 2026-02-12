@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
-'''
+r"""
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
-_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/   
-/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___   
-\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/   
+_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
+/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___
+\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/
 
 @File      :   userConfig.py
 @Author    :   lunzhiPenxil仑质
@@ -12,9 +12,8 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @License   :   AGPL
 @Copyright :   (C) 2020-2021, OlivOS-Team
 @Desc      :   None
-'''
+"""
 
-import OlivOS
 import OlivaDiceCore
 
 import json
@@ -31,73 +30,65 @@ gMsgCount = 0
 gMsgCountLock = threading.Lock()
 gUserConfigLock = threading.Lock()
 
-dictUserConfigDefault = {
-    'userId' : None,
-    'lastHit' : None
-}
+dictUserConfigDefault = {'userId': None, 'lastHit': None}
 
 dictUserConfigNoteDefault = {
-    'groupEnable' : True,
-    'hostEnable' : True,
-    'hostLocalEnable' : True,
-    'groupWithHostEnable' : False,
-    'groupTemplate' : None,
-    'groupTemplateRule' : None,
-    'groupRavRule' : None,
-    'groupMainDice' : None,
-    'groupMainDiceDRight' : None,
-    'groupMainDiceDLeft' : None,
-    'groupObList' : None,
-    'groupInitList' : None,
-    'groupInitParaList' : None,
-    'groupInitUserList' : None,
-    'groupInitCurrentPlayer' : None,
-    'groupInitRound' : 1,
-    'userObList' : None,
-    'welcomeMsg' : None,
-    'RDRecord' : None,
-    'RDRecordInt' : 0,
-    'RDRecordRaw' : '',
-    'RDRecordSkillInt' : None,
-    'userName' : '用户',
-    'trustLevel' : 0,
-    'trustRank' : 1000,
-    'autoSnEnabled' : False,
-    'showDefault' : False,
+    'groupEnable': True,
+    'hostEnable': True,
+    'hostLocalEnable': True,
+    'groupWithHostEnable': False,
+    'groupTemplate': None,
+    'groupTemplateRule': None,
+    'groupRavRule': None,
+    'groupMainDice': None,
+    'groupMainDiceDRight': None,
+    'groupMainDiceDLeft': None,
+    'groupObList': None,
+    'groupInitList': None,
+    'groupInitParaList': None,
+    'groupInitUserList': None,
+    'groupInitCurrentPlayer': None,
+    'groupInitRound': 1,
+    'userObList': None,
+    'welcomeMsg': None,
+    'RDRecord': None,
+    'RDRecordInt': 0,
+    'RDRecordRaw': '',
+    'RDRecordSkillInt': None,
+    'userName': '用户',
+    'trustLevel': 0,
+    'trustRank': 1000,
+    'autoSnEnabled': False,
+    'showDefault': False,
     'teamConfig': {},
     'activeTeam': None,
-    'mythicHardeningEnable' : False,
+    'mythicHardeningEnable': False,
 }
 
 dictUserConfigNoteMapping = {
-    'groupEnable' : [None, '群禁用'],
-    'hostEnable' : [None, '子频道默认禁用'],
-    'hostLocalEnable' : [None, '频道禁用'],
-    'groupWithHostEnable' : ['子频道特例启用', None]
+    'groupEnable': [None, '群禁用'],
+    'hostEnable': [None, '子频道默认禁用'],
+    'hostLocalEnable': [None, '频道禁用'],
+    'groupWithHostEnable': ['子频道特例启用', None],
 }
 
 dictUserConfigNoteType = {
     'user': [],
-    'group': [
-        'groupEnable',
-        'groupWithHostEnable'
-    ],
-    'host': [
-        'hostEnable',
-        'hostLocalEnable'
-    ]
+    'group': ['groupEnable', 'groupWithHostEnable'],
+    'host': ['hostEnable', 'hostLocalEnable'],
 }
 
 # 重定向黑名单：这些数据必须保持独立性，不应被重定向
 dictRedirectBlacklist = {
-    'groupEnable', # 这个是控制群开关
+    'groupEnable',  # 这个是控制群开关
     'hostEnable',
     'hostLocalEnable',
     'groupWithHostEnable',
-    'lastHit', # 这个主要是控制群hit，用于group_clear
+    'lastHit',  # 这个主要是控制群hit，用于group_clear
     # 这个注释掉是因为已经在log on里面处理了，这里就不处理，否则会在og on之后无法log off
     # 'logEnable' # 这里是让log on的时候不走从账号，从而使得不会重复记录
 }
+
 
 def getRedirectedBotHash(botHash, dataKey=None, forceNoRedirect=False):
     """
@@ -115,20 +106,14 @@ def getRedirectedBotHash(botHash, dataKey=None, forceNoRedirect=False):
         return masterBotHashList[0]
     return botHash
 
+
 def setUserConfigByKey(userId, userType, platform, userConfigKey, userConfigValue, botHash, forceNoRedirect=False):
-    global dictUserConfigData
-    global dictUserConfigNoteDefault
-    global listUserConfigDataUpdate
     userConfigNoteKey = 'configNote'
     if userConfigKey not in dictUserConfigNoteDefault:
         return
     # 应用重定向逻辑
     redirectedBotHash = getRedirectedBotHash(botHash, userConfigKey, forceNoRedirect)
-    userHash = getUserHash(
-        userId = userId,
-        userType = userType,
-        platform = platform
-    )
+    userHash = getUserHash(userId=userId, userType=userType, platform=platform)
     if userHash not in listUserConfigDataUpdate:
         listUserConfigDataUpdate.append(userHash)
     if userHash not in dictUserConfigData:
@@ -144,16 +129,14 @@ def setUserConfigByKey(userId, userType, platform, userConfigKey, userConfigValu
         dictUserConfigData[userHash][redirectedBotHash]['lastHit'] = dictUserConfigDefault['lastHit']
     dictUserConfigData[userHash][redirectedBotHash][userConfigNoteKey][userConfigKey] = userConfigValue
 
-dictConfigKeyToConsoleSwitchMapping = {
-    'showDefault': 'defaultShowDefault',
-    'autoSnEnabled': 'defaultAutoSn'
-}
+
+dictConfigKeyToConsoleSwitchMapping = {'showDefault': 'defaultShowDefault', 'autoSnEnabled': 'defaultAutoSn'}
+
 
 def getDefaultValueByConfigKey(userConfigKey):
     """
     获取配置项的默认值，优先从全局开关中读取
     """
-    global dictUserConfigNoteDefault
     if userConfigKey in dictConfigKeyToConsoleSwitchMapping:
         consoleSwitchKey = dictConfigKeyToConsoleSwitchMapping[userConfigKey]
         consoleSwitchValue = OlivaDiceCore.console.getConsoleSwitchByHash(consoleSwitchKey, 'unity')
@@ -163,20 +146,15 @@ def getDefaultValueByConfigKey(userConfigKey):
         return dictUserConfigNoteDefault[userConfigKey]
     return False
 
+
 def getUserConfigByKey(userId, userType, platform, userConfigKey, botHash, default=None, forceNoRedirect=False):
-    global dictUserConfigData
-    global dictUserConfigNoteDefault
     userConfigNoteKey = 'configNote'
     userConfigValue = default if default is not None else False
     if userConfigKey in dictUserConfigNoteDefault and default is None:
         userConfigValue = getDefaultValueByConfigKey(userConfigKey)
     # 应用重定向逻辑
     redirectedBotHash = getRedirectedBotHash(botHash, userConfigKey, forceNoRedirect)
-    userHash = getUserHash(
-        userId = userId,
-        userType = userType,
-        platform = platform
-    )
+    userHash = getUserHash(userId=userId, userType=userType, platform=platform)
     if userHash in dictUserConfigData:
         if redirectedBotHash in dictUserConfigData[userHash]:
             if userConfigNoteKey in dictUserConfigData[userHash][redirectedBotHash]:
@@ -184,9 +162,8 @@ def getUserConfigByKey(userId, userType, platform, userConfigKey, botHash, defau
                     userConfigValue = dictUserConfigData[userHash][redirectedBotHash][userConfigNoteKey][userConfigKey]
     return userConfigValue
 
+
 def getUserConfigByKeyWithHash(userHash, userConfigKey, botHash, forceNoRedirect=False):
-    global dictUserConfigData
-    global dictUserConfigNoteDefault
     userConfigNoteKey = 'configNote'
     userConfigValue = False
     if userConfigKey in dictUserConfigNoteDefault:
@@ -200,9 +177,8 @@ def getUserConfigByKeyWithHash(userHash, userConfigKey, botHash, forceNoRedirect
                     userConfigValue = dictUserConfigData[userHash][redirectedBotHash][userConfigNoteKey][userConfigKey]
     return userConfigValue
 
+
 def getUserDataByKeyWithHash(userHash, userDataKey, botHash):
-    global dictUserConfigData
-    global dictUserConfigDefault
     userDataValue = None
     if userDataKey in dictUserConfigDefault:
         userDataValue = dictUserConfigDefault[userDataKey]
@@ -214,17 +190,17 @@ def getUserDataByKeyWithHash(userHash, userDataKey, botHash):
                 userDataValue = dictUserConfigData[userHash][redirectedBotHash][userDataKey]
     return userDataValue
 
-#basic
+
+# basic
 def setMsgCount():
     global gMsgCount
     gMsgCountLock.acquire()
     gMsgCount -= 1
     gMsgCountLock.release()
 
-def releaseUnityMsgCount(data, botHash, flagForceWrite = False):
-    global gMsgCountInit
+
+def releaseUnityMsgCount(data, botHash, flagForceWrite=False):
     global gMsgCount
-    global dictUserConfigData
     global listUserConfigDataUpdate
     flag_need_release = False
     tmp_dictUserConfigData = {}
@@ -255,7 +231,8 @@ def releaseUnityMsgCount(data, botHash, flagForceWrite = False):
     if flag_need_release or flagForceWrite:
         writeUserConfig(tmp_dictUserConfigData, tmp_listUserConfigDataUpdate)
 
-#io
+
+# io
 def writeUserConfig(data, updateList):
     releaseDir(OlivaDiceCore.data.dataDirRoot)
     for data_this in updateList:
@@ -266,12 +243,11 @@ def writeUserConfig(data, updateList):
                 releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash)
                 releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/user')
                 userConfigDataPath = OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/user/' + userHash
-                with open(userConfigDataPath, 'w', encoding = 'utf-8') as userConfigDataPath_f:
-                    userConfigDataPath_f.write(json.dumps(data[userHash], ensure_ascii = False, indent = 4))
+                with open(userConfigDataPath, 'w', encoding='utf-8') as userConfigDataPath_f:
+                    userConfigDataPath_f.write(json.dumps(data[userHash], ensure_ascii=False, indent=4))
+
 
 def writeUserConfigByUserHash(userHash):
-    global dictUserConfigData
-    global listUserConfigDataUpdate
     releaseDir(OlivaDiceCore.data.dataDirRoot)
     if userHash in dictUserConfigData:
         gUserConfigLock.acquire()
@@ -282,11 +258,11 @@ def writeUserConfigByUserHash(userHash):
             releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash)
             releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/user')
             userConfigDataPath = OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/user/' + userHash
-            with open(userConfigDataPath, 'w', encoding = 'utf-8') as userConfigDataPath_f:
-                userConfigDataPath_f.write(json.dumps(tmp_dictUserConfigData_this, ensure_ascii = False, indent = 4))
+            with open(userConfigDataPath, 'w', encoding='utf-8') as userConfigDataPath_f:
+                userConfigDataPath_f.write(json.dumps(tmp_dictUserConfigData_this, ensure_ascii=False, indent=4))
+
 
 def readUserConfig():
-    global dictUserConfigData
     releaseDir(OlivaDiceCore.data.dataDirRoot)
     botHash_list = os.listdir(OlivaDiceCore.data.dataDirRoot)
     for botHash_list_this in botHash_list:
@@ -301,33 +277,31 @@ def readUserConfig():
             userConfigDataPath = userConfigDataDir + '/' + userConfigDataFile
             if userHash not in dictUserConfigData:
                 dictUserConfigData[userHash] = {}
-            with open(userConfigDataPath, 'r', encoding = 'utf-8') as userConfigDataPath_f:
-                dictUserConfigData[userHash] = jsonDataLoadSafe(userConfigDataPath_f, "用户记录", f"{botHash}/{userConfigDataFile}")
+            with open(userConfigDataPath, 'r', encoding='utf-8') as userConfigDataPath_f:
+                dictUserConfigData[userHash] = jsonDataLoadSafe(
+                    userConfigDataPath_f, '用户记录', f'{botHash}/{userConfigDataFile}'
+                )
+
 
 def jsonDataLoadSafe(data_f, dataType, dataName):
     tmp_userConfigData = {}
     try:
         tmp_userConfigData = json.loads(data_f.read())
     except Exception as e:
-        tmp_log_str =  OlivaDiceCore.msgCustomManager.formatReplySTRConst(
+        tmp_log_str = OlivaDiceCore.msgCustomManager.formatReplySTRConst(
             OlivaDiceCore.msgCustom.dictStrConst['strInitDataError'],
-            {
-                "tInitDataType": dataType,
-                "tInitDataName": dataName,
-                "tResult": str(e)
-            }
+            {'tInitDataType': dataType, 'tInitDataName': dataName, 'tResult': str(e)},
         )
-        OlivaDiceCore.msgReply.globalLog(3, tmp_log_str, [
-            ('OlivaDice', 'default'),
-            ('Init', 'default')
-        ])
+        OlivaDiceCore.msgReply.globalLog(3, tmp_log_str, [('OlivaDice', 'default'), ('Init', 'default')])
         tmp_userConfigData = {}
     return tmp_userConfigData
+
 
 def dataUserConfigLoadAll():
     global gMsgCount
     gMsgCount = OlivaDiceCore.console.getConsoleSwitchByHash('userConfigCount')
     readUserConfig()
+
 
 def dataUserConfigTotalCount():
     total_count = 0
@@ -335,22 +309,25 @@ def dataUserConfigTotalCount():
         total_count += 1
     return total_count
 
-def getUserHash(userId, userType, platform, subId = None):
+
+def getUserHash(userId, userType, platform, subId=None):
     hash_tmp = hashlib.new('md5')
-    if subId != None:
+    if subId is not None:
         tmp_strID = '%s|%s' % (str(subId), str(userId))
         hash_tmp.update(tmp_strID.encode(encoding='UTF-8'))
     else:
         hash_tmp.update(str(userId).encode(encoding='UTF-8'))
     hash_tmp.update(str(userType).encode(encoding='UTF-8'))
     hash_tmp.update(str(platform).encode(encoding='UTF-8'))
-    if subId != None:
+    if subId is not None:
         hash_tmp.update(str(subId).encode(encoding='UTF-8'))
     return hash_tmp.hexdigest()
+
 
 def releaseDir(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
+
 
 def initDelUTF8WithBom(bot_info_dict):
     for bot_info_dict_this in bot_info_dict:
@@ -363,6 +340,7 @@ def initDelUTF8WithBom(bot_info_dict):
     setDelUTF8WithBom(OlivaDiceCore.data.dataDirRoot + '/unity/console/switch.json')
     pass
 
+
 def setDelUTF8WithBom(filePath):
     flag_is_bom = False
     free_len = 0
@@ -370,16 +348,16 @@ def setDelUTF8WithBom(filePath):
     free_data = 0
     bom_data = 0
     try:
-        with open(filePath, 'r', encoding = 'utf-8') as filePath_f:
+        with open(filePath, 'r', encoding='utf-8') as filePath_f:
             free_data = str(filePath_f.read())
             free_len = len(free_data)
-        with open(filePath, 'r', encoding = 'utf-8-sig') as filePath_f:
+        with open(filePath, 'r', encoding='utf-8-sig') as filePath_f:
             bom_data = str(filePath_f.read())
             bom_len = len(bom_data)
         if free_len > bom_len:
             flag_is_bom = True
         if flag_is_bom:
-            with open(filePath, 'w', encoding = 'utf-8') as filePath_f:
+            with open(filePath, 'w', encoding='utf-8') as filePath_f:
                 filePath_f.write(bom_data)
-    except:
+    except Exception:
         pass

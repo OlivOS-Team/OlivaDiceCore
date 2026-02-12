@@ -1,18 +1,18 @@
 # -*- encoding: utf-8 -*-
-'''
+r"""
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
-_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/   
-/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___   
-\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/   
+_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
+/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___
+\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/
 
 @File      :   msgCustomManager.py
 @Author    :   lunzhiPenxil仑质
 @Contact   :   lunzhipenxil@gmail.com
 @License   :   AGPL
-@Copyright :   (C) 2020-2021, OlivOS-Team
+@Copyright :   (C) 2020-2026, OlivOS-Team
 @Desc      :   None
-'''
+"""
 
 import OlivOS
 import OlivaDiceCore
@@ -20,6 +20,7 @@ import OlivaDiceCore
 import os
 import json
 import random
+
 
 def initMsgCustom(bot_info_dict):
     for bot_info_dict_this in bot_info_dict:
@@ -35,17 +36,19 @@ def initMsgCustom(bot_info_dict):
         customReplyFile = 'customReply.json'
         customReplyPath = customReplyDir + '/' + customReplyFile
         try:
-            with open(customReplyPath, 'r', encoding = 'utf-8') as customReplyPath_f:
+            with open(customReplyPath, 'r', encoding='utf-8') as customReplyPath_f:
                 OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[botHash] = json.loads(customReplyPath_f.read())
                 OlivaDiceCore.msgCustom.dictStrCustomDict[botHash].update(
                     OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[botHash]
                 )
-        except:
+        except Exception:
             continue
+
 
 def saveMsgCustom(bot_info_dict):
     for botHash in bot_info_dict:
         saveMsgCustomByBotHash(botHash)
+
 
 def saveMsgCustomByBotHash(botHash):
     releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash)
@@ -55,17 +58,21 @@ def saveMsgCustomByBotHash(botHash):
     customReplyPath = customReplyDir + '/' + customReplyFile
     if botHash not in OlivaDiceCore.msgCustom.dictStrCustomUpdateDict:
         OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[botHash] = {}
-    if type(OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[botHash]) != dict:
+    if type(OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[botHash]) is not dict:
         OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[botHash] = {}
-    with open(customReplyPath, 'w', encoding = 'utf-8') as customReplyPath_f:
-        customReplyPath_f.write(json.dumps(OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[botHash], ensure_ascii = False, indent = 4))
+    with open(customReplyPath, 'w', encoding='utf-8') as customReplyPath_f:
+        customReplyPath_f.write(
+            json.dumps(OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[botHash], ensure_ascii=False, indent=4)
+        )
+
 
 def releaseDir(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
 
-def formatReplySTR(data:str, valDict:dict, flagCross:bool = True, flagSplit:bool = True):
-    res:str = data
+
+def formatReplySTR(data: str, valDict: dict, flagCross: bool = True, flagSplit: bool = True):
+    res: str = data
     if flagSplit:
         res = random.choice(list(res.split('|')))
         res = res.replace('{DEVIDE}', '|')
@@ -75,14 +82,16 @@ def formatReplySTR(data:str, valDict:dict, flagCross:bool = True, flagSplit:bool
     res = formatReplySTRReplace(res, valDict)
     return res
 
-def formatReplySTRConst(data:str, valDict:dict):
+
+def formatReplySTRConst(data: str, valDict: dict):
     res = data
     res = res.format(**valDict)
     return res
 
+
 # 用状态机实现高宽容度的变量引用
 # 替代Python内置Format
-def formatReplySTRReplace(data:str, valDict:dict, flagPure:bool = False):
+def formatReplySTRReplace(data: str, valDict: dict, flagPure: bool = False):
     raw = data
     res = ''
     reg_res = ''
@@ -106,7 +115,7 @@ def formatReplySTRReplace(data:str, valDict:dict, flagPure:bool = False):
             if i == '}':
                 flag_hit = False
                 # 变量表替换
-                if not flag_hit and reg_key in valDict and type(valDict[reg_key] == str):
+                if not flag_hit and reg_key in valDict and type(valDict[reg_key] is str):
                     reg_res += str(valDict[reg_key])
                     flag_hit = True
                 # 牌堆抽取
@@ -118,12 +127,9 @@ def formatReplySTRReplace(data:str, valDict:dict, flagPure:bool = False):
                     if 'vValDict' in valDict and 'vPluginEvent' in valDict['vValDict']:
                         plugin_event = valDict['vValDict']['vPluginEvent']
                     reg_res_this = OlivaDiceCore.drawCard.draw(
-                        key_str = reg_key,
-                        bot_hash = tmp_bot_hash,
-                        flag_need_give_back = True,
-                        plugin_event = plugin_event
+                        key_str=reg_key, bot_hash=tmp_bot_hash, flag_need_give_back=True, plugin_event=plugin_event
                     )
-                    if reg_res_this != None:
+                    if reg_res_this is not None:
                         reg_res += reg_res_this
                         flag_hit = True
                 # 转义字符处理（如 {\f} -> 分页符）
@@ -152,7 +158,8 @@ def formatReplySTRReplace(data:str, valDict:dict, flagPure:bool = False):
     res = reg_res
     return res
 
-def processEscapeSequences(data:str):
+
+def processEscapeSequences(data: str):
     """
     处理字符串中的转义序列
     """
@@ -170,6 +177,7 @@ def processEscapeSequences(data:str):
         res = res.replace(escape_seq, actual_char)
     return res
 
+
 def dictTValueInit(plugin_event, dictTValue):
     res = dictTValue
     res['tBotHash'] = plugin_event.bot_info.hash
@@ -178,22 +186,18 @@ def dictTValueInit(plugin_event, dictTValue):
     res['vValDict']['vPluginEvent'] = plugin_event
     return res
 
-def loadAdapterType(botInfo:OlivOS.API.bot_info_T):
+
+def loadAdapterType(botInfo: OlivOS.API.bot_info_T):
     res = 'Native'
     if type(botInfo) is OlivOS.API.bot_info_T:
-        if 'platform' in botInfo.platform \
-        and 'sdk' in botInfo.platform \
-        and 'model' in botInfo.platform:
-            if botInfo.platform['platform'] in OlivaDiceCore.msgCustom.dictAdapterMapper \
-            and botInfo.platform['sdk'] in OlivaDiceCore.msgCustom.dictAdapterMapper\
-            [botInfo.platform['platform']] \
-            and botInfo.platform['model'] in OlivaDiceCore.msgCustom.dictAdapterMapper\
-            [botInfo.platform['platform']][botInfo.platform['sdk']]:
-                res = OlivaDiceCore.msgCustom.dictAdapterMapper[
-                    botInfo.platform['platform']
-                ][
-                    botInfo.platform['sdk']
-                ][
+        if 'platform' in botInfo.platform and 'sdk' in botInfo.platform and 'model' in botInfo.platform:
+            if (
+                botInfo.platform['platform'] in OlivaDiceCore.msgCustom.dictAdapterMapper
+                and botInfo.platform['sdk'] in OlivaDiceCore.msgCustom.dictAdapterMapper[botInfo.platform['platform']]
+                and botInfo.platform['model']
+                in OlivaDiceCore.msgCustom.dictAdapterMapper[botInfo.platform['platform']][botInfo.platform['sdk']]
+            ):
+                res = OlivaDiceCore.msgCustom.dictAdapterMapper[botInfo.platform['platform']][botInfo.platform['sdk']][
                     botInfo.platform['model']
                 ]
             else:

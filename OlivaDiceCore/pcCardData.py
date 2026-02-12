@@ -1,42 +1,35 @@
 # -*- encoding: utf-8 -*-
-'''
+r"""
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
-_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/   
-/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___   
-\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/   
+_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
+/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___
+\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/
 
 @File      :   pcCardData.py
 @Author    :   lunzhiPenxil仑质
 @Contact   :   lunzhipenxil@gmail.com
 @License   :   AGPL
-@Copyright :   (C) 2020-2021, OlivOS-Team
+@Copyright :   (C) 2020-2026, OlivOS-Team
 @Desc      :   None
-'''
-
-import OlivaDiceCore
+"""
 
 dictPcCardTemplateDefault = {}
 
+# flake8: NOQA
+# ruff: NOQA
 dictPcCardTemplateModel = {
     'mainDice': '1D100',
     'customDefault': {},
     'skill': {},
-    'skillConfig': {
-        'skipEnhance': [],
-        'forceMapping': []
-    },
+    'skillConfig': {'skipEnhance': [], 'forceMapping': []},
     'init': {},
     'mapping': {},
-    'synonyms':{},
+    'synonyms': {},
     'redirect': {},
     'showName': {},
     'snTitle': '',
-    'checkRules': {
-        'default': {
-            'checkList': []
-        }
-    }
+    'checkRules': {'default': {'checkList': []}},
 }
 
 dictPcCardTemplateDefaultTemp = {
@@ -46,16 +39,8 @@ dictPcCardTemplateDefaultTemp = {
             'd': {
                 'leftD': 1,
                 'rightD': 100,
-                'sub': {
-                    'k': None,
-                    'q': None,
-                    'p': None,
-                    'b': None
-                },
-                'subD': {
-                    'p': 1,
-                    'b': 1
-                }
+                'sub': {'k': None, 'q': None, 'p': None, 'b': None},
+                'subD': {'p': 1, 'b': 1},
             }
         },
         'skill': {
@@ -79,7 +64,7 @@ dictPcCardTemplateDefaultTemp = {
                 'KNOW',
                 'HPMAXADD',
                 'MPMAXADD',
-                'SANMAXADD'
+                'SANMAXADD',
             ],
             '技能': [
                 '会计',
@@ -213,8 +198,8 @@ dictPcCardTemplateDefaultTemp = {
                 '旧印语',
                 '奈亚拉托提普的低语',
                 '手语',
-                '兽语'
-            ]
+                '兽语',
+            ],
         },
         'skillConfig': {
             'skipEnhance': [
@@ -240,13 +225,9 @@ dictPcCardTemplateDefaultTemp = {
                 'SANMAXADD',
                 'MOV',
                 '克苏鲁神话',
-                '信用'
+                '信用',
             ],
-            'forceMapping': [
-                'SANMAX',
-                'HPMAX',
-                'MPMAX'
-            ]
+            'forceMapping': ['SANMAX', 'HPMAX', 'MPMAX'],
         },
         'init': {
             'STR': '3d6x5',
@@ -257,7 +238,7 @@ dictPcCardTemplateDefaultTemp = {
             'INT': '(2d6+6)x5',
             'POW': '3d6x5',
             'EDU': '(2d6+6)x5',
-            'LUC': '3d6x5'
+            'LUC': '3d6x5',
         },
         'mapping': {
             '闪避': '({DEX})/2',
@@ -267,9 +248,9 @@ dictPcCardTemplateDefaultTemp = {
             'HP': '(({CON})+({SIZ}))/10',
             'HPMAX': '(({CON})+({SIZ}))/10+({HPMAXADD})',
             'MP': '({POW})/5',
-            'MPMAX': '({POW})/5+({MPMAXADD})'
+            'MPMAX': '({POW})/5+({MPMAXADD})',
         },
-        'synonyms':{
+        'synonyms': {
             'STR': ['力量', 'STR'],
             'CON': ['体质', 'CON'],
             'SIZ': ['体型', 'SIZ'],
@@ -279,64 +260,64 @@ dictPcCardTemplateDefaultTemp = {
             'POW': ['意志', 'POW'],
             'EDU': ['教育', 'EDU'],
             'LUC': ['幸运', 'LUC', '运气', 'LUK'],
-            'SAN': ['理智', 'SAN','Sanity','SAN值','理智值'],
-            'SANMAX': ['理智上限', 'SANMAX','SanityMAX'],
-            'HP': ['生命值','体力','HP','HitPoints','生命','血量'],
-            'HPMAX': ['生命值上限','HPMAX','HitPointsMAX','生命上限','血量上限','体力上限'],
-            'MP': ['魔法','MP','MagicPoints'],
-            'MPMAX': ['魔法上限','MPMAX','MagicPointsMAX'],
-            'SANMAXADD': ['SANMAXADD','理智上限加值'],
-            'HPMAXADD': ['HPMAXADD','生命值上限加值','生命上限加值','血量上限加值','体力上限加值'],
-            'MPMAXADD': ['MPMAXADD','魔法上限加值'],
-            'MOV': ['MOV','MOVE','移动速度','移动力'],
+            'SAN': ['理智', 'SAN', 'Sanity', 'SAN值', '理智值'],
+            'SANMAX': ['理智上限', 'SANMAX', 'SanityMAX'],
+            'HP': ['生命值', '体力', 'HP', 'HitPoints', '生命', '血量'],
+            'HPMAX': ['生命值上限', 'HPMAX', 'HitPointsMAX', '生命上限', '血量上限', '体力上限'],
+            'MP': ['魔法', 'MP', 'MagicPoints'],
+            'MPMAX': ['魔法上限', 'MPMAX', 'MagicPointsMAX'],
+            'SANMAXADD': ['SANMAXADD', '理智上限加值'],
+            'HPMAXADD': ['HPMAXADD', '生命值上限加值', '生命上限加值', '血量上限加值', '体力上限加值'],
+            'MPMAXADD': ['MPMAXADD', '魔法上限加值'],
+            'MOV': ['MOV', 'MOVE', '移动速度', '移动力'],
             'IDEA': ['灵感', 'IDEA'],
             'KNOW': ['知识', 'KNOW'],
-            'MOV': ['移动力','MOV'],
-            '会计': ['会计','Accounting'],
-            '人类学': ['人类学','Anthropology'],
-            '估价': ['估价','Aooraise'],
-            '考古学': ['考古学','Archaeology'],
-            '取悦': ['取悦','魅惑','Charm'],
-            '攀爬': ['攀爬','Climb'],
-            '计算机使用': ['计算机使用','计算机','电脑','电脑使用','Computer_Use'],
-            '信用': ['信用评级','CR','信誉','信用度','信用','信誉度','Credit_Rating'],
-            '克苏鲁神话': ['克苏鲁神话','CM','克苏鲁','Cthulhu_Mythos','克神','克话'],
-            '乔装': ['乔装','Disguise'],
-            '闪避': ['闪避','Dodge'],
-            '汽车驾驶': ['汽车驾驶','驾驶','汽车','Drive_Auto'],
-            '电气维修': ['电气维修','电器维修','Electical_Repair'],
-            '电子学': ['电子学','Electronics'],
-            '话术': ['话术','快速交谈','Fast_Talk'],
-            '急救': ['急救','First_Aid'],
-            '历史': ['历史','History'],
-            '恐吓': ['恐吓','Intimidate'],
-            '跳跃': ['跳跃','Jump'],
-            '法律': ['法律','Law'],
-            '图书馆': ['图书馆使用','图书馆','Library_Use'],
-            '聆听': ['聆听','Listen'],
-            '锁匠': ['锁匠','Locksmith','开锁','撬锁'],
-            '机械维修': ['机械维修','Mechanical_Repair'],
-            '医学': ['医学','Medicine'],
-            '博物': ['博物', '博物学','自然学','自然史','Natural_World'],
-            '导航': ['导航','领航','Navigate'],
-            '神秘学': ['神秘学','Occult'],
-            '操作重型机械': ['操作重型机械','重型机械','Operate_Heavy_Machinery','重型操作','重型'],
-            '说服': ['说服','Persuade'],
-            '精神分析': ['精神分析','Psychoanalysis'],
-            '心理学': ['心理学','Psychology'],
-            '骑乘': ['骑术','骑乘','Ride'],
-            '妙手': ['妙手','Sleight_of_Hand'],
-            '侦查': ['侦查','侦察','Spot_Hidden'],
-            '潜行': ['潜行','Stealth'],
-            '游泳': ['游泳','Swim'],
-            '投掷': ['投掷','Throw'],
-            '追踪': ['追踪','Track'],
-            '驯兽': ['驯兽','Beast_Training','动物驯养'],
-            '潜水': ['潜水','Diving'],
-            '爆破': ['爆破','Demolitions'],
-            '读唇': ['读唇','Read_Lips'],
-            '催眠': ['催眠','Hypnosis'],
-            '炮术': ['炮术','Artillery'],
+            'MOV': ['移动力', 'MOV'],
+            '会计': ['会计', 'Accounting'],
+            '人类学': ['人类学', 'Anthropology'],
+            '估价': ['估价', 'Aooraise'],
+            '考古学': ['考古学', 'Archaeology'],
+            '取悦': ['取悦', '魅惑', 'Charm'],
+            '攀爬': ['攀爬', 'Climb'],
+            '计算机使用': ['计算机使用', '计算机', '电脑', '电脑使用', 'Computer_Use'],
+            '信用': ['信用评级', 'CR', '信誉', '信用度', '信用', '信誉度', 'Credit_Rating'],
+            '克苏鲁神话': ['克苏鲁神话', 'CM', '克苏鲁', 'Cthulhu_Mythos', '克神', '克话'],
+            '乔装': ['乔装', 'Disguise'],
+            '闪避': ['闪避', 'Dodge'],
+            '汽车驾驶': ['汽车驾驶', '驾驶', '汽车', 'Drive_Auto'],
+            '电气维修': ['电气维修', '电器维修', 'Electical_Repair'],
+            '电子学': ['电子学', 'Electronics'],
+            '话术': ['话术', '快速交谈', 'Fast_Talk'],
+            '急救': ['急救', 'First_Aid'],
+            '历史': ['历史', 'History'],
+            '恐吓': ['恐吓', 'Intimidate'],
+            '跳跃': ['跳跃', 'Jump'],
+            '法律': ['法律', 'Law'],
+            '图书馆': ['图书馆使用', '图书馆', 'Library_Use'],
+            '聆听': ['聆听', 'Listen'],
+            '锁匠': ['锁匠', 'Locksmith', '开锁', '撬锁'],
+            '机械维修': ['机械维修', 'Mechanical_Repair'],
+            '医学': ['医学', 'Medicine'],
+            '博物': ['博物', '博物学', '自然学', '自然史', 'Natural_World'],
+            '导航': ['导航', '领航', 'Navigate'],
+            '神秘学': ['神秘学', 'Occult'],
+            '操作重型机械': ['操作重型机械', '重型机械', 'Operate_Heavy_Machinery', '重型操作', '重型'],
+            '说服': ['说服', 'Persuade'],
+            '精神分析': ['精神分析', 'Psychoanalysis'],
+            '心理学': ['心理学', 'Psychology'],
+            '骑乘': ['骑术', '骑乘', 'Ride'],
+            '妙手': ['妙手', 'Sleight_of_Hand'],
+            '侦查': ['侦查', '侦察', 'Spot_Hidden'],
+            '潜行': ['潜行', 'Stealth'],
+            '游泳': ['游泳', 'Swim'],
+            '投掷': ['投掷', 'Throw'],
+            '追踪': ['追踪', 'Track'],
+            '驯兽': ['驯兽', 'Beast_Training', '动物驯养'],
+            '潜水': ['潜水', 'Diving'],
+            '爆破': ['爆破', 'Demolitions'],
+            '读唇': ['读唇', 'Read_Lips'],
+            '催眠': ['催眠', 'Hypnosis'],
+            '炮术': ['炮术', 'Artillery'],
             '母语': ['母语', 'Own_Language'],
             '鞭子': ['鞭子', 'Whip', '鞭'],
             '电锯': ['电锯', 'Chainsaw', '链锯'],
@@ -396,7 +377,7 @@ dictPcCardTemplateDefaultTemp = {
             '工程学': ['工程学', 'Engineering'],
             '气象学': ['气象学', 'Meteorology'],
             '司法科学': ['司法科学', 'Forensic_Science'],
-            '斗殴': ['斗殴', 'Brawl'],  
+            '斗殴': ['斗殴', 'Brawl'],
             '生存': ['生存', 'Survival'],
             '中文': ['中文', 'Chinese'],
             '英语': ['英语', 'English'],
@@ -417,13 +398,13 @@ dictPcCardTemplateDefaultTemp = {
             '苏美尔语': ['苏美尔语', 'Sumerian'],
             '阿卡德语': ['阿卡德语', 'Akkadian'],
             '藏语': ['藏语', 'Tibetan'],
-            '拉莱耶语': ['拉莱耶语', 'R\'lyehian'],
+            '拉莱耶语': ['拉莱耶语', "R'lyehian"],
             '米戈语': ['米戈语', 'MiGo'],
             '深潜者语': ['深潜者语', 'Deep_One'],
             '旧印语': ['旧印语', 'Elder_Sign'],
-            '奈亚拉托提普的低语': ['奈亚拉托提普的低语', 'Nyarlathotep\'s_Whispers'],
+            '奈亚拉托提普的低语': ['奈亚拉托提普的低语', "Nyarlathotep's_Whispers"],
             '手语': ['手语', 'Sign_Language'],
-            '兽语': ['兽语', 'Animal_Tongue']
+            '兽语': ['兽语', 'Animal_Tongue'],
         },
         'redirect': {
             '力量': 'STR',
@@ -438,7 +419,7 @@ dictPcCardTemplateDefaultTemp = {
             '理智': 'SAN',
             '灵感': 'IDEA',
             '知识': 'KNOW',
-            '移动速度': 'MOV'
+            '移动速度': 'MOV',
         },
         'showName': {
             'STR': '力量',
@@ -452,7 +433,7 @@ dictPcCardTemplateDefaultTemp = {
             'LUC': '幸运',
             'IDEA': '灵感',
             'KNOW': '知识',
-            'MOV': '移动速度'
+            'MOV': '移动速度',
         },
         'snTitle': '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}',
         'defaultSkillValue': {
@@ -557,72 +538,24 @@ dictPcCardTemplateDefaultTemp = {
             'SANMAX': 99,
             'SANMAXADD': 0,
             'HPMAXADD': 0,
-            'MPMAXADD': 0
+            'MPMAXADD': 0,
         },
         'checkRules': {
             'default': {
-                'checkList': [
-                    'success',
-                    'hardSuccess',
-                    'extremeHardSuccess',
-                    'greatSuccess',
-                    'fail',
-                    'greatFail'
-                ],
-                'success': {
-                    '.<=': ['$roll', '$skill']
-                },
-                'fail': {
-                    '.>': ['$roll', '$skill']
-                },
-                'hardSuccess': {
-                    '.<=': [
-                        '$roll',
-                        {
-                            './': ['$skill', 2]
-                        }
-                    ]
-                },
-                'extremeHardSuccess': {
-                    '.<=': [
-                        '$roll',
-                        {
-                            './': ['$skill', 5]
-                        }
-                    ]
-                },
-                'greatSuccess': {
-                    '.==': ['$roll', 1]
-                },
+                'checkList': ['success', 'hardSuccess', 'extremeHardSuccess', 'greatSuccess', 'fail', 'greatFail'],
+                'success': {'.<=': ['$roll', '$skill']},
+                'fail': {'.>': ['$roll', '$skill']},
+                'hardSuccess': {'.<=': ['$roll', {'./': ['$skill', 2]}]},
+                'extremeHardSuccess': {'.<=': ['$roll', {'./': ['$skill', 5]}]},
+                'greatSuccess': {'.==': ['$roll', 1]},
                 'greatFail': {
                     '.or': [
-                        {
-                            '.and': [
-                                {
-                                    '.<': ['$skill', 50]
-                                },
-                                {
-                                    '.>=': ['$roll', 96]
-                                },
-                                {
-                                    '.<=': ['$roll', 100]
-                                }
-                            ]
-                        },
-                        {
-                            '.and': [
-                                {
-                                    '.>=': ['$skill', 50]
-                                },
-                                {
-                                    '.==': ['$roll', 100]
-                                }
-                            ]
-                        }
+                        {'.and': [{'.<': ['$skill', 50]}, {'.>=': ['$roll', 96]}, {'.<=': ['$roll', 100]}]},
+                        {'.and': [{'.>=': ['$skill', 50]}, {'.==': ['$roll', 100]}]},
                     ]
-                }
+                },
             }
-        }
+        },
     },
     'COC7': {
         'mainDice': '1D100',
@@ -630,16 +563,8 @@ dictPcCardTemplateDefaultTemp = {
             'd': {
                 'leftD': 1,
                 'rightD': 100,
-                'sub': {
-                    'k': None,
-                    'q': None,
-                    'p': None,
-                    'b': None
-                },
-                'subD': {
-                    'p': 1,
-                    'b': 1
-                }
+                'sub': {'k': None, 'q': None, 'p': None, 'b': None},
+                'subD': {'p': 1, 'b': 1},
             }
         },
         'skill': {
@@ -663,7 +588,7 @@ dictPcCardTemplateDefaultTemp = {
                 'KNOW',
                 'HPMAXADD',
                 'MPMAXADD',
-                'SANMAXADD'
+                'SANMAXADD',
             ],
             '技能': [
                 '会计',
@@ -797,8 +722,8 @@ dictPcCardTemplateDefaultTemp = {
                 '旧印语',
                 '奈亚拉托提普的低语',
                 '手语',
-                '兽语'
-            ]
+                '兽语',
+            ],
         },
         'skillConfig': {
             'skipEnhance': [
@@ -824,13 +749,9 @@ dictPcCardTemplateDefaultTemp = {
                 'SANMAXADD',
                 'MOV',
                 '克苏鲁神话',
-                '信用'
+                '信用',
             ],
-            'forceMapping': [
-                'SANMAX',
-                'HPMAX',
-                'MPMAX'
-            ]
+            'forceMapping': ['SANMAX', 'HPMAX', 'MPMAX'],
         },
         'init': {
             'STR': '3d6x5',
@@ -841,7 +762,7 @@ dictPcCardTemplateDefaultTemp = {
             'INT': '(2d6+6)x5',
             'POW': '3d6x5',
             'EDU': '(2d6+6)x5',
-            'LUC': '3d6x5'
+            'LUC': '3d6x5',
         },
         'mapping': {
             '闪避': '({DEX})/2',
@@ -851,9 +772,9 @@ dictPcCardTemplateDefaultTemp = {
             'HP': '(({CON})+({SIZ}))/10',
             'HPMAX': '(({CON})+({SIZ}))/10+({HPMAXADD})',
             'MP': '({POW})/5',
-            'MPMAX': '({POW})/5+({MPMAXADD})'
+            'MPMAX': '({POW})/5+({MPMAXADD})',
         },
-        'synonyms':{
+        'synonyms': {
             'STR': ['力量', 'STR'],
             'CON': ['体质', 'CON'],
             'SIZ': ['体型', 'SIZ'],
@@ -863,64 +784,64 @@ dictPcCardTemplateDefaultTemp = {
             'POW': ['意志', 'POW'],
             'EDU': ['教育', 'EDU'],
             'LUC': ['幸运', 'LUC', '运气', 'LUK'],
-            'SAN': ['理智', 'SAN','Sanity','SAN值','理智值'],
-            'SANMAX': ['理智上限', 'SANMAX','SanityMAX'],
-            'HP': ['生命值','体力','HP','HitPoints','生命','血量'],
-            'HPMAX': ['生命值上限','HPMAX','HitPointsMAX','生命上限','血量上限','体力上限'],
-            'MP': ['魔法','MP','MagicPoints'],
-            'MPMAX': ['魔法上限','MPMAX','MagicPointsMAX'],
-            'SANMAXADD': ['SANMAXADD','理智上限加值'],
-            'HPMAXADD': ['HPMAXADD','生命值上限加值','生命上限加值','血量上限加值','体力上限加值'],
-            'MPMAXADD': ['MPMAXADD','魔法上限加值'],
-            'MOV': ['MOV','MOVE','移动速度','移动力'],
+            'SAN': ['理智', 'SAN', 'Sanity', 'SAN值', '理智值'],
+            'SANMAX': ['理智上限', 'SANMAX', 'SanityMAX'],
+            'HP': ['生命值', '体力', 'HP', 'HitPoints', '生命', '血量'],
+            'HPMAX': ['生命值上限', 'HPMAX', 'HitPointsMAX', '生命上限', '血量上限', '体力上限'],
+            'MP': ['魔法', 'MP', 'MagicPoints'],
+            'MPMAX': ['魔法上限', 'MPMAX', 'MagicPointsMAX'],
+            'SANMAXADD': ['SANMAXADD', '理智上限加值'],
+            'HPMAXADD': ['HPMAXADD', '生命值上限加值', '生命上限加值', '血量上限加值', '体力上限加值'],
+            'MPMAXADD': ['MPMAXADD', '魔法上限加值'],
+            'MOV': ['MOV', 'MOVE', '移动速度', '移动力'],
             'IDEA': ['灵感', 'IDEA'],
             'KNOW': ['知识', 'KNOW'],
-            'MOV': ['移动力','MOV'],
-            '会计': ['会计','Accounting'],
-            '人类学': ['人类学','Anthropology'],
-            '估价': ['估价','Aooraise'],
-            '考古学': ['考古学','Archaeology'],
-            '取悦': ['取悦','魅惑','Charm'],
-            '攀爬': ['攀爬','Climb'],
-            '计算机使用': ['计算机使用','计算机','电脑','电脑使用','Computer_Use'],
-            '信用': ['信用评级','CR','信誉','信用度','信用','信誉度','Credit_Rating'],
-            '克苏鲁神话': ['克苏鲁神话','CM','克苏鲁','Cthulhu_Mythos','克神','克话'],
-            '乔装': ['乔装','Disguise'],
-            '闪避': ['闪避','Dodge'],
-            '汽车驾驶': ['汽车驾驶','驾驶','汽车','Drive_Auto'],
-            '电气维修': ['电气维修','电器维修','Electical_Repair'],
-            '电子学': ['电子学','Electronics'],
-            '话术': ['话术','快速交谈','Fast_Talk'],
-            '急救': ['急救','First_Aid'],
-            '历史': ['历史','History'],
-            '恐吓': ['恐吓','Intimidate'],
-            '跳跃': ['跳跃','Jump'],
-            '法律': ['法律','Law'],
-            '图书馆': ['图书馆使用','图书馆','Library_Use'],
-            '聆听': ['聆听','Listen'],
-            '锁匠': ['锁匠','Locksmith','开锁','撬锁'],
-            '机械维修': ['机械维修','Mechanical_Repair'],
-            '医学': ['医学','Medicine'],
-            '博物': ['博物', '博物学','自然学','自然史','Natural_World'],
-            '导航': ['导航','领航','Navigate'],
-            '神秘学': ['神秘学','Occult'],
-            '操作重型机械': ['操作重型机械','重型机械','Operate_Heavy_Machinery','重型操作','重型'],
-            '说服': ['说服','Persuade'],
-            '精神分析': ['精神分析','Psychoanalysis'],
-            '心理学': ['心理学','Psychology'],
-            '骑乘': ['骑术','骑乘','Ride'],
-            '妙手': ['妙手','Sleight_of_Hand'],
-            '侦查': ['侦查','侦察','Spot_Hidden'],
-            '潜行': ['潜行','Stealth'],
-            '游泳': ['游泳','Swim'],
-            '投掷': ['投掷','Throw'],
-            '追踪': ['追踪','Track'],
-            '驯兽': ['驯兽','Beast_Training','动物驯养'],
-            '潜水': ['潜水','Diving'],
-            '爆破': ['爆破','Demolitions'],
-            '读唇': ['读唇','Read_Lips'],
-            '催眠': ['催眠','Hypnosis'],
-            '炮术': ['炮术','Artillery'],
+            'MOV': ['移动力', 'MOV'],
+            '会计': ['会计', 'Accounting'],
+            '人类学': ['人类学', 'Anthropology'],
+            '估价': ['估价', 'Aooraise'],
+            '考古学': ['考古学', 'Archaeology'],
+            '取悦': ['取悦', '魅惑', 'Charm'],
+            '攀爬': ['攀爬', 'Climb'],
+            '计算机使用': ['计算机使用', '计算机', '电脑', '电脑使用', 'Computer_Use'],
+            '信用': ['信用评级', 'CR', '信誉', '信用度', '信用', '信誉度', 'Credit_Rating'],
+            '克苏鲁神话': ['克苏鲁神话', 'CM', '克苏鲁', 'Cthulhu_Mythos', '克神', '克话'],
+            '乔装': ['乔装', 'Disguise'],
+            '闪避': ['闪避', 'Dodge'],
+            '汽车驾驶': ['汽车驾驶', '驾驶', '汽车', 'Drive_Auto'],
+            '电气维修': ['电气维修', '电器维修', 'Electical_Repair'],
+            '电子学': ['电子学', 'Electronics'],
+            '话术': ['话术', '快速交谈', 'Fast_Talk'],
+            '急救': ['急救', 'First_Aid'],
+            '历史': ['历史', 'History'],
+            '恐吓': ['恐吓', 'Intimidate'],
+            '跳跃': ['跳跃', 'Jump'],
+            '法律': ['法律', 'Law'],
+            '图书馆': ['图书馆使用', '图书馆', 'Library_Use'],
+            '聆听': ['聆听', 'Listen'],
+            '锁匠': ['锁匠', 'Locksmith', '开锁', '撬锁'],
+            '机械维修': ['机械维修', 'Mechanical_Repair'],
+            '医学': ['医学', 'Medicine'],
+            '博物': ['博物', '博物学', '自然学', '自然史', 'Natural_World'],
+            '导航': ['导航', '领航', 'Navigate'],
+            '神秘学': ['神秘学', 'Occult'],
+            '操作重型机械': ['操作重型机械', '重型机械', 'Operate_Heavy_Machinery', '重型操作', '重型'],
+            '说服': ['说服', 'Persuade'],
+            '精神分析': ['精神分析', 'Psychoanalysis'],
+            '心理学': ['心理学', 'Psychology'],
+            '骑乘': ['骑术', '骑乘', 'Ride'],
+            '妙手': ['妙手', 'Sleight_of_Hand'],
+            '侦查': ['侦查', '侦察', 'Spot_Hidden'],
+            '潜行': ['潜行', 'Stealth'],
+            '游泳': ['游泳', 'Swim'],
+            '投掷': ['投掷', 'Throw'],
+            '追踪': ['追踪', 'Track'],
+            '驯兽': ['驯兽', 'Beast_Training', '动物驯养'],
+            '潜水': ['潜水', 'Diving'],
+            '爆破': ['爆破', 'Demolitions'],
+            '读唇': ['读唇', 'Read_Lips'],
+            '催眠': ['催眠', 'Hypnosis'],
+            '炮术': ['炮术', 'Artillery'],
             '母语': ['母语', 'Own_Language'],
             '鞭子': ['鞭子', 'Whip', '鞭'],
             '电锯': ['电锯', 'Chainsaw', '链锯'],
@@ -980,7 +901,7 @@ dictPcCardTemplateDefaultTemp = {
             '工程学': ['工程学', 'Engineering'],
             '气象学': ['气象学', 'Meteorology'],
             '司法科学': ['司法科学', 'Forensic_Science'],
-            '斗殴': ['斗殴', 'Brawl'],  
+            '斗殴': ['斗殴', 'Brawl'],
             '生存': ['生存', 'Survival'],
             '中文': ['中文', 'Chinese'],
             '英语': ['英语', 'English'],
@@ -1001,13 +922,13 @@ dictPcCardTemplateDefaultTemp = {
             '苏美尔语': ['苏美尔语', 'Sumerian'],
             '阿卡德语': ['阿卡德语', 'Akkadian'],
             '藏语': ['藏语', 'Tibetan'],
-            '拉莱耶语': ['拉莱耶语', 'R\'lyehian'],
+            '拉莱耶语': ['拉莱耶语', "R'lyehian"],
             '米戈语': ['米戈语', 'MiGo'],
             '深潜者语': ['深潜者语', 'Deep_One'],
             '旧印语': ['旧印语', 'Elder_Sign'],
-            '奈亚拉托提普的低语': ['奈亚拉托提普的低语', 'Nyarlathotep\'s_Whispers'],
+            '奈亚拉托提普的低语': ['奈亚拉托提普的低语', "Nyarlathotep's_Whispers"],
             '手语': ['手语', 'Sign_Language'],
-            '兽语': ['兽语', 'Animal_Tongue']
+            '兽语': ['兽语', 'Animal_Tongue'],
         },
         'redirect': {
             '力量': 'STR',
@@ -1022,7 +943,7 @@ dictPcCardTemplateDefaultTemp = {
             '理智': 'SAN',
             '灵感': 'IDEA',
             '知识': 'KNOW',
-            '移动速度': 'MOV'
+            '移动速度': 'MOV',
         },
         'showName': {
             'STR': '力量',
@@ -1036,7 +957,7 @@ dictPcCardTemplateDefaultTemp = {
             'LUC': '幸运',
             'IDEA': '灵感',
             'KNOW': '知识',
-            'MOV': '移动速度'
+            'MOV': '移动速度',
         },
         'snTitle': '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}',
         'defaultSkillValue': {
@@ -1141,410 +1062,148 @@ dictPcCardTemplateDefaultTemp = {
             'SANMAX': 99,
             'SANMAXADD': 0,
             'HPMAXADD': 0,
-            'MPMAXADD': 0
+            'MPMAXADD': 0,
         },
         'checkRules': {
             'default': {
-                'checkList': [
-                    'success',
-                    'hardSuccess',
-                    'extremeHardSuccess',
-                    'greatSuccess',
-                    'fail',
-                    'greatFail'
-                ],
-                'success': {
-                    '.<=': ['$roll', '$skill']
-                },
-                'fail': {
-                    '.>': ['$roll', '$skill']
-                },
-                'hardSuccess': {
-                    '.<=': [
-                        '$roll',
-                        {
-                            './': ['$skill', 2]
-                        }
-                    ]
-                },
-                'extremeHardSuccess': {
-                    '.<=': [
-                        '$roll',
-                        {
-                            './': ['$skill', 5]
-                        }
-                    ]
-                },
-                'greatSuccess': {
-                    '.==': ['$roll', 1]
-                },
+                'checkList': ['success', 'hardSuccess', 'extremeHardSuccess', 'greatSuccess', 'fail', 'greatFail'],
+                'success': {'.<=': ['$roll', '$skill']},
+                'fail': {'.>': ['$roll', '$skill']},
+                'hardSuccess': {'.<=': ['$roll', {'./': ['$skill', 2]}]},
+                'extremeHardSuccess': {'.<=': ['$roll', {'./': ['$skill', 5]}]},
+                'greatSuccess': {'.==': ['$roll', 1]},
                 'greatFail': {
                     '.or': [
-                        {
-                            '.and': [
-                                {
-                                    '.<': ['$skill', 50]
-                                },
-                                {
-                                    '.>=': ['$roll', 96]
-                                },
-                                {
-                                    '.<=': ['$roll', 100]
-                                }
-                            ]
-                        },
-                        {
-                            '.and': [
-                                {
-                                    '.>=': ['$skill', 50]
-                                },
-                                {
-                                    '.==': ['$roll', 100]
-                                }
-                            ]
-                        }
+                        {'.and': [{'.<': ['$skill', 50]}, {'.>=': ['$roll', 96]}, {'.<=': ['$roll', 100]}]},
+                        {'.and': [{'.>=': ['$skill', 50]}, {'.==': ['$roll', 100]}]},
                     ]
-                }
+                },
             },
             'C0': {
-                'greatSuccess': {
-                    '.==': ['$roll', 1]
-                },
+                'greatSuccess': {'.==': ['$roll', 1]},
                 'greatFail': {
                     '.or': [
-                        {
-                            '.and': [
-                                {
-                                    '.<': ['$skill', 50]
-                                },
-                                {
-                                    '.>=': ['$roll', 96]
-                                },
-                                {
-                                    '.<=': ['$roll', 100]
-                                }
-                            ]
-                        },
-                        {
-                            '.and': [
-                                {
-                                    '.>=': ['$skill', 50]
-                                },
-                                {
-                                    '.==': ['$roll', 100]
-                                }
-                            ]
-                        }
+                        {'.and': [{'.<': ['$skill', 50]}, {'.>=': ['$roll', 96]}, {'.<=': ['$roll', 100]}]},
+                        {'.and': [{'.>=': ['$skill', 50]}, {'.==': ['$roll', 100]}]},
                     ]
-                }
+                },
             },
             'C1': {
                 'greatSuccess': {
                     '.or': [
-                        {
-                            '.and': [
-                                {
-                                    '.<': ['$skill', 50]
-                                },
-                                {
-                                    '.==': ['$roll', 1]
-                                }
-                            ]
-                        },
-                        {
-                            '.and': [
-                                {
-                                    '.>=': ['$skill', 50]
-                                },
-                                {
-                                    '.>=': ['$roll', 1]
-                                },
-                                {
-                                    '.<=': ['$roll', 5]
-                                }
-                            ]
-                        }
+                        {'.and': [{'.<': ['$skill', 50]}, {'.==': ['$roll', 1]}]},
+                        {'.and': [{'.>=': ['$skill', 50]}, {'.>=': ['$roll', 1]}, {'.<=': ['$roll', 5]}]},
                     ]
                 },
                 'greatFail': {
                     '.or': [
-                        {
-                            '.and': [
-                                {
-                                    '.<': ['$skill', 50]
-                                },
-                                {
-                                    '.>=': ['$roll', 96]
-                                },
-                                {
-                                    '.<=': ['$roll', 100]
-                                }
-                            ]
-                        },
-                        {
-                            '.and': [
-                                {
-                                    '.>=': ['$skill', 50]
-                                },
-                                {
-                                    '.==': ['$roll', 100]
-                                }
-                            ]
-                        }
+                        {'.and': [{'.<': ['$skill', 50]}, {'.>=': ['$roll', 96]}, {'.<=': ['$roll', 100]}]},
+                        {'.and': [{'.>=': ['$skill', 50]}, {'.==': ['$roll', 100]}]},
                     ]
-                }
+                },
             },
             'C2': {
-                'greatSuccess': {
-                    '.and': [
-                        {
-                            '.<=': ['$roll', '$skill']
-                        },
-                        {
-                            '.>=': ['$roll', 1]
-                        },
-                        {
-                            '.<=': ['$roll', 5]
-                        }
-                    ]
-                },
+                'greatSuccess': {'.and': [{'.<=': ['$roll', '$skill']}, {'.>=': ['$roll', 1]}, {'.<=': ['$roll', 5]}]},
                 'greatFail': {
                     '.or': [
-                        {
-                            '.and': [
-                                {
-                                    '.>': ['$roll', '$skill']
-                                },
-                                {
-                                    '.>=': ['$roll', 96]
-                                },
-                                {
-                                    '.<=': ['$roll', 100]
-                                }
-                            ]
-                        },
-                        {
-                            '.==': ['$roll', 100]
-                        }
-                    ]
-                }
-            },
-            'C3': {
-                'greatSuccess': {
-                    '.and': [
-                        {
-                            '.>=': ['$roll', 1]
-                        },
-                        {
-                            '.<=': ['$roll', 5]
-                        }
+                        {'.and': [{'.>': ['$roll', '$skill']}, {'.>=': ['$roll', 96]}, {'.<=': ['$roll', 100]}]},
+                        {'.==': ['$roll', 100]},
                     ]
                 },
+            },
+            'C3': {
+                'greatSuccess': {'.and': [{'.>=': ['$roll', 1]}, {'.<=': ['$roll', 5]}]},
                 'greatFail': {
                     '.and': [
                         {
                             '.>=': ['$roll', 96],
                         },
-                        {
-                            '.<=': ['$roll', 100]
-                        }
+                        {'.<=': ['$roll', 100]},
                     ]
-                }
+                },
             },
             'C4': {
                 'greatSuccess': {
-                    '.and': [
-                        {
-                            '.<=': ['$roll', {'./': ['$skill', 10]}]
-                        },
-                        {
-                            '.>=': ['$roll', 1]
-                        },
-                        {
-                            '.<=': ['$roll', 5]
-                        }
-                    ]
+                    '.and': [{'.<=': ['$roll', {'./': ['$skill', 10]}]}, {'.>=': ['$roll', 1]}, {'.<=': ['$roll', 5]}]
                 },
                 'greatFail': {
                     '.or': [
                         {
                             '.and': [
-                                {
-                                    '.<': ['$skill', 50]
-                                },
-                                {
-                                    '.>=': [
-                                        '$roll',
-                                        {
-                                            '.+': [
-                                                96,
-                                                {
-                                                    './': ['$skill', 10]
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                },
-                                {
-                                    '.<=': ['$roll', 100]
-                                }
+                                {'.<': ['$skill', 50]},
+                                {'.>=': ['$roll', {'.+': [96, {'./': ['$skill', 10]}]}]},
+                                {'.<=': ['$roll', 100]},
                             ]
                         },
-                        {
-                            '.and': [
-                                {
-                                    '.>=': ['$skill', 50]
-                                },
-                                {
-                                    '.==': ['$roll', 100]
-                                }
-                            ]
-                        }
+                        {'.and': [{'.>=': ['$skill', 50]}, {'.==': ['$roll', 100]}]},
                     ]
-                }
+                },
             },
             'C5': {
                 'greatSuccess': {
-                    '.and': [
-                        {
-                            '.<=': [
-                                '$roll',
-                                {
-                                    './': ['$skill', 5]
-                                }
-                            ]
-                        },
-                        {
-                            '.>=': ['$roll', 1]
-                        },
-                        {
-                            '.<=': ['$roll', 2]
-                        }
-                    ]
+                    '.and': [{'.<=': ['$roll', {'./': ['$skill', 5]}]}, {'.>=': ['$roll', 1]}, {'.<=': ['$roll', 2]}]
                 },
                 'greatFail': {
                     '.or': [
-                        {
-                            '.and': [
-                                {
-                                    '.<': ['$skill', 50]
-                                },
-                                {
-                                    '.>=': ['$roll', 96]
-                                },
-                                {
-                                    '.<=': ['$roll', 100]
-                                }
-                            ]
-                        },
-                        {
-                            '.and': [
-                                {
-                                    '.>=': ['$skill', 50]
-                                },
-                                {
-                                    '.>=': ['$roll', 99]
-                                },
-                                {
-                                    '.<=': ['$roll', 100]
-                                }
-                            ]
-                        }
-                    ]
-                }
-            },
-            'C6': {
-                'greatSuccess': {
-                    '.and': [
-                        {
-                            '.>=': ['$roll', 1]
-                        },
-                        {
-                            '.<=': ['$roll', 3]
-                        }
+                        {'.and': [{'.<': ['$skill', 50]}, {'.>=': ['$roll', 96]}, {'.<=': ['$roll', 100]}]},
+                        {'.and': [{'.>=': ['$skill', 50]}, {'.>=': ['$roll', 99]}, {'.<=': ['$roll', 100]}]},
                     ]
                 },
+            },
+            'C6': {
+                'greatSuccess': {'.and': [{'.>=': ['$roll', 1]}, {'.<=': ['$roll', 3]}]},
                 'greatFail': {
                     '.and': [
                         {
                             '.>=': ['$roll', 98],
                         },
-                        {
-                            '.<=': ['$roll', 100]
-                        }
+                        {'.<=': ['$roll', 100]},
                     ]
-                }
+                },
             },
             'DeltaGreen': {
-                'success': {
-                    '.<=': ['$roll', '$skill']
-                },
-                'fail': {
-                    '.>': ['$roll', '$skill']
-                },
+                'success': {'.<=': ['$roll', '$skill']},
+                'fail': {'.>': ['$roll', '$skill']},
                 'hardSuccess': None,
                 'extremeHardSuccess': None,
                 'greatSuccess': {
                     '.and': [
-                        {
-                            '.<=': ['$roll', '$skill']
-                        },
+                        {'.<=': ['$roll', '$skill']},
                         {
                             '.or': [
                                 {
                                     '.==': ['$roll', 1],
                                 },
-                                {
-                                    '.==': [{'.%': ['$roll', 11]}, 0]
-                                }
+                                {'.==': [{'.%': ['$roll', 11]}, 0]},
                             ]
-                        }
+                        },
                     ]
                 },
                 'greatFail': {
                     '.and': [
-                        {
-                            '.>': ['$roll', '$skill']
-                        },
+                        {'.>': ['$roll', '$skill']},
                         {
                             '.or': [
                                 {
                                     '.==': ['$roll', 100],
                                 },
-                                {
-                                    '.==': [
-                                        {
-                                            '.%': ['$roll', 11]
-                                        },
-                                        0
-                                    ]
-                                }
+                                {'.==': [{'.%': ['$roll', 11]}, 0]},
                             ]
-                        }
+                        },
                     ]
-                }
-            }
-        }
+                },
+            },
+        },
     },
-    'COC' : {
-        'tempMapping': 'COC7'
-    },
+    'COC': {'tempMapping': 'COC7'},
     '纯净COC7': {
         'mainDice': '1D100',
         'customDefault': {
             'd': {
                 'leftD': 1,
                 'rightD': 100,
-                'sub': {
-                    'k': None,
-                    'q': None,
-                    'p': None,
-                    'b': None
-                },
-                'subD': {
-                    'p': 1,
-                    'b': 1
-                }
+                'sub': {'k': None, 'q': None, 'p': None, 'b': None},
+                'subD': {'p': 1, 'b': 1},
             }
         },
         'skill': {
@@ -1568,7 +1227,7 @@ dictPcCardTemplateDefaultTemp = {
                 'KNOW',
                 'HPMAXADD',
                 'MPMAXADD',
-                'SANMAXADD'
+                'SANMAXADD',
             ],
             '技能': [
                 '会计',
@@ -1702,8 +1361,8 @@ dictPcCardTemplateDefaultTemp = {
                 '旧印语',
                 '奈亚拉托提普的低语',
                 '手语',
-                '兽语'
-            ]
+                '兽语',
+            ],
         },
         'skillConfig': {
             'skipEnhance': [
@@ -1729,13 +1388,9 @@ dictPcCardTemplateDefaultTemp = {
                 'SANMAXADD',
                 'MOV',
                 '克苏鲁神话',
-                '信用'
+                '信用',
             ],
-            'forceMapping': [
-                'SANMAX',
-                'HPMAX',
-                'MPMAX'
-            ]
+            'forceMapping': ['SANMAX', 'HPMAX', 'MPMAX'],
         },
         'init': {
             'STR': '3d6x5',
@@ -1746,7 +1401,7 @@ dictPcCardTemplateDefaultTemp = {
             'INT': '(2d6+6)x5',
             'POW': '3d6x5',
             'EDU': '(2d6+6)x5',
-            'LUC': '3d6x5'
+            'LUC': '3d6x5',
         },
         'mapping': {
             'SAN': '({POW})',
@@ -1754,9 +1409,9 @@ dictPcCardTemplateDefaultTemp = {
             'HP': '(({CON})+({SIZ}))/10',
             'HPMAX': '(({CON})+({SIZ}))/10',
             'MP': '({POW})/5',
-            'MPMAX': '({POW})/5'
+            'MPMAX': '({POW})/5',
         },
-        'synonyms':{
+        'synonyms': {
             'STR': ['力量', 'STR'],
             'CON': ['体质', 'CON'],
             'SIZ': ['体型', 'SIZ'],
@@ -1766,64 +1421,64 @@ dictPcCardTemplateDefaultTemp = {
             'POW': ['意志', 'POW'],
             'EDU': ['教育', 'EDU'],
             'LUC': ['幸运', 'LUC', '运气', 'LUK'],
-            'SAN': ['理智', 'SAN','Sanity','SAN值','理智值'],
-            'SANMAX': ['理智上限', 'SANMAX','SanityMAX'],
-            'HP': ['生命值','体力','HP','HitPoints','生命','血量'],
-            'HPMAX': ['生命值上限','HPMAX','HitPointsMAX','生命上限','血量上限','体力上限'],
-            'MP': ['魔法','MP','MagicPoints'],
-            'MPMAX': ['魔法上限','MPMAX','MagicPointsMAX'],
-            'SANMAXADD': ['SANMAXADD','理智上限加值'],
-            'HPMAXADD': ['HPMAXADD','生命值上限加值','生命上限加值','血量上限加值','体力上限加值'],
-            'MPMAXADD': ['MPMAXADD','魔法上限加值'],
-            'MOV': ['MOV','MOVE','移动速度','移动力'],
+            'SAN': ['理智', 'SAN', 'Sanity', 'SAN值', '理智值'],
+            'SANMAX': ['理智上限', 'SANMAX', 'SanityMAX'],
+            'HP': ['生命值', '体力', 'HP', 'HitPoints', '生命', '血量'],
+            'HPMAX': ['生命值上限', 'HPMAX', 'HitPointsMAX', '生命上限', '血量上限', '体力上限'],
+            'MP': ['魔法', 'MP', 'MagicPoints'],
+            'MPMAX': ['魔法上限', 'MPMAX', 'MagicPointsMAX'],
+            'SANMAXADD': ['SANMAXADD', '理智上限加值'],
+            'HPMAXADD': ['HPMAXADD', '生命值上限加值', '生命上限加值', '血量上限加值', '体力上限加值'],
+            'MPMAXADD': ['MPMAXADD', '魔法上限加值'],
+            'MOV': ['MOV', 'MOVE', '移动速度', '移动力'],
             'IDEA': ['灵感', 'IDEA'],
             'KNOW': ['知识', 'KNOW'],
-            'MOV': ['移动力','MOV'],
-            '会计': ['会计','Accounting'],
-            '人类学': ['人类学','Anthropology'],
-            '估价': ['估价','Aooraise'],
-            '考古学': ['考古学','Archaeology'],
-            '取悦': ['取悦','魅惑','Charm'],
-            '攀爬': ['攀爬','Climb'],
-            '计算机使用': ['计算机使用','计算机','电脑','电脑使用','Computer_Use'],
-            '信用': ['信用评级','CR','信誉','信用度','信用','信誉度','Credit_Rating'],
-            '克苏鲁神话': ['克苏鲁神话','CM','克苏鲁','Cthulhu_Mythos','克神','克话'],
-            '乔装': ['乔装','Disguise'],
-            '闪避': ['闪避','Dodge'],
-            '汽车驾驶': ['汽车驾驶','驾驶','汽车','Drive_Auto'],
-            '电气维修': ['电气维修','电器维修','Electical_Repair'],
-            '电子学': ['电子学','Electronics'],
-            '话术': ['话术','快速交谈','Fast_Talk'],
-            '急救': ['急救','First_Aid'],
-            '历史': ['历史','History'],
-            '恐吓': ['恐吓','Intimidate'],
-            '跳跃': ['跳跃','Jump'],
-            '法律': ['法律','Law'],
-            '图书馆': ['图书馆使用','图书馆','Library_Use'],
-            '聆听': ['聆听','Listen'],
-            '锁匠': ['锁匠','Locksmith','开锁','撬锁'],
-            '机械维修': ['机械维修','Mechanical_Repair'],
-            '医学': ['医学','Medicine'],
-            '博物': ['博物', '博物学','自然学','自然史','Natural_World'],
-            '导航': ['导航','领航','Navigate'],
-            '神秘学': ['神秘学','Occult'],
-            '操作重型机械': ['操作重型机械','重型机械','Operate_Heavy_Machinery','重型操作','重型'],
-            '说服': ['说服','Persuade'],
-            '精神分析': ['精神分析','Psychoanalysis'],
-            '心理学': ['心理学','Psychology'],
-            '骑乘': ['骑术','骑乘','Ride'],
-            '妙手': ['妙手','Sleight_of_Hand'],
-            '侦查': ['侦查','侦察','Spot_Hidden'],
-            '潜行': ['潜行','Stealth'],
-            '游泳': ['游泳','Swim'],
-            '投掷': ['投掷','Throw'],
-            '追踪': ['追踪','Track'],
-            '驯兽': ['驯兽','Beast_Training','动物驯养'],
-            '潜水': ['潜水','Diving'],
-            '爆破': ['爆破','Demolitions'],
-            '读唇': ['读唇','Read_Lips'],
-            '催眠': ['催眠','Hypnosis'],
-            '炮术': ['炮术','Artillery'],
+            'MOV': ['移动力', 'MOV'],
+            '会计': ['会计', 'Accounting'],
+            '人类学': ['人类学', 'Anthropology'],
+            '估价': ['估价', 'Aooraise'],
+            '考古学': ['考古学', 'Archaeology'],
+            '取悦': ['取悦', '魅惑', 'Charm'],
+            '攀爬': ['攀爬', 'Climb'],
+            '计算机使用': ['计算机使用', '计算机', '电脑', '电脑使用', 'Computer_Use'],
+            '信用': ['信用评级', 'CR', '信誉', '信用度', '信用', '信誉度', 'Credit_Rating'],
+            '克苏鲁神话': ['克苏鲁神话', 'CM', '克苏鲁', 'Cthulhu_Mythos', '克神', '克话'],
+            '乔装': ['乔装', 'Disguise'],
+            '闪避': ['闪避', 'Dodge'],
+            '汽车驾驶': ['汽车驾驶', '驾驶', '汽车', 'Drive_Auto'],
+            '电气维修': ['电气维修', '电器维修', 'Electical_Repair'],
+            '电子学': ['电子学', 'Electronics'],
+            '话术': ['话术', '快速交谈', 'Fast_Talk'],
+            '急救': ['急救', 'First_Aid'],
+            '历史': ['历史', 'History'],
+            '恐吓': ['恐吓', 'Intimidate'],
+            '跳跃': ['跳跃', 'Jump'],
+            '法律': ['法律', 'Law'],
+            '图书馆': ['图书馆使用', '图书馆', 'Library_Use'],
+            '聆听': ['聆听', 'Listen'],
+            '锁匠': ['锁匠', 'Locksmith', '开锁', '撬锁'],
+            '机械维修': ['机械维修', 'Mechanical_Repair'],
+            '医学': ['医学', 'Medicine'],
+            '博物': ['博物', '博物学', '自然学', '自然史', 'Natural_World'],
+            '导航': ['导航', '领航', 'Navigate'],
+            '神秘学': ['神秘学', 'Occult'],
+            '操作重型机械': ['操作重型机械', '重型机械', 'Operate_Heavy_Machinery', '重型操作', '重型'],
+            '说服': ['说服', 'Persuade'],
+            '精神分析': ['精神分析', 'Psychoanalysis'],
+            '心理学': ['心理学', 'Psychology'],
+            '骑乘': ['骑术', '骑乘', 'Ride'],
+            '妙手': ['妙手', 'Sleight_of_Hand'],
+            '侦查': ['侦查', '侦察', 'Spot_Hidden'],
+            '潜行': ['潜行', 'Stealth'],
+            '游泳': ['游泳', 'Swim'],
+            '投掷': ['投掷', 'Throw'],
+            '追踪': ['追踪', 'Track'],
+            '驯兽': ['驯兽', 'Beast_Training', '动物驯养'],
+            '潜水': ['潜水', 'Diving'],
+            '爆破': ['爆破', 'Demolitions'],
+            '读唇': ['读唇', 'Read_Lips'],
+            '催眠': ['催眠', 'Hypnosis'],
+            '炮术': ['炮术', 'Artillery'],
             '母语': ['母语', 'Own_Language'],
             '鞭子': ['鞭子', 'Whip', '鞭'],
             '电锯': ['电锯', 'Chainsaw', '链锯'],
@@ -1866,7 +1521,7 @@ dictPcCardTemplateDefaultTemp = {
             '木匠': ['木匠', 'Carpentry'],
             '莫里斯舞蹈': ['莫里斯舞蹈', 'Morris_Dance'],
             '歌剧歌唱': ['歌剧歌唱', 'Opera_Singing'],
-            '粉刷匠与油漆工': ['粉刷匠与油漆工', 'Painting_Decorating','粉刷匠和油漆工'],
+            '粉刷匠与油漆工': ['粉刷匠与油漆工', 'Painting_Decorating', '粉刷匠和油漆工'],
             '吹真空管': ['吹真空管', 'Vacuum_Tube_Repair'],
             '飞行器': ['飞行器', 'Pilot_Aircraft'],
             '船': ['船', 'Boat'],
@@ -1883,7 +1538,7 @@ dictPcCardTemplateDefaultTemp = {
             '工程学': ['工程学', 'Engineering'],
             '气象学': ['气象学', 'Meteorology'],
             '司法科学': ['司法科学', 'Forensic_Science'],
-            '斗殴': ['斗殴', 'Brawl'],  
+            '斗殴': ['斗殴', 'Brawl'],
             '生存': ['生存', 'Survival'],
             '中文': ['中文', 'Chinese'],
             '英语': ['英语', 'English'],
@@ -1904,13 +1559,13 @@ dictPcCardTemplateDefaultTemp = {
             '苏美尔语': ['苏美尔语', 'Sumerian'],
             '阿卡德语': ['阿卡德语', 'Akkadian'],
             '藏语': ['藏语', 'Tibetan'],
-            '拉莱耶语': ['拉莱耶语', 'R\'lyehian'],
+            '拉莱耶语': ['拉莱耶语', "R'lyehian"],
             '米戈语': ['米戈语', 'MiGo'],
             '深潜者语': ['深潜者语', 'Deep_One'],
             '旧印语': ['旧印语', 'Elder_Sign'],
-            '奈亚拉托提普的低语': ['奈亚拉托提普的低语', 'Nyarlathotep\'s_Whispers'],
+            '奈亚拉托提普的低语': ['奈亚拉托提普的低语', "Nyarlathotep's_Whispers"],
             '手语': ['手语', 'Sign_Language'],
-            '兽语': ['兽语', 'Animal_Tongue']
+            '兽语': ['兽语', 'Animal_Tongue'],
         },
         'redirect': {
             '力量': 'STR',
@@ -1925,7 +1580,7 @@ dictPcCardTemplateDefaultTemp = {
             '理智': 'SAN',
             '灵感': 'IDEA',
             '知识': 'KNOW',
-            '移动速度': 'MOV'
+            '移动速度': 'MOV',
         },
         'showName': {
             'STR': '力量',
@@ -1939,392 +1594,140 @@ dictPcCardTemplateDefaultTemp = {
             'LUC': '幸运',
             'IDEA': '灵感',
             'KNOW': '知识',
-            'MOV': '移动速度'
+            'MOV': '移动速度',
         },
         'snTitle': '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}',
         'defaultSkillValue': {},
         'checkRules': {
             'default': {
-                'checkList': [
-                    'success',
-                    'hardSuccess',
-                    'extremeHardSuccess',
-                    'greatSuccess',
-                    'fail',
-                    'greatFail'
-                ],
-                'success': {
-                    '.<=': ['$roll', '$skill']
-                },
-                'fail': {
-                    '.>': ['$roll', '$skill']
-                },
-                'hardSuccess': {
-                    '.<=': [
-                        '$roll',
-                        {
-                            './': ['$skill', 2]
-                        }
-                    ]
-                },
-                'extremeHardSuccess': {
-                    '.<=': [
-                        '$roll',
-                        {
-                            './': ['$skill', 5]
-                        }
-                    ]
-                },
-                'greatSuccess': {
-                    '.==': ['$roll', 1]
-                },
+                'checkList': ['success', 'hardSuccess', 'extremeHardSuccess', 'greatSuccess', 'fail', 'greatFail'],
+                'success': {'.<=': ['$roll', '$skill']},
+                'fail': {'.>': ['$roll', '$skill']},
+                'hardSuccess': {'.<=': ['$roll', {'./': ['$skill', 2]}]},
+                'extremeHardSuccess': {'.<=': ['$roll', {'./': ['$skill', 5]}]},
+                'greatSuccess': {'.==': ['$roll', 1]},
                 'greatFail': {
                     '.or': [
-                        {
-                            '.and': [
-                                {
-                                    '.<': ['$skill', 50]
-                                },
-                                {
-                                    '.>=': ['$roll', 96]
-                                },
-                                {
-                                    '.<=': ['$roll', 100]
-                                }
-                            ]
-                        },
-                        {
-                            '.and': [
-                                {
-                                    '.>=': ['$skill', 50]
-                                },
-                                {
-                                    '.==': ['$roll', 100]
-                                }
-                            ]
-                        }
+                        {'.and': [{'.<': ['$skill', 50]}, {'.>=': ['$roll', 96]}, {'.<=': ['$roll', 100]}]},
+                        {'.and': [{'.>=': ['$skill', 50]}, {'.==': ['$roll', 100]}]},
                     ]
-                }
+                },
             },
             'C0': {
-                'greatSuccess': {
-                    '.==': ['$roll', 1]
-                },
+                'greatSuccess': {'.==': ['$roll', 1]},
                 'greatFail': {
                     '.or': [
-                        {
-                            '.and': [
-                                {
-                                    '.<': ['$skill', 50]
-                                },
-                                {
-                                    '.>=': ['$roll', 96]
-                                },
-                                {
-                                    '.<=': ['$roll', 100]
-                                }
-                            ]
-                        },
-                        {
-                            '.and': [
-                                {
-                                    '.>=': ['$skill', 50]
-                                },
-                                {
-                                    '.==': ['$roll', 100]
-                                }
-                            ]
-                        }
+                        {'.and': [{'.<': ['$skill', 50]}, {'.>=': ['$roll', 96]}, {'.<=': ['$roll', 100]}]},
+                        {'.and': [{'.>=': ['$skill', 50]}, {'.==': ['$roll', 100]}]},
                     ]
-                }
+                },
             },
             'C1': {
                 'greatSuccess': {
                     '.or': [
-                        {
-                            '.and': [
-                                {
-                                    '.<': ['$skill', 50]
-                                },
-                                {
-                                    '.==': ['$roll', 1]
-                                }
-                            ]
-                        },
-                        {
-                            '.and': [
-                                {
-                                    '.>=': ['$skill', 50]
-                                },
-                                {
-                                    '.>=': ['$roll', 1]
-                                },
-                                {
-                                    '.<=': ['$roll', 5]
-                                }
-                            ]
-                        }
+                        {'.and': [{'.<': ['$skill', 50]}, {'.==': ['$roll', 1]}]},
+                        {'.and': [{'.>=': ['$skill', 50]}, {'.>=': ['$roll', 1]}, {'.<=': ['$roll', 5]}]},
                     ]
                 },
                 'greatFail': {
                     '.or': [
-                        {
-                            '.and': [
-                                {
-                                    '.<': ['$skill', 50]
-                                },
-                                {
-                                    '.>=': ['$roll', 96]
-                                },
-                                {
-                                    '.<=': ['$roll', 100]
-                                }
-                            ]
-                        },
-                        {
-                            '.and': [
-                                {
-                                    '.>=': ['$skill', 50]
-                                },
-                                {
-                                    '.==': ['$roll', 100]
-                                }
-                            ]
-                        }
+                        {'.and': [{'.<': ['$skill', 50]}, {'.>=': ['$roll', 96]}, {'.<=': ['$roll', 100]}]},
+                        {'.and': [{'.>=': ['$skill', 50]}, {'.==': ['$roll', 100]}]},
                     ]
-                }
+                },
             },
             'C2': {
-                'greatSuccess': {
-                    '.and': [
-                        {
-                            '.<=': ['$roll', '$skill']
-                        },
-                        {
-                            '.>=': ['$roll', 1]
-                        },
-                        {
-                            '.<=': ['$roll', 5]
-                        }
-                    ]
-                },
+                'greatSuccess': {'.and': [{'.<=': ['$roll', '$skill']}, {'.>=': ['$roll', 1]}, {'.<=': ['$roll', 5]}]},
                 'greatFail': {
                     '.or': [
-                        {
-                            '.and': [
-                                {
-                                    '.>': ['$roll', '$skill']
-                                },
-                                {
-                                    '.>=': ['$roll', 96]
-                                },
-                                {
-                                    '.<=': ['$roll', 100]
-                                }
-                            ]
-                        },
-                        {
-                            '.==': ['$roll', 100]
-                        }
-                    ]
-                }
-            },
-            'C3': {
-                'greatSuccess': {
-                    '.and': [
-                        {
-                            '.>=': ['$roll', 1]
-                        },
-                        {
-                            '.<=': ['$roll', 5]
-                        }
+                        {'.and': [{'.>': ['$roll', '$skill']}, {'.>=': ['$roll', 96]}, {'.<=': ['$roll', 100]}]},
+                        {'.==': ['$roll', 100]},
                     ]
                 },
+            },
+            'C3': {
+                'greatSuccess': {'.and': [{'.>=': ['$roll', 1]}, {'.<=': ['$roll', 5]}]},
                 'greatFail': {
                     '.and': [
                         {
                             '.>=': ['$roll', 96],
                         },
-                        {
-                            '.<=': ['$roll', 100]
-                        }
+                        {'.<=': ['$roll', 100]},
                     ]
-                }
+                },
             },
             'C4': {
                 'greatSuccess': {
-                    '.and': [
-                        {
-                            '.<=': ['$roll', {'./': ['$skill', 10]}]
-                        },
-                        {
-                            '.>=': ['$roll', 1]
-                        },
-                        {
-                            '.<=': ['$roll', 5]
-                        }
-                    ]
+                    '.and': [{'.<=': ['$roll', {'./': ['$skill', 10]}]}, {'.>=': ['$roll', 1]}, {'.<=': ['$roll', 5]}]
                 },
                 'greatFail': {
                     '.or': [
                         {
                             '.and': [
-                                {
-                                    '.<': ['$skill', 50]
-                                },
-                                {
-                                    '.>=': [
-                                        '$roll',
-                                        {
-                                            '.+': [
-                                                96,
-                                                {
-                                                    './': ['$skill', 10]
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                },
-                                {
-                                    '.<=': ['$roll', 100]
-                                }
+                                {'.<': ['$skill', 50]},
+                                {'.>=': ['$roll', {'.+': [96, {'./': ['$skill', 10]}]}]},
+                                {'.<=': ['$roll', 100]},
                             ]
                         },
-                        {
-                            '.and': [
-                                {
-                                    '.>=': ['$skill', 50]
-                                },
-                                {
-                                    '.==': ['$roll', 100]
-                                }
-                            ]
-                        }
+                        {'.and': [{'.>=': ['$skill', 50]}, {'.==': ['$roll', 100]}]},
                     ]
-                }
+                },
             },
             'C5': {
                 'greatSuccess': {
-                    '.and': [
-                        {
-                            '.<=': [
-                                '$roll',
-                                {
-                                    './': ['$skill', 5]
-                                }
-                            ]
-                        },
-                        {
-                            '.>=': ['$roll', 1]
-                        },
-                        {
-                            '.<=': ['$roll', 2]
-                        }
-                    ]
+                    '.and': [{'.<=': ['$roll', {'./': ['$skill', 5]}]}, {'.>=': ['$roll', 1]}, {'.<=': ['$roll', 2]}]
                 },
                 'greatFail': {
                     '.or': [
-                        {
-                            '.and': [
-                                {
-                                    '.<': ['$skill', 50]
-                                },
-                                {
-                                    '.>=': ['$roll', 96]
-                                },
-                                {
-                                    '.<=': ['$roll', 100]
-                                }
-                            ]
-                        },
-                        {
-                            '.and': [
-                                {
-                                    '.>=': ['$skill', 50]
-                                },
-                                {
-                                    '.>=': ['$roll', 99]
-                                },
-                                {
-                                    '.<=': ['$roll', 100]
-                                }
-                            ]
-                        }
-                    ]
-                }
-            },
-            'C6': {
-                'greatSuccess': {
-                    '.and': [
-                        {
-                            '.>=': ['$roll', 1]
-                        },
-                        {
-                            '.<=': ['$roll', 3]
-                        }
+                        {'.and': [{'.<': ['$skill', 50]}, {'.>=': ['$roll', 96]}, {'.<=': ['$roll', 100]}]},
+                        {'.and': [{'.>=': ['$skill', 50]}, {'.>=': ['$roll', 99]}, {'.<=': ['$roll', 100]}]},
                     ]
                 },
+            },
+            'C6': {
+                'greatSuccess': {'.and': [{'.>=': ['$roll', 1]}, {'.<=': ['$roll', 3]}]},
                 'greatFail': {
                     '.and': [
                         {
                             '.>=': ['$roll', 98],
                         },
-                        {
-                            '.<=': ['$roll', 100]
-                        }
+                        {'.<=': ['$roll', 100]},
                     ]
-                }
+                },
             },
             'DeltaGreen': {
-                'success': {
-                    '.<=': ['$roll', '$skill']
-                },
-                'fail': {
-                    '.>': ['$roll', '$skill']
-                },
+                'success': {'.<=': ['$roll', '$skill']},
+                'fail': {'.>': ['$roll', '$skill']},
                 'hardSuccess': None,
                 'extremeHardSuccess': None,
                 'greatSuccess': {
                     '.and': [
-                        {
-                            '.<=': ['$roll', '$skill']
-                        },
+                        {'.<=': ['$roll', '$skill']},
                         {
                             '.or': [
                                 {
                                     '.==': ['$roll', 1],
                                 },
-                                {
-                                    '.==': [{'.%': ['$roll', 11]}, 0]
-                                }
+                                {'.==': [{'.%': ['$roll', 11]}, 0]},
                             ]
-                        }
+                        },
                     ]
                 },
                 'greatFail': {
                     '.and': [
-                        {
-                            '.>': ['$roll', '$skill']
-                        },
+                        {'.>': ['$roll', '$skill']},
                         {
                             '.or': [
                                 {
                                     '.==': ['$roll', 100],
                                 },
-                                {
-                                    '.==': [
-                                        {
-                                            '.%': ['$roll', 11]
-                                        },
-                                        0
-                                    ]
-                                }
+                                {'.==': [{'.%': ['$roll', 11]}, 0]},
                             ]
-                        }
+                        },
                     ]
-                }
-            }
-        }
+                },
+            },
+        },
     },
     'COC6': {
         'mainDice': '1D100',
@@ -2332,16 +1735,8 @@ dictPcCardTemplateDefaultTemp = {
             'd': {
                 'leftD': 1,
                 'rightD': 100,
-                'sub': {
-                    'k': None,
-                    'q': None,
-                    'p': None,
-                    'b': None
-                },
-                'subD': {
-                    'p': 1,
-                    'b': 1
-                }
+                'sub': {'k': None, 'q': None, 'p': None, 'b': None},
+                'subD': {'p': 1, 'b': 1},
             }
         },
         'skill': {
@@ -2365,7 +1760,7 @@ dictPcCardTemplateDefaultTemp = {
                 'KNOW',
                 'HPMAXADD',
                 'MPMAXADD',
-                'SANMAXADD'
+                'SANMAXADD',
             ],
             '技能': [
                 '会计',
@@ -2499,8 +1894,8 @@ dictPcCardTemplateDefaultTemp = {
                 '旧印语',
                 '奈亚拉托提普的低语',
                 '手语',
-                '兽语'
-            ]
+                '兽语',
+            ],
         },
         'skillConfig': {
             'skipEnhance': [
@@ -2526,13 +1921,9 @@ dictPcCardTemplateDefaultTemp = {
                 'SANMAXADD',
                 'MOV',
                 '克苏鲁神话',
-                '信用'
+                '信用',
             ],
-            'forceMapping': [
-                'SANMAX',
-                'HPMAX',
-                'MPMAX'
-            ]
+            'forceMapping': ['SANMAX', 'HPMAX', 'MPMAX'],
         },
         'init': {
             'STR': '3d6',
@@ -2542,7 +1933,7 @@ dictPcCardTemplateDefaultTemp = {
             'APP': '3d6',
             'INT': '2d6+6',
             'POW': '3d6',
-            'EDU': '2d6+6'
+            'EDU': '2d6+6',
         },
         'mapping': {
             'SAN': '({POW})',
@@ -2553,9 +1944,9 @@ dictPcCardTemplateDefaultTemp = {
             'MPMAX': '({POW})/5+({MPMAXADD})',
             'LUC': '({POW})*5',
             'IDEA': '({INT})*5',
-            'KNOW': '({EDU})*5'
+            'KNOW': '({EDU})*5',
         },
-        'synonyms':{
+        'synonyms': {
             'STR': ['力量', 'STR'],
             'CON': ['体质', 'CON'],
             'SIZ': ['体型', 'SIZ'],
@@ -2565,64 +1956,64 @@ dictPcCardTemplateDefaultTemp = {
             'POW': ['意志', 'POW'],
             'EDU': ['教育', 'EDU'],
             'LUC': ['幸运', 'LUC', '运气', 'LUK'],
-            'SAN': ['理智', 'SAN','Sanity','SAN值','理智值'],
-            'SANMAX': ['理智上限', 'SANMAX','SanityMAX'],
-            'HP': ['生命值','体力','HP','HitPoints','生命','血量'],
-            'HPMAX': ['生命值上限','HPMAX','HitPointsMAX','生命上限','血量上限','体力上限'],
-            'MP': ['魔法','MP','MagicPoints'],
-            'MPMAX': ['魔法上限','MPMAX','MagicPointsMAX'],
-            'SANMAXADD': ['SANMAXADD','理智上限加值'],
-            'HPMAXADD': ['HPMAXADD','生命值上限加值','生命上限加值','血量上限加值','体力上限加值'],
-            'MPMAXADD': ['MPMAXADD','魔法上限加值'],
-            'MOV': ['MOV','MOVE','移动速度','移动力'],
+            'SAN': ['理智', 'SAN', 'Sanity', 'SAN值', '理智值'],
+            'SANMAX': ['理智上限', 'SANMAX', 'SanityMAX'],
+            'HP': ['生命值', '体力', 'HP', 'HitPoints', '生命', '血量'],
+            'HPMAX': ['生命值上限', 'HPMAX', 'HitPointsMAX', '生命上限', '血量上限', '体力上限'],
+            'MP': ['魔法', 'MP', 'MagicPoints'],
+            'MPMAX': ['魔法上限', 'MPMAX', 'MagicPointsMAX'],
+            'SANMAXADD': ['SANMAXADD', '理智上限加值'],
+            'HPMAXADD': ['HPMAXADD', '生命值上限加值', '生命上限加值', '血量上限加值', '体力上限加值'],
+            'MPMAXADD': ['MPMAXADD', '魔法上限加值'],
+            'MOV': ['MOV', 'MOVE', '移动速度', '移动力'],
             'IDEA': ['灵感', 'IDEA'],
             'KNOW': ['知识', 'KNOW'],
-            'MOV': ['移动力','MOV'],
-            '会计': ['会计','Accounting'],
-            '人类学': ['人类学','Anthropology'],
-            '估价': ['估价','Aooraise'],
-            '考古学': ['考古学','Archaeology'],
-            '取悦': ['取悦','魅惑','Charm'],
-            '攀爬': ['攀爬','Climb'],
-            '计算机使用': ['计算机使用','计算机','电脑','电脑使用','Computer_Use'],
-            '信用': ['信用评级','CR','信誉','信用度','信用','信誉度','Credit_Rating'],
-            '克苏鲁神话': ['克苏鲁神话','CM','克苏鲁','Cthulhu_Mythos','克神','克话'],
-            '乔装': ['乔装','Disguise'],
-            '闪避': ['闪避','Dodge'],
-            '汽车驾驶': ['汽车驾驶','驾驶','汽车','Drive_Auto'],
-            '电气维修': ['电气维修','电器维修','Electical_Repair'],
-            '电子学': ['电子学','Electronics'],
-            '话术': ['话术','快速交谈','Fast_Talk'],
-            '急救': ['急救','First_Aid'],
-            '历史': ['历史','History'],
-            '恐吓': ['恐吓','Intimidate'],
-            '跳跃': ['跳跃','Jump'],
-            '法律': ['法律','Law'],
-            '图书馆': ['图书馆使用','图书馆','Library_Use'],
-            '聆听': ['聆听','Listen'],
-            '锁匠': ['锁匠','Locksmith','开锁','撬锁'],
-            '机械维修': ['机械维修','Mechanical_Repair'],
-            '医学': ['医学','Medicine'],
-            '博物': ['博物', '博物学','自然学','自然史','Natural_World'],
-            '导航': ['导航','领航','Navigate'],
-            '神秘学': ['神秘学','Occult'],
-            '操作重型机械': ['操作重型机械','重型机械','Operate_Heavy_Machinery','重型操作','重型'],
-            '说服': ['说服','Persuade'],
-            '精神分析': ['精神分析','Psychoanalysis'],
-            '心理学': ['心理学','Psychology'],
-            '骑乘': ['骑术','骑乘','Ride'],
-            '妙手': ['妙手','Sleight_of_Hand'],
-            '侦查': ['侦查','侦察','Spot_Hidden'],
-            '潜行': ['潜行','Stealth'],
-            '游泳': ['游泳','Swim'],
-            '投掷': ['投掷','Throw'],
-            '追踪': ['追踪','Track'],
-            '驯兽': ['驯兽','Beast_Training','动物驯养'],
-            '潜水': ['潜水','Diving'],
-            '爆破': ['爆破','Demolitions'],
-            '读唇': ['读唇','Read_Lips'],
-            '催眠': ['催眠','Hypnosis'],
-            '炮术': ['炮术','Artillery'],
+            'MOV': ['移动力', 'MOV'],
+            '会计': ['会计', 'Accounting'],
+            '人类学': ['人类学', 'Anthropology'],
+            '估价': ['估价', 'Aooraise'],
+            '考古学': ['考古学', 'Archaeology'],
+            '取悦': ['取悦', '魅惑', 'Charm'],
+            '攀爬': ['攀爬', 'Climb'],
+            '计算机使用': ['计算机使用', '计算机', '电脑', '电脑使用', 'Computer_Use'],
+            '信用': ['信用评级', 'CR', '信誉', '信用度', '信用', '信誉度', 'Credit_Rating'],
+            '克苏鲁神话': ['克苏鲁神话', 'CM', '克苏鲁', 'Cthulhu_Mythos', '克神', '克话'],
+            '乔装': ['乔装', 'Disguise'],
+            '闪避': ['闪避', 'Dodge'],
+            '汽车驾驶': ['汽车驾驶', '驾驶', '汽车', 'Drive_Auto'],
+            '电气维修': ['电气维修', '电器维修', 'Electical_Repair'],
+            '电子学': ['电子学', 'Electronics'],
+            '话术': ['话术', '快速交谈', 'Fast_Talk'],
+            '急救': ['急救', 'First_Aid'],
+            '历史': ['历史', 'History'],
+            '恐吓': ['恐吓', 'Intimidate'],
+            '跳跃': ['跳跃', 'Jump'],
+            '法律': ['法律', 'Law'],
+            '图书馆': ['图书馆使用', '图书馆', 'Library_Use'],
+            '聆听': ['聆听', 'Listen'],
+            '锁匠': ['锁匠', 'Locksmith', '开锁', '撬锁'],
+            '机械维修': ['机械维修', 'Mechanical_Repair'],
+            '医学': ['医学', 'Medicine'],
+            '博物': ['博物', '博物学', '自然学', '自然史', 'Natural_World'],
+            '导航': ['导航', '领航', 'Navigate'],
+            '神秘学': ['神秘学', 'Occult'],
+            '操作重型机械': ['操作重型机械', '重型机械', 'Operate_Heavy_Machinery', '重型操作', '重型'],
+            '说服': ['说服', 'Persuade'],
+            '精神分析': ['精神分析', 'Psychoanalysis'],
+            '心理学': ['心理学', 'Psychology'],
+            '骑乘': ['骑术', '骑乘', 'Ride'],
+            '妙手': ['妙手', 'Sleight_of_Hand'],
+            '侦查': ['侦查', '侦察', 'Spot_Hidden'],
+            '潜行': ['潜行', 'Stealth'],
+            '游泳': ['游泳', 'Swim'],
+            '投掷': ['投掷', 'Throw'],
+            '追踪': ['追踪', 'Track'],
+            '驯兽': ['驯兽', 'Beast_Training', '动物驯养'],
+            '潜水': ['潜水', 'Diving'],
+            '爆破': ['爆破', 'Demolitions'],
+            '读唇': ['读唇', 'Read_Lips'],
+            '催眠': ['催眠', 'Hypnosis'],
+            '炮术': ['炮术', 'Artillery'],
             '母语': ['母语', 'Own_Language'],
             '鞭子': ['鞭子', 'Whip', '鞭'],
             '电锯': ['电锯', 'Chainsaw', '链锯'],
@@ -2635,7 +2026,7 @@ dictPcCardTemplateDefaultTemp = {
             '步霰': ['步霰', 'Rifle_Shotgun', '步枪', 'Rifle', '霰弹枪', 'Shotgun', '霰弹', '散弹', '散弹枪'],
             '冲锋枪': ['冲锋枪', 'Submachine_Gun'],
             '弓术': ['弓术', 'Archery', '弓'],
-            '喷射器': ['喷射器', 'Flamethrower','火焰喷射器'],
+            '喷射器': ['喷射器', 'Flamethrower', '火焰喷射器'],
             '机枪': ['机枪', 'Machine_Gun'],
             '重武器': ['重武器', 'Heavy_Weapons'],
             '表演': ['表演', 'Acting'],
@@ -2682,7 +2073,7 @@ dictPcCardTemplateDefaultTemp = {
             '工程学': ['工程学', 'Engineering'],
             '气象学': ['气象学', 'Meteorology'],
             '司法科学': ['司法科学', 'Forensic_Science'],
-            '斗殴': ['斗殴', 'Brawl'],  
+            '斗殴': ['斗殴', 'Brawl'],
             '生存': ['生存', 'Survival'],
             '中文': ['中文', 'Chinese'],
             '英语': ['英语', 'English'],
@@ -2703,13 +2094,13 @@ dictPcCardTemplateDefaultTemp = {
             '苏美尔语': ['苏美尔语', 'Sumerian'],
             '阿卡德语': ['阿卡德语', 'Akkadian'],
             '藏语': ['藏语', 'Tibetan'],
-            '拉莱耶语': ['拉莱耶语', 'R\'lyehian'],
+            '拉莱耶语': ['拉莱耶语', "R'lyehian"],
             '米戈语': ['米戈语', 'MiGo'],
             '深潜者语': ['深潜者语', 'Deep_One'],
             '旧印语': ['旧印语', 'Elder_Sign'],
-            '奈亚拉托提普的低语': ['奈亚拉托提普的低语', 'Nyarlathotep\'s_Whispers'],
+            '奈亚拉托提普的低语': ['奈亚拉托提普的低语', "Nyarlathotep's_Whispers"],
             '手语': ['手语', 'Sign_Language'],
-            '兽语': ['兽语', 'Animal_Tongue']
+            '兽语': ['兽语', 'Animal_Tongue'],
         },
         'redirect': {
             '力量': 'STR',
@@ -2724,7 +2115,7 @@ dictPcCardTemplateDefaultTemp = {
             '理智': 'SAN',
             '灵感': 'IDEA',
             '知识': 'KNOW',
-            '移动速度': 'MOV'
+            '移动速度': 'MOV',
         },
         'showName': {
             'STR': '力量',
@@ -2738,49 +2129,20 @@ dictPcCardTemplateDefaultTemp = {
             'LUC': '幸运',
             'IDEA': '灵感',
             'KNOW': '知识',
-            'MOV': '移动速度'
+            'MOV': '移动速度',
         },
         'snTitle': '{tName} hp{HP}/{HPMAX} san{SAN}/{SANMAX} dex{DEX}',
         'checkRules': {
             'default': {
-                'checkList': [
-                    'success',
-                    'hardSuccess',
-                    'extremeHardSuccess',
-                    'greatSuccess',
-                    'fail',
-                    'greatFail'
-                ],
-                'success': {
-                    '.<=': ['$roll', '$skill']
-                },
-                'fail': {
-                    '.>': ['$roll', '$skill']
-                },
-                'hardSuccess': {
-                    '.<=': [
-                        '$roll',
-                        {
-                            './': ['$skill', 2]
-                        }
-                    ]
-                },
-                'extremeHardSuccess': {
-                    '.<=': [
-                        '$roll',
-                        {
-                            './': ['$skill', 5]
-                        }
-                    ]
-                },
-                'greatSuccess': {
-                    '.<=': ['$roll', 5]
-                },
-                'greatFail': {
-                    '.>=': ['$roll', 96]
-                },
+                'checkList': ['success', 'hardSuccess', 'extremeHardSuccess', 'greatSuccess', 'fail', 'greatFail'],
+                'success': {'.<=': ['$roll', '$skill']},
+                'fail': {'.>': ['$roll', '$skill']},
+                'hardSuccess': {'.<=': ['$roll', {'./': ['$skill', 2]}]},
+                'extremeHardSuccess': {'.<=': ['$roll', {'./': ['$skill', 5]}]},
+                'greatSuccess': {'.<=': ['$roll', 5]},
+                'greatFail': {'.>=': ['$roll', 96]},
             }
-        }
+        },
     },
     'DND5E': {
         'mainDice': '1D20',
@@ -2788,36 +2150,13 @@ dictPcCardTemplateDefaultTemp = {
             'd': {
                 'leftD': 1,
                 'rightD': 20,
-                'sub': {
-                    'k': None,
-                    'q': None,
-                    'p': None,
-                    'b': None
-                },
-                'subD': {
-                    'p': 1,
-                    'b': 1
-                }
+                'sub': {'k': None, 'q': None, 'p': None, 'b': None},
+                'subD': {'p': 1, 'b': 1},
             }
         },
         'skill': {
-            '属性': [
-                'STR',
-                'DEX',
-                'CON',
-                'INT',
-                'WIS',
-                'CHA',
-                '速度',
-                '先攻'
-            ],
-            '状态': [
-                '载重',
-                '负重',
-                '护甲等级',
-                '法术豁免',
-                '被动察觉'
-            ],
+            '属性': ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA', '速度', '先攻'],
+            '状态': ['载重', '负重', '护甲等级', '法术豁免', '被动察觉'],
             '技能': [
                 '运动',
                 '体操',
@@ -2836,15 +2175,9 @@ dictPcCardTemplateDefaultTemp = {
                 '游说',
                 '欺瞒',
                 '威吓',
-                '表演'
+                '表演',
             ],
-            '物品': [
-                '金币',
-                '银币',
-                '铜币',
-                '铂金币',
-                '白金币'
-            ],
+            '物品': ['金币', '银币', '铜币', '铂金币', '白金币'],
             '法术': [
                 '亚比达奇凋死术',
                 '吸收元素',
@@ -2876,28 +2209,12 @@ dictPcCardTemplateDefaultTemp = {
                 '生命灵光',
                 '净化灵光',
                 '活力灵光',
-                '启蒙术'
-            ]
+                '启蒙术',
+            ],
         },
-        'skillConfig': {
-            'skipEnhance': [
-                'STR',
-                'DEX',
-                'CON',
-                'INT',
-                'WIS',
-                'CHA'
-            ]
-        },
-        'init': {
-            'STR': '4d6k3',
-            'DEX': '4d6k3',
-            'CON': '4d6k3',
-            'INT': '4d6k3',
-            'WIS': '4d6k3',
-            'CHA': '4d6k3'
-        },
-        'synonyms':{
+        'skillConfig': {'skipEnhance': ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA']},
+        'init': {'STR': '4d6k3', 'DEX': '4d6k3', 'CON': '4d6k3', 'INT': '4d6k3', 'WIS': '4d6k3', 'CHA': '4d6k3'},
+        'synonyms': {
             'STR': ['力量', 'STR', 'Strength'],
             'DEX': ['敏捷', 'DEX', 'Dexterity'],
             'CON': ['体质', 'CON', 'Constitution'],
@@ -2907,7 +2224,6 @@ dictPcCardTemplateDefaultTemp = {
             '运动': ['运动', 'Athletics'],
             '先攻': ['先攻', 'Initiative'],
             '速度': ['速度', 'Speed'],
-
             '体操': ['体操', 'Acrobatics'],
             '巧手': ['Sleight_of_Hand', '巧手', '手上功夫'],
             '隐匿': ['Stealth', '隐匿'],
@@ -2925,19 +2241,16 @@ dictPcCardTemplateDefaultTemp = {
             '威吓': ['Intimidation', '威吓'],
             '表演': ['Performance', '表演'],
             '游说': ['Persuasion', '游说'],
-
             '载重': ['载重', 'Carring_Capacity'],
             '负重': ['负重', 'Encumbrance'],
             '护甲等级': ['AC', 'Armor_Class', '护甲等级'],
             '法术豁免': ['Spell_Save_DC', 'DC', '法术豁免'],
             '被动察觉': ['Passive_Perception', 'PP', '被动察觉'],
-
             '金币': ['Gold_Piece', '金币', 'GP'],
             '银币': ['Silver_Piece', '银币', 'SP'],
             '铜币': ['Copper_Piece', 'CP', '铜币'],
             '铂金币': ['Electrum_Piece', '铂金币', 'EP'],
             '白金币': ['Platium_Piece', '白金币', 'PP'],
-
             '亚比达奇凋死术': ['亚比达奇凋死术', 'ABI_DALZIM_S_HORRID_WILTING'],
             '吸收元素': ['吸收元素', 'ABSORB_ELEMENTS'],
             '强酸箭': ['强酸箭', 'ACID_ARROW'],
@@ -2968,7 +2281,7 @@ dictPcCardTemplateDefaultTemp = {
             '生命灵光': ['生命灵光', 'AURA_OF_LIFE'],
             '净化灵光': ['净化灵光', 'AURA_OF_PURITY'],
             '活力灵光': ['活力灵光', 'AURA_OF_VITALITY'],
-            '启蒙术': ['启蒙术', 'AWAKEN']
+            '启蒙术': ['启蒙术', 'AWAKEN'],
         },
         'showName': {
             'STR': '力量',
@@ -2979,47 +2292,25 @@ dictPcCardTemplateDefaultTemp = {
             'CHA': '魅力',
         },
         'snTitle': '{tName} AC{护甲等级} DC{法术豁免} PP{被动察觉}',
-        'defaultSkillValue': {
-            '法术豁免': 8,
-            '被动察觉': 10
-        },
+        'defaultSkillValue': {'法术豁免': 8, '被动察觉': 10},
         'checkRules': {
             'default': {
-                'checkList': [
-                    'greatSuccess',
-                    'greatFail'
-                ],
-                'greatSuccess': {
-                    '.>=': ['$roll', 20]
-                },
-                'greatFail': {
-                    '.<=': ['$roll', 1]
-                }
+                'checkList': ['greatSuccess', 'greatFail'],
+                'greatSuccess': {'.>=': ['$roll', 20]},
+                'greatFail': {'.<=': ['$roll', 1]},
             }
-        }
+        },
     },
-    'DND': {
-        'tempMapping': 'DND5E'
-    },
+    'DND': {'tempMapping': 'DND5E'},
     'DX3': {
         'mainDice': '10C8',
         'mainDiceAdvance': '{skill}C8',
-        'customDefault': {
-        },
-        'checkRules': {
-            'default': {
-                'checkList': []
-            }
-        }
+        'customDefault': {},
+        'checkRules': {'default': {'checkList': []}},
     },
     'FATE': {
         'mainDice': 'F',
-        'customDefault': {
-            'f': {
-                'leftD': 4,
-                'rightD': 3
-            }
-        },
+        'customDefault': {'f': {'leftD': 4, 'rightD': 3}},
         'checkRules': {
             'default': {
                 'checkList': [
@@ -3033,107 +2324,28 @@ dictPcCardTemplateDefaultTemp = {
                     'fate08',
                     'fate09',
                     'fate10',
-                    'fate11'
+                    'fate11',
                 ],
-                'fate01': {
-                    '.<=': [
-                        {
-                            '.+': ['$roll', '$skill']
-                        },
-                        -2
-                    ]
-                },
-                'fate02': {
-                    '.==': [
-                        {
-                            '.+': ['$roll', '$skill']
-                        },
-                        -1
-                    ]
-                },
-                'fate03': {
-                    '.==': [
-                        {
-                            '.+': ['$roll', '$skill']
-                        },
-                        0
-                    ]
-                },
-                'fate04': {
-                    '.==': [
-                        {
-                            '.+': ['$roll', '$skill']
-                        },
-                        1
-                    ]
-                },
-                'fate05': {
-                    '.==': [
-                        {
-                            '.+': ['$roll', '$skill']
-                        },
-                        2
-                    ]
-                },
-                'fate06': {
-                    '.==': [
-                        {
-                            '.+': ['$roll', '$skill']
-                        },
-                        3
-                    ]
-                },
-                'fate07': {
-                    '.==': [
-                        {
-                            '.+': ['$roll', '$skill']
-                        },
-                        4
-                    ]
-                },
-                'fate08': {
-                    '.==': [
-                        {
-                            '.+': ['$roll', '$skill']
-                        },
-                        5
-                    ]
-                },
-                'fate09': {
-                    '.==': [
-                        {
-                            '.+': ['$roll', '$skill']
-                        },
-                        6
-                    ]
-                },
-                'fate10': {
-                    '.==': [
-                        {
-                            '.+': ['$roll', '$skill']
-                        },
-                        7
-                    ]
-                },
-                'fate11': {
-                    '.>=': [
-                        {
-                            '.+': ['$roll', '$skill']
-                        },
-                        8
-                    ]
-                }
+                'fate01': {'.<=': [{'.+': ['$roll', '$skill']}, -2]},
+                'fate02': {'.==': [{'.+': ['$roll', '$skill']}, -1]},
+                'fate03': {'.==': [{'.+': ['$roll', '$skill']}, 0]},
+                'fate04': {'.==': [{'.+': ['$roll', '$skill']}, 1]},
+                'fate05': {'.==': [{'.+': ['$roll', '$skill']}, 2]},
+                'fate06': {'.==': [{'.+': ['$roll', '$skill']}, 3]},
+                'fate07': {'.==': [{'.+': ['$roll', '$skill']}, 4]},
+                'fate08': {'.==': [{'.+': ['$roll', '$skill']}, 5]},
+                'fate09': {'.==': [{'.+': ['$roll', '$skill']}, 6]},
+                'fate10': {'.==': [{'.+': ['$roll', '$skill']}, 7]},
+                'fate11': {'.>=': [{'.+': ['$roll', '$skill']}, 8]},
             }
-        }
-    }
+        },
+    },
 }
+# ruff: NOQA OFF
+# flake8: NOQA OFF
 
 # 特殊处理方法表
-dictPcCardMappingSpecial = {
-    'default': ['体格', 'DB'],
-    '纯净COC7': ['体格', 'DB'],
-    'COC7': ['体格', 'DB']
-}
+dictPcCardMappingSpecial = {'default': ['体格', 'DB'], '纯净COC7': ['体格', 'DB'], 'COC7': ['体格', 'DB']}
 
 # 特殊技能开头表（大写字母即可）
 arrPcCardLetterStart = ['D']

@@ -1,18 +1,18 @@
 # -*- encoding: utf-8 -*-
-'''
+r"""
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
-_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/   
-/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___   
-\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/   
+_  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
+/ /_/ /_  /____/ /  __ |/ / _  ___ |  /_/ /__/ /  / /___  _  /___
+\____/ /_____/___/  _____/  /_/  |_/_____/ /___/  \____/  /_____/
 
 @File      :   data.py
 @Author    :   lunzhiPenxil仑质
 @Contact   :   lunzhipenxil@gmail.com
 @License   :   AGPL
-@Copyright :   (C) 2020-2021, OlivOS-Team
+@Copyright :   (C) 2020-2026, OlivOS-Team
 @Desc      :   None
-'''
+"""
 
 import sys
 import platform
@@ -22,8 +22,8 @@ import uuid
 import OlivOS
 
 OlivaDiceCore_name = 'OlivaDice核心模块'
-OlivaDiceCore_ver = '3.4.56'
-OlivaDiceCore_svn = 1136
+OlivaDiceCore_ver = '3.4.60'
+OlivaDiceCore_svn = 1140
 OlivaDiceCore_ver_short = '%s(%s)' % (str(OlivaDiceCore_ver), str(OlivaDiceCore_svn))
 
 exce_path = os.getcwd()
@@ -36,8 +36,16 @@ bot_info_basic = 'OlivaDice By lunzhiPenxil Ver.%s' % bot_info_Ver
 
 bot_info_basic_short = 'OlivaDice Ver.%s' % bot_info_Ver
 
-bot_info = '%s [Python %s For OlivOS %s]' % (bot_info_basic, str(platform.python_version()), OlivOS.infoAPI.OlivOS_Version)
-bot_info_auto = '%s [Python %s For OlivOS %s {tAdapter}]' % (bot_info_basic, str(platform.python_version()), OlivOS.infoAPI.OlivOS_Version)
+bot_info = '%s [Python %s For OlivOS %s]' % (
+    bot_info_basic,
+    str(platform.python_version()),
+    OlivOS.infoAPI.OlivOS_Version,
+)
+bot_info_auto = '%s [Python %s For OlivOS %s {tAdapter}]' % (
+    bot_info_basic,
+    str(platform.python_version()),
+    OlivOS.infoAPI.OlivOS_Version,
+)
 
 bot_version_short = 'OlivaDice %s' % bot_info_Ver
 
@@ -48,9 +56,7 @@ bot_summary += '%s %s\n' % (str(platform.python_implementation()), str(sys.versi
 bot_summary += '%s : %s : %s\n' % (str(os.name), ' '.join(platform.architecture()), str(platform.platform()))
 bot_summary += '%s - %s' % (str(platform.machine()), str(platform.processor()))
 
-bot_content = {
-    'masterKey': str(uuid.uuid4())
-}
+bot_content = {'masterKey': str(uuid.uuid4())}
 
 dataDirRoot = './plugin/data/OlivaDice'
 
