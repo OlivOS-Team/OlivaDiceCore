@@ -70,8 +70,6 @@ dictSkillCheckTemp = {'roll': 0, 'skill': 0}
 
 
 def getSkillCheckByTemplate(data, template=None, ruleKey='default', difficulty_prefix=None):
-    global dictSkillCheckTemp
-    global dictSkillCheckResultRouter
     selection_key = 'checkRules'
     tmp_data = dictSkillCheckTemp.copy()
     tmp_template_dict = None

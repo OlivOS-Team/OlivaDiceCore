@@ -108,9 +108,6 @@ def getRedirectedBotHash(botHash, dataKey=None, forceNoRedirect=False):
 
 
 def setUserConfigByKey(userId, userType, platform, userConfigKey, userConfigValue, botHash, forceNoRedirect=False):
-    global dictUserConfigData
-    global dictUserConfigNoteDefault
-    global listUserConfigDataUpdate
     userConfigNoteKey = 'configNote'
     if userConfigKey not in dictUserConfigNoteDefault:
         return
@@ -140,7 +137,6 @@ def getDefaultValueByConfigKey(userConfigKey):
     """
     获取配置项的默认值，优先从全局开关中读取
     """
-    global dictUserConfigNoteDefault
     if userConfigKey in dictConfigKeyToConsoleSwitchMapping:
         consoleSwitchKey = dictConfigKeyToConsoleSwitchMapping[userConfigKey]
         consoleSwitchValue = OlivaDiceCore.console.getConsoleSwitchByHash(consoleSwitchKey, 'unity')
@@ -152,8 +148,6 @@ def getDefaultValueByConfigKey(userConfigKey):
 
 
 def getUserConfigByKey(userId, userType, platform, userConfigKey, botHash, default=None, forceNoRedirect=False):
-    global dictUserConfigData
-    global dictUserConfigNoteDefault
     userConfigNoteKey = 'configNote'
     userConfigValue = default if default is not None else False
     if userConfigKey in dictUserConfigNoteDefault and default is None:
@@ -170,8 +164,6 @@ def getUserConfigByKey(userId, userType, platform, userConfigKey, botHash, defau
 
 
 def getUserConfigByKeyWithHash(userHash, userConfigKey, botHash, forceNoRedirect=False):
-    global dictUserConfigData
-    global dictUserConfigNoteDefault
     userConfigNoteKey = 'configNote'
     userConfigValue = False
     if userConfigKey in dictUserConfigNoteDefault:
@@ -187,8 +179,6 @@ def getUserConfigByKeyWithHash(userHash, userConfigKey, botHash, forceNoRedirect
 
 
 def getUserDataByKeyWithHash(userHash, userDataKey, botHash):
-    global dictUserConfigData
-    global dictUserConfigDefault
     userDataValue = None
     if userDataKey in dictUserConfigDefault:
         userDataValue = dictUserConfigDefault[userDataKey]
@@ -210,9 +200,7 @@ def setMsgCount():
 
 
 def releaseUnityMsgCount(data, botHash, flagForceWrite=False):
-    global gMsgCountInit
     global gMsgCount
-    global dictUserConfigData
     global listUserConfigDataUpdate
     flag_need_release = False
     tmp_dictUserConfigData = {}
@@ -260,8 +248,6 @@ def writeUserConfig(data, updateList):
 
 
 def writeUserConfigByUserHash(userHash):
-    global dictUserConfigData
-    global listUserConfigDataUpdate
     releaseDir(OlivaDiceCore.data.dataDirRoot)
     if userHash in dictUserConfigData:
         gUserConfigLock.acquire()
@@ -277,7 +263,6 @@ def writeUserConfigByUserHash(userHash):
 
 
 def readUserConfig():
-    global dictUserConfigData
     releaseDir(OlivaDiceCore.data.dataDirRoot)
     botHash_list = os.listdir(OlivaDiceCore.data.dataDirRoot)
     for botHash_list_this in botHash_list:

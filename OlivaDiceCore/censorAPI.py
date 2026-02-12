@@ -51,7 +51,6 @@ def readListFromFile(path):
 
 
 def readConfigListByHash(bot_hash):
-    global gCensorConfigList, gCensorConfigListUnitTemplate
     res = copy.deepcopy(gCensorConfigListUnitTemplate)
     releaseDir(OlivaDiceCore.data.dataDirRoot)
     releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + bot_hash)
@@ -69,7 +68,6 @@ def readConfigListByHash(bot_hash):
 
 
 def writeConfigListByHash(bot_hash):
-    global gCensorConfigList, gCensorConfigListUnitTemplate
     res = copy.deepcopy(gCensorConfigListUnitTemplate)
     releaseDir(OlivaDiceCore.data.dataDirRoot)
     releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + bot_hash)
@@ -88,7 +86,6 @@ def writeConfigListByHash(bot_hash):
 
 
 def addConfigList(bot_hash, setWord):
-    global gCensorConfigList
     if (
         bot_hash in gCensorConfigList
         and 'censorList' in gCensorConfigList[bot_hash]
@@ -99,7 +96,6 @@ def addConfigList(bot_hash, setWord):
 
 
 def getConfigList(bot_hash):
-    global gCensorConfigList
     res = []
     if (
         bot_hash in gCensorConfigList
@@ -111,7 +107,6 @@ def getConfigList(bot_hash):
 
 
 def delConfigList(bot_hash, setWord):
-    global gCensorConfigList
     if (
         bot_hash in gCensorConfigList
         and 'censorList' in gCensorConfigList[bot_hash]
@@ -123,8 +118,6 @@ def delConfigList(bot_hash, setWord):
 
 
 def initCensor(bot_info_dict):
-    global gCensorDFA, gCensorList, gCensorInfoList, gCensorConfigList
-
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
     dictGValue = OlivaDiceCore.msgCustom.dictGValue
     dictTValue.update(dictGValue)
@@ -168,8 +161,6 @@ def initCensor(bot_info_dict):
 
 
 def initCensorByHash(bot_hash):
-    global gCensorDFA, gCensorList, gCensorInfoList, gCensorConfigList
-
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
     dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
     dictGValue = OlivaDiceCore.msgCustom.dictGValue
@@ -199,8 +190,6 @@ def initCensorByHash(bot_hash):
 
 
 def patchCensorByHash(bot_hash, patchList: list):
-    global gCensorDFA
-
     dictTValue = OlivaDiceCore.msgCustom.dictTValue.copy()
     dictStrConst = OlivaDiceCore.msgCustom.dictStrConst
     dictGValue = OlivaDiceCore.msgCustom.dictGValue
@@ -225,7 +214,6 @@ def patchCensorByHash(bot_hash, patchList: list):
 
 
 def doCensorReplace(botHash: str, msg: str, replaceMark: str = '*', mode: str = OlivaDiceCore.censorDFA.maxMatchType):
-    global gCensorDFA
     res = msg
     if botHash in gCensorDFA:
         res: str = gCensorDFA[botHash].doReplace(inData=msg, replaceMark=replaceMark, mode=mode)

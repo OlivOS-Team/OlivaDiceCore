@@ -72,7 +72,6 @@ dictAccountRelationConfig = {}
 
 
 def getConsoleSwitchByHash(switchKey, botHash='unity'):
-    global dictConsoleSwitch
     tmp_res = None
     if botHash in dictConsoleSwitch:
         if switchKey in dictConsoleSwitch[botHash]:
@@ -81,15 +80,12 @@ def getConsoleSwitchByHash(switchKey, botHash='unity'):
 
 
 def setConsoleSwitchByHash(switchKey, switchValue, botHash='unity'):
-    global dictConsoleSwitch
     if botHash in dictConsoleSwitch:
         if switchKey in dictConsoleSwitch[botHash]:
             dictConsoleSwitch[botHash][switchKey] = switchValue
 
 
 def initConsoleSwitch(botHash, templateName='default'):
-    global dictConsoleSwitch
-    global dictConsoleSwitchTemplate
     if templateName in dictConsoleSwitchTemplate:
         if botHash not in dictConsoleSwitch:
             dictConsoleSwitch[botHash] = {}
@@ -108,7 +104,6 @@ def initConsoleSwitch(botHash, templateName='default'):
 
 
 def initConsoleSwitchByBotDict(botDict):
-    global dictConsoleSwitch
     for botDict_this in botDict:
         botHash = botDict_this
         initConsoleSwitch(botHash)
@@ -116,7 +111,6 @@ def initConsoleSwitchByBotDict(botDict):
 
 
 def saveConsoleSwitch():
-    global dictConsoleSwitch
     releaseDir(OlivaDiceCore.data.dataDirRoot)
     for dictConsoleSwitch_this in dictConsoleSwitch:
         botHash = dictConsoleSwitch_this
@@ -130,7 +124,6 @@ def saveConsoleSwitch():
 
 
 def readConsoleSwitch():
-    global dictConsoleSwitch
     releaseDir(OlivaDiceCore.data.dataDirRoot)
     botHash_list = os.listdir(OlivaDiceCore.data.dataDirRoot)
     for botHash_list_this in botHash_list:
@@ -148,7 +141,6 @@ def readConsoleSwitch():
 
 
 def setMasterListAppend(botHash, dataList):
-    global dictConsoleSwitch
     if botHash in dictConsoleSwitch:
         if 'masterList' not in dictConsoleSwitch[botHash]:
             dictConsoleSwitch[botHash]['masterList'] = []
@@ -164,7 +156,6 @@ def releaseDir(dir_path):
 
 # 备份配置相关函数
 def getBackupConfigByKey(configKey):
-    global dictBackupConfig
     tmp_res = None
     if 'unity' in dictBackupConfig:
         if configKey in dictBackupConfig['unity']:
@@ -173,15 +164,12 @@ def getBackupConfigByKey(configKey):
 
 
 def setBackupConfigByKey(configKey, configValue):
-    global dictBackupConfig
     if 'unity' in dictBackupConfig:
         if configKey in dictBackupConfig['unity']:
             dictBackupConfig['unity'][configKey] = configValue
 
 
 def initBackupConfig():
-    global dictBackupConfig
-    global dictBackupConfigTemplate
     if 'unity' not in dictBackupConfig:
         dictBackupConfig['unity'] = {}
     # 获取当前日期作为默认开始日期
@@ -196,7 +184,6 @@ def initBackupConfig():
 
 
 def saveBackupConfig():
-    global dictBackupConfig
     # 创建备份文件夹
     releaseDir(OlivaDiceCore.data.backupDirRoot)
     releaseDir(OlivaDiceCore.data.dataDirRoot)
@@ -211,7 +198,6 @@ def saveBackupConfig():
 
 
 def readBackupConfig():
-    global dictBackupConfig
     # 创建备份文件夹
     releaseDir(OlivaDiceCore.data.backupDirRoot)
     releaseDir(OlivaDiceCore.data.dataDirRoot)
@@ -235,8 +221,6 @@ def readBackupConfig():
 # 主从关系配置管理函数
 def initAccountRelationConfig():
     """初始化主从关系配置"""
-    global dictAccountRelationConfig
-    global dictAccountRelationConfigTemplate
     if 'unity' not in dictAccountRelationConfig:
         dictAccountRelationConfig['unity'] = {}
     for template_key_this in dictAccountRelationConfigTemplate['default']:
@@ -248,7 +232,6 @@ def initAccountRelationConfig():
 
 def saveAccountRelationConfig():
     """保存主从关系配置"""
-    global dictAccountRelationConfig
     releaseDir(OlivaDiceCore.data.dataDirRoot)
     releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity')
     releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity/console')
@@ -264,7 +247,6 @@ def saveAccountRelationConfig():
 
 def readAccountRelationConfig():
     """读取主从关系配置"""
-    global dictAccountRelationConfig
     releaseDir(OlivaDiceCore.data.dataDirRoot)
     releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity')
     releaseDir(OlivaDiceCore.data.dataDirRoot + '/unity/console')
@@ -306,7 +288,6 @@ def readAccountRelationConfig():
 
 def getMasterBotHash(slaveBotHash):
     """获取从账号对应的主账号Hash"""
-    global dictAccountRelationConfig
     if 'unity' in dictAccountRelationConfig:
         if 'relations' in dictAccountRelationConfig['unity']:
             relations = dictAccountRelationConfig['unity']['relations']
@@ -325,7 +306,6 @@ def getMasterBotHashList(slaveBotHash):
 
 def setAccountRelation(slaveBotHash, masterBotHash):
     """设置主从关系（将从账号添加到主账号的从账号列表）"""
-    global dictAccountRelationConfig
     if 'unity' not in dictAccountRelationConfig:
         dictAccountRelationConfig['unity'] = {}
     if 'relations' not in dictAccountRelationConfig['unity']:
@@ -343,7 +323,6 @@ def setAccountRelation(slaveBotHash, masterBotHash):
 
 def removeAccountRelation(slaveBotHash, masterBotHash=None):
     """删除主从关系"""
-    global dictAccountRelationConfig
     if 'unity' in dictAccountRelationConfig:
         if 'relations' in dictAccountRelationConfig['unity']:
             relations = dictAccountRelationConfig['unity']['relations']
@@ -360,7 +339,6 @@ def removeAccountRelation(slaveBotHash, masterBotHash=None):
 
 def getAllAccountRelations():
     """获取所有主从关系"""
-    global dictAccountRelationConfig
     if 'unity' in dictAccountRelationConfig:
         if 'relations' in dictAccountRelationConfig['unity']:
             return dictAccountRelationConfig['unity']['relations'].copy()

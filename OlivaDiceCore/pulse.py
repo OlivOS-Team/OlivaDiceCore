@@ -23,7 +23,6 @@ dictPulseTs = {}
 
 
 def unity_heartbeat(plugin_event, Proc):
-    global dictPulseTs
     tmp_ts = int(time.time())
     tmp_pulse_interval = 300
     tmp_pulse_url_list = []

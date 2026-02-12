@@ -62,7 +62,6 @@ def initOnedice():
 
 class RD(OlivaDiceCore.onedice.RD):
     def random(self, nMin, nMax, mode=None):
-        global dictRandomInt
         global random_default_mode
         if mode is None:
             mode = random_default_mode

@@ -100,11 +100,6 @@ def dataPcCardTotalCount():
 
 
 def dataPcCardSave(hostKey, pcHash):
-    global dictPcCardData
-    global dictPcCardSelection
-    global dictPcCardTemplate
-    global dictPcCardHiy
-    global dictPcCardMH
     dataDirRoot_this = OlivaDiceCore.data.dataDirRoot
     releaseDir(dataDirRoot_this)
     if hostKey in dictPcCardData:
@@ -154,11 +149,6 @@ def dataPcCardSave(hostKey, pcHash):
 
 
 def dataPcCardLoad(hostKey, pcHash):
-    global dictPcCardData
-    global dictPcCardSelection
-    global dictPcCardTemplate
-    global dictPcCardHiy
-    global dictPcCardMH
     dataDirRoot_this = OlivaDiceCore.data.dataDirRoot
     releaseDir(dataDirRoot_this)
     releaseDir(dataDirRoot_this + '/' + hostKey)
@@ -535,7 +525,6 @@ def pcCardDataSetSelectionKey(pcHash, pcCardName, forceSwitch=False):
 
 
 def pcCardDataDelSelectionKey(pcHash, pcCardName, skipDel=False):
-    global dictPcCardHiy
     selection_key = 'selection'
     lockList_key = 'lockList'
     tmp_pc_card_name_key = pcCardName
@@ -640,7 +629,6 @@ def pcCardDataResolveTemplateMapping(templateName):
     注意: 此函数要求 templateName 参数必须是精确的模板名
     调用前应先通过 getKeyWithUpper 获取正确的模板名
     """
-    global dictPcCardTemplateDefault
     if templateName not in dictPcCardTemplateDefault['unity']:
         return None
     tmp_template = dictPcCardTemplateDefault['unity'][templateName]
@@ -674,7 +662,6 @@ def pcCardDataResolveTemplateMapping(templateName):
 
 
 def pcCardDataGetTemplateByKey(templateName):
-    global dictPcCardTemplateDefault
     # 先进行大小写不敏感匹配
     templateName_matched = getKeyWithUpper(data=dictPcCardTemplateDefault['unity'], key=templateName)
     if templateName_matched is None:
@@ -688,7 +675,6 @@ def pcCardDataGetTemplateByKey(templateName):
 
 
 def pcCardDataGetTemplateKey(pcHash, pcCardName):
-    global dictPcCardTemplate
     selection_key = 'template'
     tmp_pc_template_name_key = None
     if pcHash not in dictPcCardTemplate['unity']:
@@ -704,7 +690,6 @@ def pcCardDataGetTemplateKey(pcHash, pcCardName):
 
 
 def pcCardDataGetTemplateRuleKey(pcHash, pcCardName):
-    global dictPcCardTemplate
     selection_key = 'checkRules'
     tmp_pc_template_name_key = None
     if pcHash not in dictPcCardTemplate['unity']:
@@ -901,8 +886,6 @@ def pcCardDataSetHiyKey(pcHash, pcCardName, hiyKey, value):
     """
     设置人物卡骰点统计数据
     """
-    global dictPcCardHiy
-    global dictPcCardData
     hostKey = 'unity'
     # 检查人物卡是否存在,只有存在时才记录hiy统计数据
     if hostKey not in dictPcCardData:
@@ -928,7 +911,6 @@ def pcCardDataGetHiyKey(pcHash, pcCardName, hiyKey):
     """
     获取人物卡骰点统计数据
     """
-    global dictPcCardHiy
     hostKey = 'unity'
 
     if hostKey not in dictPcCardHiy:
@@ -947,7 +929,6 @@ def pcCardDataGetAllHiyKeys(pcHash, pcCardName):
     """
     获取人物卡所有骰点统计数据
     """
-    global dictPcCardHiy
     hostKey = 'unity'
 
     if hostKey not in dictPcCardHiy:
@@ -966,7 +947,6 @@ def checkMythicHardening(pcHash, pcName, hagId=None):
     检查人物卡是否符合神话淬炼条件（克苏鲁神话技能点数 > 理智值）
     同时自动记录状态
     """
-    global dictPcCardMH
     cthulhu_myth = pcCardDataGetBySkillName(pcHash, '克苏鲁神话', hagId)
     if cthulhu_myth is None:
         cthulhu_myth = 0
@@ -989,8 +969,6 @@ def getMythicHardeningStatus(pcHash, pcName):
     """
     获取人物卡的神话淬炼状态
     """
-    global dictPcCardMH
-
     if 'unity' in dictPcCardMH:
         if pcHash in dictPcCardMH['unity']:
             if pcName in dictPcCardMH['unity'][pcHash]:
@@ -1002,7 +980,6 @@ def setMythicHardeningStatus(pcHash, pcName, status):
     """
     手动设置人物卡的神话淬炼状态
     """
-    global dictPcCardMH
     if 'unity' not in dictPcCardMH:
         dictPcCardMH['unity'] = {}
     if pcHash not in dictPcCardMH['unity']:
@@ -1015,7 +992,6 @@ def delMythicHardeningStatus(pcHash, pcName):
     """
     删除人物卡的神话淬炼状态
     """
-    global dictPcCardMH
     if 'unity' in dictPcCardMH:
         if pcHash in dictPcCardMH['unity']:
             if pcName in dictPcCardMH['unity'][pcHash]:
@@ -1029,8 +1005,6 @@ def clearMythicHardeningStatus(pcHash):
     """
     清空某个用户的所有神话淬炼状态
     """
-    global dictPcCardMH
-
     if 'unity' in dictPcCardMH:
         if pcHash in dictPcCardMH['unity']:
             dictPcCardMH['unity'][pcHash] = {}
@@ -1043,7 +1017,6 @@ def getAllMythicHardeningCards(pcHash):
     """
     获取某个用户所有处于神话淬炼状态的人物卡
     """
-    global dictPcCardMH
     result = []
     if 'unity' in dictPcCardMH:
         if pcHash in dictPcCardMH['unity']:
@@ -1057,7 +1030,6 @@ def getAllMythicHardeningCards(pcHash):
 
 
 def pcCardDataGetTemplateDataByKey(pcHash, pcCardName, dataKey, resDefault=None):
-    global dictPcCardTemplate
     selection_key = dataKey
     tmp_pc_template_name_key = resDefault
     if pcHash not in dictPcCardTemplate['unity']:
