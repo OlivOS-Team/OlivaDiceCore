@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-"""
+r"""
 _______________________    _________________________________________
 __  __ \__  /____  _/_ |  / /__    |__  __ \___  _/_  ____/__  ____/
 _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
@@ -10,7 +10,7 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @Author    :   lunzhiPenxil仑质
 @Contact   :   lunzhipenxil@gmail.com
 @License   :   AGPL
-@Copyright :   (C) 2020-2021, OlivOS-Team
+@Copyright :   (C) 2020-2026, OlivOS-Team
 @Desc      :   None
 """
 
@@ -38,7 +38,7 @@ def get_user_name(plugin_event, user_id):
         botHash=plugin_event.bot_info.hash,
     )
     # 没获取到再用api获取
-    if user_name == None or user_name == '用户':
+    if user_name is None or user_name == '用户':
         plres = plugin_event.get_stranger_info(user_id)
         if plres['active']:
             user_name = plres['data']['name']
@@ -73,13 +73,13 @@ def replyCONTEXT_regGet(plugin_event: OlivOS.API.Event, tmp_reast_str: str):
         and ('block' in OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash][tmp_hash])
     ):
         if ('res' in OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash][tmp_hash]) and (
-            OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash][tmp_hash]['res'] == None
+            OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash][tmp_hash]['res'] is None
         ):
             tmp_data_block = OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash][tmp_hash]['block']
-            if type(tmp_data_block) == bool:
+            if type(tmp_data_block) is bool:
                 res = OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash][tmp_hash]['block']
                 flagResult = True
-            elif type(tmp_data_block) == str:
+            elif type(tmp_data_block) is str:
                 if tmp_data_block == 'allowCommand':
                     flag_is_command = False
                     [tmp_reast_str_tmp, flag_is_command] = OlivaDiceCore.msgReply.msgIsCommand(
@@ -105,7 +105,7 @@ def contextRegHash(data: list):
     res = None
     hash_tmp = hashlib.new('md5')
     for data_this in data:
-        if type(data_this) == str:
+        if type(data_this) is str:
             hash_tmp.update(str(data_this).encode(encoding='UTF-8'))
     res = hash_tmp.hexdigest()
     return res
@@ -116,7 +116,7 @@ def replyCONTEXT_regWait(plugin_event: OlivOS.API.Event, flagBlock=True, hash: '
     tmp_hash = None
     tmp_bothash = plugin_event.bot_info.hash
     tmp_block = flagBlock
-    if hash != None:
+    if hash is not None:
         tmp_hash = hash
     if tmp_bothash not in OlivaDiceCore.crossHook.dictReplyContextReg:
         OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash] = {}
@@ -136,7 +136,7 @@ def replyCONTEXT_regWait(plugin_event: OlivOS.API.Event, flagBlock=True, hash: '
         ):
             if (
                 'res' in OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash][tmp_hash]
-                and OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash][tmp_hash]['res'] != None
+                and OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash][tmp_hash]['res'] is not None
             ):
                 res = OlivaDiceCore.crossHook.dictReplyContextReg[tmp_bothash][tmp_hash]['res']
                 break
@@ -147,8 +147,8 @@ def replyCONTEXT_regWait(plugin_event: OlivOS.API.Event, flagBlock=True, hash: '
 
 def replySET_command(plugin_event, Proc, valDict):
     tmp_reast_str = valDict['tmp_reast_str']
-    flag_is_from_master = valDict['flag_is_from_master']
-    tmp_userID = valDict['tmp_userID']
+    flag_is_from_master = valDict['flag_is_from_master']  # NOQA: F841
+    tmp_userID = valDict['tmp_userID']  # NOQA: F841
     tmp_hagID = valDict['tmp_hagID']
     dictTValue = valDict['dictTValue']
     dictStrCustom = valDict['dictStrCustom']
@@ -174,7 +174,7 @@ def replySET_command(plugin_event, Proc, valDict):
             userConfigKey='groupMainDice',
             botHash=plugin_event.bot_info.hash,
         )
-        if tmp_set_para != None:
+        if tmp_set_para is not None:
             dictTValue['tResult'] = tmp_set_para
             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                 dictStrCustom['strShowGroupMainDice'], dictTValue
@@ -195,7 +195,7 @@ def replySET_command(plugin_event, Proc, valDict):
                 tmp_switch_setcoc = int(tmp_reast_str)
                 if tmp_switch_setcoc not in [0, 1, 2, 3, 4, 5, 6, 7]:
                     tmp_switch_setcoc = None
-            if tmp_switch_setcoc != None:
+            if tmp_switch_setcoc is not None:
                 tmp_templateName = 'COC7'
                 tmp_templateRuleName = 'default'
                 if tmp_switch_setcoc in [0, 1, 2, 3, 4, 5, 6]:
@@ -266,7 +266,7 @@ def replySET_command(plugin_event, Proc, valDict):
                 tmp_switch_setrav = int(tmp_reast_str)
                 if tmp_switch_setrav not in [1, 2]:
                     tmp_switch_setrav = None
-            if tmp_switch_setrav != None:
+            if tmp_switch_setrav is not None:
                 tmp_ravRuleName = str(tmp_switch_setrav)
                 OlivaDiceCore.userConfig.setUserConfigByKey(
                     userConfigKey='groupRavRule',
@@ -315,7 +315,7 @@ def replySET_command(plugin_event, Proc, valDict):
                 userConfigKey='groupTemplate',
                 botHash=plugin_event.bot_info.hash,
             )
-            flag_groupTemplateRule = OlivaDiceCore.userConfig.getUserConfigByKey(
+            flag_groupTemplateRule = OlivaDiceCore.userConfig.getUserConfigByKey(  # NOQA: F841
                 userId=tmp_hag_id,
                 userType='group',
                 platform=tmp_user_platform,
@@ -400,7 +400,7 @@ def replySET_command(plugin_event, Proc, valDict):
                     userConfigKey='groupTemplate',
                     botHash=plugin_event.bot_info.hash,
                 )
-                if flag_groupTemplate != None:
+                if flag_groupTemplate is not None:
                     tmp_templateName_input = flag_groupTemplate
                 tmp_templateRuleName_input = tmp_reast_str
                 if tmp_templateRuleName_input == '':
@@ -487,7 +487,7 @@ def replySET_command(plugin_event, Proc, valDict):
                 tmp_set_para = tmp_set_para.upper()
                 tmp_set_para_rd = OlivaDiceCore.onedice.RD(tmp_set_para)
                 tmp_set_para_rd.roll()
-                if tmp_set_para_rd.resError == None:
+                if tmp_set_para_rd.resError is None:
                     tmp_set_para_list = tmp_set_para.split('D')
                     if len(tmp_set_para_list) == 2:
                         if tmp_set_para_list[0].isdigit() and tmp_set_para_list[1].isdigit():
@@ -507,7 +507,7 @@ def replySET_command(plugin_event, Proc, valDict):
                             tmp_set_para = '1D%d' % (tmp_set_D_right)
                 else:
                     tmp_set_para = None
-        if tmp_set_para != None:
+        if tmp_set_para is not None:
             OlivaDiceCore.userConfig.setUserConfigByKey(
                 userConfigKey='groupMainDice',
                 userConfigValue=tmp_set_para,
@@ -598,16 +598,16 @@ def replyRR_command(plugin_event, Proc, valDict):
         mode=flag_mode,
     )
     tmp_reply_str = None
-    if tmp_RDData_str != None:
+    if tmp_RDData_str is not None:
         dictTValue['tRollFormatType'] = flag_mode
         tmp_RDDataIntUser = OlivaDiceCore.onediceOverride.getRDDataIntUser(
             botHash=plugin_event.bot_info.hash, userId=tmp_userID, platform=tmp_user_platform
         )
-        if type(tmp_RDDataIntUser) == int:
+        if type(tmp_RDDataIntUser) is int:
             tmp_RDDataIntUser = str(tmp_RDDataIntUser)
-        elif type(tmp_RDDataIntUser) == str:
+        elif type(tmp_RDDataIntUser) is str:
             tmp_RDDataIntUser = str(tmp_RDDataIntUser)
-        elif type(tmp_RDDataIntUser) == list:
+        elif type(tmp_RDDataIntUser) is list:
             tmp_RDDataIntUser = ', '.join([str(tmp_RDDataIntUser_this) for tmp_RDDataIntUser_this in tmp_RDDataIntUser])
         dictTValue['tRollResult'] = '%s=%s=%s' % (
             OlivaDiceCore.onediceOverride.getRDDataRawUser(
@@ -617,7 +617,7 @@ def replyRR_command(plugin_event, Proc, valDict):
             str(tmp_RDDataIntUser),
         )
         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollRecord'], dictTValue)
-    if tmp_reply_str != None:
+    if tmp_reply_str is not None:
         replyMsg(plugin_event, tmp_reply_str)
 
 
@@ -821,9 +821,8 @@ def record_skill_check_result(user_id, pc_name, skill_name, is_success, platform
             botHash=botHash,
         )
 
-    except Exception as e:
+    except Exception:
         import traceback
-
         traceback.print_exc()
 
 
@@ -844,7 +843,7 @@ def difficulty_analyze(res):
 
 def replyRAV_command(plugin_event, Proc, valDict):
     tmp_reast_str = valDict['tmp_reast_str']
-    flag_is_from_master = valDict['flag_is_from_master']
+    flag_is_from_master = valDict['flag_is_from_master']  # NOQA: F841
     tmp_userID = valDict['tmp_userID']
     tmp_hagID = valDict['tmp_hagID']
     tmp_platform = valDict['tmp_platform']
@@ -854,7 +853,7 @@ def replyRAV_command(plugin_event, Proc, valDict):
     dictTValue['tUserName01'] = '对方'
     replyMsg = OlivaDiceCore.msgReply.replyMsg
 
-    if tmp_hagID == None:
+    if tmp_hagID is None:
         return
 
     tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'rav')
@@ -874,7 +873,7 @@ def replyRAV_command(plugin_event, Proc, valDict):
     tmp_reast_str_para = OlivOS.messageAPI.Message_templet('old_string', tmp_reast_str)
 
     if len(tmp_reast_str_para.data) >= 2:
-        if type(tmp_reast_str_para.data[-1]) == OlivOS.messageAPI.PARA.at:
+        if type(tmp_reast_str_para.data[-1]) is OlivOS.messageAPI.PARA.at:
             tmp_userID_1 = tmp_reast_str_para.data[-1].data['id']
             tmp_userName01 = get_user_name(plugin_event, tmp_userID_1)
             dictTValue['tUserName01'] = tmp_userName01
@@ -987,27 +986,27 @@ def replyRAV_command(plugin_event, Proc, valDict):
                     )
                 tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash_1, tmp_hagID)
 
-                if tmp_pc_name_0 != None:
+                if tmp_pc_name_0 is not None:
                     dictTValue['tName'] = tmp_pc_name_0
                     tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash_0, tmp_pc_name_0)
-                    if flag_groupTemplate != None:
+                    if flag_groupTemplate is not None:
                         tmp_template_name = flag_groupTemplate
-                    if tmp_template_name != None:
+                    if tmp_template_name is not None:
                         tmp_Template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
                     tmp_template_rule_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateRuleKey(
                         tmp_pcHash_0, tmp_pc_name_0
                     )
-                    if flag_groupTemplateRule != None:
+                    if flag_groupTemplateRule is not None:
                         tmp_template_rule_name = flag_groupTemplateRule
-                    if tmp_template_rule_name != None:
+                    if tmp_template_rule_name is not None:
                         tmp_TemplateRuleName = tmp_template_rule_name
 
-                if tmp_pc_name_1 != None:
+                if tmp_pc_name_1 is not None:
                     dictTValue['tName01'] = tmp_pc_name_1
 
                 rd_para_str = '1D100'
                 tmp_customDefault = None
-                if tmp_Template != None:
+                if tmp_Template is not None:
                     if 'mainDice' in tmp_Template:
                         rd_para_str = tmp_Template['mainDice']
                     if 'customDefault' in tmp_Template:
@@ -1017,8 +1016,8 @@ def replyRAV_command(plugin_event, Proc, valDict):
                 rd_para.roll()
                 tmpSkillCheckType = None
                 dictRuleTempData = {'roll': 0, 'skill': tmp_skill_value_0}
-                if rd_para.resError == None:
-                    if rd_para.resDetail == None or rd_para.resDetail == '':
+                if rd_para.resError is None:
+                    if rd_para.resDetail is None or rd_para.resDetail == '':
                         dictTValue['tRollResult'] = '%s=%d' % (rd_para_str, rd_para.resInt)
                     else:
                         dictTValue['tRollResult'] = '%s=%s=%d' % (rd_para_str, rd_para.resDetail, rd_para.resInt)
@@ -1033,8 +1032,8 @@ def replyRAV_command(plugin_event, Proc, valDict):
                 rd_para_1.roll()
                 tmpSkillCheckType_1 = None
                 dictRuleTempData_1 = {'roll': 0, 'skill': tmp_skill_value_1}
-                if rd_para_1.resError == None:
-                    if rd_para_1.resDetail == None or rd_para_1.resDetail == '':
+                if rd_para_1.resError is None:
+                    if rd_para_1.resDetail is None or rd_para_1.resDetail == '':
                         dictTValue['tRollResult01'] = '%s=%d' % (rd_para_str, rd_para_1.resInt)
                     else:
                         dictTValue['tRollResult01'] = '%s=%s=%d' % (rd_para_str, rd_para_1.resDetail, rd_para_1.resInt)
@@ -1151,7 +1150,7 @@ def replyRAV_command(plugin_event, Proc, valDict):
                         OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
                             tmp_pcHash, tmp_pc_name_1, 'enhanceList', tmp_enhanceList
                         )
-                if tmp_pc_name_1 == None:
+                if tmp_pc_name_1 is None:
                     dictTValue['tName01'] = tmp_userName01
                 dictTValue['tSkillName'] = (
                     tmp_skill_name_0 if not difficulty_0 else f'{tmp_skill_name_0}({difficulty_0})'
@@ -1195,7 +1194,7 @@ def setPcNoteOrRecData(
 ):
     tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
     tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
-    if tmp_pc_name == None:
+    if tmp_pc_name is None:
         tmp_pc_name = dictTValue['tName']
         tmp_pc_name = OlivaDiceCore.pcCard.fixName(tmp_pc_name)
         if not OlivaDiceCore.pcCard.checkPcName(tmp_pc_name):
@@ -1249,15 +1248,17 @@ def setPcNoteOrRecData(
                     OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
         return
 
-    if tmp_key != None and tmp_value != None:
+    if tmp_key is not None and tmp_value is not None:
         # # 删除 rec 的合规检测
         # if flag_mode == 'rec':
         #     tmp_rd = OlivaDiceCore.onedice.RD(tmp_value)
         #     tmp_rd.roll()
-        #     if tmp_rd.resError != None:
+        #     if tmp_rd.resError is not None:
         #         if enableFalse:
         #             dictTValue['tResult'] = tmp_value
-        #             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcSetMapValueError'], dictTValue)
+        #             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+        #                 dictStrCustom['strPcSetMapValueError'], dictTValue
+        #             )
         #             OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
         #         return
         # 添加特殊技能检测
@@ -1295,7 +1296,7 @@ def setPcNoteOrRecData(
                 dictStrCustom['strPcSetSkillValue'], dictTValue
             )
             OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str + tmp_notice)
-    elif tmp_key != None and tmp_value == None:
+    elif tmp_key is not None and tmp_value is None:
         if tmp_key in tmp_mappingRecord:
             tmp_value = tmp_mappingRecord[tmp_key]
             if enableFalse:
@@ -1359,7 +1360,7 @@ def replyRI_command(
             # 投骰决定数量
             tmp_dice_rd = OlivaDiceCore.onedice.RD(dice_expr)
             tmp_dice_rd.roll()
-            if tmp_dice_rd.resError == None:
+            if tmp_dice_rd.resError is None:
                 batch_count = tmp_dice_rd.resInt
                 process_batch_init(
                     plugin_event,
@@ -1491,7 +1492,7 @@ def process_batch_init(
         tmp_value_rd = OlivaDiceCore.onedice.RD(tmp_value)
         tmp_value_rd.roll()
 
-        if tmp_value_rd.resError == None:
+        if tmp_value_rd.resError is None:
             tmp_value_final = tmp_value_rd.resInt
             result_values.append(tmp_value_final)
 
@@ -1593,7 +1594,7 @@ def process_single_init(
                 # 提取名称和修正值
                 tmp_name = modifier_match.group(1).strip()
                 modifier = modifier_match.group(2)
-                flag_para_mode = '4'
+                flag_para_mode = '4'  # NOQA: F841
                 tmp_op = modifier[0]
                 tmp_value = modifier[1:]
 
@@ -1640,13 +1641,13 @@ def process_single_init(
         # 使用 onedice 直接处理 kh/kl
         tmp_value_rd = OlivaDiceCore.onedice.RD(tmp_value)
         tmp_value_rd.roll()
-        if tmp_value_rd.resError == None:
+        if tmp_value_rd.resError is None:
             tmp_value_final = tmp_value_rd.resInt
             # 获取详细的投掷过程字符串
-            if tmp_value_rd.resDetail != None:
+            if tmp_value_rd.resDetail is not None:
                 display_detail = tmp_value_rd.resDetail
 
-    if tmp_name != None and tmp_value_final != None:
+    if tmp_name is not None and tmp_value_final is not None:
         setUserConfigForInit(
             tmp_hagID=tmp_hagID,
             tmp_pc_platform=tmp_pc_platform,
@@ -1694,7 +1695,7 @@ def setUserConfigForInit(tmp_hagID, tmp_pc_platform, bot_hash, config_key, init_
     tmp_groupInitList_list = OlivaDiceCore.userConfig.getUserConfigByKey(
         userId=tmp_hagID, userType='group', platform=tmp_pc_platform, userConfigKey=config_key, botHash=bot_hash
     )
-    if tmp_groupInitList_list == None:
+    if tmp_groupInitList_list is None:
         tmp_groupInitList_list = {}
     tmp_groupInitList_list[init_name] = init_value
     OlivaDiceCore.userConfig.setUserConfigByKey(
@@ -1711,7 +1712,7 @@ def setUserConfigForInit(tmp_hagID, tmp_pc_platform, bot_hash, config_key, init_
 def getNoteFormat(data: str, pcHash: str, hagID):
     res = data
     tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pcHash, hagID)
-    if tmp_pc_name != None:
+    if tmp_pc_name is not None:
         res = res.replace('{tName}', '%s' % tmp_pc_name)
     tmp_dict_pc_card = OlivaDiceCore.pcCard.pcCardDataGetByPcName(pcHash, hagId=hagID)
     for skill_name in tmp_dict_pc_card:
@@ -3091,7 +3092,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
                         expr_result_str = f'{calc_base}{expr_str}={rd_para.resDetail}={current_skill_value}'
                     else:
                         expr_result_str = f'{calc_base}{expr_str}={current_skill_value}'
-            except:
+            except Exception:
                 pass
         # 没有表达式但有固定值时使用固定值
         elif fixed_skill_value is not None:
@@ -3478,7 +3479,8 @@ def team_sc(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
             OlivaDiceCore.msgCustomManager.formatReplySTR(
                 dictStrCustom.get(
                     'strTeamSCMemberFormat',
-                    '{tDisplayName}(SAN:{tCurrentSan}): {tDiceDetail}/{tCurrentSan}\nSAN: {tCurrentSan} -> {tNewSan}(损失{tSanLoss}点)',
+                    '{tDisplayName}(SAN:{tCurrentSan}): {tDiceDetail}/{tCurrentSan}'
+                    '\nSAN: {tCurrentSan} -> {tNewSan}(损失{tSanLoss}点)',
                 ),
                 {
                     'tDisplayName': display_name,
