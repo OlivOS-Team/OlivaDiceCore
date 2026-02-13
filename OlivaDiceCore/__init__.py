@@ -14,6 +14,7 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 @Desc      :   None
 """
 
+import OlivOS
 from . import main
 from . import data
 from . import msgEvent
