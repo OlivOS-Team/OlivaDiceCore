@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=63.2.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "olivos-plugin-OlivaDiceCore"
+version = "3.4.60"
+description = "本模块为OlivaDice的核心模块，提供了所有必须的骰子功能以及基础的管理支持，几乎所有的其它模块都依赖这个模块。"
+readme = "README.md"
+requires-python = ">=3.7"
+authors = [
+    {name = "OlivOS-Team", email = "benzenpenxil@foxmail.com"}
+]
+license = {text = "AGPLv3 License"}
+classifiers = [
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+dependencies = [
+    "olivos",
+]
+
+[project.urls]
+Homepage = "https://wiki.dice.center/"
+Repository = "https://github.com/OlivOS-Team/OlivaDiceCore"
+Issues = "https://github.com/OlivOS-Team/OlivaDiceCore/issues"
