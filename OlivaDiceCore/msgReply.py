@@ -6632,6 +6632,31 @@ def unity_reply(plugin_event, Proc):
                 userConfigKey='groupMainDiceDLeft',
                 botHash=plugin_event.bot_info.hash,
             )
+            tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
+                OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform), tmp_hagID
+            )
+            if tmp_pc_name_1 is not None:
+                dictTValue['tName'] = tmp_pc_name_1
+            tmp_template_name = None
+            if tmp_pc_name_1 is not None:
+                tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
+                    OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform), tmp_pc_name_1
+                )
+            tmp_template = None
+            tmp_template_customDefault = None
+            flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
+                userId=tmp_hagID,
+                userType='group',
+                platform=tmp_pc_platform,
+                userConfigKey='groupTemplate',
+                botHash=plugin_event.bot_info.hash,
+            )
+            if flag_groupTemplate is not None:
+                tmp_template_name = flag_groupTemplate
+            if tmp_template_name is not None:
+                tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
+                if 'customDefault' in tmp_template:
+                    tmp_template_customDefault = tmp_template['customDefault']
             if len(tmp_reast_str) > 0:
                 if flag_roll_mode in ['rx']:
                     [tmp_rd_para_str, tmp_reast_str] = getExpression(tmp_reast_str, valueTable=None)
@@ -6649,9 +6674,27 @@ def unity_reply(plugin_event, Proc):
                         tmp_pcCardRule = 'DX3'
 
                     # 处理表达式中的优势/劣势
-                    # 使用主骰设置的默认值
-                    default_left = rd_para_main_D_left if type(rd_para_main_D_left) is int else 1
-                    default_right = rd_para_main_D_right if type(rd_para_main_D_right) is int else 100
+                    # 默认值优先读取模板customDefault，再按主骰设置覆盖
+                    default_left = 1
+                    default_right = 100
+                    if type(tmp_template_customDefault) is dict:
+                        if (
+                            'd' in tmp_template_customDefault
+                            and type(tmp_template_customDefault['d']) is dict
+                            and type(tmp_template_customDefault['d'].get('leftD')) is int
+                        ):
+                            default_left = tmp_template_customDefault['d']['leftD']
+                        if (
+                            'd' in tmp_template_customDefault
+                            and type(tmp_template_customDefault['d']) is dict
+                            and type(tmp_template_customDefault['d'].get('rightD')) is int
+                        ):
+                            default_right = tmp_template_customDefault['d']['rightD']
+                    if not (tmp_template_name and tmp_template_name.lower() in ['fate']):
+                        if type(rd_para_main_D_left) is int:
+                            default_left = rd_para_main_D_left
+                        if type(rd_para_main_D_right) is int:
+                            default_right = rd_para_main_D_right
 
                     def replace_advantage(match):
                         full_match = match.group(0)
@@ -6706,31 +6749,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 if len(tmp_reast_str) > 0:
                     rd_reason_str = tmp_reast_str
-            tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
-                OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform), tmp_hagID
-            )
-            if tmp_pc_name_1 is not None:
-                dictTValue['tName'] = tmp_pc_name_1
-            tmp_template_name = None
-            if tmp_pc_name_1 is not None:
-                tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
-                    OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform), tmp_pc_name_1
-                )
-            tmp_template = None
-            tmp_template_customDefault = None
-            flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
-                userId=tmp_hagID,
-                userType='group',
-                platform=tmp_pc_platform,
-                userConfigKey='groupTemplate',
-                botHash=plugin_event.bot_info.hash,
-            )
-            if flag_groupTemplate is not None:
-                tmp_template_name = flag_groupTemplate
             if tmp_template_name is not None:
-                tmp_template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
-                if 'customDefault' in tmp_template:
-                    tmp_template_customDefault = tmp_template['customDefault']
                 if 'mainDice' in tmp_template and not flag_have_para:
                     if flag_roll_mode in ['r', 'rx']:
                         rd_para_str = tmp_template['mainDice']
