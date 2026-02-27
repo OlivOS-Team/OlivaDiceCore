@@ -1400,15 +1400,20 @@ def unity_reply(plugin_event, Proc):
                 replyMsg(plugin_event, tmp_reply_str)
             elif len(tmp_reast_str) == 0:
                 dictTValue['tAdapter'] = OlivaDiceCore.msgCustomManager.loadAdapterType(plugin_event.bot_info)
+                botHash = plugin_event.bot_info.hash
                 group_count = OlivaDiceCore.userConfig.dataUserConfigTotalCount(
-                    userType='group',
-                    botHash=plugin_event.bot_info.hash
+                    userType='group', botHash=botHash
                 )
+                user_count = OlivaDiceCore.userConfig.dataUserConfigTotalCount(
+                    userType='user', botHash=botHash
+                )
+                random_mode = '真实' if OlivaDiceCore.onediceOverride.random_default_mode else '系统'
                 tmp_reply_str = (
                     OlivaDiceCore.msgCustomManager.formatReplySTR(OlivaDiceCore.data.bot_info_auto, dictTValue)
                     + '\n'
                     + f"服务于[{group_count}]个群，"
-                    + f"正在使用[{'真实' if OlivaDiceCore.onediceOverride.random_default_mode else '系统'}]随机数"
+                    + f"记录了[{user_count}]个用户，"
+                    + f"正在使用[{random_mode}]随机数"
                     + '\n'
                     + OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strBot'], dictTValue)
                 )
