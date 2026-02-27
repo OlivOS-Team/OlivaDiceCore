@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "olivos-plugin-OlivaDiceCore"
-version = "3.4.61"
+version = "3.4.63"
 description = "本模块为OlivaDice的核心模块，提供了所有必须的骰子功能以及基础的管理支持，几乎所有的其它模块都依赖这个模块。"
 readme = "README.md"
 requires-python = ">=3.7"
