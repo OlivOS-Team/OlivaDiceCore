@@ -303,10 +303,23 @@ def dataUserConfigLoadAll():
     readUserConfig()
 
 
-def dataUserConfigTotalCount():
+def dataUserConfigTotalCount(userType: 'str|None' = None, botHash: 'str|None' = None):
     total_count = 0
-    for dictUserConfigData_this in dictUserConfigData:
-        total_count += 1
+    for userHash in dictUserConfigData:
+        if userType is None:
+            total_count += 1
+        else:
+            for botHash_this in dictUserConfigData[userHash]:
+                if (
+                    botHash is None
+                    or botHash == botHash_this
+                ):
+                    if (
+                        type(dictUserConfigData[userHash][botHash_this]) is dict
+                        and 'userType' in dictUserConfigData[userHash][botHash_this]
+                        and userType == dictUserConfigData[userHash][botHash_this]['userType']
+                    ):
+                        total_count += 1
     return total_count
 
 
