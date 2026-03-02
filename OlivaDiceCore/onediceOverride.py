@@ -21,8 +21,10 @@ import json
 import OlivaDiceCore
 
 # random_default_mode = 'default'
-random_default_mode = 'random_org'
+random_default_mode = 'real'
+# random_default_mode = 'real_full'
 
+rng = None
 
 dictRuleOperationPriority = {'DX3': {'dx': 7, 'DX': 7}}
 
@@ -34,10 +36,11 @@ OlivaDiceCore.onedice.dictRuleOperationMapping = dictRuleOperationMapping
 dictRandomInt = {'default': []}
 
 
-def get_data_from_random_org():
+def get_data_from_random_org(count: int = 1000, nMin: int = -1000000000, nMax: int = 1000000000):
     res = []
     send_url = (
-        'https://www.random.org/integers/?num=1000&min=-1000000000&max=1000000000&col=1&base=10&format=plain&rnd=new'
+        'https://www.random.org/integers/'
+        f'?num={count}&min={nMin}&max={nMax}&col=1&base=10&format=plain&rnd=new'
     )
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -48,7 +51,7 @@ def get_data_from_random_org():
     res_text = res_text.lstrip('\n')
     res_text = res_text.rstrip('\n')
     res = res_text.split('\n')
-    if len(res) < 1000:
+    if len(res) < count:
         res = None
     return res
 
@@ -61,40 +64,55 @@ def initOnedice():
 
 
 class RD(OlivaDiceCore.onedice.RD):
-    def random(self, nMin, nMax, mode=None):
-        global random_default_mode
+    def random(self, nMin: int, nMax: int, mode: 'str|None' = None):
+        global random_default_mode, rng
         if mode is None:
             mode = random_default_mode
         res = None
-        if mode == 'default':
-            res = random.randint(nMin, nMax)
-        elif mode == 'random_org':
-            res = random.randint(nMin, nMax)
+        if mode == 'real':
+            if rng is None:
+                try:
+                    tmp_random_int_list = get_data_from_random_org(
+                        count=32, nMin=0, nMax=255
+                    )
+                    rng = random.Random(bytes(int(x) for x in tmp_random_int_list))
+                except Exception:
+                    mode = random_default_mode = 'default'
+            if rng is not None:
+                res = rng.randint(nMin, nMax)
+        elif mode == 'real_full':
             if len(dictRandomInt['default']) <= 0:
                 try:
                     tmp_random_int_list = get_data_from_random_org()
-                    if tmp_random_int_list is None:
-                        random_default_mode = 'default'
-                        res = random.randint(nMin, nMax)
-                        return res
-                    if len(tmp_random_int_list) > 0:
+                    if (
+                        tmp_random_int_list is not None
+                        and len(tmp_random_int_list) > 0
+                    ):
                         dictRandomInt['default'] = tmp_random_int_list
                     else:
-                        res = random.randint(nMin, nMax)
-                        return res
+                        mode = random_default_mode = 'default'
                 except Exception:
-                    random_default_mode = 'default'
-                    res = random.randint(nMin, nMax)
-                    return res
-            tmp_random_int_this = dictRandomInt['default'].pop()
-            tmp_random_int_data = None
-            if type(tmp_random_int_this) is str:
-                if tmp_random_int_this.isdigit() or (
-                    len(tmp_random_int_this) > 2 and tmp_random_int_this[0] == '-' and tmp_random_int_this[1:].isdigit()
-                ):
-                    tmp_random_int_data = int((int(tmp_random_int_this) + 1000000000) % (nMax - nMin + 1)) + nMin
-                    res = tmp_random_int_data
-                    return res
+                    mode = random_default_mode = 'default'
+            if mode != 'default':
+                tmp_random_int_this = dictRandomInt['default'].pop()
+                tmp_random_int_data = None
+                if type(tmp_random_int_this) is str:
+                    if (
+                        tmp_random_int_this.isdigit()
+                        or (
+                            len(tmp_random_int_this) > 2
+                            and tmp_random_int_this[0] == '-'
+                            and tmp_random_int_this[1:].isdigit()
+                        )
+                    ):
+                        tmp_random_int_data = int((int(tmp_random_int_this) + 1000000000) % (nMax - nMin + 1)) + nMin
+                        res = tmp_random_int_data
+        else:
+            mode = 'default'
+        if (
+            res is None
+            or mode == 'default'
+        ):
             res = random.randint(nMin, nMax)
         return res
 
