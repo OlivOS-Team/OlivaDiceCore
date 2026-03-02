@@ -1390,6 +1390,25 @@ def unity_reply(plugin_event, Proc):
             elif isMatchWordStart(tmp_reast_str, 'summary', fullMatch=True) and flag_is_from_master:
                 tmp_reply_str = ''
                 tmp_reply_str += OlivaDiceCore.data.bot_summary
+                botHash = plugin_event.bot_info.hash
+                group_count = OlivaDiceCore.userConfig.dataUserConfigTotalCount(
+                    userType='group', botHash=botHash
+                )
+                group_count_all = OlivaDiceCore.userConfig.dataUserConfigTotalCount(
+                    userType='group'
+                )
+                user_count = OlivaDiceCore.userConfig.dataUserConfigTotalCount(
+                    userType='user', botHash=botHash
+                )
+                user_count_all = OlivaDiceCore.userConfig.dataUserConfigTotalCount(
+                    userType='user'
+                )
+                random_mode = OlivaDiceCore.onediceOverride.random_default_mode
+                tmp_reply_str += (
+                    f"\nGROUP : {group_count} / {group_count_all}"
+                    f"\nUSER : {user_count} / {user_count_all}"
+                    f"\nRANDOM : {random_mode}"
+                )
                 replyMsg(plugin_event, tmp_reply_str)
             elif isMatchWordStart(tmp_reast_str, 'model', fullMatch=True):
                 tmp_reply_str = ''
