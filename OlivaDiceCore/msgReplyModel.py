@@ -40,7 +40,15 @@ def get_user_name(plugin_event, user_id):
     # 没获取到再用api获取
     if user_name is None or user_name == '用户':
         plres = plugin_event.get_stranger_info(user_id)
-        if plres['active']:
+        if (
+            type(plres) is dict
+            and 'active' in plres
+            and plres['active'] is True
+            and 'data' in plres
+            and type(plres['data']) is dict
+            and 'name' in plres['data']
+            and type(plres['data']['name']) is str
+        ):
             user_name = plres['data']['name']
         else:
             user_name = f'用户{user_id}'
