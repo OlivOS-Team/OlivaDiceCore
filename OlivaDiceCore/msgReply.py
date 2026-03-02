@@ -1426,7 +1426,7 @@ def unity_reply(plugin_event, Proc):
                 user_count = OlivaDiceCore.userConfig.dataUserConfigTotalCount(
                     userType='user', botHash=botHash
                 )
-                random_mode = '真实' if OlivaDiceCore.onediceOverride.random_default_mode else '系统'
+                random_mode = '真实' if OlivaDiceCore.onediceOverride.random_default_mode != 'default' else '系统'
                 tmp_reply_str = (
                     OlivaDiceCore.msgCustomManager.formatReplySTR(OlivaDiceCore.data.bot_info_auto, dictTValue)
                     + '\n'
