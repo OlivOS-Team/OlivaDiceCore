@@ -23,6 +23,7 @@ import uuid
 import re
 import copy
 import math
+import psutil
 
 
 def logProc(Proc, level, message, segment):
@@ -1390,6 +1391,34 @@ def unity_reply(plugin_event, Proc):
             elif isMatchWordStart(tmp_reast_str, 'summary', fullMatch=True) and flag_is_from_master:
                 tmp_reply_str = ''
                 tmp_reply_str += OlivaDiceCore.data.bot_summary
+                freq = psutil.cpu_freq()
+                if freq is not None:
+                    tmp_reply_str += (
+                        f'\nCPU : {freq.current} MHZ'
+                    )
+                disk_total = 0
+                disk_used = 0
+                disk_free = 0
+                for part in psutil.disk_partitions():
+                    if part.fstype in ('squashfs', 'tmpfs', 'devtmpfs', 'proc', 'sysfs', 'fuseblk'):
+                        continue
+                    try:
+                        usage = psutil.disk_usage(part.mountpoint)
+                        disk_total += usage.total
+                        disk_used += usage.used
+                        disk_free += usage.free
+                    except Exception:
+                        continue
+                if disk_total > 0:
+                    tmp_reply_str += (
+                        f'\nDISK : {disk_used / (1024**3):.2f} / {disk_total / (1024**3):.2f} GB'
+                        f' {disk_used / disk_total * 100:.2f}%'
+                    )
+                mem = psutil.virtual_memory()
+                if mem is not None:
+                    tmp_reply_str += (
+                        f'\nMEM : {mem.used / (1024**3):.2f} / {mem.total / (1024**3):.2f} GB {mem.percent:.2f}%'
+                    )
                 botHash = plugin_event.bot_info.hash
                 group_count = OlivaDiceCore.userConfig.dataUserConfigTotalCount(
                     userType='group', botHash=botHash
