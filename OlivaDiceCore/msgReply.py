@@ -1459,7 +1459,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = (
                     OlivaDiceCore.msgCustomManager.formatReplySTR(OlivaDiceCore.data.bot_info_auto, dictTValue)
                     + '\n'
-                    + f"服务于[{group_count}]个群，"
+                    + f"累计服务于[{group_count}]个群，"
                     + f"记录了[{user_count}]个用户，"
                     + f"正在使用[{random_mode}]随机数"
                     + '\n'
