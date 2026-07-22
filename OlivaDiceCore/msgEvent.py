@@ -67,7 +67,7 @@ def getReRxEvent_group_message(src: OlivOS.API.Event, message: str):
         res.active = True
         res.data.user_id = src.data.user_id
         res.data.group_id = src.data.group_id
-        res.data.host_id = None
+        res.data.host_id = src.data.host_id
         res.data.message_id = '-1'
         res.data.font = None
         res.data.sender = {
@@ -76,7 +76,8 @@ def getReRxEvent_group_message(src: OlivOS.API.Event, message: str):
             'nickname': 'Nobody',
             'user_id': res.data.user_id,
         }
-        res.data.extend = {}
+        # 保留协议路由信息，使 QQ 官方 Bot 的成员/自身入群消息走 QQ 群主动发送接口。
+        res.data.extend = copy.deepcopy(getattr(src.data, 'extend', {}))
 
     getReRxEvent_message_format(res, target_message)
 
