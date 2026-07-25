@@ -2062,10 +2062,12 @@ def unity_reply(plugin_event, Proc):
                         'tUserConfig': '',
                         'tTrustLevel': 'N/A',
                         'tTrustRank': 'N/A',
+                        'tHagId': '',
                     }
                     tmp_reply_str_temp = (
                         '[{tUserName}] - ({tUserId})'
                         '\n记录哈希: {tUserHash}'
+                        '{tHagId}'
                         '\n平台: {tUserPlatform}'
                         '\n最后触发: {tUserLastHit}'
                         '\n信任等级/评分: {tTrustLevel} / {tTrustRank}{tUserConfig}'
@@ -2078,8 +2080,10 @@ def unity_reply(plugin_event, Proc):
                         tmp_dictTValue['tUserName'] = tmp_userName
                     elif flag_userInfoType == 'group':
                         tmp_dictTValue['tUserName'] = '群'
+                        tmp_dictTValue['tHagId'] = '\n群号/频道号(hag_id): %s' % tmp_userId
                     elif flag_userInfoType == 'host':
                         tmp_dictTValue['tUserName'] = '频道'
+                        tmp_dictTValue['tHagId'] = '\n群号/频道号(hag_id): %s' % tmp_userId
                     tmp_dictTValue['tTrustLevel'] = str(
                         OlivaDiceCore.userConfig.getUserConfigByKeyWithHash(
                             userHash=tmp_userHash, userConfigKey='trustLevel', botHash=plugin_event.bot_info.hash
@@ -7230,9 +7234,106 @@ def replyMsg(plugin_event, message, at_user=False):
     if at_user:
         at_para = OlivOS.messageAPI.PARA.at(str(user_id))
         at_user_msg = at_para.get_string_by_key('CQ')
-        return OlivaDiceCore.msgReply.pluginReply(plugin_event, f'{at_user_msg} ' + str(message))
+        message = f'{at_user_msg} ' + str(message)
     else:
-        return OlivaDiceCore.msgReply.pluginReply(plugin_event, str(message))
+        message = str(message)
+    # QQ Guild v2 仅在消息实际包含 at 段时使用 Markdown，其余消息保持普通文本通道。
+    if _isQQGuildv2MarkdownAble(plugin_event, message):
+        return _replyMsgMarkdownQQGuildv2(plugin_event, message)
+    return OlivaDiceCore.msgReply.pluginReply(plugin_event, message)
+
+
+def _isQQGuildv2MarkdownAble(plugin_event, message):
+    """检测消息是否必须通过 QQ Guild v2 Markdown 通道发送 at。"""
+    res = False
+    try:
+        if (
+            plugin_event.platform['sdk'] == 'qqGuildv2_link'
+            and plugin_event.indeAPI is not None
+            and plugin_event.indeAPI.hasAPI('create_markdown_message')
+        ):
+            if isinstance(message, OlivOS.messageAPI.Message_templet):
+                message_obj = message
+            else:
+                message_obj = OlivOS.messageAPI.Message_templet('old_string', str(message))
+            res = any(
+                isinstance(para_this, OlivOS.messageAPI.PARA.at)
+                for para_this in message_obj.data
+            )
+    except Exception:
+        res = False
+    return res
+
+
+def _replyMsgMarkdownQQGuildv2(plugin_event, message):
+    """replyMsg 的 qqGuildv2 markdown 发送收口
+
+    将消息拆分为文本/at（走 markdown 通道，确保 at 正确）和图片等媒体（走文本回复），
+    敏感词检测后分别发送。markdown 部分失败时回退全部走 pluginReply。
+    """
+    # 敏感词检测，与 pluginReply 一致
+    message = OlivaDiceCore.censorAPI.doCensorReplaceOlivOSSafe(
+        botHash=plugin_event.bot_info.hash, msg=str(message)
+    )
+    # 用 Message_templet 解析 Para，拆分为 md 部分和文本部分
+    md_content = ''
+    plain_parts = []
+    quote_msg_id = None
+    msg_para = OlivOS.messageAPI.Message_templet('old_string', str(message))
+    for para in msg_para.data:
+        if isinstance(para, OlivOS.messageAPI.PARA.at):
+            at_id = str(para.data.get('id', ''))
+            if at_id == 'all':
+                md_content += '<qqbot-at-everyone />'
+            else:
+                md_content += OlivOS.qqGuildv2SDK.markdown_tag.at_user(at_id)
+        elif isinstance(para, OlivOS.messageAPI.PARA.text):
+            md_content += para.data.get('text', '')
+        elif isinstance(para, OlivOS.messageAPI.PARA.reply):
+            if quote_msg_id is None:
+                quote_id = para.data.get('id', None)
+                if quote_id is not None and str(quote_id) != '':
+                    quote_msg_id = str(quote_id)
+        else:
+            # 图片、表情等媒体继续走 OlivOS 普通消息通道
+            plain_parts.append(para)
+    # 发送 markdown 部分（有内容时）
+    md_ok = True
+    if md_content != '':
+        try:
+            extend_data = getattr(plugin_event.data, 'extend', {})
+            flag_from_qq = extend_data.get('flag_from_qq', False)
+            flag_from_direct = extend_data.get('flag_from_direct', False)
+            if flag_from_qq:
+                chat_type = 'qq_private' if flag_from_direct else 'qq_group'
+                chat_id = plugin_event.data.user_id if flag_from_direct else plugin_event.data.group_id
+            else:
+                chat_type = 'guild_private' if flag_from_direct else 'guild_channel'
+                if flag_from_direct:
+                    chat_id = extend_data.get('host_group_id', None)
+                else:
+                    chat_id = plugin_event.data.group_id
+            res_data = plugin_event.indeAPI.create_markdown_message(
+                chat_type=chat_type,
+                chat_id=chat_id,
+                markdown={'content': md_content},
+                msg_id=extend_data.get('reply_msg_id'),
+                quote_msg_id=quote_msg_id,
+            )
+            if res_data is None or not res_data.get('active', False):
+                md_ok = False
+        except Exception:
+            md_ok = False
+    # markdown 失败时全部回退
+    if not md_ok:
+        return OlivaDiceCore.msgReply.pluginReply(plugin_event, message)
+    # 发送媒体部分（图片/表情等）
+    if md_content == '' and quote_msg_id is not None:
+        plain_parts.insert(0, OlivOS.messageAPI.PARA.reply(id=quote_msg_id))
+    if plain_parts:
+        plain_msg = OlivOS.messageAPI.Message_templet('olivos_para', plain_parts)
+        return OlivaDiceCore.msgReply.pluginReply(plugin_event, plain_msg.get('old_string'))
+    return None
 
 
 def sendMsgByEvent(plugin_event, message, target_id, target_type, host_id=None):

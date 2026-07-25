@@ -430,6 +430,7 @@ https://github.com/OlivOS-Team/onedice
 若需要获取新成员名称，请在欢迎词中添加[{tNewMemberName}]
 如[.welcome {tAtNewMember}，欢迎[{tNewMemberName}]加入本群！]""",
     'team': """.team (小队) [@成员1][@成员2]…… 创建/更新小队
+.team (小队) (add) me (小队) 将自己加入小队，无小队时创建小队
 .team (小队) show (小队) 展示小队成员
 .team list 列出所有小队
 .team (小队) set (小队) 设置活跃小队

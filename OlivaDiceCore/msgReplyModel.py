@@ -1829,7 +1829,129 @@ def replyTEAM_command(plugin_event, Proc, valDict):
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'help', fullMatch=True):
         OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'team')
     else:
-        team_create(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, team_name)
+        # 主动入队语法: .team (小队名) (add) me (小队名)，未命中时回退为小队创建
+        [flag_team_join_self, team_name] = parse_team_join_self(tmp_reast_str, team_name)
+        if flag_team_join_self:
+            team_add_me(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, team_name)
+        else:
+            # 兼容 .team add [@成员……] 形式——剥离可选的 add 前缀后交给 team_create
+            tmp_create_str = tmp_reast_str
+            if OlivaDiceCore.msgReply.isMatchWordStart(tmp_create_str, 'add'):
+                tmp_create_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_create_str, 'add')
+                tmp_create_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_create_str)
+            team_create(plugin_event, tmp_create_str, tmp_hagID, dictTValue, dictStrCustom, team_name)
+
+
+def parse_team_join_self(tmp_reast_str, team_name):
+    """
+    解析 .team 主动入队语法: (add) me (小队名)
+    小队名可由 replyTEAM_command 前置解析（已有小队），或放在 me 之后（支持新小队名）
+    返回 [是否命中主动入队语法, 解析后的小队名(未指定时为None)]
+    """
+    res_flag = False
+    res_team_name = team_name
+    tmp_str = tmp_reast_str
+    # 去掉可选的 add 前缀
+    if OlivaDiceCore.msgReply.isMatchWordStart(tmp_str, 'add'):
+        tmp_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_str, 'add')
+        tmp_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_str)
+    # 开头匹配 me（前缀匹配，与项目内其他子指令的 isMatchWordStart 用法一致）
+    if OlivaDiceCore.msgReply.isMatchWordStart(tmp_str, 'me'):
+        res_flag = True
+        tmp_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_str, 'me')
+        tmp_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_str)
+        if res_team_name is None and tmp_str != '':
+            res_team_name = tmp_str
+    # 后缀形式: .team 新小队名 me / .team 新小队名 add me
+    # me 在结尾，使用字符串处理（与 team_at/team_set 等子指令的 "动作 小队名" 风格一致）
+    if not res_flag:
+        tmp_str_strip = tmp_str.strip()
+        if tmp_str_strip.lower() == 'me' or tmp_str_strip.lower().endswith(' me'):
+            res_flag = True
+            prefix = tmp_str_strip[:-3].strip() if tmp_str_strip.lower().endswith(' me') else ''
+            if prefix != '':
+                # 去掉末尾可能残留的 add（支持 .team 新小队名 add me 形式）
+                if prefix.lower().endswith(' add') or prefix.lower() == 'add':
+                    prefix = prefix[: -len('add')].strip()
+                if res_team_name is None:
+                    res_team_name = prefix
+    return [res_flag, res_team_name]
+
+
+def team_add_me(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, team_name):
+    # 用户主动加入小队: .team (小队名) (add) me (小队名)
+    # 成员 id 与 at 解析结果保持一致，统一存为字符串
+    tmp_member_id = str(plugin_event.data.user_id)
+    team_config = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='teamConfig',
+        botHash=plugin_event.bot_info.hash,
+        default={},
+    )
+    active_team = OlivaDiceCore.userConfig.getUserConfigByKey(
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+        userConfigKey='activeTeam',
+        botHash=plugin_event.bot_info.hash,
+    )
+    # 未指定小队时加入当前活跃小队；没有活跃小队时创建默认小队
+    if team_name is None or team_name == '':
+        if active_team is None:
+            team_name = 'default'
+        else:
+            team_name = active_team
+    # 小队不存在时创建小队并设为活跃小队，存在时仅更新成员
+    if team_name not in team_config:
+        team_config[team_name] = {'members': [tmp_member_id], 'created': int(time.time())}
+        OlivaDiceCore.userConfig.setUserConfigByKey(
+            userConfigKey='activeTeam',
+            userConfigValue=team_name,
+            botHash=plugin_event.bot_info.hash,
+            userId=tmp_hagID,
+            userType='group',
+            platform=plugin_event.platform['platform'],
+        )
+    else:
+        existing_members = set(team_config[team_name]['members'])
+        existing_members.add(tmp_member_id)
+        team_config[team_name]['members'] = list(existing_members)
+    OlivaDiceCore.userConfig.setUserConfigByKey(
+        userConfigKey='teamConfig',
+        userConfigValue=team_config,
+        botHash=plugin_event.bot_info.hash,
+        userId=tmp_hagID,
+        userType='group',
+        platform=plugin_event.platform['platform'],
+    )
+    OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+        userHash=OlivaDiceCore.userConfig.getUserHash(
+            userId=tmp_hagID, userType='group', platform=plugin_event.platform['platform']
+        )
+    )
+    # 复用 team_create 的回复词与成员列表格式
+    members = team_config[team_name]['members']
+    member_info = []
+    index = 1
+    for member_id in members:
+        # 获取用户名称
+        user_name = get_user_name(plugin_event, member_id)
+        # 获取当前人物卡
+        pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
+        pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
+        member_display = format_team_member_display(
+            user_name, pc_name, dictStrCustom, 'strTeamMemberFormatWithIndex', tIndex=f'{index}'
+        )
+        member_info.append(member_display)
+        index += 1
+    dictTValue['tTeamName'] = team_name
+    dictTValue['tMemberCount'] = str(len(members))
+    dictTValue['tMembers'] = '\n'.join(member_info)
+    OlivaDiceCore.msgReply.replyMsg(
+        plugin_event, OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strTeamCreated'], dictTValue)
+    )
 
 
 def team_create(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, team_name):
@@ -2374,7 +2496,7 @@ def team_at(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
         )
         return
 
-    # at实现
+    # at 实现：使用标准 CQ 码 via replyMsg，replyMsg 内部会根据平台选择发送通路
     at_members_str = ''
     for member_id in members:
         at_para = OlivOS.messageAPI.PARA.at(str(member_id))
