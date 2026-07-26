@@ -176,6 +176,14 @@ def unity_reply(plugin_event, Proc):
         if plugin_event.data.extend['sub_self_id'] is not None:
             tmp_at_str_sub = OlivOS.messageAPI.PARA.at(plugin_event.data.extend['sub_self_id']).CQ()
             tmp_id_str_sub = str(plugin_event.data.extend['sub_self_id'])
+    tmp_at_str_sub_open = None
+    tmp_id_str_sub_open = None
+    if 'sub_self_open_id' in plugin_event.data.extend:
+        if plugin_event.data.extend['sub_self_open_id'] is not None:
+            tmp_at_str_sub_open = OlivOS.messageAPI.PARA.at(
+                plugin_event.data.extend['sub_self_open_id']
+            ).CQ()
+            tmp_id_str_sub_open = str(plugin_event.data.extend['sub_self_open_id'])
     tmp_reast_str = plugin_event.data.message
     flag_force_reply = False
     flag_is_command = False
@@ -207,6 +215,8 @@ def unity_reply(plugin_event, Proc):
         if tmp_id_str in tmp_at_list:
             flag_force_reply = True
         if tmp_id_str_sub in tmp_at_list:
+            flag_force_reply = True
+        if tmp_id_str_sub_open in tmp_at_list:
             flag_force_reply = True
         if 'all' in tmp_at_list:
             flag_force_reply = True
@@ -747,7 +757,6 @@ def unity_reply(plugin_event, Proc):
                             if (
                                 tmp_listValue.isdecimal()
                                 and tmp_editKey in ['noticeGroupList', 'masterList']
-                                and plugin_event.platform['platform'] not in ['qqGuild']
                             ):
                                 tmp_listValue = int(tmp_listValue)
                             elif tmp_listValue == 'this' and flag_is_from_group and tmp_editKey in ['noticeGroupList']:
@@ -1131,6 +1140,8 @@ def unity_reply(plugin_event, Proc):
             tmp_end_list = ['', tmp_at_str]
             if tmp_at_str_sub is not None:
                 tmp_end_list.append(tmp_at_str_sub)
+            if tmp_at_str_sub_open is not None:
+                tmp_end_list.append(tmp_at_str_sub_open)
             tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'bot')
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             if isMatchWordStart(tmp_reast_str, 'on'):
@@ -1192,8 +1203,6 @@ def unity_reply(plugin_event, Proc):
                             )
                             replyMsg(plugin_event, tmp_reply_str)
                     else:
-                        if plugin_event.platform['platform'] in ['qqGuild']:
-                            return
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                             dictStrCustom['strNeedAdmin'], dictTValue
                         )
@@ -1257,8 +1266,6 @@ def unity_reply(plugin_event, Proc):
                             )
                             replyMsg(plugin_event, tmp_reply_str)
                     else:
-                        if plugin_event.platform['platform'] in ['qqGuild']:
-                            return
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                             dictStrCustom['strNeedAdmin'], dictTValue
                         )
@@ -1311,8 +1318,6 @@ def unity_reply(plugin_event, Proc):
                                 )
                                 replyMsg(plugin_event, tmp_reply_str)
                         else:
-                            if plugin_event.platform['platform'] in ['qqGuild']:
-                                return
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                                 dictStrCustom['strNeedAdmin'], dictTValue
                             )
@@ -1362,8 +1367,6 @@ def unity_reply(plugin_event, Proc):
                                 )
                                 replyMsg(plugin_event, tmp_reply_str)
                         else:
-                            if plugin_event.platform['platform'] in ['qqGuild']:
-                                return
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                                 dictStrCustom['strNeedAdmin'], dictTValue
                             )
@@ -1382,8 +1385,6 @@ def unity_reply(plugin_event, Proc):
                         time.sleep(1)
                         plugin_event.set_group_leave(plugin_event.data.group_id)
                     else:
-                        if plugin_event.platform['platform'] in ['qqGuild']:
-                            return
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                             dictStrCustom['strNeedAdmin'], dictTValue
                         )
@@ -1526,8 +1527,6 @@ def unity_reply(plugin_event, Proc):
                         )
                         replyMsg(plugin_event, tmp_reply_str)
                 else:
-                    if plugin_event.platform['platform'] in ['qqGuild']:
-                        return
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                         dictStrCustom['strNeedAdmin'], dictTValue
                     )
@@ -7282,11 +7281,7 @@ def _replyMsgMarkdownQQGuildv2(plugin_event, message):
     msg_para = OlivOS.messageAPI.Message_templet('old_string', str(message))
     for para in msg_para.data:
         if isinstance(para, OlivOS.messageAPI.PARA.at):
-            at_id = str(para.data.get('id', ''))
-            if at_id == 'all':
-                md_content += '<qqbot-at-everyone />'
-            else:
-                md_content += OlivOS.qqGuildv2SDK.markdown_tag.at_user(at_id)
+            md_content += OlivOS.qqGuildv2SDK.markdown_tag.at_para(para)
         elif isinstance(para, OlivOS.messageAPI.PARA.text):
             md_content += para.data.get('text', '')
         elif isinstance(para, OlivOS.messageAPI.PARA.reply):
@@ -7676,9 +7671,11 @@ def msgIsCommand(data, prefix_list):
     res = False
     res_data = data
     if type(data) is str:
+        # 所有平台的命令统一忽略正文开头的空格。
+        command_data = skipSpaceStart(data)
         for prefix_list_this in prefix_list:
-            if isMatchWordStart(data, prefix_list_this):
-                res_data = getMatchWordStartRight(data, prefix_list_this)
+            if isMatchWordStart(command_data, prefix_list_this):
+                res_data = getMatchWordStartRight(command_data, prefix_list_this)
                 res = True
                 break
     return [res_data, res]
@@ -8082,10 +8079,6 @@ def parse_at_user(plugin_event, tmp_reast_str, valDict, flag_is_from_group_admin
                 new_tmp_reast_str_parts.append(part.data['text'])
 
     if is_at:
-        if plugin_event.platform['platform'] in ['qqGuild']:
-            # QQ频道平台直接返回解析结果，不进行权限检查
-            cleaned_message = ''.join(new_tmp_reast_str_parts).strip()
-            return is_at, at_user_id, cleaned_message
         # 检查发送者是否为管理员或群主
         if not (flag_is_from_group_admin or flag_is_from_master):
             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
