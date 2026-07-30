@@ -23,6 +23,7 @@ from . import msgCustomManager
 from . import console
 from . import pcCardData
 from . import pcCard
+from . import pcCardPorter
 from . import userConfig
 from . import msgReply
 from . import onedice

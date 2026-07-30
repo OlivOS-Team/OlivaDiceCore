@@ -58,6 +58,7 @@ def unity_init(plugin_event, Proc):
     OlivaDiceCore.msgCustomManager.saveMsgCustom(Proc.Proc_data['bot_info_dict'])
     OlivaDiceCore.helpDoc.initHelpDoc(Proc.Proc_data['bot_info_dict'])
     OlivaDiceCore.drawCard.initDeck(Proc.Proc_data['bot_info_dict'])
+    OlivaDiceCore.pcCardPorter.initPortExportDir()
     OlivaDiceCore.pcCard.dataPcCardTemplateDefaultInit()
     OlivaDiceCore.pcCard.dataPcCardTemplateInit()
     OlivaDiceCore.pcCard.dataPcCardLoadAll()
@@ -2876,6 +2877,18 @@ def unity_reply(plugin_event, Proc):
                     )
                 replyMsg(plugin_event, tmp_reply_str)
             return
+        elif isMatchWordStart(tmp_reast_str_original, ['port', '引继'], isCommand=True):
+            # 人物卡引继(同骰引继码/跨骰数据码): 主体实现见 pcCardPorter.py, 此处仅保留入口
+            tmp_reast_str = getMatchWordStartRight(tmp_reast_str_original, ['port', '引继'])
+            OlivaDiceCore.pcCardPorter.replyPort(
+                plugin_event=plugin_event,
+                cmd_str=tmp_reast_str,
+                dictStrCustom=dictStrCustom,
+                dictTValue=dictTValue,
+                hagID=tmp_hagID,
+                flagIsFromMaster=flag_is_from_master,
+            )
+            return
         elif isMatchWordStart(tmp_reast_str_original, ['st', 'pc'], isCommand=True):
             tmp_reply_str = ''
             is_at, at_user_id, tmp_reast_str = parse_at_user(
@@ -3532,24 +3545,83 @@ def unity_reply(plugin_event, Proc):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'del')
                 tmp_reast_str = skipSpaceStart(tmp_reast_str)
                 tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
-                tmp_pc_name = tmp_reast_str
-                tmp_pc_name = tmp_pc_name.strip()
+                tmp_pc_name = tmp_reast_str.strip()
+                tmp_pc_card_list = []
+                if tmp_pcHash in OlivaDiceCore.pcCard.dictPcCardData['unity']:
+                    tmp_pc_card_list = list(OlivaDiceCore.pcCard.dictPcCardData['unity'][tmp_pcHash].keys())
+                if len(tmp_pc_card_list) == 0:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                        dictStrCustom['strPcDelNone'], dictTValue
+                    )
+                    trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
+                    replyMsg(plugin_event, tmp_reply_str)
+                    return
+                removed_cards = []
+                failed_parts = []
                 if len(tmp_pc_name) == 0:
-                    tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
-                if tmp_pc_name is not None:
-                    OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(tmp_pcHash, tmp_pc_name, 'enhanceList', [])
-                    if OlivaDiceCore.pcCard.pcCardDataDelSelectionKey(tmp_pcHash, tmp_pc_name):
-                        dictTValue['tPcSelection'] = tmp_pc_name
+                    tmp_pc_name_selected = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
+                    if tmp_pc_name_selected is not None:
+                        removed_cards = [tmp_pc_name_selected]
+                elif isMatchWordStart(tmp_pc_name, 'all', fullMatch=True):
+                    removed_cards = tmp_pc_card_list.copy()
+                else:
+                    card_name_map = {}
+                    for card_name in tmp_pc_card_list:
+                        card_name_map[str(card_name).upper()] = card_name
+                    for part in tmp_pc_name.split():
+                        remaining_str = part.upper()
+                        current_unmatched = []
+                        while remaining_str:
+                            matched_name = None
+                            matched_len = 0
+                            for card_name_upper in sorted(card_name_map.keys(), key=len, reverse=True):
+                                if remaining_str.startswith(card_name_upper):
+                                    matched_name = card_name_map[card_name_upper]
+                                    matched_len = len(card_name_upper)
+                                    break
+                            if matched_name is not None:
+                                if current_unmatched:
+                                    failed_parts.append(''.join(current_unmatched))
+                                    current_unmatched = []
+                                if matched_name not in removed_cards:
+                                    removed_cards.append(matched_name)
+                                remaining_str = remaining_str[matched_len:]
+                            else:
+                                current_unmatched.append(remaining_str[0])
+                                remaining_str = remaining_str[1:]
+                        if current_unmatched:
+                            failed_parts.append(''.join(current_unmatched))
+                if removed_cards:
+                    for removed_card_name in removed_cards:
+                        OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
+                            tmp_pcHash, removed_card_name, 'enhanceList', []
+                        )
+                        OlivaDiceCore.pcCard.pcCardDataDelSelectionKey(tmp_pcHash, removed_card_name)
+                    dictTValue['tLenSkillName'] = len(removed_cards)
+                    dictTValue['tSkillName'] = '、'.join([f'[{card_name}]' for card_name in removed_cards])
+                    if isMatchWordStart(tmp_pc_name, 'all', fullMatch=True):
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                            dictStrCustom['strPcDelAll'], dictTValue
+                        )
+                    elif failed_parts:
+                        dictTValue['tLenFailedSkills'] = len(failed_parts)
+                        dictTValue['tFailedSkills'] = '、'.join([f'[{part}]' for part in failed_parts])
+                        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                            dictStrCustom['strPcDelPartialSuccess'], dictTValue
+                        )
+                    elif len(removed_cards) == 1:
+                        dictTValue['tPcSelection'] = removed_cards[0]
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                             dictStrCustom['strPcDel'], dictTValue
                         )
                     else:
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
-                            dictStrCustom['strPcDelError'], dictTValue
+                            dictStrCustom['strPcDelMulti'], dictTValue
                         )
                 else:
+                    dictTValue['tFailedSkills'] = '、'.join([f'[{part}]' for part in failed_parts or [tmp_pc_name]])
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
-                        dictStrCustom['strPcDelNone'], dictTValue
+                        dictStrCustom['strPcDelError'], dictTValue
                     )
                 trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)

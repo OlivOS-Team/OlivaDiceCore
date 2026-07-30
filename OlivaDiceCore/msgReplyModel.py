@@ -1963,10 +1963,13 @@ def team_create(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCusto
             team_name = tmp_reast_str_para.data[0].data['text'].strip()
             if team_name == '':
                 team_name = None
-    # 解析成员
+    # 解析成员;@全体成员/无效 at 段静默忽略,不计入小队
     for part in tmp_reast_str_para.data:
         if isinstance(part, OlivOS.messageAPI.PARA.at):
-            members.append(part.data['id'])
+            tmp_at_id = str(part.data.get('id', ''))
+            if tmp_at_id in ['', 'all', 'everyone']:
+                continue
+            members.append(tmp_at_id)
     if team_name is None and not members:
         OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'team')
         return
@@ -2172,10 +2175,13 @@ def team_remove(
             team_name = tmp_reast_str_para.data[0].data['text'].strip()
             if team_name == '':
                 team_name = None
-    # 解析要移除的成员
+    # 解析要移除的成员;@全体成员/无效 at 段静默忽略
     for part in tmp_reast_str_para.data:
         if isinstance(part, OlivOS.messageAPI.PARA.at):
-            members_to_remove.append(part.data['id'])
+            tmp_at_id = str(part.data.get('id', ''))
+            if tmp_at_id in ['', 'all', 'everyone']:
+                continue
+            members_to_remove.append(tmp_at_id)
     if team_name is None and not members_to_remove:
         OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'team')
         return
@@ -2497,8 +2503,11 @@ def team_at(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
         return
 
     # at 实现：使用标准 CQ 码 via replyMsg，replyMsg 内部会根据平台选择发送通路
+    # 历史数据中可能混入 all/空 id 等无效成员,输出时静默跳过,避免 at 全体
     at_members_str = ''
     for member_id in members:
+        if str(member_id) in ['', 'all', 'everyone']:
+            continue
         at_para = OlivOS.messageAPI.PARA.at(str(member_id))
         at_str = at_para.get_string_by_key('CQ')
         at_members_str += at_str
