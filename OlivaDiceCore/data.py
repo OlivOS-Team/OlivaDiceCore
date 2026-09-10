@@ -62,4 +62,4 @@ dataDirRoot = './plugin/data/OlivaDice'
 
 backupDirRoot = './plugin/backup'
 
-defaultOlivaDicePulseUrl = 'https://api.dice.center/dicestatusup/'
+defaultOlivaDicePulseUrl = 'http://api.dice.center/dicestatusup/'
