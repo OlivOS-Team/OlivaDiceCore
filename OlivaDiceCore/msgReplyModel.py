@@ -3397,16 +3397,22 @@ def team_sc(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
         flag_bp_type = 1
         tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'b')
         # 检查是否有数字指定骰子数量
-        if len(tmp_reast_str) > 0 and tmp_reast_str[0].isdigit():
-            flag_bp_count = int(tmp_reast_str[0])
+        bp_digits = ''
+        while len(tmp_reast_str) > 0 and tmp_reast_str[0].isdigit():
+            bp_digits += tmp_reast_str[0]
             tmp_reast_str = tmp_reast_str[1:]
+        if bp_digits:
+            flag_bp_count = int(bp_digits)
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'p'):
         flag_bp_type = 2
         tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'p')
         # 检查是否有数字指定骰子数量
-        if len(tmp_reast_str) > 0 and tmp_reast_str[0].isdigit():
-            flag_bp_count = int(tmp_reast_str[0])
+        bp_digits = ''
+        while len(tmp_reast_str) > 0 and tmp_reast_str[0].isdigit():
+            bp_digits += tmp_reast_str[0]
             tmp_reast_str = tmp_reast_str[1:]
+        if bp_digits:
+            flag_bp_count = int(bp_digits)
     tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
     team_config = OlivaDiceCore.userConfig.getUserConfigByKey(
         userId=tmp_hagID,

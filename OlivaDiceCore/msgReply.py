@@ -5181,17 +5181,23 @@ def unity_reply(plugin_event, Proc):
             if isMatchWordStart(tmp_reast_str, 'b'):
                 flag_bp_type = 1
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'b')
-                # 检查是否有数字指定骰子数量
-                if len(tmp_reast_str) > 0 and tmp_reast_str[0].isdigit():
-                    flag_bp_count = int(tmp_reast_str[0])
+                # 检查是否有数字指定骰子数量（支持多位数）
+                bp_digits = ''
+                while len(tmp_reast_str) > 0 and tmp_reast_str[0].isdigit():
+                    bp_digits += tmp_reast_str[0]
                     tmp_reast_str = tmp_reast_str[1:]
+                if bp_digits:
+                    flag_bp_count = int(bp_digits)
             elif isMatchWordStart(tmp_reast_str, 'p'):
                 flag_bp_type = 2
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'p')
-                # 检查是否有数字指定骰子数量
-                if len(tmp_reast_str) > 0 and tmp_reast_str[0].isdigit():
-                    flag_bp_count = int(tmp_reast_str[0])
+                # 检查是否有数字指定骰子数量（支持多位数）
+                bp_digits = ''
+                while len(tmp_reast_str) > 0 and tmp_reast_str[0].isdigit():
+                    bp_digits += tmp_reast_str[0]
                     tmp_reast_str = tmp_reast_str[1:]
+                if bp_digits:
+                    flag_bp_count = int(bp_digits)
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             tmp_reast_str_list = tmp_reast_str.split(' ')
             tmp_sancheck_para = None
@@ -5938,10 +5944,13 @@ def unity_reply(plugin_event, Proc):
                 elif isMatchWordStart(tmp_reast_str, ['p', 'P']):
                     flag_bp_type = 2
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['p', 'P'])
-                if flag_bp_type != 0 and len(tmp_reast_str) > 1:
-                    if tmp_reast_str[0].isdecimal():
-                        flag_bp_count = tmp_reast_str[0]
+                if flag_bp_type != 0 and len(tmp_reast_str) > 0:
+                    bp_digits = ''
+                    while len(tmp_reast_str) > 0 and tmp_reast_str[0].isdecimal():
+                        bp_digits += tmp_reast_str[0]
                         tmp_reast_str = tmp_reast_str[1:]
+                    if bp_digits:
+                        flag_bp_count = bp_digits
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             # 检查是否没有指定技能
             if tmp_reast_str == '' or tmp_reast_str is None:
