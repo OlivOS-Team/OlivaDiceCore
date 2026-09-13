@@ -4354,7 +4354,9 @@ def unity_reply(plugin_event, Proc):
                 tmp_mappingRecord = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
                     pcHash=tmp_pcHash, pcCardName=tmp_pc_name, dataKey='mappingRecord', resDefault={}
                 )
-                mapping_part = ''.join(f'&{mapping_name}={mapping_expr}' for mapping_name, mapping_expr in tmp_mappingRecord.items())
+                mapping_part = ''.join(
+                    f'&{mapping_name}={mapping_expr}' for mapping_name, mapping_expr in tmp_mappingRecord.items()
+                )
                 skill_part = ''.join(skill_pairs)
                 if skill_part or mapping_part:
                     export_lines.append(f'.st {tmp_pc_name}-' + skill_part + mapping_part)
@@ -8077,7 +8079,6 @@ def extract_st_mapping_updates(data: str):
 
     表达式以数字或 D 开头时按骰子表达式收集；否则视为技能名引用，收集到下一个 & 或结尾。
     """
-    op_list = OlivaDiceCore.msgReplyModel.op_list_get()
     mappings = []
     if not data or '&' not in data:
         return data, mappings
