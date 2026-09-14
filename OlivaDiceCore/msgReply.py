@@ -4350,15 +4350,16 @@ def unity_reply(plugin_event, Proc):
                             skill_pairs.append(f'{skill_key}{skill_value}')
                             processed_skills.add(skill_key)
                 export_lines = []
-                # 添加技能导出
-                if skill_pairs:
-                    export_lines.append(f'.st {tmp_pc_name}-' + ''.join(skill_pairs))
-                # 添加映射导出
+                # 技能与映射混排导出
                 tmp_mappingRecord = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
                     pcHash=tmp_pcHash, pcCardName=tmp_pc_name, dataKey='mappingRecord', resDefault={}
                 )
-                for mapping_name, mapping_expr in tmp_mappingRecord.items():
-                    export_lines.append(f'.st &{mapping_name}={mapping_expr}')
+                mapping_part = ''.join(
+                    f'&{mapping_name}={mapping_expr}' for mapping_name, mapping_expr in tmp_mappingRecord.items()
+                )
+                skill_part = ''.join(skill_pairs)
+                if skill_part or mapping_part:
+                    export_lines.append(f'.st {tmp_pc_name}-' + skill_part + mapping_part)
                 # 添加记录导出
                 tmp_noteRecord = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
                     pcHash=tmp_pcHash, pcCardName=tmp_pc_name, dataKey='noteRecord', resDefault={}
@@ -4382,6 +4383,37 @@ def unity_reply(plugin_event, Proc):
                 return
             tmp_reast_str_new = tmp_reast_str
             tmp_reast_str_new_2 = tmp_reast_str
+            # 先抽出 &映射，剩余部分再按普通技能解析，支持混排
+            tmp_reast_str_new, tmp_mapping_updates = extract_st_mapping_updates(tmp_reast_str)
+            tmp_reast_str = tmp_reast_str_new
+            tmp_reast_str_original = tmp_reast_str
+            if tmp_mapping_updates and not tmp_reast_str.strip():
+                # 仅映射录入（沿用 setPcNoteOrRecData，保留无卡时的建卡行为）
+                for map_name, map_expr in tmp_mapping_updates:
+                    OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
+                        plugin_event=plugin_event,
+                        tmp_pc_id=tmp_pc_id,
+                        tmp_pc_platform=tmp_pc_platform,
+                        tmp_hagID=tmp_hagID,
+                        dictTValue=dictTValue,
+                        dictStrCustom=dictStrCustom,
+                        keyName='mappingRecord',
+                        tmp_key=map_name,
+                        tmp_value=map_expr,
+                        flag_mode='rec',
+                        enableFalse=False,
+                    )
+                if is_at:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                        dictStrCustom['strPcSetSkillValueAtOther'], dictTValue
+                    )
+                else:
+                    tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                        dictStrCustom['strPcSetSkillValue'], dictTValue
+                    )
+                trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
+                return
             if len(tmp_reast_str_new) > 0:
                 # 支持连续多个技能更新
                 tmp_skill_updates = []
@@ -4483,6 +4515,10 @@ def unity_reply(plugin_event, Proc):
                                 skill_end_pos = i
                                 break
                         if skill_end_pos == -1:
+                            # 末尾技能名未接数字/表达式时，自动视为 0
+                            tmp_skill_name = processed_str[current_pos:].strip()
+                            if tmp_skill_name:
+                                tmp_skill_updates.append([tmp_skill_name, '=0'])
                             break  # 没有找到符号或数字，结束解析
                         # 处理技能名和表达式
                         if processed_str[skill_end_pos].isdigit() or processed_str[skill_end_pos] in op_list + [
@@ -4687,7 +4723,7 @@ def unity_reply(plugin_event, Proc):
                             reply_messages.append(f'[{tmp_skill_name}]: {tmp_skill_value_old}')
                     if reply_messages:
                         if special_skills:
-                            dictTValue['tSpecialSkills'] = '、'.join([f'[{skill}]' for skill in special_skills])
+                            dictTValue['tSpecialSkills'] = '、'.join(f'[{skill}]' for skill in special_skills)
                             tmp_notice = OlivaDiceCore.msgCustomManager.formatReplySTR(
                                 dictStrCustom['strPcSetSpecialSkills'], dictTValue
                             )
@@ -4705,6 +4741,16 @@ def unity_reply(plugin_event, Proc):
                             )
                         trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                         replyMsg(plugin_event, tmp_reply_str + tmp_notice)
+                    if tmp_mapping_updates:
+                        apply_st_mapping_updates(
+                            plugin_event,
+                            tmp_pc_id,
+                            tmp_pc_platform,
+                            tmp_hagID,
+                            dictTValue,
+                            dictStrCustom,
+                            tmp_mapping_updates,
+                        )
                     return
                 tmp_skill_name = None
                 tmp_skill_value = None
@@ -4813,9 +4859,14 @@ def unity_reply(plugin_event, Proc):
                         if tmp_skill_value is not None:
                             tmp_skill_pair_list.append([tmp_skill_name, tmp_skill_value])
                         else:
-                            return
+                            # 末尾技能名未接数字时，自动视为 0
+                            tmp_skill_pair_list.append([tmp_skill_name, 0])
                 else:
                     return
+            # 混排时把已抽出的映射并入录入列表（字符串值走映射写入）
+            if tmp_mapping_updates:
+                for map_name, map_expr in tmp_mapping_updates:
+                    tmp_skill_pair_list.append([map_name, map_expr])
             if tmp_skill_name_find is None:
                 if len(tmp_skill_pair_list) > 0:
                     tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
@@ -5181,17 +5232,23 @@ def unity_reply(plugin_event, Proc):
             if isMatchWordStart(tmp_reast_str, 'b'):
                 flag_bp_type = 1
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'b')
-                # 检查是否有数字指定骰子数量
-                if len(tmp_reast_str) > 0 and tmp_reast_str[0].isdigit():
-                    flag_bp_count = int(tmp_reast_str[0])
+                # 检查是否有数字指定骰子数量（支持多位数）
+                bp_digits = ''
+                while len(tmp_reast_str) > 0 and tmp_reast_str[0].isdigit():
+                    bp_digits += tmp_reast_str[0]
                     tmp_reast_str = tmp_reast_str[1:]
+                if bp_digits:
+                    flag_bp_count = int(bp_digits)
             elif isMatchWordStart(tmp_reast_str, 'p'):
                 flag_bp_type = 2
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'p')
-                # 检查是否有数字指定骰子数量
-                if len(tmp_reast_str) > 0 and tmp_reast_str[0].isdigit():
-                    flag_bp_count = int(tmp_reast_str[0])
+                # 检查是否有数字指定骰子数量（支持多位数）
+                bp_digits = ''
+                while len(tmp_reast_str) > 0 and tmp_reast_str[0].isdigit():
+                    bp_digits += tmp_reast_str[0]
                     tmp_reast_str = tmp_reast_str[1:]
+                if bp_digits:
+                    flag_bp_count = int(bp_digits)
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             tmp_reast_str_list = tmp_reast_str.split(' ')
             tmp_sancheck_para = None
@@ -5938,10 +5995,13 @@ def unity_reply(plugin_event, Proc):
                 elif isMatchWordStart(tmp_reast_str, ['p', 'P']):
                     flag_bp_type = 2
                     tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['p', 'P'])
-                if flag_bp_type != 0 and len(tmp_reast_str) > 1:
-                    if tmp_reast_str[0].isdecimal():
-                        flag_bp_count = tmp_reast_str[0]
+                if flag_bp_type != 0 and len(tmp_reast_str) > 0:
+                    bp_digits = ''
+                    while len(tmp_reast_str) > 0 and tmp_reast_str[0].isdecimal():
+                        bp_digits += tmp_reast_str[0]
                         tmp_reast_str = tmp_reast_str[1:]
+                    if bp_digits:
+                        flag_bp_count = bp_digits
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             # 检查是否没有指定技能
             if tmp_reast_str == '' or tmp_reast_str is None:
@@ -8012,6 +8072,93 @@ def getToNumberPara(data):
         else:
             tmp_output_str_2 = data
     return [tmp_output_str_1, tmp_output_str_2]
+
+
+def extract_st_mapping_updates(data: str):
+    """从 st 录入串中抽取全部 &名称=表达式 映射项，返回 (剩余串, [(名称, 表达式), ...])。
+
+    表达式以数字或 D 开头时按骰子表达式收集；否则视为技能名引用，收集到下一个 & 或结尾。
+    """
+    mappings = []
+    if not data or '&' not in data:
+        return data, mappings
+    remaining = []
+    i = 0
+    n = len(data)
+    while i < n:
+        if data[i] != '&':
+            remaining.append(data[i])
+            i += 1
+            continue
+        j = i + 1
+        name_chars = []
+        while j < n and data[j] not in ('=', ':', '：'):
+            name_chars.append(data[j])
+            j += 1
+        name = ''.join(name_chars).strip()
+        if not name or j >= n:
+            remaining.append(data[i])
+            i += 1
+            continue
+        j += 1
+        expr_chars = []
+        if j < n and (data[j].isdigit() or data[j].upper() == 'D'):
+            # 骰子/算式表达式：括号内允许中文技能名，括号外遇中文则视为后续技能
+            paren = 0
+            while j < n:
+                c = data[j]
+                if c == '&':
+                    break
+                if c in '([':
+                    paren += 1
+                elif c in ')]':
+                    paren = max(0, paren - 1)
+                if paren == 0 and not c.isascii():
+                    break
+                expr_chars.append(c)
+                j += 1
+        else:
+            # 技能名引用或以 ( 等开头的表达式：收集到下一个映射或结尾
+            while j < n and data[j] != '&':
+                expr_chars.append(data[j])
+                j += 1
+        expr = ''.join(expr_chars).strip()
+        if name and expr:
+            mappings.append((name, expr))
+            i = j
+        else:
+            remaining.append(data[i])
+            i += 1
+    return ''.join(remaining), mappings
+
+
+def apply_st_mapping_updates(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue, dictStrCustom, mappings):
+    """批量写入映射，不逐条回复。返回是否写入成功。"""
+    if not mappings:
+        return False
+    tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+    tmp_pc_name = dictTValue.get('tName')
+    if tmp_pc_name:
+        tmp_pc_name = OlivaDiceCore.pcCard.fixName(tmp_pc_name)
+        if not OlivaDiceCore.pcCard.checkPcName(tmp_pc_name):
+            tmp_pc_name = None
+    if not tmp_pc_name:
+        tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
+    if not tmp_pc_name:
+        return False
+    dictTValue['tName'] = tmp_pc_name
+    tmp_mappingRecord = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+        pcHash=tmp_pcHash, pcCardName=tmp_pc_name, dataKey='mappingRecord', resDefault={}
+    )
+    for map_name, map_expr in mappings:
+        map_name_fix = OlivaDiceCore.pcCard.fixName(map_name)
+        if not OlivaDiceCore.pcCard.checkPcName(map_name_fix):
+            continue
+        tmp_mappingRecord[map_name_fix] = map_expr
+    OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
+        pcHash=tmp_pcHash, pcCardName=tmp_pc_name, dataKey='mappingRecord', dataContent=tmp_mappingRecord
+    )
+    return True
 
 
 def isMatchWordStart(data, key, ignoreCase=True, fullMatch=False, isCommand=False):

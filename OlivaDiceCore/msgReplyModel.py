@@ -2817,6 +2817,12 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
     if not skill_name:
         OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'team')
         return
+    # 先抽出 &映射，剩余部分按普通技能解析
+    skill_name, team_mapping_updates = OlivaDiceCore.msgReply.extract_st_mapping_updates(skill_name)
+    skill_name = skill_name.strip()
+    if not skill_name and not team_mapping_updates:
+        OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'team')
+        return
     if team_name not in team_config:
         dictTValue['tTeamName'] = team_name
         OlivaDiceCore.msgReply.replyMsg(
@@ -2878,6 +2884,13 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
                 skill_end_pos = i
                 break
         if skill_end_pos == -1:
+            # 末尾技能名未接数字/表达式时，自动视为 0
+            skill_name = processed_skill_ops[current_pos:].strip()
+            if skill_name:
+                skill_name = OlivaDiceCore.pcCard.fixName(skill_name, flagMode='skillName')
+                clean_skill_name = re.sub(r'\d+', '', skill_name).upper()
+                if clean_skill_name:
+                    skill_updates.append((clean_skill_name, '', '0'))
             break
 
         # 处理技能名和表达式
@@ -2934,7 +2947,7 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
             current_pos = expr_end_pos
         else:
             current_pos = skill_end_pos + 1
-    if not skill_updates:
+    if not skill_updates and not team_mapping_updates:
         OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'team')
         return
 
@@ -2958,6 +2971,20 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
                 default=f'用户{member_id}',
             )
         member_results = []
+        # 批量写入映射
+        if team_mapping_updates:
+            tmp_mappingRecord = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                pcHash=tmp_pcHash, pcCardName=tmp_pc_name, dataKey='mappingRecord', resDefault={}
+            )
+            for map_name, map_expr in team_mapping_updates:
+                map_name_fix = OlivaDiceCore.pcCard.fixName(map_name)
+                if not OlivaDiceCore.pcCard.checkPcName(map_name_fix):
+                    continue
+                tmp_mappingRecord[map_name_fix] = map_expr
+                member_results.append(f'[映射{map_name_fix}]: {map_expr}')
+            OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
+                pcHash=tmp_pcHash, pcCardName=tmp_pc_name, dataKey='mappingRecord', dataContent=tmp_mappingRecord
+            )
         for skill_name, op, expr_str in skill_updates:
             # 获取当前技能值
             current_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(tmp_pcHash, skill_name, hagId=tmp_hagID)
@@ -3397,16 +3424,22 @@ def team_sc(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
         flag_bp_type = 1
         tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'b')
         # 检查是否有数字指定骰子数量
-        if len(tmp_reast_str) > 0 and tmp_reast_str[0].isdigit():
-            flag_bp_count = int(tmp_reast_str[0])
+        bp_digits = ''
+        while len(tmp_reast_str) > 0 and tmp_reast_str[0].isdigit():
+            bp_digits += tmp_reast_str[0]
             tmp_reast_str = tmp_reast_str[1:]
+        if bp_digits:
+            flag_bp_count = int(bp_digits)
     elif OlivaDiceCore.msgReply.isMatchWordStart(tmp_reast_str, 'p'):
         flag_bp_type = 2
         tmp_reast_str = OlivaDiceCore.msgReply.getMatchWordStartRight(tmp_reast_str, 'p')
         # 检查是否有数字指定骰子数量
-        if len(tmp_reast_str) > 0 and tmp_reast_str[0].isdigit():
-            flag_bp_count = int(tmp_reast_str[0])
+        bp_digits = ''
+        while len(tmp_reast_str) > 0 and tmp_reast_str[0].isdigit():
+            bp_digits += tmp_reast_str[0]
             tmp_reast_str = tmp_reast_str[1:]
+        if bp_digits:
+            flag_bp_count = int(bp_digits)
     tmp_reast_str = OlivaDiceCore.msgReply.skipSpaceStart(tmp_reast_str)
     team_config = OlivaDiceCore.userConfig.getUserConfigByKey(
         userId=tmp_hagID,
