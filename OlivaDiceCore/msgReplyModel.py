@@ -3275,9 +3275,18 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
             rd_para_str = 'P'
         if bp_count is not None:
             rd_para_str += str(bp_count)
-        # 获取模板配置
-        template_name = flag_groupTemplate or 'default'
-        template_rule_name = flag_groupTemplateRule or 'default'
+        # 模板与规则来源：群房规 > 人物卡设置 > 默认
+        template_name = None
+        template_rule_name = None
+        if pc_name is not None:
+            template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(pc_hash, pc_name)
+            template_rule_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateRuleKey(pc_hash, pc_name)
+        if flag_groupTemplate is not None:
+            template_name = flag_groupTemplate
+        if flag_groupTemplateRule is not None:
+            template_rule_name = flag_groupTemplateRule
+        template_name = template_name or 'default'
+        template_rule_name = template_rule_name or 'default'
         template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(template_name)
         custom_default = None
         if template and 'customDefault' in template:
@@ -3554,8 +3563,18 @@ def team_sc(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
         roll_value = rd_para.resInt
         skill_check_data = {'roll': roll_value, 'skill': current_san}
         # 获取检定结果
-        template_name = flag_groupTemplate or 'COC7'
-        template_rule_name = flag_groupTemplateRule or 'default'
+        # 模板与规则来源：群房规 > 人物卡设置 > 默认
+        template_name = None
+        template_rule_name = None
+        if pc_name is not None:
+            template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(pc_hash, pc_name)
+            template_rule_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateRuleKey(pc_hash, pc_name)
+        if flag_groupTemplate is not None:
+            template_name = flag_groupTemplate
+        if flag_groupTemplateRule is not None:
+            template_rule_name = flag_groupTemplateRule
+        template_name = template_name or 'COC7'
+        template_rule_name = template_rule_name or 'default'
         template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(template_name)
         skill_check_type, _ = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
             skill_check_data, template, template_rule_name

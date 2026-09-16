@@ -5332,12 +5332,26 @@ def unity_reply(plugin_event, Proc):
                         userConfigKey='groupTemplateRule',
                         botHash=plugin_event.bot_info.hash,
                     )
+                    # 模板与规则来源：群房规 > 人物卡设置 > 默认
                     tmp_template_name = 'COC7'
                     tmp_template_rule_name = 'default'
+                    if tmp_pc_name is not None:
+                        tmp_template_name = (
+                            OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
+                                OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform), tmp_pc_name
+                            )
+                            or 'COC7'
+                        )
+                        tmp_template_rule_name = (
+                            OlivaDiceCore.pcCard.pcCardDataGetTemplateRuleKey(
+                                OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform), tmp_pc_name
+                            )
+                            or 'default'
+                        )
                     if flag_groupTemplate is not None:
                         tmp_template_name = flag_groupTemplate
-                        if flag_groupTemplateRule is not None:
-                            tmp_template_rule_name = flag_groupTemplateRule
+                    if flag_groupTemplateRule is not None:
+                        tmp_template_rule_name = flag_groupTemplateRule
                     tmpSkillCheckType, _ = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
                         dictRuleTempData,
                         OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name),
