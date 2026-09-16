@@ -994,20 +994,23 @@ def replyRAV_command(plugin_event, Proc, valDict):
                     )
                 tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash_1, tmp_hagID)
 
+                tmp_template_name = None
+                tmp_template_rule_name = None
                 if tmp_pc_name_0 is not None:
                     dictTValue['tName'] = tmp_pc_name_0
                     tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash_0, tmp_pc_name_0)
-                    if flag_groupTemplate is not None:
-                        tmp_template_name = flag_groupTemplate
-                    if tmp_template_name is not None:
-                        tmp_Template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
                     tmp_template_rule_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateRuleKey(
                         tmp_pcHash_0, tmp_pc_name_0
                     )
-                    if flag_groupTemplateRule is not None:
-                        tmp_template_rule_name = flag_groupTemplateRule
-                    if tmp_template_rule_name is not None:
-                        tmp_TemplateRuleName = tmp_template_rule_name
+                # 群房规优先于人物卡设置，且不依赖是否选中人物卡
+                if flag_groupTemplate is not None:
+                    tmp_template_name = flag_groupTemplate
+                if flag_groupTemplateRule is not None:
+                    tmp_template_rule_name = flag_groupTemplateRule
+                if tmp_template_name is not None:
+                    tmp_Template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
+                if tmp_template_rule_name is not None:
+                    tmp_TemplateRuleName = tmp_template_rule_name
 
                 if tmp_pc_name_1 is not None:
                     dictTValue['tName01'] = tmp_pc_name_1

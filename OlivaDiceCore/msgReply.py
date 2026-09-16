@@ -6104,21 +6104,24 @@ def unity_reply(plugin_event, Proc):
             if tmp_skill_name is not None or tmp_skill_value is not None:
                 tmp_Template = None
                 tmp_TemplateRuleName = 'default'
+                tmp_template_name = None
+                tmp_template_rule_name = None
                 if tmp_pc_name_1 is not None:
                     tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
                         OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform), tmp_pc_name_1
                     )
-                    if flag_groupTemplate is not None:
-                        tmp_template_name = flag_groupTemplate
-                    if tmp_template_name is not None:
-                        tmp_Template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
                     tmp_template_rule_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateRuleKey(
                         OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform), tmp_pc_name_1
                     )
-                    if flag_groupTemplateRule is not None:
-                        tmp_template_rule_name = flag_groupTemplateRule
-                    if tmp_template_rule_name is not None:
-                        tmp_TemplateRuleName = tmp_template_rule_name
+                # 群房规优先于人物卡设置，且不依赖是否选中人物卡
+                if flag_groupTemplate is not None:
+                    tmp_template_name = flag_groupTemplate
+                if flag_groupTemplateRule is not None:
+                    tmp_template_rule_name = flag_groupTemplateRule
+                if tmp_template_name is not None:
+                    tmp_Template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
+                if tmp_template_rule_name is not None:
+                    tmp_TemplateRuleName = tmp_template_rule_name
                 rd_para_str = '1D100'
                 tmp_customDefault = None
                 if tmp_Template is not None:
