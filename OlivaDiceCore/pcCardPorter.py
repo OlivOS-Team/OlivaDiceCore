@@ -30,6 +30,7 @@ import OlivaDiceCore
 
 import base64
 import copy
+import hashlib
 import json
 import lzma
 import os
@@ -37,6 +38,8 @@ import struct
 import time
 import uuid
 import zlib
+
+import requests as req
 
 # =========================================================
 # 常量
@@ -1119,6 +1122,111 @@ def _splitAccountArgs(tokens):
     return None, rest + suffixTokens
 
 
+_AVATAR_UA = {
+    'User-Agent': (
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+        'AppleWebKit/537.36 (KHTML, like Gecko) '
+        'Chrome/120.0.0.0 Safari/537.36'
+    )
+}
+
+
+def _isOfficialQQBot(plugin_event):
+    try:
+        return plugin_event.platform.get('sdk') == 'qqGuildv2_link'
+    except Exception:
+        return False
+
+
+def _isQQNumber(user_id):
+    text = str(user_id).strip()
+    return text.isdigit() and 5 <= len(text) <= 12
+
+
+def _canAvatarVerify(plugin_event, acct):
+    """官方 bot 上点名 qq+QQ号 时可用头像校验代替 Master"""
+    if acct is None or not _isOfficialQQBot(plugin_event):
+        return False
+    return str(acct[1]).lower() == 'qq' and _isQQNumber(acct[0])
+
+
+def _getOfficialOpenId(plugin_event):
+    """优先应用级 user_openid，否则回退当前 user_id"""
+    try:
+        extend = plugin_event.data.extend or {}
+        author = None
+        event_data = extend.get('qq_event_data')
+        if isinstance(event_data, dict):
+            author = event_data.get('author')
+        if not isinstance(author, dict):
+            author = extend.get('qq_author')
+        if isinstance(author, dict):
+            for key in ('user_openid', 'id', 'member_openid'):
+                value = author.get(key)
+                if value is not None and str(value) != '':
+                    return str(value)
+    except Exception:
+        pass
+    try:
+        return str(plugin_event.data.user_id)
+    except Exception:
+        return None
+
+
+def _fetchAvatarMd5(url):
+    """内存拉取头像并计算 md5，不落盘"""
+    data = None
+    try:
+        resp = req.get(
+            url,
+            headers=_AVATAR_UA,
+            timeout=8,
+            proxies=OlivaDiceCore.webTool.get_system_proxy(),
+        )
+        if resp.status_code != 200:
+            return None
+        data = resp.content
+        if not data or len(data) < 32:
+            return None
+        return hashlib.md5(data).hexdigest()
+    except Exception:
+        return None
+    finally:
+        data = None
+
+
+def _verifyAvatarHash(plugin_event, qq_number):
+    """True 匹配, False 不匹配, None 拉图失败"""
+    openid = _getOfficialOpenId(plugin_event)
+    if openid is None:
+        return None
+    appid = plugin_event.bot_info.id
+    hash_qq = _fetchAvatarMd5('https://q1.qlogo.cn/g?b=qq&nk=%s&s=40' % qq_number)
+    hash_open = _fetchAvatarMd5('https://q.qlogo.cn/qqapp/%s/%s/40' % (appid, openid))
+    if hash_qq is None or hash_open is None:
+        return None
+    return hash_qq == hash_open
+
+
+def _authorizeSpecifiedAccount(plugin_event, dictStrCustom, dictTValue, flagIsFromMaster, acct):
+    """指定账号操作授权: 骰主直接放行, 官方 bot 可走头像校验。失败时已回复。"""
+    if flagIsFromMaster:
+        return True
+    if _canAvatarVerify(plugin_event, acct):
+        dictTValue['tPortQQ'] = str(acct[0])
+        _reply(plugin_event, dictStrCustom, dictTValue, 'strPortAvatarCheck')
+        result = _verifyAvatarHash(plugin_event, acct[0])
+        if result is True:
+            return True
+        if result is False:
+            _reply(plugin_event, dictStrCustom, dictTValue, 'strPortAvatarFail')
+            return False
+        _reply(plugin_event, dictStrCustom, dictTValue, 'strPortAvatarError')
+        return False
+    _reply(plugin_event, dictStrCustom, dictTValue, 'strPortNeedMaster')
+    return False
+
+
 def _ttlText(botHash):
     ttl = _getConsole('portCodeTTL', botHash, 86400)
     if ttl <= 0:
@@ -1244,8 +1352,9 @@ def replyPort(plugin_event, cmd_str, dictStrCustom, dictTValue, hagID, flagIsFro
         sourcePlatform = str(tmp_platform)
         acct, rest = _splitAccountArgs(args)
         if acct is not None:
-            if not flagIsFromMaster:
-                _reply(plugin_event, dictStrCustom, dictTValue, 'strPortNeedMaster')
+            if not _authorizeSpecifiedAccount(
+                plugin_event, dictStrCustom, dictTValue, flagIsFromMaster, acct
+            ):
                 return
             target_pcHash = OlivaDiceCore.pcCard.getPcHash(acct[0], acct[1])
             sourceUserId = str(acct[0])
@@ -1317,11 +1426,14 @@ def replyPort(plugin_event, cmd_str, dictStrCustom, dictTValue, hagID, flagIsFro
                 pullArgs.append(tok)
         src_pcHash = None
         flagByCode = False
-        if flagIsFromMaster:
-            acct, pullArgs = _splitAccountArgs(pullArgs)
-            if acct is not None:
-                src_pcHash = OlivaDiceCore.pcCard.getPcHash(acct[0], acct[1])
-                dictTValue['tPortTarget'] = '平台[%s] 账号[%s]' % (acct[1], acct[0])
+        acct, pullArgs = _splitAccountArgs(pullArgs)
+        if acct is not None:
+            if not _authorizeSpecifiedAccount(
+                plugin_event, dictStrCustom, dictTValue, flagIsFromMaster, acct
+            ):
+                return
+            src_pcHash = OlivaDiceCore.pcCard.getPcHash(acct[0], acct[1])
+            dictTValue['tPortTarget'] = '平台[%s] 账号[%s]' % (acct[1], acct[0])
         if pullArgs:
             code = pullArgs[0]
         if code is None and src_pcHash is None:
