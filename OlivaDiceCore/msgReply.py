@@ -6332,6 +6332,9 @@ def unity_reply(plugin_event, Proc):
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                                     dictStrCustom['strPcSkillCheckHideAtOther'], dictTValue
                                 )
+                        # 多次掷骰时 tSkillCheckReasult 为空，去掉模板残留的尾部空格
+                        tmp_reply_str = tmp_reply_str.rstrip(' ')
+                        tmp_reply_str_show = tmp_reply_str_show.rstrip(' ')
                         if flag_hide_roll and flag_is_from_group:
                             replyMsg(plugin_event, tmp_reply_str_show)
                             replyMsgPrivateByEvent(plugin_event, tmp_reply_str)
@@ -6367,6 +6370,9 @@ def unity_reply(plugin_event, Proc):
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                                     dictStrCustom['strPcSkillCheckHide'], dictTValue
                                 )
+                        # 多次掷骰时 tSkillCheckReasult 为空，去掉模板残留的尾部空格
+                        tmp_reply_str = tmp_reply_str.rstrip(' ')
+                        tmp_reply_str_show = tmp_reply_str_show.rstrip(' ')
                         if flag_hide_roll and flag_is_from_group:
                             replyMsg(plugin_event, tmp_reply_str_show)
                             replyMsgPrivateByEvent(plugin_event, tmp_reply_str)
@@ -6486,7 +6492,7 @@ def unity_reply(plugin_event, Proc):
                         )
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                         dictStrCustom['strPcSkillEnhanceCheck'], dictTValue
-                    )
+                    ).rstrip(' ')
                     replyMsg(plugin_event, tmp_reply_str)
                 return
             # 多技能或单个技能（从人物卡取值）成长模式
@@ -6594,7 +6600,7 @@ def unity_reply(plugin_event, Proc):
                         )
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                         dictStrCustom['strPcSkillEnhanceCheck'], dictTValue
-                    )
+                    ).rstrip(' ')
                     enhanceList = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
                         tmp_pcHash, tmp_pc_name, 'enhanceList', []
                     )
