@@ -5332,12 +5332,26 @@ def unity_reply(plugin_event, Proc):
                         userConfigKey='groupTemplateRule',
                         botHash=plugin_event.bot_info.hash,
                     )
+                    # 模板与规则来源：群房规 > 人物卡设置 > 默认
                     tmp_template_name = 'COC7'
                     tmp_template_rule_name = 'default'
+                    if tmp_pc_name is not None:
+                        tmp_template_name = (
+                            OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
+                                OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform), tmp_pc_name
+                            )
+                            or 'COC7'
+                        )
+                        tmp_template_rule_name = (
+                            OlivaDiceCore.pcCard.pcCardDataGetTemplateRuleKey(
+                                OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform), tmp_pc_name
+                            )
+                            or 'default'
+                        )
                     if flag_groupTemplate is not None:
                         tmp_template_name = flag_groupTemplate
-                        if flag_groupTemplateRule is not None:
-                            tmp_template_rule_name = flag_groupTemplateRule
+                    if flag_groupTemplateRule is not None:
+                        tmp_template_rule_name = flag_groupTemplateRule
                     tmpSkillCheckType, _ = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
                         dictRuleTempData,
                         OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name),
@@ -6104,21 +6118,24 @@ def unity_reply(plugin_event, Proc):
             if tmp_skill_name is not None or tmp_skill_value is not None:
                 tmp_Template = None
                 tmp_TemplateRuleName = 'default'
+                tmp_template_name = None
+                tmp_template_rule_name = None
                 if tmp_pc_name_1 is not None:
                     tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(
                         OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform), tmp_pc_name_1
                     )
-                    if flag_groupTemplate is not None:
-                        tmp_template_name = flag_groupTemplate
-                    if tmp_template_name is not None:
-                        tmp_Template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
                     tmp_template_rule_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateRuleKey(
                         OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform), tmp_pc_name_1
                     )
-                    if flag_groupTemplateRule is not None:
-                        tmp_template_rule_name = flag_groupTemplateRule
-                    if tmp_template_rule_name is not None:
-                        tmp_TemplateRuleName = tmp_template_rule_name
+                # 群房规优先于人物卡设置，且不依赖是否选中人物卡
+                if flag_groupTemplate is not None:
+                    tmp_template_name = flag_groupTemplate
+                if flag_groupTemplateRule is not None:
+                    tmp_template_rule_name = flag_groupTemplateRule
+                if tmp_template_name is not None:
+                    tmp_Template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_template_name)
+                if tmp_template_rule_name is not None:
+                    tmp_TemplateRuleName = tmp_template_rule_name
                 rd_para_str = '1D100'
                 tmp_customDefault = None
                 if tmp_Template is not None:
@@ -6315,6 +6332,9 @@ def unity_reply(plugin_event, Proc):
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                                     dictStrCustom['strPcSkillCheckHideAtOther'], dictTValue
                                 )
+                        # 多次掷骰时 tSkillCheckReasult 为空，去掉模板残留的尾部空格
+                        tmp_reply_str = tmp_reply_str.rstrip(' ')
+                        tmp_reply_str_show = tmp_reply_str_show.rstrip(' ')
                         if flag_hide_roll and flag_is_from_group:
                             replyMsg(plugin_event, tmp_reply_str_show)
                             replyMsgPrivateByEvent(plugin_event, tmp_reply_str)
@@ -6350,6 +6370,9 @@ def unity_reply(plugin_event, Proc):
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                                     dictStrCustom['strPcSkillCheckHide'], dictTValue
                                 )
+                        # 多次掷骰时 tSkillCheckReasult 为空，去掉模板残留的尾部空格
+                        tmp_reply_str = tmp_reply_str.rstrip(' ')
+                        tmp_reply_str_show = tmp_reply_str_show.rstrip(' ')
                         if flag_hide_roll and flag_is_from_group:
                             replyMsg(plugin_event, tmp_reply_str_show)
                             replyMsgPrivateByEvent(plugin_event, tmp_reply_str)
@@ -6469,7 +6492,7 @@ def unity_reply(plugin_event, Proc):
                         )
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                         dictStrCustom['strPcSkillEnhanceCheck'], dictTValue
-                    )
+                    ).rstrip(' ')
                     replyMsg(plugin_event, tmp_reply_str)
                 return
             # 多技能或单个技能（从人物卡取值）成长模式
@@ -6577,7 +6600,7 @@ def unity_reply(plugin_event, Proc):
                         )
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                         dictStrCustom['strPcSkillEnhanceCheck'], dictTValue
-                    )
+                    ).rstrip(' ')
                     enhanceList = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
                         tmp_pcHash, tmp_pc_name, 'enhanceList', []
                     )

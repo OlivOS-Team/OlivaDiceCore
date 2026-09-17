@@ -116,14 +116,14 @@ He dismissed the dismiss as worthless.
 
 同 OlivOS 迁移(换账号/换平台):
 .port code    生成当前账号的6位同骰引继码(默认24小时有效, 一次性)
-.port code [平台] [user_id]    (Master)为指定账号生成同骰引继码
+.port code [平台] [user_id]    (Master/官方头像校验)为指定账号生成同骰引继码
 .port pull [同骰码]    在新账号处凭码整套拉取
-.port pull [平台] [user_id]    (Master)直接拉取指定账号数据
+.port pull [平台] [user_id]    (Master/官方头像校验)直接拉取指定账号数据
 
 跨 OlivOS 迁移(换骰娘/换服务器, 码本身就是数据):
 .port code out    默认导出当前账号全部人物卡的跨骰引继码
 .port code out ([卡名]...)    导出当前账号的人物卡
-.port code out ([卡名]...) [平台] [user_id]    (Master)导出指定账号的人物卡
+.port code out ([卡名]...) [平台] [user_id]    (Master/官方头像校验)导出指定账号的人物卡
 .port code out [对方同骰码]    凭对方同骰码导出其跨骰引继码
 .port code out ... split    强制不发文件，改为逐段发送
 .port in [跨骰码]    在目标骰处导入(多段码逐段发送即可)
@@ -140,6 +140,7 @@ He dismissed the dismiss as worthless.
     聊天直发或 split 逐段发送时，只发送 ODC1... 引继码正文
     文件内每段会写成 .port in ODC1...，可直接复制发送
 4. [对方同骰码] 与 [平台] [user_id] 二选一，都是导出别人的数据用
+5. 官方 QQ 机器人上填写自己的 QQ 号时，可通过头像校验代替 Master；骰主始终可直接操作
 
 导入修饰参数:
 .port in force [码]    同名人物卡直接覆盖(默认为改名导入)
