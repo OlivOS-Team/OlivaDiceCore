@@ -42,6 +42,9 @@ jobs:
           curl -L https://github.com/OlivOS-Team/ChanceCustom/releases/latest/download/ChanceCustom.opk -o ./download/ChanceCustom.opk
           cp ./download/ChanceCustom.opk ./unpack
           echo "Download ChanceCustom Done"
+          curl -L https://github.com/OlivOS-Team/OlivaDiceWebUI/releases/latest/download/OlivaDiceWebUI.opk -o ./download/OlivaDiceWebUI.opk
+          cp ./download/OlivaDiceWebUI.opk ./unpack
+          echo "Download OlivaDiceWebUI Done"
           mkdir ./unpack/OlivOS
           mkdir ./unpack/OlivOS-Linux
           unzip ./download/OlivOS-Win.zip -d ./unpack/OlivOS
