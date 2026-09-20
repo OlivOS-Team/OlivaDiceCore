@@ -1589,8 +1589,8 @@ def unity_reply(plugin_event, Proc):
             if isMatchWordStart(tmp_reast_str, 'h'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'h')
                 flag_hide = True
-            tmp_reast_str = skipSpaceStart(tmp_reast_str)
-            tmp_reast_str = tmp_reast_str.rstrip(' ')
+            # 首尾空白统一去掉（含全角空格、制表符、换行），避免归一化把它们变成 ':'
+            tmp_reast_str = tmp_reast_str.strip()
             # 先完整匹配牌堆名，再按固定牌堆名表拆分尾部数字，最后支持纯数字索引
             tmp_deck_name_candidate = tmp_reast_str
             tmp_card_count_str = None
@@ -1599,8 +1599,9 @@ def unity_reply(plugin_event, Proc):
                 tmp_deck_name_candidate_norm = tmp_deck_name_candidate_norm.lstrip('_')
                 deck_name_table = OlivaDiceCore.drawCard.getDrawDeckNameTable(plugin_event.bot_info.hash)
                 deck_name_set = set(deck_name_table)
+                flag_deck_name = tmp_deck_name_candidate_norm in deck_name_set
 
-                if tmp_deck_name_candidate_norm in deck_name_set:
+                if flag_deck_name:
                     tmp_deck_name_candidate = tmp_deck_name_candidate_norm
 
                 # 计算右边连续数字的总长度
@@ -1611,8 +1612,26 @@ def unity_reply(plugin_event, Proc):
                     else:
                         break
 
-                # 仅当完整名未命中时，尝试拆分尾部数量
-                if tmp_deck_name_candidate_norm not in deck_name_set and total_digit_count > 0:
+                # 空白分隔的数量写法（如「牌堆名 5」）：
+                # 归一化会把充当分隔的空白变成 ':'，导致查表落到「牌堆名:5」上，故先在原始串上切掉数量再查表
+                if not flag_deck_name and total_digit_count > 0:
+                    tmp_space_split = re.match(r'^(.*?)\s+(\d+)$', tmp_deck_name_candidate)
+                    if tmp_space_split is not None:
+                        tmp_space_base = re.sub(r'\s+', r':', tmp_space_split.group(1).rstrip(' '))
+                        tmp_space_base = tmp_space_base.lstrip('_')
+                        if tmp_space_base not in deck_name_set:
+                            # 纯数字的牌堆名部分可按牌堆名表索引（1-based）
+                            tmp_space_base = OlivaDiceCore.drawCard.resolveDrawDeckNameByIndex(
+                                tmp_space_base,
+                                plugin_event.bot_info.hash,
+                            )
+                        if tmp_space_base in deck_name_set:
+                            tmp_deck_name_candidate = tmp_space_base
+                            tmp_card_count_str = tmp_space_split.group(2)
+                            flag_deck_name = True
+
+                # 其余情况：仅当完整名未命中时，尝试拆分尾部数量
+                if not flag_deck_name and total_digit_count > 0:
                     found_match = False
                     for digit_count in range(1, total_digit_count + 1):
                         tmp_potential_deck_name = tmp_deck_name_candidate_norm[:-digit_count]
@@ -1624,15 +1643,18 @@ def unity_reply(plugin_event, Proc):
                             break
 
                     if not found_match:
+                        tmp_deck_name_candidate_index = tmp_deck_name_candidate_norm
                         # 纯数字参数可按牌堆名表索引（1-based）
                         if tmp_deck_name_candidate_norm.isdecimal():
-                            tmp_deck_name_candidate = OlivaDiceCore.drawCard.resolveDrawDeckNameByIndex(
+                            tmp_deck_name_candidate_index = OlivaDiceCore.drawCard.resolveDrawDeckNameByIndex(
                                 tmp_deck_name_candidate_norm,
                                 plugin_event.bot_info.hash,
                             )
-                        # 保留原行为：都未命中时，按“末尾连续数字”视作数量
-                        if tmp_deck_name_candidate == tmp_deck_name_candidate_norm:
-                            tmp_deck_name_candidate = tmp_deck_name_candidate_norm[:-total_digit_count]
+                        if tmp_deck_name_candidate_index != tmp_deck_name_candidate_norm:
+                            tmp_deck_name_candidate = tmp_deck_name_candidate_index
+                        else:
+                            # 保留原行为：都未命中时，按“末尾连续数字”视作数量
+                            tmp_deck_name_candidate = tmp_deck_name_candidate_norm[:-total_digit_count].rstrip(':')
                             tmp_card_count_str = tmp_deck_name_candidate_norm[-total_digit_count:]
             if tmp_card_count_str == '':
                 tmp_card_count_str = None
