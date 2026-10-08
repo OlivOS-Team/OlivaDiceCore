@@ -18,8 +18,78 @@ import OlivOS
 import OlivaDiceCore
 
 import os
+import sys
 import json
 import random
+
+
+def getDictStrCustomDefault():
+    # 已加载模块的 dictStrCustom 即为默认回复；后加载模块覆盖同名键
+    result = {}
+    try:
+        for key, value in OlivaDiceCore.msgCustom.dictStrCustom.items():
+            if isinstance(key, str) and isinstance(value, str):
+                result[key] = value
+    except Exception:
+        pass
+    for module in list(sys.modules.values()):
+        try:
+            values = getattr(getattr(module, 'msgCustom', None), 'dictStrCustom', None)
+            if type(values) is not dict:
+                continue
+            for key, value in values.items():
+                if isinstance(key, str) and isinstance(value, str):
+                    result[key] = value
+        except Exception:
+            continue
+    return result
+
+
+def pruneMsgCustomByBotHash(botHash, defaults=None):
+    # 与默认完全一致的自定义条目直接删掉，并按默认重新加载
+    if defaults is None:
+        defaults = getDictStrCustomDefault()
+    if botHash not in OlivaDiceCore.msgCustom.dictStrCustomUpdateDict:
+        return False
+    updates = OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[botHash]
+    if type(updates) is not dict:
+        OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[botHash] = {}
+        return True
+    changed = False
+    for key in list(updates.keys()):
+        value = updates[key]
+        if isinstance(value, str) and key in defaults and value == defaults[key]:
+            del updates[key]
+            if botHash in OlivaDiceCore.msgCustom.dictStrCustomDict:
+                OlivaDiceCore.msgCustom.dictStrCustomDict[botHash][key] = defaults[key]
+            changed = True
+    return changed
+
+
+def pruneAndSaveMsgCustom():
+    # 其它模块 init 之后再清一次，才能对上 Joy/Master 等默认回复
+    defaults = getDictStrCustomDefault()
+    for botHash in list(OlivaDiceCore.msgCustom.dictStrCustomUpdateDict.keys()):
+        if pruneMsgCustomByBotHash(botHash, defaults=defaults):
+            saveMsgCustomByBotHash(botHash, defaults=defaults)
+
+
+def setMsgCustomByBotHash(botHash, key, value):
+    # 写成默认值时不落盘，删掉该条目后重新加载默认回复
+    if botHash not in OlivaDiceCore.msgCustom.dictStrCustomDict:
+        OlivaDiceCore.msgCustom.dictStrCustomDict[botHash] = OlivaDiceCore.msgCustom.dictStrCustom.copy()
+    if botHash not in OlivaDiceCore.msgCustom.dictStrCustomUpdateDict:
+        OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[botHash] = {}
+    if type(OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[botHash]) is not dict:
+        OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[botHash] = {}
+    defaults = getDictStrCustomDefault()
+    if isinstance(value, str) and key in defaults and value == defaults[key]:
+        OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[botHash].pop(key, None)
+        OlivaDiceCore.msgCustom.dictStrCustomDict[botHash][key] = defaults[key]
+    else:
+        OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[botHash][key] = value
+        OlivaDiceCore.msgCustom.dictStrCustomDict[botHash][key] = value
+    saveMsgCustomByBotHash(botHash, defaults=defaults)
 
 
 def initMsgCustom(bot_info_dict):
@@ -28,6 +98,7 @@ def initMsgCustom(bot_info_dict):
         OlivaDiceCore.msgCustom.dictStrCustomDict[bot_info_dict_this] = OlivaDiceCore.msgCustom.dictStrCustom.copy()
     releaseDir(OlivaDiceCore.data.dataDirRoot)
     botHash_list = os.listdir(OlivaDiceCore.data.dataDirRoot)
+    defaults = getDictStrCustomDefault()
     for botHash_list_this in botHash_list:
         botHash = botHash_list_this
         releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash)
@@ -41,16 +112,19 @@ def initMsgCustom(bot_info_dict):
                 OlivaDiceCore.msgCustom.dictStrCustomDict[botHash].update(
                     OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[botHash]
                 )
+                pruneMsgCustomByBotHash(botHash, defaults=defaults)
         except Exception:
             continue
 
 
 def saveMsgCustom(bot_info_dict):
+    defaults = getDictStrCustomDefault()
     for botHash in bot_info_dict:
-        saveMsgCustomByBotHash(botHash)
+        saveMsgCustomByBotHash(botHash, defaults=defaults)
 
 
-def saveMsgCustomByBotHash(botHash):
+def saveMsgCustomByBotHash(botHash, defaults=None):
+    pruneMsgCustomByBotHash(botHash, defaults=defaults)
     releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash)
     releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/console')
     customReplyDir = OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/console'
