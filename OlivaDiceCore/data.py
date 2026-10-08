@@ -22,8 +22,8 @@ import uuid
 import OlivOS
 
 OlivaDiceCore_name = 'OlivaDice核心模块'
-OlivaDiceCore_ver = '3.4.86'
-OlivaDiceCore_svn = 1166
+OlivaDiceCore_ver = '3.5.1'
+OlivaDiceCore_svn = 1201
 OlivaDiceCore_ver_short = '%s(%s)' % (str(OlivaDiceCore_ver), str(OlivaDiceCore_svn))
 
 exce_path = os.getcwd()
@@ -62,4 +62,4 @@ dataDirRoot = './plugin/data/OlivaDice'
 
 backupDirRoot = './plugin/backup'
 
-defaultOlivaDicePulseUrl = 'https://api.dice.center/dicestatusup/'
+defaultOlivaDicePulseUrl = 'http://api.dice.center/dicestatusup/'

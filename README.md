@@ -84,4 +84,5 @@ Latest Release: [![GitHub release](https://img.shields.io/github/release-pre/Oli
 - [OlivaDiceOdyssey](https://github.com/OlivOS-Team/OlivaDiceOdyssey)
 - [OlivaStoryCore](https://github.com/OlivOS-Team/OlivaStoryCore)
 - [OlivaDiceNativeGUI](https://github.com/OlivOS-Team/OlivaDiceNativeGUI)
+- [OlivaDiceWebUI](https://github.com/OlivOS-Team/OlivaDiceWebUI)
 - [ChanceCustom](https://github.com/OlivOS-Team/ChanceCustom)
