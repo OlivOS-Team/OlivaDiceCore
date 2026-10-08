@@ -3,7 +3,7 @@
         "OlivaDiceCore": {
             "main": {
                 "command": "OlivaDiceCore",
-                "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceCore.opk",
+                "opk_path": "http://api.dice.center/OlivaDiceVer/main/OlivaDiceCore.opk",
                 "svn": 1200,
                 "version": "3.5.0"
             },
@@ -17,7 +17,7 @@
         "OlivaDiceJoy": {
             "main": {
                 "command": "OlivaDiceJoy",
-                "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceJoy.opk",
+                "opk_path": "http://api.dice.center/OlivaDiceVer/main/OlivaDiceJoy.opk",
                 "svn": 26,
                 "version": "3.0.18"
             },
@@ -31,7 +31,7 @@
         "OlivaDiceMaster": {
             "main": {
                 "command": "OlivaDiceMaster",
-                "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceMaster.opk",
+                "opk_path": "http://api.dice.center/OlivaDiceVer/main/OlivaDiceMaster.opk",
                 "svn": 32,
                 "version": "3.0.31"
             },
@@ -45,7 +45,7 @@
         "OlivaDiceLogger": {
             "main": {
                 "command": "OlivaDiceLogger",
-                "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceLogger.opk",
+                "opk_path": "http://api.dice.center/OlivaDiceVer/main/OlivaDiceLogger.opk",
                 "svn": 55,
                 "version": "3.0.47"
             },
@@ -59,7 +59,7 @@
         "OlivaDiceOdyssey": {
             "main": {
                 "command": "OlivaDiceOdyssey",
-                "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceOdyssey.opk",
+                "opk_path": "http://api.dice.center/OlivaDiceVer/main/OlivaDiceOdyssey.opk",
                 "svn": 19,
                 "version": "3.0.18"
             },
@@ -73,7 +73,7 @@
         "OlivaStoryCore": {
             "main": {
                 "command": "OlivaStoryCore",
-                "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaStoryCore.opk",
+                "opk_path": "http://api.dice.center/OlivaDiceVer/main/OlivaStoryCore.opk",
                 "svn": 7,
                 "version": "3.0.6"
             },
@@ -87,7 +87,7 @@
         "OlivaDiceNativeGUI": {
             "main": {
                 "command": "OlivaDiceNativeGUI",
-                "opk_path": "https://api.dice.center/OlivaDiceVer/main/OlivaDiceNativeGUI.opk",
+                "opk_path": "http://api.dice.center/OlivaDiceVer/main/OlivaDiceNativeGUI.opk",
                 "svn": 60,
                 "version": "3.0.59"
             },
@@ -101,7 +101,7 @@
         "ChanceCustom": {
             "main": {
                 "command": "ChanceCustom",
-                "opk_path": "https://api.dice.center/OlivaDiceVer/main/ChanceCustom.opk",
+                "opk_path": "http://api.dice.center/OlivaDiceVer/main/ChanceCustom.opk",
                 "svn": 39,
                 "version": "0.2.24"
             },
