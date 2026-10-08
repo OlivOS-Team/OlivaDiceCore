@@ -84,6 +84,7 @@ def unity_init(plugin_event, Proc):
 
 
 def unity_init_after(plugin_event, Proc):
+    OlivaDiceCore.msgCustomManager.pruneAndSaveMsgCustom()
     for bot_info_this in Proc.Proc_data['bot_info_dict']:
         bot_info = Proc.Proc_data['bot_info_dict'][bot_info_this]
         if bot_info.platform['sdk'] in [
@@ -1007,13 +1008,9 @@ def unity_reply(plugin_event, Proc):
                                 replyMsg(plugin_event, tmp_reply_str)
                     elif len(tmp_reast_list) >= 2:
                         tmp_new_str = ' '.join(tmp_reast_list[1:])
-                        OlivaDiceCore.msgCustom.dictStrCustomUpdateDict[plugin_event.bot_info.hash][
-                            tmp_reast_list[0]
-                        ] = tmp_new_str
-                        OlivaDiceCore.msgCustom.dictStrCustomDict[plugin_event.bot_info.hash][tmp_reast_list[0]] = (
-                            tmp_new_str
+                        OlivaDiceCore.msgCustomManager.setMsgCustomByBotHash(
+                            plugin_event.bot_info.hash, tmp_reast_list[0], tmp_new_str
                         )
-                        OlivaDiceCore.msgCustomManager.saveMsgCustomByBotHash(plugin_event.bot_info.hash)
                         dictTValue['tStrName'] = tmp_reast_list[0]
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                             dictStrCustom['strSetStr'], dictTValue
