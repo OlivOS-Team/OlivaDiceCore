@@ -16,19 +16,27 @@ jobs:
     env:
       OlivOSTag: ""
     steps:
-      - name: Get OlivOS Latest Release Version Tag
-        id: OlivOSTag
+      - name: Get Latest Release Version Tags (incl. prerelease)
+        id: getTags
         uses: actions/github-script@v7
         with:
           script: |
-            const response = await github.rest.repos.getLatestRelease({
-              owner: 'OlivOS-Team',
-              repo: 'OlivOS',
-            });
-            const tagName = response.data.tag_name;
-            console.log(`OlivOS Latest Release Version: ${tagName}`);
-            core.exportVariable('OlivOSTag', tagName);
-            return tagName;
+            const repos = ['OlivOS', 'ChanceCustom', 'OlivaDiceWebUI'];
+            for (const repo of repos) {
+              const response = await github.rest.repos.listReleases({
+                owner: 'OlivOS-Team',
+                repo: repo,
+                per_page: 10,
+              });
+              const release = response.data.find(r => !r.draft);
+              if (!release) {
+                throw new Error(`No release found for OlivOS-Team/${repo}`);
+              }
+              const tagName = release.tag_name;
+              const isPre = release.prerelease ? ' (prerelease)' : '';
+              console.log(`${repo} Latest Version: ${tagName}${isPre}`);
+              core.exportVariable(`${repo}Tag`, tagName);
+            }
       - uses: actions/checkout@v3
       - name: Download & Unpack OlivOS
         run: |
@@ -36,13 +44,13 @@ jobs:
           mkdir ./unpack
           mkdir ./release
           mkdir ./release-final
-          curl -L https://github.com/OlivOS-Team/OlivOS/releases/latest/download/OlivOS-Win.zip -o ./download/OlivOS-Win.zip
-          curl -L https://github.com/OlivOS-Team/OlivOS/releases/latest/download/OlivOS-Linux.zip -o ./download/OlivOS-Linux.zip
+          curl -L https://github.com/OlivOS-Team/OlivOS/releases/download/${{ env.OlivOSTag }}/OlivOS-Win.zip -o ./download/OlivOS-Win.zip
+          curl -L https://github.com/OlivOS-Team/OlivOS/releases/download/${{ env.OlivOSTag }}/OlivOS-Linux.zip -o ./download/OlivOS-Linux.zip
           echo "Download OlivOS Done"
-          curl -L https://github.com/OlivOS-Team/ChanceCustom/releases/latest/download/ChanceCustom.opk -o ./download/ChanceCustom.opk
+          curl -L https://github.com/OlivOS-Team/ChanceCustom/releases/download/${{ env.ChanceCustomTag }}/ChanceCustom.opk -o ./download/ChanceCustom.opk
           cp ./download/ChanceCustom.opk ./unpack
           echo "Download ChanceCustom Done"
-          curl -L https://github.com/OlivOS-Team/OlivaDiceWebUI/releases/latest/download/OlivaDiceWebUI.opk -o ./download/OlivaDiceWebUI.opk
+          curl -L https://github.com/OlivOS-Team/OlivaDiceWebUI/releases/download/${{ env.OlivaDiceWebUITag }}/OlivaDiceWebUI.opk -o ./download/OlivaDiceWebUI.opk
           cp ./download/OlivaDiceWebUI.opk ./unpack
           echo "Download OlivaDiceWebUI Done"
           mkdir ./unpack/OlivOS
