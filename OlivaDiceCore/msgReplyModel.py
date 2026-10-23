@@ -1334,11 +1334,15 @@ def replyRI_command(
 
     result_list = []
     count = 1
+    flag_lazy = False
 
     for tmp_reast_str_list_this in tmp_reast_str_list:
         tmp_reast_str_list_this = tmp_reast_str_list_this.strip(' ')
         if not tmp_reast_str_list_this:
-            continue
+            # 未提供表达式与名称时，回退到当前选中人物卡记录的「先攻」值，且只回退一次
+            if flag_lazy:
+                continue
+            flag_lazy = True
 
         # 检查是否是批量生成格式: 5#敌人+3 或 1D3黄色敌人
         batch_match = re.match(r'^(\d+)#(.+)$', tmp_reast_str_list_this)
@@ -1349,7 +1353,7 @@ def replyRI_command(
             batch_count = int(batch_match.group(1))
             batch_content = batch_match.group(2).strip()
             # 传入 count 作为起始序号，并获取实际添加的数量
-            process_batch_init(
+            added_count = process_batch_init(
                 plugin_event,
                 batch_count,
                 batch_content,
@@ -1361,8 +1365,9 @@ def replyRI_command(
                 result_list,
                 count,
             )
-            # 批量添加只算1个条目（整体显示）
-            count += 1
+            # 批量添加只算1个条目（整体显示），全部失败时不占用序号
+            if added_count:
+                count += 1
         elif dice_batch_match:
             # 骰子批量生成模式: 1D3黄色敌人
             dice_expr = dice_batch_match.group(1)
@@ -1373,7 +1378,7 @@ def replyRI_command(
             tmp_dice_rd.roll()
             if tmp_dice_rd.resError is None:
                 batch_count = tmp_dice_rd.resInt
-                process_batch_init(
+                added_count = process_batch_init(
                     plugin_event,
                     batch_count,
                     batch_content,
@@ -1385,8 +1390,9 @@ def replyRI_command(
                     result_list,
                     count,
                 )
-                # 批量添加只算1个条目（整体显示）
-                count += 1
+                # 批量添加只算1个条目（整体显示），全部失败时不占用序号
+                if added_count:
+                    count += 1
         else:
             # 普通单个处理
             added = process_single_init(
@@ -1405,8 +1411,12 @@ def replyRI_command(
 
     if flag_reply:
         dictTValue['tResult'] = '\n'.join(result_list)
-        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitSet'], dictTValue)
-        OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+        if result_list:
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitSet'], dictTValue)
+            OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+        else:
+            # 没有任何有效条目时不回复「设置完成」，改为给出用法提示
+            OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'ri')
 
 
 def process_batch_init(
@@ -1644,6 +1654,21 @@ def process_single_init(
             tmp_name = OlivaDiceCore.pcCard.fixName(tmp_name)
             if not OlivaDiceCore.pcCard.checkPcName(tmp_name):
                 tmp_name = None
+    else:
+        # 未提供表达式与名称：取当前选中人物卡记录的「先攻」值作为表达式
+        tmp_value = None
+        tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+        tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
+        if tmp_pc_name is not None:
+            tmp_value_dict = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                pcHash=tmp_pcHash,
+                pcCardName=tmp_pc_name,
+                dataKey='mappingRecord',
+                resDefault={},
+            )
+            if '先攻' in tmp_value_dict:
+                tmp_value = tmp_value_dict['先攻']
+                tmp_name = tmp_pc_name
 
     tmp_value_final = None
     display_detail = None
