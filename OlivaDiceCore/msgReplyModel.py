@@ -59,6 +59,30 @@ def op_list_get():
     return ['+', '-', '*', '/', '^']
 
 
+def split_expr_para(data, op_list=None):
+    """从串首截出骰子表达式段（数字、运算符、D），返回 (表达式, 剩余串)。
+
+    用于把 `+2`、`+3d40` 这类跟在技能名或数值后的表达式切出来，
+    切分规则与 ra 原有的表达式解析保持一致。
+    """
+    if op_list is None:
+        op_list = op_list_get()
+    expr_end = 0
+    in_dice = False
+    for i, char in enumerate(data):
+        if char.isspace():
+            expr_end = i
+            break
+        if char.upper() == 'D':
+            in_dice = True
+        if not (char.isdigit() or char in op_list or char.upper() == 'D'):
+            if not in_dice:
+                expr_end = i
+                break
+    expr_str = data[:expr_end] if expr_end > 0 else data
+    return expr_str, data[len(expr_str) :]
+
+
 def replyCONTEXT_fliter(tmp_reast_str):
     res = False
     if 'replyContextPrefixFliter' in OlivaDiceCore.crossHook.dictHookList:
@@ -3205,25 +3229,17 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
         skill_expr = skill_expr[pos:].strip()
         if skill_expr:
             if skill_expr[0] in op_list:
-                expr_end = 0
-                in_dice = False
-                for i, char in enumerate(skill_expr):
-                    if char.isspace():
-                        expr_end = i
-                        break
-                    if char.upper() == 'D':
-                        in_dice = True
-                    if not (char.isdigit() or char in op_list or char.upper() == 'D'):
-                        if not in_dice:
-                            expr_end = i
-                            break
-                expr_str = skill_expr[:expr_end] if expr_end > 0 else skill_expr
-                skill_expr = skill_expr[len(expr_str) :].strip()
+                expr_str, skill_expr = split_expr_para(skill_expr, op_list)
+                skill_expr = skill_expr.strip()
             elif skill_expr[0].isdigit():
                 [num_str, skill_expr] = OlivaDiceCore.msgReply.getNumberPara(skill_expr)
                 if num_str.isdigit():
                     fixed_skill_value = int(num_str)
                 skill_expr = OlivaDiceCore.msgReply.skipSpaceStart(skill_expr)
+                # 数值后仍可跟运算表达式：.teamra50+3d40，以该数值为基础值逐成员计算
+                if skill_expr and skill_expr[0] in op_list:
+                    expr_str, skill_expr = split_expr_para(skill_expr, op_list)
+                    skill_expr = skill_expr.strip()
         if skill_expr:
             [num_str, skill_expr] = OlivaDiceCore.msgReply.getNumberPara(skill_expr)
             if num_str.isdigit():
