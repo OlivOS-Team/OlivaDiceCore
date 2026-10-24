@@ -1359,13 +1359,16 @@ def replyRI_command(
     result_list = []
     count = 1
     flag_lazy = False
+    # 分隔符切出的空 token 与「整条命令没有参数」要区别对待：
+    # 前者是用户多打了逗号，直接跳过；只有后者才回退到人物卡记录的「先攻」值
+    flag_has_valid = any(tmp_reast_str_list_this.strip() for tmp_reast_str_list_this in tmp_reast_str_list)
 
     for tmp_reast_str_list_this in tmp_reast_str_list:
         tmp_reast_str_list_this = tmp_reast_str_list_this.strip(' ')
         if not tmp_reast_str_list_this:
-            # 未提供表达式与名称时，回退到当前选中人物卡记录的「先攻」值，且只回退一次
-            if flag_lazy:
+            if flag_has_valid or flag_lazy:
                 continue
+            # 未提供表达式与名称时，回退到当前选中人物卡记录的「先攻」值，且只回退一次
             flag_lazy = True
 
         # 检查是否是批量生成格式: 5#敌人+3 或 1D3黄色敌人
@@ -1690,6 +1693,9 @@ def process_single_init(
                 dataKey='mappingRecord',
                 resDefault={},
             )
+            # 人物卡数据可能被手工改坏成非字典，此时按「没有记录」处理而不是抛异常
+            if not isinstance(tmp_value_dict, dict):
+                tmp_value_dict = {}
             if '先攻' in tmp_value_dict:
                 tmp_value = tmp_value_dict['先攻']
                 tmp_name = tmp_pc_name
@@ -3290,12 +3296,16 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
         current_skill_value = base_skill_value
         expr_result_str = str(base_skill_value)
         if expr_str:
+            # 表达式求值失败时回落到基础值并在展示中标注，避免静默拿错值当检定阈值
+            calc_base = fixed_skill_value if fixed_skill_value is not None else base_skill_value
             try:
                 # 如果有固定值，基于固定值计算表达式
-                calc_base = fixed_skill_value if fixed_skill_value is not None else base_skill_value
                 rd_para = OlivaDiceCore.onedice.RD(f'{calc_base}{expr_str}')
                 rd_para.roll()
-                if not rd_para.resError:
+                if rd_para.resError:
+                    current_skill_value = calc_base
+                    expr_result_str = f'{calc_base}{expr_str}=无效(按{calc_base})'
+                else:
                     current_skill_value = rd_para.resInt
                     # 构建表达式详情
                     if 'D' in expr_str.upper():
@@ -3303,7 +3313,8 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
                     else:
                         expr_result_str = f'{calc_base}{expr_str}={current_skill_value}'
             except Exception:
-                pass
+                current_skill_value = calc_base
+                expr_result_str = f'{calc_base}{expr_str}=无效(按{calc_base})'
         # 没有表达式但有固定值时使用固定值
         elif fixed_skill_value is not None:
             current_skill_value = fixed_skill_value
