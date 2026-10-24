@@ -852,6 +852,11 @@ def record_skill_check_result(user_id, pc_name, skill_name, is_success, platform
             userConfigValue=log_status,
             botHash=botHash,
         )
+        # 立即落盘：logStatus 是累积统计，此前只留在内存里等消息计数攒够
+        # userConfigCount（默认 100 条）才批量 flush，进程异常退出会把这期间的记录全丢掉
+        OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+            userHash=OlivaDiceCore.userConfig.getUserHash(userId=hagId, userType='group', platform=platform)
+        )
 
     except Exception:
         import traceback
