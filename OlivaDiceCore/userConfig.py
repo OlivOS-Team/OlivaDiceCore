@@ -17,6 +17,8 @@ _  / / /_  /  __  / __ | / /__  /| |_  / / /__  / _  /    __  __/
 import OlivaDiceCore
 
 import json
+import copy
+import tempfile
 import threading
 import time
 import hashlib
@@ -111,23 +113,28 @@ def setUserConfigByKey(userId, userType, platform, userConfigKey, userConfigValu
     userConfigNoteKey = 'configNote'
     if userConfigKey not in dictUserConfigNoteDefault:
         return
-    # 应用重定向逻辑
+    # 应用重定向逻辑（纯读取，留在锁外，避免与 console 的锁形成锁序依赖）
     redirectedBotHash = getRedirectedBotHash(botHash, userConfigKey, forceNoRedirect)
     userHash = getUserHash(userId=userId, userType=userType, platform=platform)
-    if userHash not in listUserConfigDataUpdate:
-        listUserConfigDataUpdate.append(userHash)
-    if userHash not in dictUserConfigData:
-        dictUserConfigData[userHash] = {}
-    if redirectedBotHash not in dictUserConfigData[userHash]:
-        dictUserConfigData[userHash][redirectedBotHash] = {}
-    if userConfigNoteKey not in dictUserConfigData[userHash][redirectedBotHash]:
-        dictUserConfigData[userHash][redirectedBotHash][userConfigNoteKey] = {}
-    dictUserConfigData[userHash][redirectedBotHash]['userId'] = userId
-    dictUserConfigData[userHash][redirectedBotHash]['userType'] = userType
-    dictUserConfigData[userHash][redirectedBotHash]['platform'] = platform
-    if 'lastHit' not in dictUserConfigData[userHash][redirectedBotHash]:
-        dictUserConfigData[userHash][redirectedBotHash]['lastHit'] = dictUserConfigDefault['lastHit']
-    dictUserConfigData[userHash][redirectedBotHash][userConfigNoteKey][userConfigKey] = userConfigValue
+    # OlivOS 在线程池中并发派发插件事件，此处必须与写盘快照互斥
+    gUserConfigLock.acquire()
+    try:
+        if userHash not in listUserConfigDataUpdate:
+            listUserConfigDataUpdate.append(userHash)
+        if userHash not in dictUserConfigData:
+            dictUserConfigData[userHash] = {}
+        if redirectedBotHash not in dictUserConfigData[userHash]:
+            dictUserConfigData[userHash][redirectedBotHash] = {}
+        if userConfigNoteKey not in dictUserConfigData[userHash][redirectedBotHash]:
+            dictUserConfigData[userHash][redirectedBotHash][userConfigNoteKey] = {}
+        dictUserConfigData[userHash][redirectedBotHash]['userId'] = userId
+        dictUserConfigData[userHash][redirectedBotHash]['userType'] = userType
+        dictUserConfigData[userHash][redirectedBotHash]['platform'] = platform
+        if 'lastHit' not in dictUserConfigData[userHash][redirectedBotHash]:
+            dictUserConfigData[userHash][redirectedBotHash]['lastHit'] = dictUserConfigDefault['lastHit']
+        dictUserConfigData[userHash][redirectedBotHash][userConfigNoteKey][userConfigKey] = userConfigValue
+    finally:
+        gUserConfigLock.release()
 
 
 dictConfigKeyToConsoleSwitchMapping = {'showDefault': 'defaultShowDefault', 'autoSnEnabled': 'defaultAutoSn'}
@@ -210,29 +217,68 @@ def releaseUnityMsgCount(data, botHash, flagForceWrite=False):
         flag_need_release = True
     gMsgCountLock.release()
     gUserConfigLock.acquire()
-    for data_this in data:
-        [userId, userType, platform] = data_this
-        tmp_UserHash = getUserHash(userId, userType, platform)
-        if tmp_UserHash not in listUserConfigDataUpdate:
-            listUserConfigDataUpdate.append(tmp_UserHash)
-        if tmp_UserHash not in dictUserConfigData:
-            dictUserConfigData[tmp_UserHash] = {}
-        if botHash not in dictUserConfigData[tmp_UserHash]:
-            dictUserConfigData[tmp_UserHash][botHash] = {}
-        dictUserConfigData[tmp_UserHash][botHash]['userId'] = userId
-        dictUserConfigData[tmp_UserHash][botHash]['userType'] = userType
-        dictUserConfigData[tmp_UserHash][botHash]['platform'] = platform
-        dictUserConfigData[tmp_UserHash][botHash]['lastHit'] = int(time.time())
-    if flag_need_release or flagForceWrite:
-        tmp_dictUserConfigData = dictUserConfigData.copy()
-        tmp_listUserConfigDataUpdate = listUserConfigDataUpdate.copy()
-        listUserConfigDataUpdate = []
-    gUserConfigLock.release()
+    try:
+        for data_this in data:
+            [userId, userType, platform] = data_this
+            tmp_UserHash = getUserHash(userId, userType, platform)
+            if tmp_UserHash not in listUserConfigDataUpdate:
+                listUserConfigDataUpdate.append(tmp_UserHash)
+            if tmp_UserHash not in dictUserConfigData:
+                dictUserConfigData[tmp_UserHash] = {}
+            if botHash not in dictUserConfigData[tmp_UserHash]:
+                dictUserConfigData[tmp_UserHash][botHash] = {}
+            dictUserConfigData[tmp_UserHash][botHash]['userId'] = userId
+            dictUserConfigData[tmp_UserHash][botHash]['userType'] = userType
+            dictUserConfigData[tmp_UserHash][botHash]['platform'] = platform
+            dictUserConfigData[tmp_UserHash][botHash]['lastHit'] = int(time.time())
+        if flag_need_release or flagForceWrite:
+            # 锁内只做快照，且必须逐条深拷贝：浅拷贝得到的仍是同一份内层 dict，
+            # 锁一释放就会被并发写入改动，序列化时可能抛 RuntimeError 或写出不一致内容
+            tmp_listUserConfigDataUpdate = list(listUserConfigDataUpdate)
+            tmp_dictUserConfigData = {
+                tmp_userHash: copy.deepcopy(dictUserConfigData[tmp_userHash])
+                for tmp_userHash in tmp_listUserConfigDataUpdate
+                if tmp_userHash in dictUserConfigData
+            }
+            listUserConfigDataUpdate = []
+    finally:
+        gUserConfigLock.release()
     if flag_need_release or flagForceWrite:
         writeUserConfig(tmp_dictUserConfigData, tmp_listUserConfigDataUpdate)
 
 
 # io
+def writeUserConfigDataAtomic(userConfigDataPath, data):
+    """同目录临时文件 + 原子替换，避免写入中断或并发写导致 JSON 残缺"""
+    userConfigDataDir = os.path.dirname(userConfigDataPath)
+    releaseDir(userConfigDataDir)
+    jsonStr = json.dumps(data, ensure_ascii=False, indent=4)
+    tmp_fd, tmpPath = tempfile.mkstemp(
+        dir=userConfigDataDir, prefix=os.path.basename(userConfigDataPath) + '.', suffix='.tmp'
+    )
+    try:
+        with os.fdopen(tmp_fd, 'w', encoding='utf-8') as tmpPath_f:
+            tmpPath_f.write(jsonStr)
+        # Windows 下目标文件正被其他进程打开（杀毒扫描、备份等）时 os.replace 会失败，
+        # 短暂重试；仍失败则退化为直接写入，避免整次配置更新丢失
+        for tmp_retry in range(5):
+            try:
+                os.replace(tmpPath, userConfigDataPath)
+                return
+            except PermissionError:
+                if tmp_retry >= 4:
+                    with open(userConfigDataPath, 'w', encoding='utf-8') as userConfigDataPath_f:
+                        userConfigDataPath_f.write(jsonStr)
+                    return
+                time.sleep(0.02)
+    finally:
+        if os.path.exists(tmpPath):
+            try:
+                os.unlink(tmpPath)
+            except OSError:
+                pass
+
+
 def writeUserConfig(data, updateList):
     releaseDir(OlivaDiceCore.data.dataDirRoot)
     for data_this in updateList:
@@ -243,23 +289,25 @@ def writeUserConfig(data, updateList):
                 releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash)
                 releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/user')
                 userConfigDataPath = OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/user/' + userHash
-                with open(userConfigDataPath, 'w', encoding='utf-8') as userConfigDataPath_f:
-                    userConfigDataPath_f.write(json.dumps(data[userHash], ensure_ascii=False, indent=4))
+                writeUserConfigDataAtomic(userConfigDataPath, data[userHash])
 
 
 def writeUserConfigByUserHash(userHash):
     releaseDir(OlivaDiceCore.data.dataDirRoot)
-    if userHash in dictUserConfigData:
-        gUserConfigLock.acquire()
-        tmp_dictUserConfigData_this = dictUserConfigData[userHash].copy()
+    gUserConfigLock.acquire()
+    try:
+        tmp_dictUserConfigData_this = None
+        if userHash in dictUserConfigData:
+            tmp_dictUserConfigData_this = copy.deepcopy(dictUserConfigData[userHash])
+    finally:
         gUserConfigLock.release()
+    if tmp_dictUserConfigData_this is not None:
         for tmp_dictUserConfigData_this_this in tmp_dictUserConfigData_this:
             botHash = tmp_dictUserConfigData_this_this
             releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash)
             releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/user')
             userConfigDataPath = OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/user/' + userHash
-            with open(userConfigDataPath, 'w', encoding='utf-8') as userConfigDataPath_f:
-                userConfigDataPath_f.write(json.dumps(tmp_dictUserConfigData_this, ensure_ascii=False, indent=4))
+            writeUserConfigDataAtomic(userConfigDataPath, tmp_dictUserConfigData_this)
 
 
 def readUserConfig():
