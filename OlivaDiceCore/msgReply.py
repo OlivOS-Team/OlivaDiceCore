@@ -6080,20 +6080,8 @@ def unity_reply(plugin_event, Proc):
                     # 检查是否有运算符
                     if tmp_reast_str[0] in op_list:
                         # 带运算表达式
-                        expr_end = 0
-                        in_dice = False
-                        for i, char in enumerate(tmp_reast_str):
-                            if char.isspace():
-                                expr_end = i
-                                break
-                            if char.upper() == 'D':
-                                in_dice = True
-                            if not (char.isdigit() or char in op_list or char.upper() == 'D'):
-                                if not in_dice:
-                                    expr_end = i
-                                    break
-                        expr_str = tmp_reast_str[:expr_end] if expr_end > 0 else tmp_reast_str
-                        tmp_reast_str = tmp_reast_str[len(expr_str) :].strip()
+                        expr_str, tmp_reast_str = OlivaDiceCore.msgReplyModel.split_expr_para(tmp_reast_str, op_list)
+                        tmp_reast_str = tmp_reast_str.strip()
                         base_value = None
                         if tmp_reast_str and tmp_reast_str[0].isdigit():
                             [base_value, tmp_reast_str] = getNumberPara(tmp_reast_str)
@@ -6123,6 +6111,32 @@ def unity_reply(plugin_event, Proc):
                             [tmp_skill_value, tmp_reast_str] = getNumberPara(tmp_reast_str)
                             tmp_skill_value = int(tmp_skill_value)
                             tmp_skill_value_str = str(tmp_skill_value)
+                            # 数值后仍可跟运算表达式：.ra50+2 / .ra50+3d40，以该数值为基础值
+                            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+                            if tmp_reast_str and tmp_reast_str[0] in op_list:
+                                expr_str, tmp_reast_str = OlivaDiceCore.msgReplyModel.split_expr_para(
+                                    tmp_reast_str, op_list
+                                )
+                                tmp_reast_str = tmp_reast_str.strip()
+                                base_value = tmp_skill_value
+                                has_dice = 'D' in expr_str.upper()
+                                full_expr = f'{base_value}{expr_str}'
+                                rd_para = OlivaDiceCore.onedice.RD(full_expr)
+                                rd_para.roll()
+                                if rd_para.resError is None:
+                                    # 保存表达式信息供多次掷骰使用
+                                    tmp_expr_info = {
+                                        'base_value': base_value,
+                                        'expr_str': expr_str,
+                                        'has_dice': has_dice,
+                                    }
+                                    tmp_skill_value = rd_para.resInt
+                                    if has_dice:
+                                        tmp_skill_value_str = (
+                                            f'{full_expr}={rd_para.resDetail}={tmp_skill_value}'
+                                        )
+                                    else:
+                                        tmp_skill_value_str = f'{full_expr}={tmp_skill_value}'
             if tmp_skill_name and tmp_skill_value is None:
                 tmp_skill_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
                     OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform), tmp_skill_name, hagId=tmp_hagID

@@ -59,6 +59,30 @@ def op_list_get():
     return ['+', '-', '*', '/', '^']
 
 
+def split_expr_para(data, op_list=None):
+    """从串首截出骰子表达式段（数字、运算符、D），返回 (表达式, 剩余串)。
+
+    用于把 `+2`、`+3d40` 这类跟在技能名或数值后的表达式切出来，
+    切分规则与 ra 原有的表达式解析保持一致。
+    """
+    if op_list is None:
+        op_list = op_list_get()
+    expr_end = 0
+    in_dice = False
+    for i, char in enumerate(data):
+        if char.isspace():
+            expr_end = i
+            break
+        if char.upper() == 'D':
+            in_dice = True
+        if not (char.isdigit() or char in op_list or char.upper() == 'D'):
+            if not in_dice:
+                expr_end = i
+                break
+    expr_str = data[:expr_end] if expr_end > 0 else data
+    return expr_str, data[len(expr_str) :]
+
+
 def replyCONTEXT_fliter(tmp_reast_str):
     res = False
     if 'replyContextPrefixFliter' in OlivaDiceCore.crossHook.dictHookList:
@@ -828,6 +852,11 @@ def record_skill_check_result(user_id, pc_name, skill_name, is_success, platform
             userConfigValue=log_status,
             botHash=botHash,
         )
+        # 立即落盘：logStatus 是累积统计，此前只留在内存里等消息计数攒够
+        # userConfigCount（默认 100 条）才批量 flush，进程异常退出会把这期间的记录全丢掉
+        OlivaDiceCore.userConfig.writeUserConfigByUserHash(
+            userHash=OlivaDiceCore.userConfig.getUserHash(userId=hagId, userType='group', platform=platform)
+        )
 
     except Exception:
         import traceback
@@ -1334,11 +1363,18 @@ def replyRI_command(
 
     result_list = []
     count = 1
+    flag_lazy = False
+    # 分隔符切出的空 token 与「整条命令没有参数」要区别对待：
+    # 前者是用户多打了逗号，直接跳过；只有后者才回退到人物卡记录的「先攻」值
+    flag_has_valid = any(tmp_reast_str_list_this.strip() for tmp_reast_str_list_this in tmp_reast_str_list)
 
     for tmp_reast_str_list_this in tmp_reast_str_list:
         tmp_reast_str_list_this = tmp_reast_str_list_this.strip(' ')
         if not tmp_reast_str_list_this:
-            continue
+            if flag_has_valid or flag_lazy:
+                continue
+            # 未提供表达式与名称时，回退到当前选中人物卡记录的「先攻」值，且只回退一次
+            flag_lazy = True
 
         # 检查是否是批量生成格式: 5#敌人+3 或 1D3黄色敌人
         batch_match = re.match(r'^(\d+)#(.+)$', tmp_reast_str_list_this)
@@ -1349,7 +1385,7 @@ def replyRI_command(
             batch_count = int(batch_match.group(1))
             batch_content = batch_match.group(2).strip()
             # 传入 count 作为起始序号，并获取实际添加的数量
-            process_batch_init(
+            added_count = process_batch_init(
                 plugin_event,
                 batch_count,
                 batch_content,
@@ -1361,8 +1397,9 @@ def replyRI_command(
                 result_list,
                 count,
             )
-            # 批量添加只算1个条目（整体显示）
-            count += 1
+            # 批量添加只算1个条目（整体显示），全部失败时不占用序号
+            if added_count:
+                count += 1
         elif dice_batch_match:
             # 骰子批量生成模式: 1D3黄色敌人
             dice_expr = dice_batch_match.group(1)
@@ -1373,7 +1410,7 @@ def replyRI_command(
             tmp_dice_rd.roll()
             if tmp_dice_rd.resError is None:
                 batch_count = tmp_dice_rd.resInt
-                process_batch_init(
+                added_count = process_batch_init(
                     plugin_event,
                     batch_count,
                     batch_content,
@@ -1385,8 +1422,9 @@ def replyRI_command(
                     result_list,
                     count,
                 )
-                # 批量添加只算1个条目（整体显示）
-                count += 1
+                # 批量添加只算1个条目（整体显示），全部失败时不占用序号
+                if added_count:
+                    count += 1
         else:
             # 普通单个处理
             added = process_single_init(
@@ -1405,8 +1443,12 @@ def replyRI_command(
 
     if flag_reply:
         dictTValue['tResult'] = '\n'.join(result_list)
-        tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitSet'], dictTValue)
-        OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+        if result_list:
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitSet'], dictTValue)
+            OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
+        else:
+            # 没有任何有效条目时不回复「设置完成」，改为给出用法提示
+            OlivaDiceCore.msgReply.replyMsgLazyHelpByEvent(plugin_event, 'ri')
 
 
 def process_batch_init(
@@ -1644,6 +1686,24 @@ def process_single_init(
             tmp_name = OlivaDiceCore.pcCard.fixName(tmp_name)
             if not OlivaDiceCore.pcCard.checkPcName(tmp_name):
                 tmp_name = None
+    else:
+        # 未提供表达式与名称：取当前选中人物卡记录的「先攻」值作为表达式
+        tmp_value = None
+        tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+        tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
+        if tmp_pc_name is not None:
+            tmp_value_dict = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+                pcHash=tmp_pcHash,
+                pcCardName=tmp_pc_name,
+                dataKey='mappingRecord',
+                resDefault={},
+            )
+            # 人物卡数据可能被手工改坏成非字典，此时按「没有记录」处理而不是抛异常
+            if not isinstance(tmp_value_dict, dict):
+                tmp_value_dict = {}
+            if '先攻' in tmp_value_dict:
+                tmp_value = tmp_value_dict['先攻']
+                tmp_name = tmp_pc_name
 
     tmp_value_final = None
     display_detail = None
@@ -3180,25 +3240,17 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
         skill_expr = skill_expr[pos:].strip()
         if skill_expr:
             if skill_expr[0] in op_list:
-                expr_end = 0
-                in_dice = False
-                for i, char in enumerate(skill_expr):
-                    if char.isspace():
-                        expr_end = i
-                        break
-                    if char.upper() == 'D':
-                        in_dice = True
-                    if not (char.isdigit() or char in op_list or char.upper() == 'D'):
-                        if not in_dice:
-                            expr_end = i
-                            break
-                expr_str = skill_expr[:expr_end] if expr_end > 0 else skill_expr
-                skill_expr = skill_expr[len(expr_str) :].strip()
+                expr_str, skill_expr = split_expr_para(skill_expr, op_list)
+                skill_expr = skill_expr.strip()
             elif skill_expr[0].isdigit():
                 [num_str, skill_expr] = OlivaDiceCore.msgReply.getNumberPara(skill_expr)
                 if num_str.isdigit():
                     fixed_skill_value = int(num_str)
                 skill_expr = OlivaDiceCore.msgReply.skipSpaceStart(skill_expr)
+                # 数值后仍可跟运算表达式：.teamra50+3d40，以该数值为基础值逐成员计算
+                if skill_expr and skill_expr[0] in op_list:
+                    expr_str, skill_expr = split_expr_para(skill_expr, op_list)
+                    skill_expr = skill_expr.strip()
         if skill_expr:
             [num_str, skill_expr] = OlivaDiceCore.msgReply.getNumberPara(skill_expr)
             if num_str.isdigit():
@@ -3249,12 +3301,16 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
         current_skill_value = base_skill_value
         expr_result_str = str(base_skill_value)
         if expr_str:
+            # 表达式求值失败时回落到基础值并在展示中标注，避免静默拿错值当检定阈值
+            calc_base = fixed_skill_value if fixed_skill_value is not None else base_skill_value
             try:
                 # 如果有固定值，基于固定值计算表达式
-                calc_base = fixed_skill_value if fixed_skill_value is not None else base_skill_value
                 rd_para = OlivaDiceCore.onedice.RD(f'{calc_base}{expr_str}')
                 rd_para.roll()
-                if not rd_para.resError:
+                if rd_para.resError:
+                    current_skill_value = calc_base
+                    expr_result_str = f'{calc_base}{expr_str}=无效(按{calc_base})'
+                else:
                     current_skill_value = rd_para.resInt
                     # 构建表达式详情
                     if 'D' in expr_str.upper():
@@ -3262,7 +3318,8 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
                     else:
                         expr_result_str = f'{calc_base}{expr_str}={current_skill_value}'
             except Exception:
-                pass
+                current_skill_value = calc_base
+                expr_result_str = f'{calc_base}{expr_str}=无效(按{calc_base})'
         # 没有表达式但有固定值时使用固定值
         elif fixed_skill_value is not None:
             current_skill_value = fixed_skill_value
