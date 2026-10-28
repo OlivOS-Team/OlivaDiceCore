@@ -7538,6 +7538,22 @@ def sendMsgByEvent(plugin_event, message, target_id, target_type, host_id=None):
     return pluginSend(plugin_event, target_type, target_id, message, host_id=host_id)
 
 
+def getSendResultFlag(send_result):
+    """根据 sendMsgByEvent 的返回值判断发送是否成功
+
+    任意一页被平台明确判定为失败（active 为 False）时返回 False；
+    平台未返回结果（旧版框架或不支持回执的平台）时视为成功，与原有行为保持一致。
+    """
+    if send_result is None:
+        return True
+    if not isinstance(send_result, list):
+        send_result = [send_result]
+    for send_result_this in send_result:
+        if isinstance(send_result_this, dict) and send_result_this.get('active', True) is False:
+            return False
+    return True
+
+
 def replyMsgPrivateByEvent(plugin_event, message):
     if OlivaDiceCore.console.getConsoleSwitchByHash('disableReplyPrivate', plugin_event.bot_info.hash) == 1:
         # 2022-01-19腾讯暗改临时会话协议，在此提供关闭群聊向私聊回复的办法
@@ -7642,6 +7658,8 @@ def sendSplitMessageList(
     messageSplitManualShowPage,
     send_func,
 ):
+    # 收集每一页的发送结果并返回，供调用方判断发送是否成功
+    res = []
     count = 1
     flag_need_split = len(message_info_list) > 1
     total_pages = min(len(message_info_list), messageSplitPageLimit)
@@ -7652,12 +7670,13 @@ def sendSplitMessageList(
                 message_info_this['splitType'], messageSplitAutoShowPage, messageSplitManualShowPage
             ):
                 tmp_message = '---[第%s/%s页]---\n%s' % (str(count), str(total_pages), tmp_message)
-            send_func(tmp_message)
+            res.append(send_func(tmp_message))
             if flag_need_split:
                 count += 1
                 time.sleep(messageSplitDelay)
         if not flag_need_split or count > messageSplitPageLimit:
             break
+    return res
 
 
 def pluginReply(plugin_event, message):
@@ -7709,7 +7728,7 @@ def pluginSend(plugin_event: OlivOS.API.Event, send_type, target_id, message: st
     message = OlivaDiceCore.censorAPI.doCensorReplaceOlivOSSafe(botHash=botHash, msg=message)
 
     message_info_list = getSplitMessageInfoList(message, messageSplitGate)
-    sendSplitMessageList(
+    return sendSplitMessageList(
         message_info_list,
         messageSplitPageLimit,
         messageSplitDelay,
