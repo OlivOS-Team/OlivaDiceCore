@@ -7538,6 +7538,21 @@ def sendMsgByEvent(plugin_event, message, target_id, target_type, host_id=None):
     return pluginSend(plugin_event, target_type, target_id, message, host_id=host_id)
 
 
+class SendResultList(list):
+    """sendMsgByEvent 的返回值：每一页的发送结果，并记录分页上限导致的截断"""
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        # 实际需要发送的页数（不含空页）
+        self.page_total = 0
+        # 因超出 messageSplitPageLimit 而未发送的页数
+        self.page_skipped = 0
+
+    @property
+    def flag_truncated(self):
+        return self.page_skipped > 0
+
+
 def getSendResultFlag(send_result):
     """根据 sendMsgByEvent 的返回值判断发送是否成功
 
@@ -7552,6 +7567,20 @@ def getSendResultFlag(send_result):
         if isinstance(send_result_this, dict) and send_result_this.get('active', True) is False:
             return False
     return True
+
+
+def getSendResultStatus(send_result):
+    """根据 sendMsgByEvent 的返回值给出发送状态
+
+    返回 'failed'：任意一页被平台明确判定为失败；
+    返回 'partial'：已发出的页都成功，但超出分页上限的部分没有发送；
+    返回 'success'：其余情况（包括平台未返回结果）。
+    """
+    if not getSendResultFlag(send_result):
+        return 'failed'
+    if getattr(send_result, 'flag_truncated', False):
+        return 'partial'
+    return 'success'
 
 
 def replyMsgPrivateByEvent(plugin_event, message):
@@ -7659,7 +7688,8 @@ def sendSplitMessageList(
     send_func,
 ):
     # 收集每一页的发送结果并返回，供调用方判断发送是否成功
-    res = []
+    res = SendResultList()
+    res.page_total = len([x for x in message_info_list if len(x['message']) > 0])
     count = 1
     flag_need_split = len(message_info_list) > 1
     total_pages = min(len(message_info_list), messageSplitPageLimit)
@@ -7676,6 +7706,7 @@ def sendSplitMessageList(
                 time.sleep(messageSplitDelay)
         if not flag_need_split or count > messageSplitPageLimit:
             break
+    res.page_skipped = max(res.page_total - len(res), 0)
     return res
 
 
