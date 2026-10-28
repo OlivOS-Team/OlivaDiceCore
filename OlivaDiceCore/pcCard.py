@@ -219,17 +219,55 @@ def jsonDataLoadSafe(data_f, dataType, dataName):
 
 
 def dataPcCardLoadAll():
+    # 与逐张调用 dataPcCardLoad 的结果一致，但每个目录只列一次，
+    # 并通过 dataLoadCache 快照跳过未变化文件的打开与读取
     dataDirRoot_this = OlivaDiceCore.data.dataDirRoot
     releaseDir(dataDirRoot_this)
-    pcCardDataHostList = os.listdir(dataDirRoot_this)
-    for pcCardDataHostList_this in pcCardDataHostList:
-        hostKey = pcCardDataHostList_this
-        releaseDir(dataDirRoot_this + '/' + hostKey + '/pcCard')
-        releaseDir(dataDirRoot_this + '/' + hostKey + '/pcCard/data')
-        pcCardDataPCHashList = os.listdir(dataDirRoot_this + '/' + hostKey + '/pcCard/data')
-        for pcCardDataPCHashList_this in pcCardDataPCHashList:
-            pcHash = pcCardDataPCHashList_this
-            dataPcCardLoad(hostKey, pcHash)
+    snapshot = OlivaDiceCore.dataLoadCache.DataLoadSnapshot('pcCard', '人物卡')
+    with OlivaDiceCore.dataLoadCache.pauseGC():
+        pcCardDataHostList = os.listdir(dataDirRoot_this)
+        for pcCardDataHostList_this in pcCardDataHostList:
+            hostKey = pcCardDataHostList_this
+            releaseDir(dataDirRoot_this + '/' + hostKey + '/pcCard')
+            releaseDir(dataDirRoot_this + '/' + hostKey + '/pcCard/data')
+            pcCardDataPCHashList, pcCardDataEntries = OlivaDiceCore.dataLoadCache.scanDir(
+                dataDirRoot_this + '/' + hostKey + '/pcCard/data'
+            )
+            if len(pcCardDataPCHashList) == 0:
+                continue
+            dataPcCardLoadHost(snapshot, hostKey, pcCardDataPCHashList, pcCardDataEntries)
+    snapshot.finish()
+
+
+def dataPcCardLoadHost(snapshot, hostKey, pcHashList, dataEntries):
+    dataDirRoot_this = OlivaDiceCore.data.dataDirRoot
+    pcCardDir = dataDirRoot_this + '/' + hostKey + '/pcCard'
+    dataTypeList = [
+        ['data', dictPcCardData],
+        ['selection', dictPcCardSelection],
+        ['template', dictPcCardTemplate],
+        ['hiy', dictPcCardHiy],
+        ['mh', dictPcCardMH],
+    ]
+    dirEntries = {}
+    for dataType, dataDict in dataTypeList:
+        releaseDir(pcCardDir + '/' + dataType)
+        if dataType == 'data':
+            dirEntries[dataType] = dataEntries
+        else:
+            dirEntries[dataType] = OlivaDiceCore.dataLoadCache.scanDir(pcCardDir + '/' + dataType)[1]
+        if hostKey not in dataDict:
+            dataDict[hostKey] = {}
+    for pcHash in pcHashList:
+        for dataType, dataDict in dataTypeList:
+            if pcHash not in dataDict[hostKey]:
+                dataDict[hostKey][pcHash] = {}
+        for dataType, dataDict in dataTypeList:
+            entryKey = OlivaDiceCore.dataLoadCache.getScanEntry(dirEntries[dataType], pcHash)
+            if entryKey is None:
+                continue
+            dataPath = pcCardDir + '/' + dataType + '/' + pcHash
+            dataDict[hostKey][pcHash] = snapshot.load(dataPath, entryKey, f'{hostKey}/{pcHash}')
 
 
 def dataPcCardTemplateInit():
