@@ -22,8 +22,8 @@ import uuid
 import OlivOS
 
 OlivaDiceCore_name = 'OlivaDice核心模块'
-OlivaDiceCore_ver = '3.5.7'
-OlivaDiceCore_svn = 1207
+OlivaDiceCore_ver = '3.5.9'
+OlivaDiceCore_svn = 1209
 OlivaDiceCore_ver_short = '%s(%s)' % (str(OlivaDiceCore_ver), str(OlivaDiceCore_svn))
 
 exce_path = os.getcwd()
@@ -61,5 +61,7 @@ bot_content = {'masterKey': str(uuid.uuid4())}
 dataDirRoot = './plugin/data/OlivaDice'
 
 backupDirRoot = './plugin/backup'
+
+cacheDirRoot = './plugin/cache/OlivaDice'
 
 defaultOlivaDicePulseUrl = 'http://api.dice.center/dicestatusup/'

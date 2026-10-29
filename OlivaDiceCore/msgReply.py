@@ -7538,6 +7538,51 @@ def sendMsgByEvent(plugin_event, message, target_id, target_type, host_id=None):
     return pluginSend(plugin_event, target_type, target_id, message, host_id=host_id)
 
 
+class SendResultList(list):
+    """sendMsgByEvent 的返回值：每一页的发送结果，并记录分页上限导致的截断"""
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        # 实际需要发送的页数（不含空页）
+        self.page_total = 0
+        # 因超出 messageSplitPageLimit 而未发送的页数
+        self.page_skipped = 0
+
+    @property
+    def flag_truncated(self):
+        return self.page_skipped > 0
+
+
+def getSendResultFlag(send_result):
+    """根据 sendMsgByEvent 的返回值判断发送是否成功
+
+    任意一页被平台明确判定为失败（active 为 False）时返回 False；
+    平台未返回结果（旧版框架或不支持回执的平台）时视为成功，与原有行为保持一致。
+    """
+    if send_result is None:
+        return True
+    if not isinstance(send_result, list):
+        send_result = [send_result]
+    for send_result_this in send_result:
+        if isinstance(send_result_this, dict) and send_result_this.get('active', True) is False:
+            return False
+    return True
+
+
+def getSendResultStatus(send_result):
+    """根据 sendMsgByEvent 的返回值给出发送状态
+
+    返回 'failed'：任意一页被平台明确判定为失败；
+    返回 'partial'：已发出的页都成功，但超出分页上限的部分没有发送；
+    返回 'success'：其余情况（包括平台未返回结果）。
+    """
+    if not getSendResultFlag(send_result):
+        return 'failed'
+    if getattr(send_result, 'flag_truncated', False):
+        return 'partial'
+    return 'success'
+
+
 def replyMsgPrivateByEvent(plugin_event, message):
     if OlivaDiceCore.console.getConsoleSwitchByHash('disableReplyPrivate', plugin_event.bot_info.hash) == 1:
         # 2022-01-19腾讯暗改临时会话协议，在此提供关闭群聊向私聊回复的办法
@@ -7642,6 +7687,9 @@ def sendSplitMessageList(
     messageSplitManualShowPage,
     send_func,
 ):
+    # 收集每一页的发送结果并返回，供调用方判断发送是否成功
+    res = SendResultList()
+    res.page_total = len([x for x in message_info_list if len(x['message']) > 0])
     count = 1
     flag_need_split = len(message_info_list) > 1
     total_pages = min(len(message_info_list), messageSplitPageLimit)
@@ -7652,12 +7700,14 @@ def sendSplitMessageList(
                 message_info_this['splitType'], messageSplitAutoShowPage, messageSplitManualShowPage
             ):
                 tmp_message = '---[第%s/%s页]---\n%s' % (str(count), str(total_pages), tmp_message)
-            send_func(tmp_message)
+            res.append(send_func(tmp_message))
             if flag_need_split:
                 count += 1
                 time.sleep(messageSplitDelay)
         if not flag_need_split or count > messageSplitPageLimit:
             break
+    res.page_skipped = max(res.page_total - len(res), 0)
+    return res
 
 
 def pluginReply(plugin_event, message):
@@ -7709,7 +7759,7 @@ def pluginSend(plugin_event: OlivOS.API.Event, send_type, target_id, message: st
     message = OlivaDiceCore.censorAPI.doCensorReplaceOlivOSSafe(botHash=botHash, msg=message)
 
     message_info_list = getSplitMessageInfoList(message, messageSplitGate)
-    sendSplitMessageList(
+    return sendSplitMessageList(
         message_info_list,
         messageSplitPageLimit,
         messageSplitDelay,

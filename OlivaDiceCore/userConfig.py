@@ -311,24 +311,29 @@ def writeUserConfigByUserHash(userHash):
 
 
 def readUserConfig():
+    # 通过 dataLoadCache 快照跳过未变化文件的打开与读取，加载结果与逐个读取一致
     releaseDir(OlivaDiceCore.data.dataDirRoot)
-    botHash_list = os.listdir(OlivaDiceCore.data.dataDirRoot)
-    for botHash_list_this in botHash_list:
-        botHash = botHash_list_this
-        releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash)
-        releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/user')
-        userHash_list = os.listdir(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/user')
-        for userHash_list_this in userHash_list:
-            userHash = userHash_list_this
+    snapshot = OlivaDiceCore.dataLoadCache.DataLoadSnapshot('userConfig', '用户记录')
+    with OlivaDiceCore.dataLoadCache.pauseGC():
+        botHash_list = os.listdir(OlivaDiceCore.data.dataDirRoot)
+        for botHash_list_this in botHash_list:
+            botHash = botHash_list_this
+            releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash)
+            releaseDir(OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/user')
             userConfigDataDir = OlivaDiceCore.data.dataDirRoot + '/' + botHash + '/user'
-            userConfigDataFile = userHash
-            userConfigDataPath = userConfigDataDir + '/' + userConfigDataFile
-            if userHash not in dictUserConfigData:
-                dictUserConfigData[userHash] = {}
-            with open(userConfigDataPath, 'r', encoding='utf-8') as userConfigDataPath_f:
-                dictUserConfigData[userHash] = jsonDataLoadSafe(
-                    userConfigDataPath_f, '用户记录', f'{botHash}/{userConfigDataFile}'
+            userHash_list, userHash_entries = OlivaDiceCore.dataLoadCache.scanDir(userConfigDataDir)
+            for userHash_list_this in userHash_list:
+                userHash = userHash_list_this
+                userConfigDataFile = userHash
+                userConfigDataPath = userConfigDataDir + '/' + userConfigDataFile
+                if userHash not in dictUserConfigData:
+                    dictUserConfigData[userHash] = {}
+                dictUserConfigData[userHash] = snapshot.load(
+                    userConfigDataPath,
+                    OlivaDiceCore.dataLoadCache.getScanEntry(userHash_entries, userHash),
+                    f'{botHash}/{userConfigDataFile}',
                 )
+    snapshot.finish()
 
 
 def jsonDataLoadSafe(data_f, dataType, dataName):
