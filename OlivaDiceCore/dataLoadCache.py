@@ -55,7 +55,7 @@ jsonDumpSeparators = (',', ':')
 # 路径长度、修改时间、文件大小、创建/变更时间、内容长度、内容 CRC32、原文件 CRC32
 snapshotEntryHead = struct.Struct('<IqqqqII')
 # 内容核对：每次加载核对的比例（1/N）与「最近修改」的时间窗
-snapshotVerifyRounds = 8
+snapshotVerifyRounds = 4
 snapshotVerifyRecentSeconds = 24 * 3600
 snapshotReadBuffer = 1024 * 1024
 # 请求的路径不在当前位置时最多向后预读的条目数，以及预读缓冲的上限
