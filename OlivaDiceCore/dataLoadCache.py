@@ -48,8 +48,6 @@ import struct
 import time
 import zlib
 
-cacheDirRoot = './plugin/cache/OlivaDice'
-
 snapshotMagic = b'OlivaDiceDataLoadSnapshot|5|json\n'
 jsonDumpSeparators = (',', ':')
 # 路径长度、修改时间、文件大小、创建/变更时间、内容长度、内容 CRC32、原文件 CRC32
@@ -198,7 +196,7 @@ class DataLoadSnapshot(object):
     def __init__(self, name, dataType):
         self.name = name
         self.dataType = dataType
-        self.path = cacheDirRoot + '/' + name + '.snapshot'
+        self.path = OlivaDiceCore.data.cacheDirRoot + '/' + name + '.snapshot'
         self.tmpPath = self.path + '.tmp'
         self.countHit = 0
         self.countRead = 0
@@ -289,7 +287,7 @@ class DataLoadSnapshot(object):
 
     def __openNew(self):
         try:
-            releaseDir(cacheDirRoot)
+            releaseDir(OlivaDiceCore.data.cacheDirRoot)
             self.newFile = open(self.tmpPath, 'wb')
             self.newFile.write(snapshotMagic)
         except OSError as e:
