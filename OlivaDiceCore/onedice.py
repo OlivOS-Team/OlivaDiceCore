@@ -942,7 +942,9 @@ class RD(object):
                         return resNoneTemplate
                     tmp_node_this_output_str = tmp_main_val_left[1] + '+' + tmp_main_val_right[1]
                     tmp_node_this_output_data_final = tmp_main_val_left_data + [{'op': '+'}] + tmp_main_val_right_data
-                    if tmp_priority_this < rootPriority:
+                    if tmp_priority_this < rootPriority or (
+                        forkSideRight and tmp_priority_this == rootPriority and rootData == '-'
+                    ):
                         tmp_node_this_output_str = '(' + tmp_node_this_output_str + ')'
                         tmp_node_this_output_data_final = (
                             [{'op': '('}] + tmp_node_this_output_data_final + [{'op': ')'}]
@@ -994,7 +996,9 @@ class RD(object):
                         return resNoneTemplate
                     tmp_node_this_output_str = tmp_main_val_left[1] + '-' + tmp_main_val_right[1]
                     tmp_node_this_output_data_final = tmp_main_val_left_data + [{'op': '-'}] + tmp_main_val_right_data
-                    if tmp_priority_this < rootPriority:
+                    if tmp_priority_this < rootPriority or (
+                        forkSideRight and tmp_priority_this == rootPriority and rootData == '-'
+                    ):
                         tmp_node_this_output_str = '(' + tmp_node_this_output_str + ')'
                         tmp_node_this_output_data_final = (
                             [{'op': '('}] + tmp_node_this_output_data_final + [{'op': ')'}]
