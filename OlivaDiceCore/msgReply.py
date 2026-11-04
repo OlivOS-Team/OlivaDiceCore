@@ -7347,7 +7347,7 @@ def unity_reply(plugin_event, Proc):
                 replyMsgPrivateByEvent(plugin_event, tmp_reply_str)
             else:
                 replyMsg(plugin_event, tmp_reply_str)
-    nativeMsgBlocker(plugin_event, Proc)
+    nativeMsgBlocker(plugin_event, Proc, flag_force_reply=flag_force_reply)
     return
 
 
@@ -7801,7 +7801,7 @@ def splitMessageByGateKeepBracket(message: str, gate: int):
 
 
 # 阻塞普通消息
-def nativeMsgBlocker(plugin_event, Proc):
+def nativeMsgBlocker(plugin_event, Proc, flag_force_reply=False):
     flag_is_from_host = False
     flag_is_from_group = False
     flag_hostEnable = True
@@ -7872,11 +7872,11 @@ def nativeMsgBlocker(plugin_event, Proc):
         plugin_event.set_block()
         return
     # 此频道关闭时中断处理
-    if not flag_hostLocalEnable:
+    if not flag_hostLocalEnable and not flag_force_reply:
         plugin_event.set_block()
         return
     # 此群关闭时中断处理
-    if not flag_groupEnable:
+    if not flag_groupEnable and not flag_force_reply:
         plugin_event.set_block()
         return
 

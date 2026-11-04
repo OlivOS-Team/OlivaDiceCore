@@ -77,6 +77,9 @@ Latest Release: [![GitHub release](https://img.shields.io/github/release-pre/Oli
 手册: <https://wiki.dice.center>  
 备用手册: <https://oliva.dicer.wiki>   
 
+群内 `.bot off` 后，普通消息仍会阻断后续插件；消息开头 @ 本骰或 @ 全体时，允许事件继续传递给后续插件。
+消息过滤和上下文阻断仍然生效。
+
 ## 子模块
 - [OlivaDiceJoy](https://github.com/OlivOS-Team/OlivaDiceJoy)
 - [OlivaDiceLogger](https://github.com/OlivOS-Team/OlivaDiceLogger)
