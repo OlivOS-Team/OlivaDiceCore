@@ -5090,9 +5090,63 @@ def unity_reply(plugin_event, Proc):
                 return
         elif isMatchWordStart(tmp_reast_str, 'set', isCommand=True):
             OlivaDiceCore.msgReplyModel.replySET_command(plugin_event, Proc, valDict)
-        elif isMatchWordStart(tmp_reast_str, ['coc6', 'coc'], isCommand=True) or (
-            False and isMatchWordStart(tmp_reast_str, 'dnd', isCommand=True)
-        ):
+        elif isMatchWordStart(tmp_reast_str, ['coc7r', 'c7r'], isCommand=True):
+            # COC7R: 八项属性各掷(2D6+5)x5，不绑定属性名，可由玩家自由调换；幸运另掷(2D6+6)x5
+            # 非模板车卡，独立成支并置于 coc/coc6 之前，避免被 'coc' 前缀吞掉
+            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['coc7r', 'c7r'])
+            tmp_roll_count = 1
+            tmp_roll_count_str = None
+            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            if len(tmp_reast_str) > 0:
+                [tmp_roll_count_str, tmp_reast_str] = getNumberPara(tmp_reast_str)
+            if tmp_roll_count_str == '':
+                tmp_roll_count_str = None
+            if tmp_roll_count_str is not None:
+                if tmp_roll_count_str.isdecimal():
+                    tmp_roll_count = int(tmp_roll_count_str)
+            if tmp_roll_count > 0 and tmp_roll_count <= 10:
+                tmp_res_list = []
+                for _ in range(0, tmp_roll_count):
+                    tmp_attr_list = []
+                    for _ in range(8):
+                        rd_this = OlivaDiceCore.onedice.RD('(2d6+5)x5')
+                        rd_this.roll()
+                        if rd_this.resError is None:
+                            tmp_attr_list.append(rd_this.resInt)
+                    rd_luc_this = OlivaDiceCore.onedice.RD('(2d6+6)x5')
+                    rd_luc_this.roll()
+                    tmp_luc = rd_luc_this.resInt if rd_luc_this.resError is None else 0
+                    tmp_res_list.append([tmp_attr_list, tmp_luc])
+                tmp_reply_str_1 = ''
+                for tmp_index_this, tmp_res_list_this in enumerate(tmp_res_list):
+                    tmp_attr_list, tmp_luc = tmp_res_list_this
+                    if tmp_index_this > 0:
+                        # 各套之间空一行；首套不留空行，末套之后也不额外补换行
+                        tmp_reply_str_1 += '\n'
+                    tmp_total_count_1 = sum(tmp_attr_list)
+                    tmp_total_count_2 = tmp_total_count_1 + tmp_luc
+                    tmp_percent = 100 * tmp_total_count_1 / tmp_total_count_2 if tmp_total_count_2 > 0 else 0
+                    tmp_reply_str_1 += '\n[%s] 幸运: %d' % (
+                        ', '.join('%d' % tmp_attr_this for tmp_attr_this in tmp_attr_list),
+                        tmp_luc,
+                    )
+                    tmp_reply_str_1 += '\n共计: %d/%d   %.1f%%' % (
+                        tmp_total_count_1,
+                        tmp_total_count_2,
+                        tmp_percent,
+                    )
+                dictTValue['tPcTempName'] = 'COC7R'
+                dictTValue['tPcInitResult'] = tmp_reply_str_1
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInit'], dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
+            else:
+                dictTValue['tPcTempName'] = 'COC7R'
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                    dictStrCustom['strPcInitErrorRange'], dictTValue
+                )
+                replyMsg(plugin_event, tmp_reply_str)
+                return
+        elif isMatchWordStart(tmp_reast_str, ['coc6', 'coc'], isCommand=True):
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
@@ -5104,9 +5158,6 @@ def unity_reply(plugin_event, Proc):
             elif isMatchWordStart(tmp_reast_str, 'coc'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'coc')
                 tmp_pcCardTemplateName = 'COC7'
-            elif isMatchWordStart(tmp_reast_str, 'dnd'):
-                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'dnd')
-                tmp_pcCardTemplateName = 'DND5E'
             tmp_roll_count = 1
             tmp_roll_count_str = None
             tmp_pcCardTemplate = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_pcCardTemplateName)
