@@ -24,6 +24,10 @@ import re
 import copy
 import math
 import psutil
+from contextvars import ContextVar
+
+_markdown_roll_result = ContextVar('OlivaDiceCore.markdown_roll_result', default=None)
+_markdown_hud_prefix = ContextVar('OlivaDiceCore.markdown_hud_prefix', default=None)
 
 
 def logProc(Proc, level, message, segment):
@@ -5086,9 +5090,63 @@ def unity_reply(plugin_event, Proc):
                 return
         elif isMatchWordStart(tmp_reast_str, 'set', isCommand=True):
             OlivaDiceCore.msgReplyModel.replySET_command(plugin_event, Proc, valDict)
-        elif isMatchWordStart(tmp_reast_str, ['coc6', 'coc'], isCommand=True) or (
-            False and isMatchWordStart(tmp_reast_str, 'dnd', isCommand=True)
-        ):
+        elif isMatchWordStart(tmp_reast_str, ['coc7r', 'c7r'], isCommand=True):
+            # COC7R: 八项属性各掷(2D6+5)x5，不绑定属性名，可由玩家自由调换；幸运另掷(2D6+6)x5
+            # 非模板车卡，独立成支并置于 coc/coc6 之前，避免被 'coc' 前缀吞掉
+            tmp_reast_str = getMatchWordStartRight(tmp_reast_str, ['coc7r', 'c7r'])
+            tmp_roll_count = 1
+            tmp_roll_count_str = None
+            tmp_reast_str = skipSpaceStart(tmp_reast_str)
+            if len(tmp_reast_str) > 0:
+                [tmp_roll_count_str, tmp_reast_str] = getNumberPara(tmp_reast_str)
+            if tmp_roll_count_str == '':
+                tmp_roll_count_str = None
+            if tmp_roll_count_str is not None:
+                if tmp_roll_count_str.isdecimal():
+                    tmp_roll_count = int(tmp_roll_count_str)
+            if tmp_roll_count > 0 and tmp_roll_count <= 10:
+                tmp_res_list = []
+                for _ in range(0, tmp_roll_count):
+                    tmp_attr_list = []
+                    for _ in range(8):
+                        rd_this = OlivaDiceCore.onedice.RD('(2d6+5)x5')
+                        rd_this.roll()
+                        if rd_this.resError is None:
+                            tmp_attr_list.append(rd_this.resInt)
+                    rd_luc_this = OlivaDiceCore.onedice.RD('(2d6+6)x5')
+                    rd_luc_this.roll()
+                    tmp_luc = rd_luc_this.resInt if rd_luc_this.resError is None else 0
+                    tmp_res_list.append([tmp_attr_list, tmp_luc])
+                tmp_reply_str_1 = ''
+                for tmp_index_this, tmp_res_list_this in enumerate(tmp_res_list):
+                    tmp_attr_list, tmp_luc = tmp_res_list_this
+                    if tmp_index_this > 0:
+                        # 各套之间空一行；首套不留空行，末套之后也不额外补换行
+                        tmp_reply_str_1 += '\n'
+                    tmp_total_count_1 = sum(tmp_attr_list)
+                    tmp_total_count_2 = tmp_total_count_1 + tmp_luc
+                    tmp_percent = 100 * tmp_total_count_1 / tmp_total_count_2 if tmp_total_count_2 > 0 else 0
+                    tmp_reply_str_1 += '\n[%s] 幸运: %d' % (
+                        ', '.join('%d' % tmp_attr_this for tmp_attr_this in tmp_attr_list),
+                        tmp_luc,
+                    )
+                    tmp_reply_str_1 += '\n共计: %d/%d   %.1f%%' % (
+                        tmp_total_count_1,
+                        tmp_total_count_2,
+                        tmp_percent,
+                    )
+                dictTValue['tPcTempName'] = 'COC7R'
+                dictTValue['tPcInitResult'] = tmp_reply_str_1
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInit'], dictTValue)
+                replyMsg(plugin_event, tmp_reply_str)
+            else:
+                dictTValue['tPcTempName'] = 'COC7R'
+                tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+                    dictStrCustom['strPcInitErrorRange'], dictTValue
+                )
+                replyMsg(plugin_event, tmp_reply_str)
+                return
+        elif isMatchWordStart(tmp_reast_str, ['coc6', 'coc'], isCommand=True):
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
             tmp_reply_str = ''
@@ -5100,9 +5158,6 @@ def unity_reply(plugin_event, Proc):
             elif isMatchWordStart(tmp_reast_str, 'coc'):
                 tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'coc')
                 tmp_pcCardTemplateName = 'COC7'
-            elif isMatchWordStart(tmp_reast_str, 'dnd'):
-                tmp_reast_str = getMatchWordStartRight(tmp_reast_str, 'dnd')
-                tmp_pcCardTemplateName = 'DND5E'
             tmp_roll_count = 1
             tmp_roll_count_str = None
             tmp_pcCardTemplate = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(tmp_pcCardTemplateName)
@@ -6372,7 +6427,7 @@ def unity_reply(plugin_event, Proc):
                             replyMsg(plugin_event, tmp_reply_str_show)
                             replyMsgPrivateByEvent(plugin_event, tmp_reply_str)
                         else:
-                            replyMsg(plugin_event, tmp_reply_str)
+                            replyMsg(plugin_event, tmp_reply_str, markdown_code=dictTValue['tRollResult'])
                     else:
                         if tmp_skill_name:
                             dictTValue['tSkillName'] = (
@@ -6410,7 +6465,7 @@ def unity_reply(plugin_event, Proc):
                             replyMsg(plugin_event, tmp_reply_str_show)
                             replyMsgPrivateByEvent(plugin_event, tmp_reply_str)
                         else:
-                            replyMsg(plugin_event, tmp_reply_str)
+                            replyMsg(plugin_event, tmp_reply_str, markdown_code=dictTValue['tRollResult'])
         elif isMatchWordStart(tmp_reast_str, 'en', isCommand=True):
             tmp_pc_id = plugin_event.data.user_id
             tmp_pc_platform = plugin_event.platform['platform']
@@ -7346,8 +7401,8 @@ def unity_reply(plugin_event, Proc):
                 replyMsg(plugin_event, tmp_reply_str_show)
                 replyMsgPrivateByEvent(plugin_event, tmp_reply_str)
             else:
-                replyMsg(plugin_event, tmp_reply_str)
-    nativeMsgBlocker(plugin_event, Proc)
+                replyMsg(plugin_event, tmp_reply_str, markdown_code=dictTValue['tRollResult'])
+    nativeMsgBlocker(plugin_event, Proc, flag_force_reply=flag_force_reply)
     return
 
 
@@ -7402,7 +7457,7 @@ def trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, 
     )
 
 
-def replyMsg(plugin_event, message, at_user=False):
+def replyMsg(plugin_event, message, at_user=False, markdown_code=None):
     host_id = None
     group_id = None
     user_id = None
@@ -7424,14 +7479,18 @@ def replyMsg(plugin_event, message, at_user=False):
         message = f'{at_user_msg} ' + str(message)
     else:
         message = str(message)
-    # QQ Guild v2 仅在消息实际包含 at 段时使用 Markdown，其余消息保持普通文本通道。
-    if _isQQGuildv2MarkdownAble(plugin_event, message):
-        return _replyMsgMarkdownQQGuildv2(plugin_event, message)
-    return OlivaDiceCore.msgReply.pluginReply(plugin_event, message)
+    # 图文消息与需要 at 的消息共用同一收口，供 HUD 包装。
+    token = _markdown_roll_result.set(markdown_code)
+    try:
+        if _isQQGuildv2MarkdownAble(plugin_event, message):
+            return _replyMsgMarkdownQQGuildv2(plugin_event, message)
+        return OlivaDiceCore.msgReply.pluginReply(plugin_event, message)
+    finally:
+        _markdown_roll_result.reset(token)
 
 
 def _isQQGuildv2MarkdownAble(plugin_event, message):
-    """检测消息是否必须通过 QQ Guild v2 Markdown 通道发送 at。"""
+    """检测需要 Markdown 的 at 或 QQ 图文消息。"""
     res = False
     try:
         if (
@@ -7443,13 +7502,151 @@ def _isQQGuildv2MarkdownAble(plugin_event, message):
                 message_obj = message
             else:
                 message_obj = OlivOS.messageAPI.Message_templet('old_string', str(message))
+            extend_data = getattr(plugin_event.data, 'extend', {}) or {}
             res = any(
                 isinstance(para_this, OlivOS.messageAPI.PARA.at)
+                or (extend_data.get('flag_from_qq', False)
+                    and isinstance(para_this, OlivOS.messageAPI.PARA.image))
                 for para_this in message_obj.data
             )
     except Exception:
         res = False
     return res
+
+
+def _hasQQImage(message):
+    try:
+        parsed = OlivOS.messageAPI.Message_templet('old_string', str(message))
+        return any(isinstance(part, OlivOS.messageAPI.PARA.image) for part in parsed.data)
+    except Exception:
+        return False
+
+
+def _protectMarkdownRoll(content):
+    values = _markdown_roll_result.get()
+    if isinstance(values, str):
+        values = (values,)
+    if not isinstance(values, (tuple, list)):
+        return content
+    spans = []
+    for value in set(item for item in values if isinstance(item, str) and item):
+        if content.count(value) == 1:
+            start = content.index(value)
+            spans.append((start, start + len(value), value))
+    spans.sort()
+    for i, (start, end, value) in enumerate(spans):
+        if (i and spans[i - 1][1] > start) or (i + 1 < len(spans) and spans[i + 1][0] < end):
+            continue
+        lines = []
+        for line in value.split('\n'):
+            if not line:
+                lines.append(line)
+                continue
+            fence = '`'
+            while fence in line:
+                fence += '`'
+            padding = ' ' if line.startswith(('`', ' ')) or line.endswith(('`', ' ')) else ''
+            lines.append(f'{fence}{padding}{line}{padding}{fence}')
+        spans[i] = (start, end, '\n'.join(lines))
+    # 在原文坐标上替换，避免某个结果成为另一个结果的误匹配。
+    for i in range(len(spans) - 1, -1, -1):
+        start, end, value = spans[i]
+        if (i and spans[i - 1][1] > start) or (i + 1 < len(spans) and spans[i + 1][0] < end):
+            continue
+        content = content[:start] + value + content[end:]
+    return content
+
+
+def _applyMarkdownHudPrefix(plugin_event, content):
+    prefixes = _markdown_hud_prefix.get()
+    if not isinstance(prefixes, tuple) or len(prefixes) != 2:
+        return content
+    markdown_prefix, plain_prefix = prefixes
+    if not isinstance(markdown_prefix, str) or not isinstance(plain_prefix, str) or not plain_prefix:
+        return content
+    plain_prefix = OlivaDiceCore.censorAPI.doCensorReplaceOlivOSSafe(
+        botHash=plugin_event.bot_info.hash, msg=plain_prefix
+    )
+    if not plain_prefix or not content.startswith(plain_prefix):
+        return content
+    markdown_prefix = OlivaDiceCore.censorAPI.doCensorReplaceOlivOSSafe(
+        botHash=plugin_event.bot_info.hash, msg=markdown_prefix
+    )
+    return markdown_prefix + content[len(plain_prefix):]
+
+
+def _replyQQMixedMarkdown(plugin_event, message, chat_type, chat_id, force_active=False):
+    """尝试完整发送 QQ 图文；明确失败返回 False，结果不确定时不重发。"""
+    if not _hasQQImage(message):
+        return False
+    try:
+        gate = OlivaDiceCore.console.getConsoleSwitchByHash('messageSplitGate', plugin_event.bot_info.hash)
+        if len(getSplitMessageInfoList(str(message).replace('{SPLIT}', '\f'), gate)) != 1:
+            return False
+        api = OlivOS.qqGuildv2SDK.event_action
+        target_event = plugin_event.indeAPI.event
+        upload = api._upload_markdown_images
+        cleanup = api._delete_markdown_images
+        safe_message = OlivaDiceCore.censorAPI.doCensorReplaceOlivOSSafe(
+            botHash=plugin_event.bot_info.hash, msg=str(message)
+        )
+        parsed = OlivOS.messageAPI.Message_templet('old_string', safe_message)
+        content = []
+        images = {}
+        quote_msg_id = None
+        for part in parsed.data:
+            if isinstance(part, OlivOS.messageAPI.PARA.text):
+                content.append(part.data.get('text', ''))
+            elif isinstance(part, OlivOS.messageAPI.PARA.at):
+                content.append(OlivOS.qqGuildv2SDK.markdown_tag.at_para(part))
+            elif isinstance(part, OlivOS.messageAPI.PARA.reply):
+                if quote_msg_id is None and part.data.get('id'):
+                    quote_msg_id = str(part.data['id'])
+            elif isinstance(part, OlivOS.messageAPI.PARA.image):
+                resource = part.data.get('file')
+                if not isinstance(resource, str) or not resource:
+                    return False
+                name = 'oliva_image_%s' % len(images)
+                while '{{%s}}' % name in safe_message:
+                    name += '_'
+                images[name] = resource
+                content.append('{{%s}}' % name)
+            else:
+                return False
+        if not images:
+            return False
+        content = _protectMarkdownRoll(''.join(content))
+        content = _applyMarkdownHudPrefix(plugin_event, content)
+        replacements, uploaded, error = upload(target_event, images)
+        if error is not None:
+            cleanup(target_event, uploaded or [])
+            return False
+    except Exception:
+        return False
+    try:
+        for name, replacement in replacements.items():
+            content = content.replace('{{%s}}' % name, replacement)
+        extend_data = getattr(plugin_event.data, 'extend', {}) or {}
+        result = plugin_event.indeAPI.create_markdown_message(
+            chat_type=chat_type, chat_id=chat_id, markdown={'content': content},
+            msg_id=None if force_active else extend_data.get('reply_msg_id'),
+            quote_msg_id=quote_msg_id, force_active=force_active,
+        )
+    except Exception:
+        # 发送可能已到达平台：保留素材，不重发。
+        return True
+    if isinstance(result, dict) and result.get('active', False):
+        try:
+            cleanup(target_event, uploaded)
+        except Exception:
+            pass
+        return True
+    result_data = result.get('data') if isinstance(result, dict) else None
+    status = result_data.get('http_status') if isinstance(result_data, dict) else None
+    if not isinstance(status, int) or status >= 500:
+        return True
+    cleanup(target_event, uploaded)
+    return False
 
 
 def _replyMsgMarkdownQQGuildv2(plugin_event, message):
@@ -7458,6 +7655,15 @@ def _replyMsgMarkdownQQGuildv2(plugin_event, message):
     将消息拆分为文本/at（走 markdown 通道，确保 at 正确）和图片等媒体（走文本回复），
     敏感词检测后分别发送。markdown 部分失败时回退全部走 pluginReply。
     """
+    extend_data = getattr(plugin_event.data, 'extend', {}) or {}
+    if extend_data.get('flag_from_qq', False):
+        chat_type = 'qq_private' if extend_data.get('flag_from_direct', False) else 'qq_group'
+        chat_id = plugin_event.data.user_id if chat_type == 'qq_private' else plugin_event.data.group_id
+        if _replyQQMixedMarkdown(plugin_event, message, chat_type, chat_id):
+            return None
+        # 图文处理失败时，不再拆分发送，保持原始消息与顺序。
+        if _hasQQImage(message):
+            return OlivaDiceCore.msgReply.pluginReply(plugin_event, message)
     # 敏感词检测，与 pluginReply 一致
     message = OlivaDiceCore.censorAPI.doCensorReplaceOlivOSSafe(
         botHash=plugin_event.bot_info.hash, msg=str(message)
@@ -7480,6 +7686,9 @@ def _replyMsgMarkdownQQGuildv2(plugin_event, message):
         else:
             # 图片、表情等媒体继续走 OlivOS 普通消息通道
             plain_parts.append(para)
+    # 只有完整结果在文本中唯一出现时才保护，避免误改模板或用户名。
+    md_content = _protectMarkdownRoll(md_content)
+    md_content = _applyMarkdownHudPrefix(plugin_event, md_content)
     # 发送 markdown 部分（有内容时）
     md_ok = True
     if md_content != '':
@@ -7583,7 +7792,15 @@ def getSendResultStatus(send_result):
     return 'success'
 
 
-def replyMsgPrivateByEvent(plugin_event, message):
+def replyMsgPrivateByEvent(plugin_event, message, markdown_code=None):
+    token = _markdown_roll_result.set(markdown_code)
+    try:
+        return _replyMsgPrivateByEvent(plugin_event, message)
+    finally:
+        _markdown_roll_result.reset(token)
+
+
+def _replyMsgPrivateByEvent(plugin_event, message):
     if OlivaDiceCore.console.getConsoleSwitchByHash('disableReplyPrivate', plugin_event.bot_info.hash) == 1:
         # 2022-01-19腾讯暗改临时会话协议，在此提供关闭群聊向私聊回复的办法
         return
@@ -7601,10 +7818,24 @@ def replyMsgPrivateByEvent(plugin_event, message):
     OlivaDiceCore.crossHook.dictHookFunc['msgHook'](
         plugin_event, 'reply_private', {'name': tmp_name, 'id': tmp_self_id}, [host_id, group_id, user_id], str(message)
     )
-    if 'host_id' in plugin_event.data.__dict__:
-        pluginSend(plugin_event, 'private', plugin_event.data.user_id, message, host_id=plugin_event.data.host_id)
-    else:
-        pluginSend(plugin_event, 'private', plugin_event.data.user_id, message)
+    mixed_sent = False
+    try:
+        extend_data = getattr(plugin_event.data, 'extend', {}) or {}
+        if (plugin_event.platform['sdk'] == 'qqGuildv2_link'
+                and extend_data.get('flag_from_qq', False)
+                and plugin_event.indeAPI is not None
+                and plugin_event.indeAPI.hasAPI('create_markdown_message')):
+            mixed_sent = _replyQQMixedMarkdown(
+                plugin_event, message, 'qq_private', user_id,
+                force_active=not extend_data.get('flag_from_direct', False),
+            )
+    except Exception:
+        pass
+    if not mixed_sent:
+        if 'host_id' in plugin_event.data.__dict__:
+            pluginSend(plugin_event, 'private', plugin_event.data.user_id, message, host_id=plugin_event.data.host_id)
+        else:
+            pluginSend(plugin_event, 'private', plugin_event.data.user_id, message)
     replyMsgPrivateForObByEvent(plugin_event, message)
     return
 
@@ -7801,7 +8032,7 @@ def splitMessageByGateKeepBracket(message: str, gate: int):
 
 
 # 阻塞普通消息
-def nativeMsgBlocker(plugin_event, Proc):
+def nativeMsgBlocker(plugin_event, Proc, flag_force_reply=False):
     flag_is_from_host = False
     flag_is_from_group = False
     flag_hostEnable = True
@@ -7872,11 +8103,11 @@ def nativeMsgBlocker(plugin_event, Proc):
         plugin_event.set_block()
         return
     # 此频道关闭时中断处理
-    if not flag_hostLocalEnable:
+    if not flag_hostLocalEnable and not flag_force_reply:
         plugin_event.set_block()
         return
     # 此群关闭时中断处理
-    if not flag_groupEnable:
+    if not flag_groupEnable and not flag_force_reply:
         plugin_event.set_block()
         return
 
