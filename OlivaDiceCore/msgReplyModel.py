@@ -103,7 +103,7 @@ def split_check_reason(text):
     return text[:end].strip(), text[end:].strip()
 
 
-def evaluate_check_target(text, pc_hash, hag_id, custom_default=None):
+def evaluate_check_target(text, pc_hash, hag_id, custom_default=None, template_name=None):
     """解析并独立掷出一次检定目标值；失败时不返回可用于检定的数值。"""
     text = (text or '').strip().upper()
     if not text:
@@ -118,11 +118,16 @@ def evaluate_check_target(text, pc_hash, hag_id, custom_default=None):
         )
         if isinstance(mappings, dict):
             values.update(mappings)
+    if template_name is not None:
+        rule = template_name
     template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(rule) or {}
-    for canonical, synonyms in template.get('synonyms', {}).items():
-        if canonical in values:
-            for synonym in synonyms:
-                values.setdefault(synonym.upper(), values[canonical])
+    template_synonyms = template.get('synonyms')
+    if isinstance(template_synonyms, dict):
+        for canonical, synonyms in template_synonyms.items():
+            if canonical in values and isinstance(synonyms, (list, tuple)):
+                for synonym in synonyms:
+                    if isinstance(synonym, str):
+                        values.setdefault(synonym.upper(), values[canonical])
 
     # 旧式“技能+修正 显式值”和“技能显式值”与一般表达式有歧义。
     skill = None
@@ -3395,7 +3400,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
         if template and 'customDefault' in template:
             custom_default = template['customDefault']
         skill_name, current_skill_value, expr_result_str, target_error = evaluate_check_target(
-            skill_expr, pc_hash, tmp_hagID, custom_default
+            skill_expr, pc_hash, tmp_hagID, custom_default, template_name
         )
         if target_error is not None:
             dictTValue['tRollPara'] = skill_expr

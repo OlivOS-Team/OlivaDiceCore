@@ -6165,7 +6165,7 @@ def unity_reply(plugin_event, Proc):
                 if roll_times_count == 1:
                     tmp_skill_name, tmp_skill_value, tmp_skill_value_str, target_error = (
                         OlivaDiceCore.msgReplyModel.evaluate_check_target(
-                            tmp_check_target, tmp_pc_hash, tmp_hagID, tmp_customDefault
+                            tmp_check_target, tmp_pc_hash, tmp_hagID, tmp_customDefault, tmp_template_name
                         )
                     )
                     if target_error is not None or tmp_skill_value is None:
@@ -6249,7 +6249,7 @@ def unity_reply(plugin_event, Proc):
                     for i in range(roll_times_count):
                         tmp_skill_name, current_skill_value, current_detail, target_error = (
                             OlivaDiceCore.msgReplyModel.evaluate_check_target(
-                                tmp_check_target, tmp_pc_hash, tmp_hagID, tmp_customDefault
+                                tmp_check_target, tmp_pc_hash, tmp_hagID, tmp_customDefault, tmp_template_name
                             )
                         )
                         if target_error is not None or current_skill_value is None:
