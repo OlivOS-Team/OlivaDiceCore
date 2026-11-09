@@ -6199,10 +6199,11 @@ def unity_reply(plugin_event, Proc):
                             replyMsg(plugin_event, error_reply)
                         return
                     if rd_para.resError is None:
-                        if rd_para.resDetail is None or rd_para.resDetail == '':
-                            dictTValue['tRollResult'] = '%s=%d' % (rd_para_str, rd_para.resInt)
+                        roll_detail = OlivaDiceCore.msgReplyModel.check_roll_detail(rd_para)
+                        if roll_detail:
+                            dictTValue['tRollResult'] = '%s=%s=%d' % (rd_para_str, roll_detail, rd_para.resInt)
                         else:
-                            dictTValue['tRollResult'] = '%s=%s=%d' % (rd_para_str, rd_para.resDetail, rd_para.resInt)
+                            dictTValue['tRollResult'] = '%s=%d' % (rd_para_str, rd_para.resInt)
                         dictRuleTempData = {'roll': rd_para.resInt, 'skill': tmp_skill_value}
                         OlivaDiceCore.onediceOverride.saveRDDataUser(
                             data=rd_para,

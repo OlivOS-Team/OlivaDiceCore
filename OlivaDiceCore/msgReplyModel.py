@@ -103,6 +103,15 @@ def split_check_reason(text):
     return text[:end].strip(), text[end:].strip()
 
 
+def check_roll_detail(dice):
+    """按普通 .r 的单骰及 150 字符规则返回掷骰过程。"""
+    formatter = OlivaDiceCore.onediceOverride
+    if formatter.RDDataFormat_default_is1step(dice.resDetailData) == 1:
+        return ''
+    detail = formatter.RDDataFormat(data=dice.resDetailData, mode='default') or ''
+    return detail if len(detail) <= 150 else ''
+
+
 def evaluate_check_target(text, pc_hash, hag_id, custom_default=None, template_name=None):
     """解析并独立掷出一次检定目标值；失败时不返回可用于检定的数值。"""
     text = (text or '').strip().upper()
@@ -197,8 +206,9 @@ def evaluate_check_target(text, pc_hash, hag_id, custom_default=None, template_n
         detail = str(dice.resInt)
         if display_text != detail:
             detail = display_text
-            if dice.resDetail and dice.resDetail != text:
-                detail += '=' + str(dice.resDetail)
+            roll_detail = check_roll_detail(dice)
+            if roll_detail and roll_detail != text:
+                detail += '=' + roll_detail
             detail += '=' + str(dice.resInt)
         return skill, dice.resInt, detail, None
     except (ValueError, TypeError, ArithmeticError, KeyError, IndexError, RecursionError):
@@ -3435,9 +3445,10 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
             skill_check_data, template, template_rule_name, difficulty
         )
         # 构建骰子详情
+        roll_detail = check_roll_detail(rd_para)
         dice_detail = f'{rd_para_str}={roll_value}'
-        if rd_para.resDetail:
-            dice_detail = f'{rd_para_str}={rd_para.resDetail}={roll_value}'
+        if roll_detail:
+            dice_detail = f'{rd_para_str}={roll_detail}={roll_value}'
         skill_value_str = expr_result_str
         if difficulty:
             skill_value_str = f'{skill_threshold}({expr_result_str})'
