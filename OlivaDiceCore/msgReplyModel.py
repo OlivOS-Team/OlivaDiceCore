@@ -113,11 +113,6 @@ def evaluate_check_target(text, pc_hash, hag_id, custom_default=None, template_n
     rule = 'default'
     if pc_name is not None:
         rule = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(pc_hash, pc_name) or 'default'
-        mappings = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
-            pcHash=pc_hash, pcCardName=pc_name, dataKey='mappingRecord', resDefault={}
-        )
-        if isinstance(mappings, dict):
-            values.update(mappings)
     if template_name is not None:
         rule = template_name
     template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(rule) or {}
@@ -128,6 +123,13 @@ def evaluate_check_target(text, pc_hash, hag_id, custom_default=None, template_n
                 for synonym in synonyms:
                     if isinstance(synonym, str):
                         values.setdefault(synonym.upper(), values[canonical])
+    if pc_name is not None:
+        mappings = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+            pcHash=pc_hash, pcCardName=pc_name, dataKey='mappingRecord', resDefault={}
+        )
+        if isinstance(mappings, dict):
+            for name, expression in mappings.items():
+                values.setdefault(name, expression)
 
     # 旧式“技能+修正 显式值”和“技能显式值”与一般表达式有歧义。
     skill = None
