@@ -83,6 +83,121 @@ def split_expr_para(data, op_list=None):
     return expr_str, data[len(expr_str) :]
 
 
+def split_check_reason(text):
+    """分离检定参数和空格后的理由，保留旧式技能显式值。"""
+    parts = list(re.finditer(r'\S+', text))
+    if not parts:
+        return '', ''
+    end = parts[0].end()
+    for part in parts[1:]:
+        current = text[:end].strip()
+        token = part.group()
+        legacy_value = token.isdecimal() and re.fullmatch(
+            r'[^\d\s+\-*/^()\[\],<>&|?$=:]+(?:[+\-*/^][\dD+\-*/^().]+)?',
+            current.upper(),
+        )
+        if legacy_value or current[-1] in '+-*/^' or token[0] in '+-*/^':
+            end = part.end()
+        else:
+            break
+    return text[:end].strip(), text[end:].strip()
+
+
+def evaluate_check_target(text, pc_hash, hag_id, custom_default=None):
+    """解析并独立掷出一次检定目标值；失败时不返回可用于检定的数值。"""
+    text = (text or '').strip().upper()
+    if not text:
+        return None, None, None, OlivaDiceCore.onedice.RD.resErrorType.INPUT_RAW_INVALID
+    pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, hag_id)
+    values = (OlivaDiceCore.pcCard.pcCardDataGetByPcName(pc_hash, hagId=hag_id) or {}).copy()
+    rule = 'default'
+    if pc_name is not None:
+        rule = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(pc_hash, pc_name) or 'default'
+        mappings = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
+            pcHash=pc_hash, pcCardName=pc_name, dataKey='mappingRecord', resDefault={}
+        )
+        if isinstance(mappings, dict):
+            values.update(mappings)
+    template = OlivaDiceCore.pcCard.pcCardDataGetTemplateByKey(rule) or {}
+    for canonical, synonyms in template.get('synonyms', {}).items():
+        if canonical in values:
+            for synonym in synonyms:
+                values.setdefault(synonym.upper(), values[canonical])
+
+    # 旧式“技能+修正 显式值”和“技能显式值”与一般表达式有歧义。
+    skill = None
+    explicit = None
+    adjustment = None
+    name_pattern = r'[^\d\s+\-*/^()\[\],<>&|?$=:]+?'
+    match = re.fullmatch(rf'({name_pattern})\s*([+\-*/^]\s*[\dD+\-*/^().]+)\s+(\d+)', text)
+    if match:
+        skill, adjustment, explicit = match.groups()
+    else:
+        match = re.fullmatch(rf'({name_pattern})\s*(\d+)\s*([+\-*/^]\s*[\dD+\-*/^().]+)', text)
+        if match and match.group(1) not in OlivaDiceCore.onedice.dictOperationPriority:
+            skill, explicit, adjustment = match.groups()
+        else:
+            match = re.fullmatch(rf'({name_pattern})\s*(\d+)', text)
+            if match and match.group(1) not in OlivaDiceCore.onedice.dictOperationPriority:
+                skill, explicit = match.groups()
+            else:
+                match = re.fullmatch(rf'({name_pattern})\s*([+\-*/^]\s*[\dD+\-*/^().]+)', text)
+                if match and match.group(1) not in OlivaDiceCore.onedice.dictOperationPriority:
+                    skill, adjustment = match.groups()
+                elif re.fullmatch(name_pattern, text) and text not in OlivaDiceCore.onedice.dictOperationPriority:
+                    skill = text
+    if skill:
+        skill = OlivaDiceCore.pcCard.fixName(skill, flagMode='skillName')
+        if explicit is not None:
+            base = int(explicit)
+        elif skill in values:
+            base = values[skill]
+        else:
+            canonical = OlivaDiceCore.pcCard.pcCardDataSkillNameMapper(pc_hash, skill, hagId=hag_id)
+            if canonical in values:
+                base = values[canonical]
+            elif OlivaDiceCore.skillCheck.isSpecialSkill(skill, rule):
+                base = OlivaDiceCore.skillCheck.getSpecialSkill(skill, rule, values)
+            else:
+                base = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(pc_hash, skill, hagId=hag_id)
+        if adjustment:
+            text = f'({base}){adjustment}'
+        else:
+            text = str(base)
+    elif re.search(r'\d\s+\d', text) or any(
+        left[-1].isalnum() and right[0].isalnum()
+        and left not in OlivaDiceCore.onedice.dictOperationPriority
+        and right not in OlivaDiceCore.onedice.dictOperationPriority
+        for left, right in zip(text.split(), text.split()[1:])
+    ):
+        return None, None, None, OlivaDiceCore.onedice.RD.resErrorType.INPUT_RAW_INVALID
+    text = re.sub(r'\s+', '', text)
+    display_text = text
+    # 在表达式内，技能名后紧跟的数字仅覆盖该次引用，不写入人物卡。
+    for name in sorted(values, key=len, reverse=True):
+        if name and name not in OlivaDiceCore.onedice.dictOperationPriority:
+            text = re.sub(re.escape(name) + r'(\d+)', lambda match: f'({match.group(1)})', text)
+    try:
+        expression, rest = OlivaDiceCore.msgReply.getExpression(
+            text, valueTable=values, pcCardRule=rule, flagDynamic=True, ruleMode='default'
+        )
+        if not expression or rest or re.search(r'\)\d', expression):
+            return skill, None, None, OlivaDiceCore.onedice.RD.resErrorType.INPUT_RAW_INVALID
+        dice = OlivaDiceCore.onedice.RD(expression, custom_default)
+        dice.roll()
+        if dice.resError is not None or dice.resInt is None:
+            return skill, None, None, dice.resError or OlivaDiceCore.onedice.RD.resErrorType.INPUT_RAW_INVALID
+        detail = str(dice.resInt)
+        if display_text != detail:
+            detail = display_text
+            if dice.resDetail and dice.resDetail != text:
+                detail += '=' + str(dice.resDetail)
+            detail += '=' + str(dice.resInt)
+        return skill, dice.resInt, detail, None
+    except (ValueError, TypeError, ArithmeticError, KeyError, IndexError, RecursionError):
+        return skill, None, None, OlivaDiceCore.onedice.RD.resErrorType.INPUT_RAW_INVALID
+
+
 def replyCONTEXT_fliter(tmp_reast_str):
     res = False
     if 'replyContextPrefixFliter' in OlivaDiceCore.crossHook.dictHookList:
@@ -3194,8 +3309,6 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
         )
         return
     skill_name = None
-    expr_str = None
-    fixed_skill_value = None
     difficulty = None
     bp_type = 0  # 0:无, 1:奖励骰, 2:惩罚骰
     bp_count = None
@@ -3226,35 +3339,8 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
         return
     # 解析难度前缀
     difficulty, skill_expr = difficulty_analyze(skill_expr)
-    # 解析技能名和表达式
-    if skill_expr:
-        op_list = op_list_get()
-        pos = len(skill_expr)
-        for i, char in enumerate(skill_expr):
-            if char in op_list or char.isdigit():
-                pos = i
-                break
-        skill_name = skill_expr[:pos].strip().upper() or None
-        if skill_name:
-            skill_name = OlivaDiceCore.pcCard.fixName(skill_name, flagMode='skillName')
-        skill_expr = skill_expr[pos:].strip()
-        if skill_expr:
-            if skill_expr[0] in op_list:
-                expr_str, skill_expr = split_expr_para(skill_expr, op_list)
-                skill_expr = skill_expr.strip()
-            elif skill_expr[0].isdigit():
-                [num_str, skill_expr] = OlivaDiceCore.msgReply.getNumberPara(skill_expr)
-                if num_str.isdigit():
-                    fixed_skill_value = int(num_str)
-                skill_expr = OlivaDiceCore.msgReply.skipSpaceStart(skill_expr)
-                # 数值后仍可跟运算表达式：.teamra50+3d40，以该数值为基础值逐成员计算
-                if skill_expr and skill_expr[0] in op_list:
-                    expr_str, skill_expr = split_expr_para(skill_expr, op_list)
-                    skill_expr = skill_expr.strip()
-        if skill_expr:
-            [num_str, skill_expr] = OlivaDiceCore.msgReply.getNumberPara(skill_expr)
-            if num_str.isdigit():
-                fixed_skill_value = int(num_str)
+    skill_expr, check_reason = split_check_reason(skill_expr)
+    dictTValue['tRollReason'] = check_reason
     flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
         userId=tmp_hagID,
         userType='group',
@@ -3284,46 +3370,6 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
         pc_hash = OlivaDiceCore.pcCard.getPcHash(member_id, plugin_event.platform['platform'])
         pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(pc_hash, tmp_hagID)
         display_name = format_team_member_display(user_name, pc_name, dictStrCustom, 'strTeamMemberFormat')
-        # 获取基础技能值
-        base_skill_value = None
-        if skill_name:
-            skill_name_upper = skill_name.upper()
-            base_skill_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(pc_hash, skill_name_upper, hagId=tmp_hagID)
-            if base_skill_value is None and pc_name:
-                pc_data = OlivaDiceCore.pcCard.pcCardDataGetByPcName(pc_hash, hagId=tmp_hagID)
-                if pc_data and skill_name_upper in pc_data:
-                    base_skill_value = pc_data[skill_name_upper]
-        # 默认值处理
-        try:
-            base_skill_value = int(base_skill_value) if base_skill_value is not None else 0
-        except (ValueError, TypeError):
-            base_skill_value = 0
-        current_skill_value = base_skill_value
-        expr_result_str = str(base_skill_value)
-        if expr_str:
-            # 表达式求值失败时回落到基础值并在展示中标注，避免静默拿错值当检定阈值
-            calc_base = fixed_skill_value if fixed_skill_value is not None else base_skill_value
-            try:
-                # 如果有固定值，基于固定值计算表达式
-                rd_para = OlivaDiceCore.onedice.RD(f'{calc_base}{expr_str}')
-                rd_para.roll()
-                if rd_para.resError:
-                    current_skill_value = calc_base
-                    expr_result_str = f'{calc_base}{expr_str}=无效(按{calc_base})'
-                else:
-                    current_skill_value = rd_para.resInt
-                    # 构建表达式详情
-                    if 'D' in expr_str.upper():
-                        expr_result_str = f'{calc_base}{expr_str}={rd_para.resDetail}={current_skill_value}'
-                    else:
-                        expr_result_str = f'{calc_base}{expr_str}={current_skill_value}'
-            except Exception:
-                current_skill_value = calc_base
-                expr_result_str = f'{calc_base}{expr_str}=无效(按{calc_base})'
-        # 没有表达式但有固定值时使用固定值
-        elif fixed_skill_value is not None:
-            current_skill_value = fixed_skill_value
-            expr_result_str = f'{fixed_skill_value}'
         # 构建骰子表达式
         rd_para_str = '1D100'
         if bp_type == 1:
@@ -3348,6 +3394,21 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
         custom_default = None
         if template and 'customDefault' in template:
             custom_default = template['customDefault']
+        skill_name, current_skill_value, expr_result_str, target_error = evaluate_check_target(
+            skill_expr, pc_hash, tmp_hagID, custom_default
+        )
+        if target_error is not None:
+            dictTValue['tRollPara'] = skill_expr
+            error_reply = get_SkillCheckError(target_error, dictStrCustom, dictTValue)
+            error_reply += OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollErrorHelp'], dictTValue)
+            results.append({
+                'name': display_name,
+                'result_str': f'{display_name}: {error_reply}',
+                'success_level': -1,
+                'roll_value': 0,
+                'skill_value': 0,
+            })
+            continue
         rd_para = OlivaDiceCore.onedice.RD(rd_para_str, custom_default)
         rd_para.roll()
         if rd_para.resError is not None:
@@ -3472,7 +3533,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
         if skill_name:
             dictTValue['tSkillName'] = skill_name
         else:
-            dictTValue['tSkillName'] = str(results[0]['skill_value'])
+            dictTValue['tSkillName'] = skill_expr
     # 构建最终输出
     result_lines = []
     for i, result in enumerate(results, 1):
@@ -3480,6 +3541,8 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
     dictTValue['tTeamName'] = team_name
     dictTValue['tResult'] = '\n'.join(result_lines)
     reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strTeamCheckResult'], dictTValue)
+    if check_reason:
+        reply_str += f'\n理由：{check_reason}'
     OlivaDiceCore.msgReply.replyMsg(plugin_event, reply_str)
 
 

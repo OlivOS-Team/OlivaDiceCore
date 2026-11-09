@@ -4324,8 +4324,9 @@ def unity_reply(plugin_event, Proc):
                     )
                     replyMsg(plugin_event, tmp_reply_str)
                     return
-                tmp_dict_pc_card = OlivaDiceCore.pcCard.pcCardDataGetUserAll(tmp_pcHash).get(tmp_pc_name, {})
-                if not tmp_dict_pc_card:
+                tmp_cards = OlivaDiceCore.pcCard.pcCardDataGetUserAll(tmp_pcHash)
+                tmp_dict_pc_card = tmp_cards.get(tmp_pc_name, {})
+                if tmp_pc_name not in tmp_cards:
                     dictTValue['tPcInputCard'] = tmp_pc_name
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                         dictStrCustom['strNoPcInputCard'], dictTValue
@@ -4410,6 +4411,23 @@ def unity_reply(plugin_event, Proc):
             tmp_reast_str_new, tmp_mapping_updates = extract_st_mapping_updates(tmp_reast_str)
             tmp_reast_str = tmp_reast_str_new
             tmp_reast_str_original = tmp_reast_str
+            # 纯映射导出包含“卡名-”前缀；按该卡名建立或选中目标卡。
+            if tmp_mapping_updates and tmp_reast_str.strip().endswith('-'):
+                mapping_pc_name = OlivaDiceCore.pcCard.fixName(tmp_reast_str.strip()[:-1].strip())
+                if not mapping_pc_name or not OlivaDiceCore.pcCard.checkPcName(mapping_pc_name):
+                    return
+                mapping_pc_hash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+                if mapping_pc_name in OlivaDiceCore.pcCard.pcCardDataGetUserAll(mapping_pc_hash):
+                    if OlivaDiceCore.pcCard.pcCardDataGetSelectionKeyLock(mapping_pc_hash, tmp_hagID) is not None:
+                        OlivaDiceCore.pcCard.pcCardDataSetSelectionKeyLock(mapping_pc_hash, mapping_pc_name, tmp_hagID)
+                    else:
+                        OlivaDiceCore.pcCard.pcCardDataSetSelectionKey(mapping_pc_hash, mapping_pc_name)
+                else:
+                    OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
+                        mapping_pc_hash, '__new', 0, mapping_pc_name, hagId=tmp_hagID
+                    )
+                    OlivaDiceCore.pcCard.pcCardDataDelBySkillName(mapping_pc_hash, '__new', mapping_pc_name)
+                tmp_reast_str = ''
             if tmp_mapping_updates and not tmp_reast_str.strip():
                 # 仅映射录入（沿用 setPcNoteOrRecData，保留无卡时的建卡行为）
                 for map_name, map_expr in tmp_mapping_updates:
@@ -6103,107 +6121,20 @@ def unity_reply(plugin_event, Proc):
                     )
                 OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str)
                 return
-            tmp_skill_name = None
-            tmp_skill_value = None
-            difficulty = None
-            # 解析难度前缀（困难/极难/大成功）
+            # 难度前缀不属于目标值表达式。
             difficulty, tmp_reast_str = OlivaDiceCore.msgReplyModel.difficulty_analyze(tmp_reast_str)
-            tmp_skill_value_str = None
-            # 保存表达式信息，用于多次掷骰时重新计算
-            tmp_expr_info = None
-            if tmp_reast_str:
-                op_list = OlivaDiceCore.msgReplyModel.op_list_get()
-                skill_end_pos = len(tmp_reast_str)
-                for i, char in enumerate(tmp_reast_str):
-                    if char in op_list or char.isdigit():
-                        skill_end_pos = i
-                        break
-                tmp_skill_name = tmp_reast_str[:skill_end_pos].strip().upper() or None
-                tmp_reast_str = tmp_reast_str[skill_end_pos:].strip()
-                if not tmp_reast_str:
-                    tmp_skill_name = tmp_skill_name.split()[0]
-                    if tmp_skill_name:
-                        tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode='skillName')
-                    # 直接读取数值
-                    tmp_skill_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
-                        OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform), tmp_skill_name, hagId=tmp_hagID
-                    )
-                    tmp_skill_value_str = str(tmp_skill_value)
-                else:
-                    if tmp_skill_name:
-                        tmp_skill_name = OlivaDiceCore.pcCard.fixName(tmp_skill_name, flagMode='skillName')
-                    # 检查是否有运算符
-                    if tmp_reast_str[0] in op_list:
-                        # 带运算表达式
-                        expr_str, tmp_reast_str = OlivaDiceCore.msgReplyModel.split_expr_para(tmp_reast_str, op_list)
-                        tmp_reast_str = tmp_reast_str.strip()
-                        base_value = None
-                        if tmp_reast_str and tmp_reast_str[0].isdigit():
-                            [base_value, tmp_reast_str] = getNumberPara(tmp_reast_str)
-                            base_value = int(base_value)
-                        else:
-                            base_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
-                                OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
-                                tmp_skill_name,
-                                hagId=tmp_hagID,
-                            )
-                        if base_value is not None:
-                            # 保存表达式信息供多次掷骰使用
-                            has_dice = 'D' in expr_str.upper()
-                            tmp_expr_info = {'base_value': base_value, 'expr_str': expr_str, 'has_dice': has_dice}
-                            full_expr = f'{base_value}{expr_str}'
-                            rd_para = OlivaDiceCore.onedice.RD(full_expr)
-                            rd_para.roll()
-                            if rd_para.resError is None:
-                                tmp_skill_value = rd_para.resInt
-                                if has_dice:
-                                    tmp_skill_value_str = f'{full_expr}={rd_para.resDetail}={tmp_skill_value}'
-                                else:
-                                    tmp_skill_value_str = f'{full_expr}={tmp_skill_value}'
-                    else:
-                        # 指定数值
-                        if tmp_reast_str[0].isdigit():
-                            [tmp_skill_value, tmp_reast_str] = getNumberPara(tmp_reast_str)
-                            tmp_skill_value = int(tmp_skill_value)
-                            tmp_skill_value_str = str(tmp_skill_value)
-                            # 数值后仍可跟运算表达式：.ra50+2 / .ra50+3d40，以该数值为基础值
-                            tmp_reast_str = skipSpaceStart(tmp_reast_str)
-                            if tmp_reast_str and tmp_reast_str[0] in op_list:
-                                expr_str, tmp_reast_str = OlivaDiceCore.msgReplyModel.split_expr_para(
-                                    tmp_reast_str, op_list
-                                )
-                                tmp_reast_str = tmp_reast_str.strip()
-                                base_value = tmp_skill_value
-                                has_dice = 'D' in expr_str.upper()
-                                full_expr = f'{base_value}{expr_str}'
-                                rd_para = OlivaDiceCore.onedice.RD(full_expr)
-                                rd_para.roll()
-                                if rd_para.resError is None:
-                                    # 保存表达式信息供多次掷骰使用
-                                    tmp_expr_info = {
-                                        'base_value': base_value,
-                                        'expr_str': expr_str,
-                                        'has_dice': has_dice,
-                                    }
-                                    tmp_skill_value = rd_para.resInt
-                                    if has_dice:
-                                        tmp_skill_value_str = (
-                                            f'{full_expr}={rd_para.resDetail}={tmp_skill_value}'
-                                        )
-                                    else:
-                                        tmp_skill_value_str = f'{full_expr}={tmp_skill_value}'
-            if tmp_skill_name and tmp_skill_value is None:
-                tmp_skill_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(
-                    OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform), tmp_skill_name, hagId=tmp_hagID
-                )
-                if tmp_skill_value is not None:
-                    tmp_skill_value_str = str(tmp_skill_value)
+            tmp_check_target, check_reason = OlivaDiceCore.msgReplyModel.split_check_reason(tmp_reast_str)
+            dictTValue['tRollReason'] = check_reason
+            tmp_pc_hash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
+            if not tmp_check_target:
+                replyMsg(plugin_event, '无法计算检定目标值：缺少目标值')
+                return
             tmp_pc_name_1 = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(
                 OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform), tmp_hagID
             )
             if tmp_pc_name_1:
                 dictTValue['tName'] = tmp_pc_name_1
-            if tmp_skill_name is not None or tmp_skill_value is not None:
+            if tmp_check_target:
                 tmp_Template = None
                 tmp_TemplateRuleName = 'default'
                 tmp_template_name = None
@@ -6231,6 +6162,22 @@ def unity_reply(plugin_event, Proc):
                         rd_para_str = tmp_Template['mainDice']
                     if 'customDefault' in tmp_Template:
                         tmp_customDefault = tmp_Template['customDefault']
+                if roll_times_count == 1:
+                    tmp_skill_name, tmp_skill_value, tmp_skill_value_str, target_error = (
+                        OlivaDiceCore.msgReplyModel.evaluate_check_target(
+                            tmp_check_target, tmp_pc_hash, tmp_hagID, tmp_customDefault
+                        )
+                    )
+                    if target_error is not None or tmp_skill_value is None:
+                        dictTValue['tRollPara'] = tmp_check_target
+                        error_reply = OlivaDiceCore.msgReplyModel.get_SkillCheckError(
+                            target_error, dictStrCustom, dictTValue
+                        ) + OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollErrorHelp'], dictTValue)
+                        if flag_hide_roll and flag_is_from_group:
+                            replyMsgPrivateByEvent(plugin_event, error_reply)
+                        else:
+                            replyMsg(plugin_event, error_reply)
+                        return
                 if flag_bp_type == 1:
                     rd_para_str = 'B'
                 elif flag_bp_type == 2:
@@ -6241,6 +6188,16 @@ def unity_reply(plugin_event, Proc):
                 if roll_times_count == 1:
                     rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_customDefault)
                     rd_para.roll()
+                    if rd_para.resError is not None:
+                        dictTValue['tRollPara'] = rd_para_str
+                        error_reply = OlivaDiceCore.msgReplyModel.get_SkillCheckError(
+                            rd_para.resError, dictStrCustom, dictTValue
+                        ) + OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollErrorHelp'], dictTValue)
+                        if flag_hide_roll and flag_is_from_group:
+                            replyMsgPrivateByEvent(plugin_event, error_reply)
+                        else:
+                            replyMsg(plugin_event, error_reply)
+                        return
                     if rd_para.resError is None:
                         if rd_para.resDetail is None or rd_para.resDetail == '':
                             dictTValue['tRollResult'] = '%s=%d' % (rd_para_str, rd_para.resInt)
@@ -6257,22 +6214,11 @@ def unity_reply(plugin_event, Proc):
                         tmpSkillCheckType, tmpSkillThreshold = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
                             dictRuleTempData, tmp_Template, tmp_TemplateRuleName, difficulty_prefix=difficulty
                         )
-                        # 单次掷骰时，如果有表达式，只显示最终结果
-                        if tmp_expr_info is not None:
-                            dictTValue['tSkillValue'] = (
-                                f'{tmp_expr_info["base_value"]}{tmp_expr_info["expr_str"]}={tmp_skill_value}'
-                            )
-                        else:
-                            dictTValue['tSkillValue'] = (
-                                tmp_skill_value_str if not difficulty else f'{tmpSkillThreshold}({tmp_skill_value_str})'
-                            )
+                        dictTValue['tSkillValue'] = (
+                            tmp_skill_value_str if not difficulty or tmpSkillThreshold is None
+                            else f'{tmpSkillThreshold}({tmp_skill_value_str})'
+                        )
                         if tmpSkillThreshold is None:
-                            if tmp_expr_info is not None:
-                                dictTValue['tSkillValue'] = (
-                                    f'{tmp_expr_info["base_value"]}{tmp_expr_info["expr_str"]}={tmp_skill_value}'
-                                )
-                            else:
-                                dictTValue['tSkillValue'] = tmp_skill_value_str
                             tmpSkillThreshold = tmp_skill_value
                         dictTValue['tRollResult'] = '%s/%s' % (dictTValue['tRollResult'], tmpSkillThreshold)
                         dictTValue['tSkillCheckReasult'] = OlivaDiceCore.msgReplyModel.get_SkillCheckResult(
@@ -6296,31 +6242,30 @@ def unity_reply(plugin_event, Proc):
                             flag_check_success = True
                         flag_need_reply = True
                 else:
-                    flag_begin = True
                     tmp_tSkillCheckReasult = ''
-                    # 多次掷骰时，tSkillValue只显示基础值+表达式（不显示详细计算）
-                    if tmp_expr_info is not None:
-                        dictTValue['tSkillValue'] = f'{tmp_expr_info["base_value"]}{tmp_expr_info["expr_str"]}'
-                    else:
-                        dictTValue['tSkillValue'] = tmp_skill_value_str
-
+                    dictTValue['tSkillValue'] = tmp_check_target
+                    tmp_skill_name = None
+                    tmpSkillThreshold = None
                     for i in range(roll_times_count):
-                        # 如果有表达式信息，每次重新计算技能值
-                        current_skill_value = tmp_skill_value
-                        if tmp_expr_info is not None:
-                            full_expr = f'{tmp_expr_info["base_value"]}{tmp_expr_info["expr_str"]}'
-                            rd_para_expr = OlivaDiceCore.onedice.RD(full_expr)
-                            rd_para_expr.roll()
-                            if rd_para_expr.resError is None:
-                                current_skill_value = rd_para_expr.resInt
-                        rd_para = OlivaDiceCore.onedice.RD(rd_para_str)
+                        tmp_skill_name, current_skill_value, current_detail, target_error = (
+                            OlivaDiceCore.msgReplyModel.evaluate_check_target(
+                                tmp_check_target, tmp_pc_hash, tmp_hagID, tmp_customDefault
+                            )
+                        )
+                        if target_error is not None or current_skill_value is None:
+                            dictTValue['tRollPara'] = tmp_check_target
+                            tmp_tSkillCheckReasult += OlivaDiceCore.msgReplyModel.get_SkillCheckError(
+                                target_error, dictStrCustom, dictTValue
+                            ) + OlivaDiceCore.msgCustomManager.formatReplySTR(
+                                dictStrCustom['strRollErrorHelp'], dictTValue
+                            ) + '\n'
+                            flag_need_reply = True
+                            continue
+                        rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_customDefault)
                         rd_para.roll()
                         if rd_para.resError is None:
                             # 构建掷骰结果显示
-                            if flag_bp_type == 0:
-                                tmp_tSkillCheckReasult += '%s=%d' % (rd_para_str, rd_para.resInt)
-                            else:
-                                tmp_tSkillCheckReasult += '%s=%s=%d' % (rd_para_str, rd_para.resDetail, rd_para.resInt)
+                            tmp_tSkillCheckReasult += '%s=%d' % (rd_para_str, rd_para.resInt)
 
                             dictRuleTempData = {'roll': rd_para.resInt, 'skill': current_skill_value}
                             tmpSkillCheckType, tmpSkillThreshold = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
@@ -6328,14 +6273,11 @@ def unity_reply(plugin_event, Proc):
                             )
                             if tmpSkillThreshold is None:
                                 tmpSkillThreshold = current_skill_value
-                            # 在 /后面显示技能值（基础值+表达式=结果）
-                            if tmp_expr_info is not None:
-                                tmp_tSkillCheckReasult += '/%s=%d ' % (
-                                    f'{tmp_expr_info["base_value"]}{tmp_expr_info["expr_str"]}',
-                                    tmpSkillThreshold,
-                                )
-                            else:
-                                tmp_tSkillCheckReasult += '/%s ' % tmpSkillThreshold
+                            tmp_tSkillCheckReasult += '/%s ' % tmpSkillThreshold
+                            if current_detail and '=' in current_detail:
+                                detail = current_detail.split('=', 1)[1].rsplit('=', 1)[0]
+                                if detail.strip() != str(current_skill_value):
+                                    tmp_tSkillCheckReasult += f'({detail}) '
                             tmp_tSkillCheckReasult += OlivaDiceCore.msgReplyModel.get_SkillCheckResult(
                                 tmpSkillCheckType,
                                 dictStrCustom,
@@ -6358,7 +6300,11 @@ def unity_reply(plugin_event, Proc):
                             flag_need_reply = True
                             tmp_tSkillCheckReasult += '\n'
                         else:
-                            flag_need_reply = False
+                            dictTValue['tRollPara'] = rd_para_str
+                            tmp_tSkillCheckReasult += OlivaDiceCore.msgReplyModel.get_SkillCheckError(
+                                rd_para.resError, dictStrCustom, dictTValue
+                            ) + '\n'
+                            flag_need_reply = True
                             break
                     dictTValue['tRollResult'] = tmp_tSkillCheckReasult.strip()
                     dictTValue['tSkillCheckReasult'] = ''
@@ -6423,6 +6369,9 @@ def unity_reply(plugin_event, Proc):
                         # 多次掷骰时 tSkillCheckReasult 为空，去掉模板残留的尾部空格
                         tmp_reply_str = tmp_reply_str.rstrip(' ')
                         tmp_reply_str_show = tmp_reply_str_show.rstrip(' ')
+                        if check_reason:
+                            tmp_reply_str += f'\n理由：{check_reason}'
+                            tmp_reply_str_show += f'\n理由：{check_reason}'
                         if flag_hide_roll and flag_is_from_group:
                             replyMsg(plugin_event, tmp_reply_str_show)
                             replyMsgPrivateByEvent(plugin_event, tmp_reply_str)
@@ -6461,6 +6410,9 @@ def unity_reply(plugin_event, Proc):
                         # 多次掷骰时 tSkillCheckReasult 为空，去掉模板残留的尾部空格
                         tmp_reply_str = tmp_reply_str.rstrip(' ')
                         tmp_reply_str_show = tmp_reply_str_show.rstrip(' ')
+                        if check_reason:
+                            tmp_reply_str += f'\n理由：{check_reason}'
+                            tmp_reply_str_show += f'\n理由：{check_reason}'
                         if flag_hide_roll and flag_is_from_group:
                             replyMsg(plugin_event, tmp_reply_str_show)
                             replyMsgPrivateByEvent(plugin_event, tmp_reply_str)
@@ -8440,8 +8392,9 @@ def extract_st_mapping_updates(data: str):
         j += 1
         expr_chars = []
         if j < n and (data[j].isdigit() or data[j].upper() == 'D'):
-            # 骰子/算式表达式：括号内允许中文技能名，括号外遇中文则视为后续技能
+            # 骰式后的中文既可能是运算数，也可能是紧接着录入的技能。
             paren = 0
+            in_name = False
             while j < n:
                 c = data[j]
                 if c == '&':
@@ -8451,7 +8404,15 @@ def extract_st_mapping_updates(data: str):
                 elif c in ')]':
                     paren = max(0, paren - 1)
                 if paren == 0 and not c.isascii():
-                    break
+                    if not in_name:
+                        previous = ''.join(expr_chars).rstrip()
+                        if not previous or previous[-1] not in '+-*/^<>=|,([':
+                            break
+                    in_name = True
+                elif in_name:
+                    in_name = False
+                    if c.isdigit():
+                        break
                 expr_chars.append(c)
                 j += 1
         else:
