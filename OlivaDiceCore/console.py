@@ -38,6 +38,7 @@ dictConsoleSwitchTemplate = {
         'messageSplitManualShowPage': 0,
         'largeRollLimit': 300,
         'multiRollDetail': 1,
+        'checkTargetDetail': 1,
         'randomMode': 0,
         'drawRecommendMode': 1,
         'drawListMode': 2,

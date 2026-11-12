@@ -82,6 +82,7 @@ dictRuleOperationMapping = {}
 
 listOperationSub = ['m', 'M', 'k', 'K', 'q', 'Q', 'b', 'B', 'p', 'P', ':', '=', 'i']
 
+
 lenOperationMax = 3
 
 """
@@ -351,10 +352,14 @@ class RD(object):
         self.dictOperationPriority = dictOperationPriority
         self.dictRuleOperationPriority = dictRuleOperationPriority
         self.customDefault = customDefault
-        self.valueTable = valueTable
+        self.valueTable = {} if valueTable is None else valueTable
         self.ruleMode = ruleMode
+        self._roll_budget = [100000]
+        self._budget_is_child = False
 
     def roll(self):
+        if not self._budget_is_child:
+            self._roll_budget[0] = 100000
         try:
             if type(self.valueTable) is dict:
                 self.__replace()
@@ -380,7 +385,7 @@ class RD(object):
                 self.resError = self.resErrorType.UNKNOWN_COMPLETE_FATAL
         if self.resError is not None:
             return
-        else:
+        try:
             self.resInt = resRecursiveObj.resInt
             self.resIntMin = resRecursiveObj.resIntMin
             self.resIntMax = resRecursiveObj.resIntMax
@@ -392,6 +397,10 @@ class RD(object):
             if not self.resMetaTupleEnable:
                 self.resMetaTupleEnable = self.check_metaTuple(resRecursiveObj.resMetaTuple)
             self.resMetaTuple = self.get_from_metaTuple(resRecursiveObj.resMetaTuple)
+        except Exception:
+            traceback.print_exc()
+            if self.resError is None:
+                self.resError = self.resErrorType.UNKNOWN_COMPLETE_FATAL
         return
 
     class resErrorType(Enum):
@@ -407,6 +416,7 @@ class RD(object):
         NODE_SUB_VAL_INVALID = -10
         NODE_EXTREME_VAL_INVALID = -11
         UNKNOWN_REPLACE_FATAL = -12
+        RESOURCE_LIMIT_EXCEEDED = -13
 
     class resExtremeType(Enum):
         INT_LIMITED = 0
@@ -424,6 +434,7 @@ class RD(object):
             self.resDetailData = []
             self.resMetaTuple = []
             self.resMetaTupleEnable = False
+            self.isTupleLiteral = False
 
     def getPriority(self, data):
         res = None
@@ -621,7 +632,10 @@ class RD(object):
                                             tmp_data[it_offset + 1 : it_offset + 1 + tmp_number_offset + 1],
                                             customDefault=self.customDefault,
                                             valueTable=self.valueTable,
+                                            ruleMode=self.ruleMode,
                                         )
+                                        tmp_rd_child_para._roll_budget = self._roll_budget
+                                        tmp_rd_child_para._budget_is_child = True
                                         tmp_rd_child_para.roll()
                                         if tmp_rd_child_para.resError is None:
                                             op_stack.pop()
@@ -807,21 +821,29 @@ class RD(object):
                 tmp_node_this_output = 0
                 tmp_node_this_output_Max = 0
                 tmp_node_this_output_Min = 0
-                if len(tmp_node_this.data) > 0 and rootData not in ['kh', 'kl', 'lp']:
+                tmp_tuple_is_loop_body = rootData == 'lp' and forkSideRight
+                if tmp_tuple_is_loop_body:
+                    tmp_metaTuple_res = tmp_node_this.data
+                else:
                     tmp_metaTuple_res = self.get_from_metaTuple(tmp_node_this.data)
-                    if len(tmp_metaTuple_res) > 0:
+                    if self.resError is not None:
+                        return resNoneTemplate
+                    if tmp_metaTuple_res:
                         tmp_node_this_output = tmp_metaTuple_res[-1]
                         tmp_node_this_output_Max = tmp_node_this_output
                         tmp_node_this_output_Min = tmp_node_this_output
                 tmp_node_this_output_str = '[%s]' % ','.join([str(data_this) for data_this in tmp_node_this.data])
                 tmp_node_this_output_data_final = [{'op': '[', 'v': tmp_node_this.data}]
-                tmp_node_this_output_meta_tuple = tmp_node_this.data
+                tmp_node_this_output_meta_tuple = tmp_metaTuple_res
                 tmp_node_this_output_meta_tuple_enable = True
             elif self.calTree.peek().isOperation():
                 tmp_node_this = self.calTree.pop()
                 tmp_priority_this = tmp_node_this.getPriority()
                 if tmp_priority_this is None:
                     tmp_priority_this = 0
+                if tmp_node_this.data == 'lp' and not self.calTree.peek().isTuple():
+                    self.resError = self.resErrorType.NODE_RIGHT_VAL_INVALID
+                    return resNoneTemplate
                 tmp_main_val_right_obj = self.__calculate(tmp_priority_this, True, tmp_node_this.data)
                 if self.resError is not None:
                     return resNoneTemplate
@@ -1016,7 +1038,7 @@ class RD(object):
                         ]
                     elif not len(tmp_node_this_left_resMetaTuple) > 1 and len(tmp_node_this_right_resMetaTuple) > 1:
                         tmp_node_this_resMetaTuple = [
-                            (tmp_node_this_resMetaTuple_this - tmp_main_val_left[0])
+                            (tmp_main_val_left[0] - tmp_node_this_resMetaTuple_this)
                             for tmp_node_this_resMetaTuple_this in tmp_node_this_right_resMetaTuple
                         ]
                     tmp_node_this_output_meta_tuple = tmp_node_this_resMetaTuple
@@ -1049,9 +1071,9 @@ class RD(object):
                         if tmp_main_val_right_obj.resIntMinType == self.resExtremeType.INT_NEGATIVE_INFINITE:
                             tmp_node_this_output_ExtremumType_2 = self.resExtremeType.INT_NEGATIVE_INFINITE
                         elif tmp_main_val_right_obj.resIntMinType == self.resExtremeType.INT_LIMITED:
-                            if tmp_main_val_right_obj.resIntMax > 0:
+                            if tmp_main_val_right_obj.resIntMin > 0:
                                 tmp_node_this_output_ExtremumType_2 = self.resExtremeType.INT_POSITIVE_INFINITE
-                            elif tmp_main_val_right_obj.resIntMax < 0:
+                            elif tmp_main_val_right_obj.resIntMin < 0:
                                 tmp_node_this_output_ExtremumType_2 = self.resExtremeType.INT_NEGATIVE_INFINITE
                             else:
                                 tmp_node_this_output_ExtremumType_2 = self.resExtremeType.INT_LIMITED
@@ -1062,9 +1084,9 @@ class RD(object):
                     ##############################################
                     elif tmp_main_val_left_obj.resIntMaxType == self.resExtremeType.INT_LIMITED:
                         if tmp_main_val_right_obj.resIntMaxType == self.resExtremeType.INT_POSITIVE_INFINITE:
-                            if tmp_main_val_left_obj.resIntMin > 0:
+                            if tmp_main_val_left_obj.resIntMax > 0:
                                 tmp_node_this_output_ExtremumType_1 = self.resExtremeType.INT_POSITIVE_INFINITE
-                            elif tmp_main_val_left_obj.resIntMin < 0:
+                            elif tmp_main_val_left_obj.resIntMax < 0:
                                 tmp_node_this_output_ExtremumType_1 = self.resExtremeType.INT_NEGATIVE_INFINITE
                             else:
                                 tmp_node_this_output_ExtremumType_1 = self.resExtremeType.INT_LIMITED
@@ -1079,9 +1101,9 @@ class RD(object):
                             return resNoneTemplate
                         ##############################################
                         if tmp_main_val_right_obj.resIntMinType == self.resExtremeType.INT_NEGATIVE_INFINITE:
-                            if tmp_main_val_left_obj.resIntMin > 0:
+                            if tmp_main_val_left_obj.resIntMax > 0:
                                 tmp_node_this_output_ExtremumType_2 = self.resExtremeType.INT_NEGATIVE_INFINITE
-                            elif tmp_main_val_left_obj.resIntMin < 0:
+                            elif tmp_main_val_left_obj.resIntMax < 0:
                                 tmp_node_this_output_ExtremumType_2 = self.resExtremeType.INT_POSITIVE_INFINITE
                             else:
                                 tmp_node_this_output_ExtremumType_2 = self.resExtremeType.INT_LIMITED
@@ -2533,6 +2555,10 @@ class RD(object):
                     tmp_node_this_output_1_list = []
                     tmp_node_this_output_str = ''
                     while flag_add_roll_not_empty:
+                        if tmp_add_roll_count > self._roll_budget[0]:
+                            self.resError = self.resErrorType.RESOURCE_LIMIT_EXCEEDED
+                            return resNoneTemplate
+                        self._roll_budget[0] -= tmp_add_roll_count
                         tmp_range_list = range(0, tmp_add_roll_count)
                         tmp_add_roll_count = 0
                         tmp_node_this_output_list = []
@@ -2624,7 +2650,7 @@ class RD(object):
                         self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
                         return resNoneTemplate
                     if (
-                        tmp_node_this.vals['m'] > tmp_main_val_right_obj.resIntMin
+                        tmp_node_this.vals['m'] >= tmp_main_val_right_obj.resIntMin
                         or tmp_main_val_right_obj.resIntMinType == self.resExtremeType.INT_NEGATIVE_INFINITE
                     ):
                         tmp_node_this_output_MaxType = self.resExtremeType.INT_POSITIVE_INFINITE
@@ -2652,6 +2678,10 @@ class RD(object):
                     tmp_node_this_output_str = ''
                     tmp_node_this_output_this_max = 0
                     while flag_add_roll_not_empty:
+                        if tmp_add_roll_count > self._roll_budget[0]:
+                            self.resError = self.resErrorType.RESOURCE_LIMIT_EXCEEDED
+                            return resNoneTemplate
+                        self._roll_budget[0] -= tmp_add_roll_count
                         tmp_range_list = range(0, tmp_add_roll_count)
                         tmp_add_roll_count = 0
                         tmp_node_this_output_list = []
@@ -3251,6 +3281,9 @@ class RD(object):
                         tmp_last_left_resMetaTuple_raw = tmp_main_val_left_obj.resMetaTuple
                     tmp_last_left_resMetaTuple = tmp_last_left_resMetaTuple_raw.copy()
                     tmp_last_left_resMetaTuple = self.get_from_metaTuple(tmp_last_left_resMetaTuple)
+                    if not tmp_main_val_right_obj.isTupleLiteral:
+                        self.resError = self.resErrorType.NODE_RIGHT_VAL_INVALID
+                        return resNoneTemplate
                     tmp_last_right_resMetaTuple_raw = tmp_main_val_right_obj.resMetaTuple
                     tmp_last_right_resMetaTuple = tmp_last_right_resMetaTuple_raw.copy()
                     tmp_start = 1
@@ -3268,14 +3301,40 @@ class RD(object):
                     if tmp_start > tmp_end or tmp_step < 1:
                         self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
                         return resNoneTemplate
+                    tmp_iterations = (tmp_end - tmp_start) // tmp_step + 1
+                    if tmp_iterations * len(tmp_last_right_resMetaTuple) > 1000:
+                        self.resError = self.resErrorType.RESOURCE_LIMIT_EXCEEDED
+                        return resNoneTemplate
                     tmp_res_resMetaTuple = []
-                    for tmp_count_i in range(tmp_start, tmp_end + 1, tmp_step):
-                        tmp_res_resMetaTuple += [
-                            tmp_last_right_resMetaTuple_this.replace('i', str(tmp_count_i))
-                            for tmp_last_right_resMetaTuple_this in tmp_last_right_resMetaTuple
-                        ]
-                    if len(tmp_res_resMetaTuple) > 1000:
-                        tmp_res_resMetaTuple = tmp_res_resMetaTuple[:1000]
+                    for tmp_count_i in range(tmp_start, tmp_end + 1, tmp_step) if tmp_last_right_resMetaTuple else ():
+                        for tmp_body in tmp_last_right_resMetaTuple:
+                            # 保留花括号引用和 min 运算符，只替换循环变量。
+                            tmp_parts = []
+                            tmp_offset = 0
+                            while tmp_offset < len(tmp_body):
+                                if tmp_body[tmp_offset] == '{':
+                                    tmp_close = tmp_body.find('}', tmp_offset + 1)
+                                    if tmp_close != -1:
+                                        tmp_parts.append(tmp_body[tmp_offset : tmp_close + 1])
+                                        tmp_offset = tmp_close + 1
+                                        continue
+                                if tmp_body.startswith('min', tmp_offset):
+                                    tmp_parts.append('min')
+                                    tmp_offset += 3
+                                elif tmp_body[tmp_offset] == 'i':
+                                    tmp_parts.append('(%s)' % tmp_count_i)
+                                    tmp_offset += 1
+                                else:
+                                    tmp_parts.append(tmp_body[tmp_offset])
+                                    tmp_offset += 1
+                            tmp_expression = ''.join(tmp_parts)
+                            tmp_res_resMetaTuple.extend(self.get_from_metaTuple([tmp_expression]))
+                            if self.resError is not None:
+                                return resNoneTemplate
+                    if tmp_res_resMetaTuple:
+                        tmp_node_this_output = tmp_res_resMetaTuple[-1]
+                        tmp_node_this_output_Min = tmp_node_this_output
+                        tmp_node_this_output_Max = tmp_node_this_output
                     tmp_node_this_output_str = '{%s:%s:%s}lp{%s}' % (
                         str(tmp_start),
                         str(tmp_step),
@@ -3293,7 +3352,7 @@ class RD(object):
                                 'r': tmp_main_val_right[0],
                                 'v': tmp_node_this.vals,
                             },
-                            'result': [[tmp_start, tmp_step, tmp_end], tmp_last_right_resMetaTuple_raw, []],
+                            'result': [[tmp_start, tmp_step, tmp_end], tmp_last_right_resMetaTuple_raw, tmp_res_resMetaTuple],
                         }
                     ]
                     tmp_node_this_output_meta_tuple = tmp_res_resMetaTuple
@@ -3314,6 +3373,7 @@ class RD(object):
             resRecursiveObj.resDetailData = tmp_node_this_output_data_final
             resRecursiveObj.resMetaTuple = tmp_node_this_output_meta_tuple
             resRecursiveObj.resMetaTupleEnable = tmp_node_this_output_meta_tuple_enable
+            resRecursiveObj.isTupleLiteral = tmp_node_this.isTuple()
             return resRecursiveObj
 
     def get_from_metaTuple(self, data, flag_last=False, flag_update=True):
@@ -3322,12 +3382,16 @@ class RD(object):
             if type(data_this) is int:
                 res.append(data_this)
             elif type(data_this) is str:
-                para_this = RD(data_this, customDefault=self.customDefault, valueTable=self.valueTable)
+                para_this = RD(
+                    data_this, customDefault=self.customDefault, valueTable=self.valueTable, ruleMode=self.ruleMode
+                )
+                para_this._roll_budget = self._roll_budget
+                para_this._budget_is_child = True
                 para_this.roll()
-                if para_this.resError is None:
-                    res.append(para_this.resInt)
-                if flag_update:
-                    self.valueTable.update(para_this.valueTable)
+                if para_this.resError is not None:
+                    self.resError = para_this.resError
+                    return res
+                res.append(para_this.resInt)
                 if flag_last:
                     self.resInt = para_this.resInt
                     self.resIntMin = para_this.resIntMin

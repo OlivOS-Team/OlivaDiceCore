@@ -6165,7 +6165,8 @@ def unity_reply(plugin_event, Proc):
                 if roll_times_count == 1:
                     tmp_skill_name, tmp_skill_value, tmp_skill_value_str, target_error = (
                         OlivaDiceCore.msgReplyModel.evaluate_check_target(
-                            tmp_check_target, tmp_pc_hash, tmp_hagID, tmp_customDefault, tmp_template_name
+                            tmp_check_target, tmp_pc_hash, tmp_hagID, tmp_customDefault, tmp_template_name,
+                            plugin_event.bot_info.hash,
                         )
                     )
                     if target_error is not None or tmp_skill_value is None:
@@ -6250,7 +6251,8 @@ def unity_reply(plugin_event, Proc):
                     for i in range(roll_times_count):
                         tmp_skill_name, current_skill_value, current_detail, target_error = (
                             OlivaDiceCore.msgReplyModel.evaluate_check_target(
-                                tmp_check_target, tmp_pc_hash, tmp_hagID, tmp_customDefault, tmp_template_name
+                                tmp_check_target, tmp_pc_hash, tmp_hagID, tmp_customDefault, tmp_template_name,
+                                plugin_event.bot_info.hash,
                             )
                         )
                         if target_error is not None or current_skill_value is None:
@@ -6275,7 +6277,11 @@ def unity_reply(plugin_event, Proc):
                             if tmpSkillThreshold is None:
                                 tmpSkillThreshold = current_skill_value
                             tmp_tSkillCheckReasult += '/%s ' % tmpSkillThreshold
-                            if current_detail and '=' in current_detail:
+                            if (
+                                OlivaDiceCore.console.getConsoleSwitchByHash(
+                                    'checkTargetDetail', plugin_event.bot_info.hash
+                                ) != 0 and current_detail and '=' in current_detail
+                            ):
                                 detail = current_detail.split('=', 1)[1].rsplit('=', 1)[0]
                                 if detail.strip() != str(current_skill_value):
                                     tmp_tSkillCheckReasult += f'({detail}) '

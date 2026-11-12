@@ -112,7 +112,7 @@ def check_roll_detail(dice):
     return detail if len(detail) <= 150 else ''
 
 
-def evaluate_check_target(text, pc_hash, hag_id, custom_default=None, template_name=None):
+def evaluate_check_target(text, pc_hash, hag_id, custom_default=None, template_name=None, bot_hash=None):
     """解析并独立掷出一次检定目标值；失败时不返回可用于检定的数值。"""
     text = (text or '').strip().upper()
     if not text:
@@ -206,7 +206,9 @@ def evaluate_check_target(text, pc_hash, hag_id, custom_default=None, template_n
         detail = str(dice.resInt)
         if display_text != detail:
             detail = display_text
-            roll_detail = check_roll_detail(dice)
+            roll_detail = check_roll_detail(dice) if OlivaDiceCore.console.getConsoleSwitchByHash(
+                'checkTargetDetail', bot_hash
+            ) != 0 else ''
             if roll_detail and roll_detail != text:
                 detail += '=' + roll_detail
             detail += '=' + str(dice.resInt)
@@ -904,6 +906,8 @@ def get_SkillCheckError(resError, dictStrCustom, dictTValue):
         tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError11'], dictTValue)
     elif resError == OlivaDiceCore.onedice.RD.resErrorType.UNKNOWN_REPLACE_FATAL:
         tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError12'], dictTValue)
+    elif resError == OlivaDiceCore.onedice.RD.resErrorType.RESOURCE_LIMIT_EXCEEDED:
+        tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strRollError13'], dictTValue)
     else:
         tmp_reply_str_1 = OlivaDiceCore.msgCustomManager.formatReplySTR(
             dictStrCustom['strRollErrorUnknown'], dictTValue
@@ -3412,7 +3416,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
         if template and 'customDefault' in template:
             custom_default = template['customDefault']
         skill_name, current_skill_value, expr_result_str, target_error = evaluate_check_target(
-            skill_expr, pc_hash, tmp_hagID, custom_default, template_name
+            skill_expr, pc_hash, tmp_hagID, custom_default, template_name, plugin_event.bot_info.hash
         )
         if target_error is not None:
             dictTValue['tRollPara'] = skill_expr
