@@ -204,11 +204,11 @@ def evaluate_check_target(text, pc_hash, hag_id, custom_default=None, template_n
         if dice.resError is not None or dice.resInt is None:
             return skill, None, None, dice.resError or OlivaDiceCore.onedice.RD.resErrorType.INPUT_RAW_INVALID
         detail = str(dice.resInt)
-        if display_text != detail:
+        if display_text != detail and OlivaDiceCore.console.getConsoleSwitchByHash(
+            'checkTargetDetail', bot_hash
+        ) != 0:
             detail = display_text
-            roll_detail = check_roll_detail(dice) if OlivaDiceCore.console.getConsoleSwitchByHash(
-                'checkTargetDetail', bot_hash
-            ) != 0 else ''
+            roll_detail = check_roll_detail(dice)
             if roll_detail and roll_detail != text:
                 detail += '=' + roll_detail
             detail += '=' + str(dice.resInt)

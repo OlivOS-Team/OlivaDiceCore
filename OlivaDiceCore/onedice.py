@@ -82,7 +82,6 @@ dictRuleOperationMapping = {}
 
 listOperationSub = ['m', 'M', 'k', 'K', 'q', 'Q', 'b', 'B', 'p', 'P', ':', '=', 'i']
 
-
 lenOperationMax = 3
 
 """
@@ -354,12 +353,32 @@ class RD(object):
         self.customDefault = customDefault
         self.valueTable = {} if valueTable is None else valueTable
         self.ruleMode = ruleMode
-        self._roll_budget = [100000]
-        self._budget_is_child = False
+        self.__rollBudget = [100000]
+        self.__budgetIsChild = False
+        self.__randomSource = None
+
+    def __newChild(self, expression):
+        child = RD(expression, customDefault=self.customDefault, valueTable=self.valueTable, ruleMode=self.ruleMode)
+        child.__rollBudget = self.__rollBudget
+        child.__budgetIsChild = True
+        child.__randomSource = self.__randomSource or self.random
+        return child
+
+    def __reserveRolls(self, count):
+        if count > self.__rollBudget[0]:
+            self.resError = self.resErrorType.RESOURCE_LIMIT_EXCEEDED
+            return False
+        self.__rollBudget[0] -= count
+        return True
+
+    def __rollRandom(self, nMin, nMax):
+        if self.__randomSource is not None:
+            return self.__randomSource(nMin, nMax)
+        return self.random(nMin, nMax)
 
     def roll(self):
-        if not self._budget_is_child:
-            self._roll_budget[0] = 100000
+        if not self.__budgetIsChild:
+            self.__rollBudget[0] = 100000
         try:
             if type(self.valueTable) is dict:
                 self.__replace()
@@ -434,6 +453,7 @@ class RD(object):
             self.resDetailData = []
             self.resMetaTuple = []
             self.resMetaTupleEnable = False
+            self.resMetaTupleRaw = None
             self.isTupleLiteral = False
 
     def getPriority(self, data):
@@ -628,14 +648,9 @@ class RD(object):
                                         elif tmp_data[tmp_total_offset] == ')':
                                             count_child_para_2 -= 1
                                     if count_child_para_2 == 0:
-                                        tmp_rd_child_para = RD(
-                                            tmp_data[it_offset + 1 : it_offset + 1 + tmp_number_offset + 1],
-                                            customDefault=self.customDefault,
-                                            valueTable=self.valueTable,
-                                            ruleMode=self.ruleMode,
+                                        tmp_rd_child_para = self.__newChild(
+                                            tmp_data[it_offset + 1 : it_offset + 1 + tmp_number_offset + 1]
                                         )
-                                        tmp_rd_child_para._roll_budget = self._roll_budget
-                                        tmp_rd_child_para._budget_is_child = True
                                         tmp_rd_child_para.roll()
                                         if tmp_rd_child_para.resError is None:
                                             op_stack.pop()
@@ -807,6 +822,7 @@ class RD(object):
             tmp_node_this_output_data = {}
             tmp_node_this_output_data_final = []
             tmp_node_this_output_meta_tuple = []
+            tmp_node_this_output_meta_tuple_raw = None
             tmp_node_this_output_meta_tuple_enable = False
             if self.calTree.peek().isNumber():
                 tmp_node_this = self.calTree.pop()
@@ -835,6 +851,7 @@ class RD(object):
                 tmp_node_this_output_str = '[%s]' % ','.join([str(data_this) for data_this in tmp_node_this.data])
                 tmp_node_this_output_data_final = [{'op': '[', 'v': tmp_node_this.data}]
                 tmp_node_this_output_meta_tuple = tmp_metaTuple_res
+                tmp_node_this_output_meta_tuple_raw = tmp_node_this.data
                 tmp_node_this_output_meta_tuple_enable = True
             elif self.calTree.peek().isOperation():
                 tmp_node_this = self.calTree.pop()
@@ -2283,19 +2300,19 @@ class RD(object):
                     tmp_node_this_output_data_3 = []
                     tmp_node_this_output_data_final = []
                     if tmp_node_this.vals['a'] is not None:
-                        tmp_RD = RD(
+                        tmp_RD = self.__newChild(
                             '%sa(%s+1)k%sm%s'
                             % (
                                 str(tmp_main_val_left[0]),
                                 str(tmp_main_val_right[0]),
                                 str(tmp_node_this.vals['a']),
                                 str(tmp_main_val_right[0]),
-                            ),
-                            self.customDefault,
+                            )
                         )
                         tmp_RD.roll()
                         if tmp_RD.resError is not None:
-                            return tmp_RD.resError
+                            self.resError = tmp_RD.resError
+                            return resNoneTemplate
                         else:
                             resRecursiveObj = self.resRecursive()
                             resRecursiveObj.resInt = tmp_RD.resInt
@@ -2316,8 +2333,10 @@ class RD(object):
                             self.resError = self.resErrorType.NODE_SUB_VAL_INVALID
                             return resNoneTemplate
                     if tmp_node_this.vals['k'] is not None or tmp_node_this.vals['q'] is not None:
+                        if not self.__reserveRolls(tmp_main_val_left[0]):
+                            return resNoneTemplate
                         for tmp_it_this in tmp_range_list:
-                            tmp_node_this_output_this = self.random(1, tmp_main_val_right[0])
+                            tmp_node_this_output_this = self.__rollRandom(1, tmp_main_val_right[0])
                             tmp_node_this_output_list.append(tmp_node_this_output_this)
                             tmp_node_this_output_data_1.append(tmp_node_this_output_this)
                         if tmp_node_this.vals['k'] is not None:
@@ -2351,7 +2370,7 @@ class RD(object):
                                 return resNoneTemplate
                             flag_begin = True
                             for tmp_it_this in tmp_range_list:
-                                tmp_rd_this = RD('1b%d' % (tmp_node_this.vals['b'],))
+                                tmp_rd_this = self.__newChild('1b%d' % (tmp_node_this.vals['b'],))
                                 tmp_rd_this.roll()
                                 if tmp_rd_this.resError is not None:
                                     self.resError = tmp_rd_this.resError
@@ -2375,7 +2394,7 @@ class RD(object):
                                 return resNoneTemplate
                             flag_begin = True
                             for tmp_it_this in tmp_range_list:
-                                tmp_rd_this = RD('1p%d' % (tmp_node_this.vals['p'],))
+                                tmp_rd_this = self.__newChild('1p%d' % (tmp_node_this.vals['p'],))
                                 tmp_rd_this.roll()
                                 if tmp_rd_this.resError is not None:
                                     self.resError = tmp_rd_this.resError
@@ -2394,8 +2413,10 @@ class RD(object):
                                     tmp_node_this_output_data_1.append(tmp_rd_this.resDetailData)
                                     tmp_node_this_output_data_2.append(tmp_node_this_output_this)
                     else:
+                        if not self.__reserveRolls(tmp_main_val_left[0]):
+                            return resNoneTemplate
                         for tmp_it_this in tmp_range_list:
-                            tmp_node_this_output_this = self.random(1, tmp_main_val_right[0])
+                            tmp_node_this_output_this = self.__rollRandom(1, tmp_main_val_right[0])
                             tmp_node_this_output_list.append(tmp_node_this_output_this)
                             tmp_node_this_output_data_1.append(tmp_node_this_output_this)
                         for tmp_node_this_output_this in tmp_node_this_output_list:
@@ -2555,16 +2576,14 @@ class RD(object):
                     tmp_node_this_output_1_list = []
                     tmp_node_this_output_str = ''
                     while flag_add_roll_not_empty:
-                        if tmp_add_roll_count > self._roll_budget[0]:
-                            self.resError = self.resErrorType.RESOURCE_LIMIT_EXCEEDED
+                        if not self.__reserveRolls(tmp_add_roll_count):
                             return resNoneTemplate
-                        self._roll_budget[0] -= tmp_add_roll_count
                         tmp_range_list = range(0, tmp_add_roll_count)
                         tmp_add_roll_count = 0
                         tmp_node_this_output_list = []
                         tmp_node_this_output_1_this = 0
                         for tmp_it_this in tmp_range_list:
-                            tmp_node_this_output_this = self.random(1, tmp_add_roll_m)
+                            tmp_node_this_output_this = self.__rollRandom(1, tmp_add_roll_m)
                             tmp_node_this_output_list.append(tmp_node_this_output_this)
                             if tmp_add_roll_k is not None and tmp_node_this_output_this >= tmp_add_roll_k:
                                 tmp_node_this_output += 1
@@ -2678,16 +2697,14 @@ class RD(object):
                     tmp_node_this_output_str = ''
                     tmp_node_this_output_this_max = 0
                     while flag_add_roll_not_empty:
-                        if tmp_add_roll_count > self._roll_budget[0]:
-                            self.resError = self.resErrorType.RESOURCE_LIMIT_EXCEEDED
+                        if not self.__reserveRolls(tmp_add_roll_count):
                             return resNoneTemplate
-                        self._roll_budget[0] -= tmp_add_roll_count
                         tmp_range_list = range(0, tmp_add_roll_count)
                         tmp_add_roll_count = 0
                         tmp_node_this_output_list = []
                         tmp_node_this_output_this_max = 0
                         for tmp_it_this in tmp_range_list:
-                            tmp_node_this_output_this = self.random(1, tmp_add_roll_m)
+                            tmp_node_this_output_this = self.__rollRandom(1, tmp_add_roll_m)
                             tmp_node_this_output_list.append(tmp_node_this_output_this)
                             if tmp_node_this_output_this >= tmp_add_roll_threshold:
                                 tmp_add_roll_count += 1
@@ -2786,13 +2803,15 @@ class RD(object):
                     tmp_node_this_output_data_2 = []
                     tmp_node_this_output_data_3 = []
                     tmp_node_this_output_data_final = []
-                    tmp_node_this_output_this = self.random(1, 100)
+                    if not self.__reserveRolls(1 + max(0, tmp_main_val_right[0])):
+                        return resNoneTemplate
+                    tmp_node_this_output_this = self.__rollRandom(1, 100)
                     tmp_node_this_output_1 = tmp_node_this_output_this
                     tmp_range_list = range(0, tmp_main_val_right[0])
                     tmp_node_this_output_1_1 = int(tmp_node_this_output_1 / 10)
                     tmp_node_this_output_1_2 = int(tmp_node_this_output_1 % 10)
                     for tmp_it_this in tmp_range_list:
-                        tmp_node_this_output_this = self.random(1, 10) - 1
+                        tmp_node_this_output_this = self.__rollRandom(1, 10) - 1
                         if tmp_node_this_output_1_2 == 0 and tmp_node_this_output_this == 0:
                             tmp_node_this_output_this = 10
                         tmp_node_this_output_list_2.append(tmp_node_this_output_this)
@@ -2878,13 +2897,15 @@ class RD(object):
                     tmp_node_this_output_data_2 = []
                     tmp_node_this_output_data_3 = []
                     tmp_node_this_output_data_final = []
-                    tmp_node_this_output_this = self.random(1, 100)
+                    if not self.__reserveRolls(1 + max(0, tmp_main_val_right[0])):
+                        return resNoneTemplate
+                    tmp_node_this_output_this = self.__rollRandom(1, 100)
                     tmp_node_this_output_1 = tmp_node_this_output_this
                     tmp_range_list = range(0, tmp_main_val_right[0])
                     tmp_node_this_output_1_1 = int(tmp_node_this_output_1 / 10)
                     tmp_node_this_output_1_2 = int(tmp_node_this_output_1 % 10)
                     for tmp_it_this in tmp_range_list:
-                        tmp_node_this_output_this = self.random(1, 10) - 1
+                        tmp_node_this_output_this = self.__rollRandom(1, 10) - 1
                         if tmp_node_this_output_1_2 == 0 and tmp_node_this_output_this == 0:
                             tmp_node_this_output_this = 10
                         tmp_node_this_output_list_2.append(tmp_node_this_output_this)
@@ -2951,6 +2972,8 @@ class RD(object):
                     if tmp_main_val_left[0] <= 0 or tmp_main_val_left[0] > 10000:
                         self.resError = self.resErrorType.NODE_LEFT_VAL_INVALID
                         return resNoneTemplate
+                    if not self.__reserveRolls(tmp_main_val_left[0]):
+                        return resNoneTemplate
                     if tmp_main_val_left_obj.resIntMaxType == self.resExtremeType.INT_POSITIVE_INFINITE:
                         tmp_node_this_output_MaxType = self.resExtremeType.INT_POSITIVE_INFINITE
                         tmp_node_this_output_MinType = self.resExtremeType.INT_NEGATIVE_INFINITE
@@ -2974,7 +2997,7 @@ class RD(object):
                     tmp_node_this_output_data_3 = []
                     tmp_node_this_output_data_final = []
                     for tmp_it_this in tmp_range_list:
-                        tmp_node_this_output_this = self.random(-1, 1)
+                        tmp_node_this_output_this = self.__rollRandom(-1, 1)
                         tmp_node_this_output += tmp_node_this_output_this
                         tmp_node_this_output_list.append(tmp_node_this_output_this)
                     flag_begin = True
@@ -3078,11 +3101,13 @@ class RD(object):
                     or (tmp_node_this.data == 'max')
                     or (tmp_node_this.data == 'min')
                 ):
-                    tmp_last_resMetaTuple_raw = tmp_main_val_left_obj.resMetaTuple
+                    tmp_last_resMetaTuple = tmp_main_val_left_obj.resMetaTuple
+                    tmp_last_resMetaTuple_raw = tmp_main_val_left_obj.resMetaTupleRaw
+                    if tmp_last_resMetaTuple_raw is None:
+                        tmp_last_resMetaTuple_raw = tmp_last_resMetaTuple
                     tmp_last_resMetaTuple_raw_new = tmp_last_resMetaTuple_raw
-                    tmp_last_resMetaTuple = tmp_last_resMetaTuple_raw
                     if type(tmp_last_resMetaTuple) is list and len(tmp_last_resMetaTuple) > 0:
-                        tmp_last_resMetaTuple = self.get_from_metaTuple(tmp_last_resMetaTuple_raw)
+                        tmp_last_resMetaTuple = self.get_from_metaTuple(tmp_last_resMetaTuple)
                     else:
                         tmp_last_resMetaTuple_raw = [tmp_main_val_left[0]]
                         tmp_last_resMetaTuple = tmp_last_resMetaTuple_raw
@@ -3114,12 +3139,10 @@ class RD(object):
                         for tmp_last_resMetaTuple_list_this in tmp_last_resMetaTuple_list:
                             if tmp_last_resMetaTuple_list_this[0] > tmp_main_val_right[0]:
                                 tmp_last_resMetaTuple_list_this[0] = tmp_main_val_right[0]
-                                tmp_last_resMetaTuple_list_this[1] = tmp_main_val_right[0]
                     elif tmp_node_this.data == 'min':
                         for tmp_last_resMetaTuple_list_this in tmp_last_resMetaTuple_list:
                             if tmp_last_resMetaTuple_list_this[0] < tmp_main_val_right[0]:
                                 tmp_last_resMetaTuple_list_this[0] = tmp_main_val_right[0]
-                                tmp_last_resMetaTuple_list_this[1] = tmp_main_val_right[0]
                     if tmp_node_this.data in ['kh', 'kl']:
                         if tmp_main_val_right[0] <= len(tmp_last_resMetaTuple_list):
                             tmp_last_resMetaTuple_list_new = tmp_last_resMetaTuple_list[: tmp_main_val_right[0]]
@@ -3148,7 +3171,7 @@ class RD(object):
                     tmp_node_this_output_Max = tmp_node_this_output
                     tmp_node_this_output_Min = tmp_node_this_output
                     tmp_node_this_output_str = '{%s}(%d)' % (
-                        ','.join(self.get_str_from_metaTuple(tmp_last_resMetaTuple_raw, tmp_last_resMetaTuple)),
+                        ','.join(self.get_str_from_metaTuple(tmp_last_resMetaTuple_raw_new, tmp_last_resMetaTuple)),
                         tmp_node_this_output,
                     )
                     tmp_node_this_output_data_final = [
@@ -3167,11 +3190,13 @@ class RD(object):
                         }
                     ]
                 elif tmp_node_this.data in ['sp', 'tp']:
-                    tmp_last_resMetaTuple_raw = tmp_main_val_left_obj.resMetaTuple
+                    tmp_last_resMetaTuple = tmp_main_val_left_obj.resMetaTuple
+                    tmp_last_resMetaTuple_raw = tmp_main_val_left_obj.resMetaTupleRaw
+                    if tmp_last_resMetaTuple_raw is None:
+                        tmp_last_resMetaTuple_raw = tmp_last_resMetaTuple
                     tmp_last_resMetaTuple_raw_new = tmp_last_resMetaTuple_raw
-                    tmp_last_resMetaTuple = tmp_last_resMetaTuple_raw
                     if type(tmp_last_resMetaTuple) is list and len(tmp_last_resMetaTuple) > 0:
-                        tmp_last_resMetaTuple = self.get_from_metaTuple(tmp_last_resMetaTuple_raw)
+                        tmp_last_resMetaTuple = self.get_from_metaTuple(tmp_last_resMetaTuple)
                     else:
                         tmp_last_resMetaTuple_raw = [tmp_main_val_left[0]]
                         tmp_last_resMetaTuple = tmp_last_resMetaTuple_raw
@@ -3352,7 +3377,11 @@ class RD(object):
                                 'r': tmp_main_val_right[0],
                                 'v': tmp_node_this.vals,
                             },
-                            'result': [[tmp_start, tmp_step, tmp_end], tmp_last_right_resMetaTuple_raw, tmp_res_resMetaTuple],
+                            'result': [
+                                [tmp_start, tmp_step, tmp_end],
+                                tmp_last_right_resMetaTuple_raw,
+                                tmp_res_resMetaTuple,
+                            ],
                         }
                     ]
                     tmp_node_this_output_meta_tuple = tmp_res_resMetaTuple
@@ -3372,6 +3401,7 @@ class RD(object):
             resRecursiveObj.resDetail = tmp_node_this_output_str
             resRecursiveObj.resDetailData = tmp_node_this_output_data_final
             resRecursiveObj.resMetaTuple = tmp_node_this_output_meta_tuple
+            resRecursiveObj.resMetaTupleRaw = tmp_node_this_output_meta_tuple_raw
             resRecursiveObj.resMetaTupleEnable = tmp_node_this_output_meta_tuple_enable
             resRecursiveObj.isTupleLiteral = tmp_node_this.isTuple()
             return resRecursiveObj
@@ -3382,11 +3412,7 @@ class RD(object):
             if type(data_this) is int:
                 res.append(data_this)
             elif type(data_this) is str:
-                para_this = RD(
-                    data_this, customDefault=self.customDefault, valueTable=self.valueTable, ruleMode=self.ruleMode
-                )
-                para_this._roll_budget = self._roll_budget
-                para_this._budget_is_child = True
+                para_this = self.__newChild(data_this)
                 para_this.roll()
                 if para_this.resError is not None:
                     self.resError = para_this.resError
