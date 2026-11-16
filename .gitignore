@@ -3,3 +3,6 @@ build
 *.egg-info
 *.opk
 tests/
+!tests/
+tests/*
+!tests/test_forced_roll_and_team_st.py

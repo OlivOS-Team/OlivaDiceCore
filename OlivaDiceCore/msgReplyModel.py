@@ -83,6 +83,27 @@ def split_expr_para(data, op_list=None):
     return expr_str, data[len(expr_str) :]
 
 
+def parse_forced_roll_prefix(text):
+    """只消费开头的指定骰点，保留科学表达式前缀。"""
+    match = re.match(r'\s*\(\s*(-?[0-9]+)\s*\)', text)
+    if not match:
+        return None, text
+    rest = text[match.end():].lstrip()
+    if rest.startswith(('+', '-', '*', '/', '^')):
+        return None, text
+    return max(1, int(match.group(1))), rest
+
+
+def format_skill_update_roll(expression, rd_para):
+    """使用与单次 .r 相同的长度限制展示技能运算。"""
+    detail = OlivaDiceCore.onediceOverride.RDDataFormat(data=rd_para.resDetailData, mode='short')
+    result = str(rd_para.resInt)
+    limit = 50 if detail else 100
+    if len(result) > limit:
+        result = result[:50] + '...的天文数字'
+    return f'{expression}={detail}={result}' if detail else f'{expression}={result}'
+
+
 def split_check_reason(text):
     """分离检定参数和空格后的理由，保留旧式技能显式值。"""
     parts = list(re.finditer(r'\S+', text))
@@ -1453,7 +1474,7 @@ def setPcNoteOrRecData(
             ]:
                 special_skills.append(tmp_key)
         tmp_mappingRecord[tmp_key] = tmp_value
-        OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
+        write_success = OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
             pcHash=tmp_pcHash, pcCardName=tmp_pc_name, dataKey=keyName, dataContent=tmp_mappingRecord
         )
         # 如果有特殊技能，添加提示
@@ -1468,10 +1489,12 @@ def setPcNoteOrRecData(
             OlivaDiceCore.msgReply.trigger_auto_sn_update(
                 plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue
             )
+            dictTValue['tEntryCount'] = int(bool(write_success))
             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                 dictStrCustom['strPcSetSkillValue'], dictTValue
             )
             OlivaDiceCore.msgReply.replyMsg(plugin_event, tmp_reply_str + tmp_notice)
+        return write_success
     elif tmp_key is not None and tmp_value is None:
         if tmp_key in tmp_mappingRecord:
             tmp_value = tmp_mappingRecord[tmp_key]
@@ -3153,6 +3176,7 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
     members = team_config[team_name]['members']
     results = []
     special_skills = []
+    entry_count = 0
     # 处理每个成员
     for member_id in members:
         tmp_pc_id = member_id
@@ -3175,15 +3199,18 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
             tmp_mappingRecord = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
                 pcHash=tmp_pcHash, pcCardName=tmp_pc_name, dataKey='mappingRecord', resDefault={}
             )
+            mapping_count = 0
             for map_name, map_expr in team_mapping_updates:
                 map_name_fix = OlivaDiceCore.pcCard.fixName(map_name)
                 if not OlivaDiceCore.pcCard.checkPcName(map_name_fix):
                     continue
                 tmp_mappingRecord[map_name_fix] = map_expr
+                mapping_count += 1
                 member_results.append(f'[映射{map_name_fix}]: {map_expr}')
-            OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
+            if OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
                 pcHash=tmp_pcHash, pcCardName=tmp_pc_name, dataKey='mappingRecord', dataContent=tmp_mappingRecord
-            )
+            ):
+                entry_count += mapping_count
         for skill_name, op, expr_str in skill_updates:
             # 获取当前技能值
             current_value = OlivaDiceCore.pcCard.pcCardDataGetBySkillName(tmp_pcHash, skill_name, hagId=tmp_hagID)
@@ -3208,6 +3235,7 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
                 OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
                     tmp_pcHash, skill_name, new_value, tmp_pc_name, hagId=tmp_hagID
                 )
+                entry_count += 1
                 # 检查是否为特殊技能
                 tmp_pcCardRule = 'default'
                 if tmp_pc_name is not None:
@@ -3219,33 +3247,9 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
                         skill for skill in OlivaDiceCore.pcCardData.dictPcCardMappingSpecial[tmp_pcCardRule]
                     ]:
                         special_skills.append(skill_name)
-                # 构建计算过程字符串
-                if op != '':
-                    calculation_detail = f'{current_value}{op}{expr_str}'
+                if op:
+                    skill_update_detail = format_skill_update_roll(rd_para_str, rd_para)
                 else:
-                    calculation_detail = expr_str
-                # 判断是否显示详细计算过程
-                has_calc_in_expr = False
-                if len(expr_str) > 1:
-                    for i, char in enumerate(expr_str):
-                        if char in op_list and i > 0:
-                            has_calc_in_expr = True
-                            break
-                if op != '' or 'D' in expr_str.upper() or has_calc_in_expr:
-                    if 'D' in expr_str.upper():
-                        # 包含骰子表达式，显示骰子结果
-                        detail_str = f'{calculation_detail}={rd_para.resDetail}'
-                        if len(detail_str) > 50:
-                            skill_update_detail = f'{current_value} -> {new_value} ({calculation_detail}={new_value})'
-                        else:
-                            skill_update_detail = (
-                                f'{current_value} -> {new_value} ({calculation_detail}={rd_para.resDetail})'
-                            )
-                    else:
-                        # 普通计算表达式
-                        skill_update_detail = f'{current_value} -> {new_value} ({calculation_detail})'
-                else:
-                    # 直接赋值
                     skill_update_detail = f'{current_value} -> {new_value}'
                 member_results.append(
                     OlivaDiceCore.msgCustomManager.formatReplySTR(
@@ -3272,6 +3276,7 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
             )
             results.append(member_header + ':\n' + '\n'.join(member_results))
     dictTValue['tTeamName'] = team_name
+    dictTValue['tEntryCount'] = entry_count
     dictTValue['tResults'] = '\n'.join(results)
     # 特殊技能提示
     if special_skills:
@@ -3351,6 +3356,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
             skill_expr = skill_expr[1:]
         bp_count = int(bp_digits) if bp_digits else 1
     skill_expr = OlivaDiceCore.msgReply.skipSpaceStart(skill_expr)
+    forced_roll, skill_expr = parse_forced_roll_prefix(skill_expr)
     # 检查是否没有指定技能
     if skill_expr == '' or skill_expr is None:
         OlivaDiceCore.msgReply.replyMsg(
@@ -3430,26 +3436,30 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
                 'skill_value': 0,
             })
             continue
-        rd_para = OlivaDiceCore.onedice.RD(rd_para_str, custom_default)
-        rd_para.roll()
-        if rd_para.resError is not None:
-            # 检定出错
-            result_str = get_SkillCheckError(rd_para.resError, dictStrCustom, dictTValue)
-            results.append({
-                'name': display_name,
-                'result_str': result_str,
-                'success_level': -1,
-                'roll_value': 0,
-                'skill_value': 0,
-            })
-            continue
-        roll_value = rd_para.resInt
+        if forced_roll is None:
+            rd_para = OlivaDiceCore.onedice.RD(rd_para_str, custom_default)
+            rd_para.roll()
+            if rd_para.resError is not None:
+                result_str = get_SkillCheckError(rd_para.resError, dictStrCustom, dictTValue)
+                results.append({
+                    'name': display_name,
+                    'result_str': result_str,
+                    'success_level': -1,
+                    'roll_value': 0,
+                    'skill_value': 0,
+                })
+                continue
+            roll_value = rd_para.resInt
+            roll_detail = check_roll_detail(rd_para)
+        else:
+            rd_para_str = '1D100'
+            roll_value = forced_roll
+            roll_detail = ''
         skill_check_data = {'roll': roll_value, 'skill': current_skill_value}
         skill_check_type, skill_threshold = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
             skill_check_data, template, template_rule_name, difficulty
         )
         # 构建骰子详情
-        roll_detail = check_roll_detail(rd_para)
         dice_detail = f'{rd_para_str}={roll_value}'
         if roll_detail:
             dice_detail = f'{rd_para_str}={roll_detail}={roll_value}'

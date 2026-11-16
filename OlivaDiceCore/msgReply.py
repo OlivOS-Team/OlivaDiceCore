@@ -4409,6 +4409,7 @@ def unity_reply(plugin_event, Proc):
             tmp_reast_str_new_2 = tmp_reast_str
             # 先抽出 &映射，剩余部分再按普通技能解析，支持混排
             tmp_reast_str_new, tmp_mapping_updates = extract_st_mapping_updates(tmp_reast_str)
+            dictTValue['tEntryCount'] = 0
             tmp_reast_str = tmp_reast_str_new
             tmp_reast_str_original = tmp_reast_str
             # 纯映射导出包含“卡名-”前缀；按该卡名建立或选中目标卡。
@@ -4431,7 +4432,7 @@ def unity_reply(plugin_event, Proc):
             if tmp_mapping_updates and not tmp_reast_str.strip():
                 # 仅映射录入（沿用 setPcNoteOrRecData，保留无卡时的建卡行为）
                 for map_name, map_expr in tmp_mapping_updates:
-                    OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
+                    if OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
                         plugin_event=plugin_event,
                         tmp_pc_id=tmp_pc_id,
                         tmp_pc_platform=tmp_pc_platform,
@@ -4443,7 +4444,8 @@ def unity_reply(plugin_event, Proc):
                         tmp_value=map_expr,
                         flag_mode='rec',
                         enableFalse=False,
-                    )
+                    ):
+                        dictTValue['tEntryCount'] += 1
                 if is_at:
                     tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                         dictStrCustom['strPcSetSkillValueAtOther'], dictTValue
@@ -4464,7 +4466,10 @@ def unity_reply(plugin_event, Proc):
                 assign_op = '='
                 is_pass = False
                 # 检查是否需要跳过
-                if not any(op in tmp_reast_str_new for op in op_list) or tmp_reast_str_new.startswith('&'):
+                if (
+                    not any(op in tmp_reast_str_new for op in op_list + [assign_op, ':', '：'])
+                    or tmp_reast_str_new.startswith('&')
+                ):
                     is_pass = True
                 # 检查是否是录卡格式（字符串-字符串）
                 dash_pos_original = -1
@@ -4673,28 +4678,10 @@ def unity_reply(plugin_event, Proc):
                                     rd_para = OlivaDiceCore.onedice.RD(tmp_skill_value_new, tmp_template_customDefault)
                                     rd_para.roll()
                                     if rd_para.resError is None:
-                                        tmp_original_str = tmp_skill_value_new
                                         tmp_skill_value_new = rd_para.resInt
-                                        # 显示详细计算过程
-                                        if 'D' in tmp_original_str.upper():
-                                            detail_str = f'{tmp_original_str}={rd_para.resDetail}'
-                                            if len(detail_str) > 50:
-                                                update_msg = (
-                                                    f'[{tmp_skill_name}]: {tmp_skill_value_old}'
-                                                    f' -> {tmp_skill_value_new}'
-                                                    f' ({tmp_original_str}={tmp_skill_value_new})'
-                                                )
-                                            else:
-                                                update_msg = (
-                                                    f'[{tmp_skill_name}]: {tmp_skill_value_old}'
-                                                    f' -> {tmp_skill_value_new}'
-                                                    f' ({tmp_original_str}={rd_para.resDetail})'
-                                                )
-                                        else:
-                                            update_msg = (
-                                                f'[{tmp_skill_name}]: {tmp_skill_value_old}'
-                                                f' -> {tmp_skill_value_new} ({tmp_original_str})'
-                                            )
+                                        update_msg = (
+                                            f'[{tmp_skill_name}]: {tmp_skill_value_old} -> {tmp_skill_value_new}'
+                                        )
                                         OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
                                             OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
                                             tmp_skill_name,
@@ -4702,6 +4689,7 @@ def unity_reply(plugin_event, Proc):
                                             dictTValue.get('tName', ''),
                                             hagId=tmp_hagID,
                                         )
+                                        dictTValue['tEntryCount'] += 1
                                         reply_messages.append(update_msg)
                                     else:
                                         reply_messages.append(f"[{tmp_skill_name}]: 表达式错误 '{tmp_skill_value_new}'")
@@ -4719,6 +4707,7 @@ def unity_reply(plugin_event, Proc):
                                             dictTValue.get('tName', ''),
                                             hagId=tmp_hagID,
                                         )
+                                        dictTValue['tEntryCount'] += 1
                                         reply_messages.append(update_msg)
                                     else:
                                         reply_messages.append(f"[{tmp_skill_name}]: 无效数值 '{tmp_skill_value_new}'")
@@ -4738,17 +4727,10 @@ def unity_reply(plugin_event, Proc):
                                 rd_para.roll()
                                 if rd_para.resError is None:
                                     tmp_skill_value_new = rd_para.resInt
-                                    # 显示详细计算过程
-                                    if 'D' in tmp_skill_value.upper():
-                                        update_msg = (
-                                            f'[{tmp_skill_name}]: {tmp_skill_value_old}{tmp_skill_value}'
-                                            f'={rd_para.resDetail}={tmp_skill_value_new}'
-                                        )
-                                    else:
-                                        update_msg = (
-                                            f'[{tmp_skill_name}]: {tmp_skill_value_old}{tmp_skill_value}'
-                                            f'={tmp_skill_value_new}'
-                                        )
+                                    update_msg = (
+                                        f'[{tmp_skill_name}]: '
+                                        + OlivaDiceCore.msgReplyModel.format_skill_update_roll(rd_para_str, rd_para)
+                                    )
                                     OlivaDiceCore.pcCard.pcCardDataSetBySkillName(
                                         OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform),
                                         tmp_skill_name,
@@ -4756,12 +4738,18 @@ def unity_reply(plugin_event, Proc):
                                         dictTValue.get('tName', ''),
                                         hagId=tmp_hagID,
                                     )
+                                    dictTValue['tEntryCount'] += 1
                                     reply_messages.append(update_msg)
                                 else:
                                     reply_messages.append(f"[{tmp_skill_name}]: 表达式错误 '{tmp_skill_value}'")
                         else:
                             # 不符合所有条件的直接记录
                             reply_messages.append(f'[{tmp_skill_name}]: {tmp_skill_value_old}')
+                    if tmp_mapping_updates:
+                        dictTValue['tEntryCount'] += apply_st_mapping_updates(
+                            plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID,
+                            dictTValue, dictStrCustom, tmp_mapping_updates,
+                        )
                     if reply_messages:
                         if special_skills:
                             dictTValue['tSpecialSkills'] = '、'.join(f'[{skill}]' for skill in special_skills)
@@ -4782,16 +4770,6 @@ def unity_reply(plugin_event, Proc):
                             )
                         trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                         replyMsg(plugin_event, tmp_reply_str + tmp_notice)
-                    if tmp_mapping_updates:
-                        apply_st_mapping_updates(
-                            plugin_event,
-                            tmp_pc_id,
-                            tmp_pc_platform,
-                            tmp_hagID,
-                            dictTValue,
-                            dictStrCustom,
-                            tmp_mapping_updates,
-                        )
                     return
                 tmp_skill_name = None
                 tmp_skill_value = None
@@ -4936,8 +4914,9 @@ def unity_reply(plugin_event, Proc):
                                 dictTValue['tName'],
                                 hagId=tmp_hagID,
                             )
+                            dictTValue['tEntryCount'] += 1
                         elif type(tmp_skill_pair_this[1]) is str:
-                            OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
+                            if OlivaDiceCore.msgReplyModel.setPcNoteOrRecData(
                                 plugin_event=plugin_event,
                                 tmp_pc_id=tmp_pc_id,
                                 tmp_pc_platform=tmp_pc_platform,
@@ -4949,7 +4928,8 @@ def unity_reply(plugin_event, Proc):
                                 tmp_value=tmp_skill_pair_this[1],
                                 flag_mode='rec',
                                 enableFalse=False,
-                            )
+                            ):
+                                dictTValue['tEntryCount'] += 1
                     if special_skills:
                         dictTValue['tSpecialSkills'] = '、'.join([f'[{skill}]' for skill in special_skills])
                         tmp_notice = OlivaDiceCore.msgCustomManager.formatReplySTR(
@@ -6108,6 +6088,7 @@ def unity_reply(plugin_event, Proc):
                         tmp_reast_str = tmp_reast_str[1:]
                     if bp_digits:
                         flag_bp_count = bp_digits
+            forced_roll, tmp_reast_str = OlivaDiceCore.msgReplyModel.parse_forced_roll_prefix(tmp_reast_str)
             tmp_reast_str = skipSpaceStart(tmp_reast_str)
             # 检查是否没有指定技能
             if tmp_reast_str == '' or tmp_reast_str is None:
@@ -6179,17 +6160,21 @@ def unity_reply(plugin_event, Proc):
                         else:
                             replyMsg(plugin_event, error_reply)
                         return
-                if flag_bp_type == 1:
+                if forced_roll is not None:
+                    rd_para_str = '1D100'
+                elif flag_bp_type == 1:
                     rd_para_str = 'B'
                 elif flag_bp_type == 2:
                     rd_para_str = 'P'
-                if flag_bp_count is not None:
+                if forced_roll is None and flag_bp_count is not None:
                     rd_para_str += flag_bp_count
                 flag_need_reply = False
                 if roll_times_count == 1:
-                    rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_customDefault)
-                    rd_para.roll()
-                    if rd_para.resError is not None:
+                    rd_para = None
+                    if forced_roll is None:
+                        rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_customDefault)
+                        rd_para.roll()
+                    if rd_para is not None and rd_para.resError is not None:
                         dictTValue['tRollPara'] = rd_para_str
                         error_reply = OlivaDiceCore.msgReplyModel.get_SkillCheckError(
                             rd_para.resError, dictStrCustom, dictTValue
@@ -6199,20 +6184,24 @@ def unity_reply(plugin_event, Proc):
                         else:
                             replyMsg(plugin_event, error_reply)
                         return
-                    if rd_para.resError is None:
-                        roll_detail = OlivaDiceCore.msgReplyModel.check_roll_detail(rd_para)
-                        if roll_detail:
-                            dictTValue['tRollResult'] = '%s=%s=%d' % (rd_para_str, roll_detail, rd_para.resInt)
-                        else:
-                            dictTValue['tRollResult'] = '%s=%d' % (rd_para_str, rd_para.resInt)
-                        dictRuleTempData = {'roll': rd_para.resInt, 'skill': tmp_skill_value}
-                        OlivaDiceCore.onediceOverride.saveRDDataUser(
-                            data=rd_para,
-                            botHash=plugin_event.bot_info.hash,
-                            userId=tmp_pc_id,
-                            platform=tmp_pc_platform,
-                            skillValue=tmp_skill_value,
+                    if forced_roll is not None or rd_para.resError is None:
+                        roll_value = forced_roll if forced_roll is not None else rd_para.resInt
+                        roll_detail = (
+                            '' if forced_roll is not None else OlivaDiceCore.msgReplyModel.check_roll_detail(rd_para)
                         )
+                        if roll_detail:
+                            dictTValue['tRollResult'] = '%s=%s=%d' % (rd_para_str, roll_detail, roll_value)
+                        else:
+                            dictTValue['tRollResult'] = '%s=%d' % (rd_para_str, roll_value)
+                        dictRuleTempData = {'roll': roll_value, 'skill': tmp_skill_value}
+                        if rd_para is not None:
+                            OlivaDiceCore.onediceOverride.saveRDDataUser(
+                                data=rd_para,
+                                botHash=plugin_event.bot_info.hash,
+                                userId=tmp_pc_id,
+                                platform=tmp_pc_platform,
+                                skillValue=tmp_skill_value,
+                            )
                         tmpSkillCheckType, tmpSkillThreshold = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
                             dictRuleTempData, tmp_Template, tmp_TemplateRuleName, difficulty_prefix=difficulty
                         )
@@ -6264,13 +6253,16 @@ def unity_reply(plugin_event, Proc):
                             ) + '\n'
                             flag_need_reply = True
                             continue
-                        rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_customDefault)
-                        rd_para.roll()
-                        if rd_para.resError is None:
+                        rd_para = None
+                        if forced_roll is None:
+                            rd_para = OlivaDiceCore.onedice.RD(rd_para_str, tmp_customDefault)
+                            rd_para.roll()
+                        if forced_roll is not None or rd_para.resError is None:
+                            roll_value = forced_roll if forced_roll is not None else rd_para.resInt
                             # 构建掷骰结果显示
-                            tmp_tSkillCheckReasult += '%s=%d' % (rd_para_str, rd_para.resInt)
+                            tmp_tSkillCheckReasult += '%s=%d' % (rd_para_str, roll_value)
 
-                            dictRuleTempData = {'roll': rd_para.resInt, 'skill': current_skill_value}
+                            dictRuleTempData = {'roll': roll_value, 'skill': current_skill_value}
                             tmpSkillCheckType, tmpSkillThreshold = OlivaDiceCore.skillCheck.getSkillCheckByTemplate(
                                 dictRuleTempData, tmp_Template, tmp_TemplateRuleName, difficulty_prefix=difficulty
                             )
@@ -6381,7 +6373,9 @@ def unity_reply(plugin_event, Proc):
                             tmp_reply_str_show += f'\n理由：{check_reason}'
                         if flag_hide_roll and flag_is_from_group:
                             replyMsg(plugin_event, tmp_reply_str_show)
-                            replyMsgPrivateByEvent(plugin_event, tmp_reply_str)
+                            replyMsgPrivateByEvent(
+                                plugin_event, tmp_reply_str, markdown_code=dictTValue.get('tRollResult')
+                            )
                         else:
                             replyMsg(plugin_event, tmp_reply_str, markdown_code=dictTValue['tRollResult'])
                     else:
@@ -6422,7 +6416,9 @@ def unity_reply(plugin_event, Proc):
                             tmp_reply_str_show += f'\n理由：{check_reason}'
                         if flag_hide_roll and flag_is_from_group:
                             replyMsg(plugin_event, tmp_reply_str_show)
-                            replyMsgPrivateByEvent(plugin_event, tmp_reply_str)
+                            replyMsgPrivateByEvent(
+                                plugin_event, tmp_reply_str, markdown_code=dictTValue.get('tRollResult')
+                            )
                         else:
                             replyMsg(plugin_event, tmp_reply_str, markdown_code=dictTValue['tRollResult'])
         elif isMatchWordStart(tmp_reast_str, 'en', isCommand=True):
@@ -7358,7 +7354,9 @@ def unity_reply(plugin_event, Proc):
                     )
             if flag_hide_roll and flag_is_from_group:
                 replyMsg(plugin_event, tmp_reply_str_show)
-                replyMsgPrivateByEvent(plugin_event, tmp_reply_str)
+                replyMsgPrivateByEvent(
+                    plugin_event, tmp_reply_str, markdown_code=dictTValue.get('tRollResult')
+                )
             else:
                 replyMsg(plugin_event, tmp_reply_str, markdown_code=dictTValue['tRollResult'])
     nativeMsgBlocker(plugin_event, Proc, flag_force_reply=flag_force_reply)
@@ -7449,7 +7447,7 @@ def replyMsg(plugin_event, message, at_user=False, markdown_code=None):
 
 
 def _isQQGuildv2MarkdownAble(plugin_event, message):
-    """检测需要 Markdown 的 at 或 QQ 图文消息。"""
+    """检测 QQ 官方 Markdown 开关、at 或图文消息。"""
     res = False
     try:
         if (
@@ -7457,6 +7455,8 @@ def _isQQGuildv2MarkdownAble(plugin_event, message):
             and plugin_event.indeAPI is not None
             and plugin_event.indeAPI.hasAPI('create_markdown_message')
         ):
+            if OlivaDiceCore.console.getConsoleSwitchByHash('forceMarkdownReply', plugin_event.bot_info.hash) == 1:
+                return True
             if isinstance(message, OlivOS.messageAPI.Message_templet):
                 message_obj = message
             else:
@@ -7751,6 +7751,48 @@ def getSendResultStatus(send_result):
     return 'success'
 
 
+def _sendForcedPrivateMarkdown(plugin_event, message, user_id):
+    """开关打开时，把一条私聊回复走 markdown。失败则由调用方回退纯文本。"""
+    if user_id is None:
+        return False
+    if OlivaDiceCore.console.getConsoleSwitchByHash(
+        'forceMarkdownReply', plugin_event.bot_info.hash
+    ) != 1:
+        return False
+    if plugin_event.platform.get('sdk') != 'qqGuildv2_link':
+        return False
+    if plugin_event.indeAPI is None or not plugin_event.indeAPI.hasAPI('create_markdown_message'):
+        return False
+    extend_data = getattr(plugin_event.data, 'extend', {}) or {}
+    safe_message = OlivaDiceCore.censorAPI.doCensorReplaceOlivOSSafe(
+        botHash=plugin_event.bot_info.hash, msg=str(message)
+    )
+    safe_message = _protectMarkdownRoll(safe_message)
+    safe_message = _applyMarkdownHudPrefix(plugin_event, safe_message)
+    if not safe_message:
+        return False
+    if extend_data.get('flag_from_qq', False):
+        chat_type = 'qq_private'
+        chat_id = user_id
+    else:
+        chat_type = 'guild_private'
+        chat_id = extend_data.get('host_group_id', None)
+        if not chat_id:
+            return False
+    try:
+        result = plugin_event.indeAPI.create_markdown_message(
+            chat_type=chat_type,
+            chat_id=chat_id,
+            markdown={'content': safe_message},
+            msg_id=None,
+            quote_msg_id=None,
+            force_active=not extend_data.get('flag_from_direct', False),
+        )
+    except Exception:
+        return False
+    return isinstance(result, dict) and result.get('active', False)
+
+
 def replyMsgPrivateByEvent(plugin_event, message, markdown_code=None):
     token = _markdown_roll_result.set(markdown_code)
     try:
@@ -7790,6 +7832,8 @@ def _replyMsgPrivateByEvent(plugin_event, message):
             )
     except Exception:
         pass
+    if not mixed_sent and _sendForcedPrivateMarkdown(plugin_event, message, user_id):
+        mixed_sent = True
     if not mixed_sent:
         if 'host_id' in plugin_event.data.__dict__:
             pluginSend(plugin_event, 'private', plugin_event.data.user_id, message, host_id=plugin_event.data.host_id)
@@ -7828,6 +7872,8 @@ def replyMsgPrivateForObByEvent(plugin_event, message):
             userHash=tmp_groupObList_list_this, userDataKey='userId', botHash=plugin_event.bot_info.hash
         )
         if tmp_userId_this is not None and tmp_userId_this != user_id:
+            if _sendForcedPrivateMarkdown(plugin_event, message, tmp_userId_this):
+                continue
             if 'host_id' in plugin_event.data.__dict__:
                 pluginSend(plugin_event, 'private', tmp_userId_this, message, host_id=plugin_event.data.host_id)
             else:
@@ -8438,9 +8484,9 @@ def extract_st_mapping_updates(data: str):
 
 
 def apply_st_mapping_updates(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue, dictStrCustom, mappings):
-    """批量写入映射，不逐条回复。返回是否写入成功。"""
+    """批量写入映射，不逐条回复，返回成功写入的条数。"""
     if not mappings:
-        return False
+        return 0
     tmp_pcHash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
     tmp_pc_name = dictTValue.get('tName')
     if tmp_pc_name:
@@ -8450,20 +8496,23 @@ def apply_st_mapping_updates(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID
     if not tmp_pc_name:
         tmp_pc_name = OlivaDiceCore.pcCard.pcCardDataGetSelectionKey(tmp_pcHash, tmp_hagID)
     if not tmp_pc_name:
-        return False
+        return 0
     dictTValue['tName'] = tmp_pc_name
     tmp_mappingRecord = OlivaDiceCore.pcCard.pcCardDataGetTemplateDataByKey(
         pcHash=tmp_pcHash, pcCardName=tmp_pc_name, dataKey='mappingRecord', resDefault={}
     )
+    count = 0
     for map_name, map_expr in mappings:
         map_name_fix = OlivaDiceCore.pcCard.fixName(map_name)
         if not OlivaDiceCore.pcCard.checkPcName(map_name_fix):
             continue
         tmp_mappingRecord[map_name_fix] = map_expr
-    OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
+        count += 1
+    if OlivaDiceCore.pcCard.pcCardDataSetTemplateDataByKey(
         pcHash=tmp_pcHash, pcCardName=tmp_pc_name, dataKey='mappingRecord', dataContent=tmp_mappingRecord
-    )
-    return True
+    ):
+        return count
+    return 0
 
 
 def isMatchWordStart(data, key, ignoreCase=True, fullMatch=False, isCommand=False):
