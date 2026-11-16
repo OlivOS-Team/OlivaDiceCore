@@ -227,7 +227,7 @@ dictPcCardTemplateDefaultTemp = {
                 '克苏鲁神话',
                 '信用',
             ],
-            'forceMapping': ['SANMAX', 'HPMAX', 'MPMAX'],
+            'forceMapping': ['SANMAX', 'HPMAX', 'MPMAX', 'IDEA', 'KNOW'],
         },
         'init': {
             'STR': '3d6x5',
@@ -249,6 +249,8 @@ dictPcCardTemplateDefaultTemp = {
             'HPMAX': '(({CON})+({SIZ}))/10+({HPMAXADD})',
             'MP': '({POW})/5',
             'MPMAX': '({POW})/5+({MPMAXADD})',
+            'IDEA': '({INT})',
+            'KNOW': '({EDU})',
         },
         'synonyms': {
             'STR': ['力量', 'STR'],
@@ -751,7 +753,7 @@ dictPcCardTemplateDefaultTemp = {
                 '克苏鲁神话',
                 '信用',
             ],
-            'forceMapping': ['SANMAX', 'HPMAX', 'MPMAX'],
+            'forceMapping': ['SANMAX', 'HPMAX', 'MPMAX', 'IDEA', 'KNOW'],
         },
         'init': {
             'STR': '3d6x5',
@@ -773,6 +775,8 @@ dictPcCardTemplateDefaultTemp = {
             'HPMAX': '(({CON})+({SIZ}))/10+({HPMAXADD})',
             'MP': '({POW})/5',
             'MPMAX': '({POW})/5+({MPMAXADD})',
+            'IDEA': '({INT})',
+            'KNOW': '({EDU})',
         },
         'synonyms': {
             'STR': ['力量', 'STR'],
@@ -1390,7 +1394,7 @@ dictPcCardTemplateDefaultTemp = {
                 '克苏鲁神话',
                 '信用',
             ],
-            'forceMapping': ['SANMAX', 'HPMAX', 'MPMAX'],
+            'forceMapping': ['SANMAX', 'HPMAX', 'MPMAX', 'IDEA', 'KNOW'],
         },
         'init': {
             'STR': '3d6x5',
@@ -1410,6 +1414,8 @@ dictPcCardTemplateDefaultTemp = {
             'HPMAX': '(({CON})+({SIZ}))/10',
             'MP': '({POW})/5',
             'MPMAX': '({POW})/5',
+            'IDEA': '({INT})',
+            'KNOW': '({EDU})',
         },
         'synonyms': {
             'STR': ['力量', 'STR'],
@@ -1923,7 +1929,7 @@ dictPcCardTemplateDefaultTemp = {
                 '克苏鲁神话',
                 '信用',
             ],
-            'forceMapping': ['SANMAX', 'HPMAX', 'MPMAX'],
+            'forceMapping': ['SANMAX', 'HPMAX', 'MPMAX', 'IDEA', 'KNOW'],
         },
         'init': {
             'STR': '3d6',
