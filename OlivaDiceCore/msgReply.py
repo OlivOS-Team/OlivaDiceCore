@@ -6109,7 +6109,7 @@ def unity_reply(plugin_event, Proc):
             # 难度前缀不属于目标值表达式。
             difficulty, tmp_reast_str = OlivaDiceCore.msgReplyModel.difficulty_analyze(tmp_reast_str)
             tmp_check_target, check_reason = OlivaDiceCore.msgReplyModel.split_check_reason(tmp_reast_str)
-            dictTValue['tRollReason'] = check_reason
+            OlivaDiceCore.msgReplyModel.set_check_reason(dictTValue, check_reason)
             tmp_pc_hash = OlivaDiceCore.pcCard.getPcHash(tmp_pc_id, tmp_pc_platform)
             if not tmp_check_target:
                 replyMsg(plugin_event, '无法计算检定目标值：缺少目标值')
@@ -6347,34 +6347,49 @@ def unity_reply(plugin_event, Proc):
                             if tmpSkillThreshold is None:
                                 dictTValue['tSkillName'] = tmp_skill_name
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
-                                dictStrCustom['strPcSkillCheckWithSkillNameAtOther'], dictTValue
+                                OlivaDiceCore.msgReplyModel.skill_check_custom(
+                                    dictStrCustom, 'strPcSkillCheckWithSkillNameAtOther', dictTValue
+                                ),
+                                dictTValue,
                             )
                             tmp_reply_str_show = OlivaDiceCore.msgCustomManager.formatReplySTR(
-                                dictStrCustom['strPcSkillCheckHideShowWithSkillNameAtOther'], dictTValue
+                                OlivaDiceCore.msgReplyModel.skill_check_custom(
+                                    dictStrCustom, 'strPcSkillCheckHideShowWithSkillNameAtOther', dictTValue
+                                ),
+                                dictTValue,
                             )
                             if flag_hide_roll and flag_is_from_group:
                                 dictTValue['tGroupId'] = str(plugin_event.data.group_id)
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
-                                    dictStrCustom['strPcSkillCheckHideWithSkillNameAtOther'], dictTValue
+                                    OlivaDiceCore.msgReplyModel.skill_check_custom(
+                                        dictStrCustom, 'strPcSkillCheckHideWithSkillNameAtOther', dictTValue
+                                    ),
+                                    dictTValue,
                                 )
                         else:
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
-                                dictStrCustom['strPcSkillCheckAtOther'], dictTValue
+                                OlivaDiceCore.msgReplyModel.skill_check_custom(
+                                    dictStrCustom, 'strPcSkillCheckAtOther', dictTValue
+                                ),
+                                dictTValue,
                             )
                             tmp_reply_str_show = OlivaDiceCore.msgCustomManager.formatReplySTR(
-                                dictStrCustom['strPcSkillCheckHideShowAtOther'], dictTValue
+                                OlivaDiceCore.msgReplyModel.skill_check_custom(
+                                    dictStrCustom, 'strPcSkillCheckHideShowAtOther', dictTValue
+                                ),
+                                dictTValue,
                             )
                             if flag_hide_roll and flag_is_from_group:
                                 dictTValue['tGroupId'] = str(plugin_event.data.group_id)
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
-                                    dictStrCustom['strPcSkillCheckHideAtOther'], dictTValue
+                                    OlivaDiceCore.msgReplyModel.skill_check_custom(
+                                        dictStrCustom, 'strPcSkillCheckHideAtOther', dictTValue
+                                    ),
+                                    dictTValue,
                                 )
                         # 多次掷骰时 tSkillCheckReasult 为空，去掉模板残留的尾部空格
                         tmp_reply_str = tmp_reply_str.rstrip(' ')
                         tmp_reply_str_show = tmp_reply_str_show.rstrip(' ')
-                        if check_reason:
-                            tmp_reply_str += f'\n理由：{check_reason}'
-                            tmp_reply_str_show += f'\n理由：{check_reason}'
                         if flag_hide_roll and flag_is_from_group:
                             replyMsg(plugin_event, tmp_reply_str_show)
                             replyMsgPrivateByEvent(
@@ -6390,34 +6405,49 @@ def unity_reply(plugin_event, Proc):
                             if tmpSkillThreshold is None:
                                 dictTValue['tSkillName'] = tmp_skill_name
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
-                                dictStrCustom['strPcSkillCheckWithSkillName'], dictTValue
+                                OlivaDiceCore.msgReplyModel.skill_check_custom(
+                                    dictStrCustom, 'strPcSkillCheckWithSkillName', dictTValue
+                                ),
+                                dictTValue,
                             )
                             tmp_reply_str_show = OlivaDiceCore.msgCustomManager.formatReplySTR(
-                                dictStrCustom['strPcSkillCheckHideShowWithSkillName'], dictTValue
+                                OlivaDiceCore.msgReplyModel.skill_check_custom(
+                                    dictStrCustom, 'strPcSkillCheckHideShowWithSkillName', dictTValue
+                                ),
+                                dictTValue,
                             )
                             if flag_hide_roll and flag_is_from_group:
                                 dictTValue['tGroupId'] = str(plugin_event.data.group_id)
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
-                                    dictStrCustom['strPcSkillCheckHideWithSkillName'], dictTValue
+                                    OlivaDiceCore.msgReplyModel.skill_check_custom(
+                                        dictStrCustom, 'strPcSkillCheckHideWithSkillName', dictTValue
+                                    ),
+                                    dictTValue,
                                 )
                         else:
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
-                                dictStrCustom['strPcSkillCheck'], dictTValue
+                                OlivaDiceCore.msgReplyModel.skill_check_custom(
+                                    dictStrCustom, 'strPcSkillCheck', dictTValue
+                                ),
+                                dictTValue,
                             )
                             tmp_reply_str_show = OlivaDiceCore.msgCustomManager.formatReplySTR(
-                                dictStrCustom['strPcSkillCheckHideShow'], dictTValue
+                                OlivaDiceCore.msgReplyModel.skill_check_custom(
+                                    dictStrCustom, 'strPcSkillCheckHideShow', dictTValue
+                                ),
+                                dictTValue,
                             )
                             if flag_hide_roll and flag_is_from_group:
                                 dictTValue['tGroupId'] = str(plugin_event.data.group_id)
                                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
-                                    dictStrCustom['strPcSkillCheckHide'], dictTValue
+                                    OlivaDiceCore.msgReplyModel.skill_check_custom(
+                                        dictStrCustom, 'strPcSkillCheckHide', dictTValue
+                                    ),
+                                    dictTValue,
                                 )
                         # 多次掷骰时 tSkillCheckReasult 为空，去掉模板残留的尾部空格
                         tmp_reply_str = tmp_reply_str.rstrip(' ')
                         tmp_reply_str_show = tmp_reply_str_show.rstrip(' ')
-                        if check_reason:
-                            tmp_reply_str += f'\n理由：{check_reason}'
-                            tmp_reply_str_show += f'\n理由：{check_reason}'
                         if flag_hide_roll and flag_is_from_group:
                             replyMsg(plugin_event, tmp_reply_str_show)
                             replyMsgPrivateByEvent(

@@ -83,6 +83,20 @@ def split_expr_para(data, op_list=None):
     return expr_str, data[len(expr_str) :]
 
 
+def skill_check_custom(dict_str_custom, base_key, dict_t_value):
+    """有理由时用带理由的回复词，没有就用原来那条。"""
+    if dict_t_value.get('tRollReason'):
+        with_reason = base_key + 'WithReason'
+        if with_reason in dict_str_custom:
+            return dict_str_custom[with_reason]
+    return dict_str_custom[base_key]
+
+
+def set_check_reason(dict_t_value, reason):
+    """理由只写入模板变量，发送时不再另起一行拼接。"""
+    dict_t_value['tRollReason'] = (reason or '').strip()
+
+
 def parse_forced_roll_prefix(text):
     """只消费开头的指定骰点，保留科学表达式前缀。"""
     match = re.match(r'\s*\(\s*(-?[0-9]+)\s*\)', text)
@@ -3373,7 +3387,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
     # 解析难度前缀
     difficulty, skill_expr = difficulty_analyze(skill_expr)
     skill_expr, check_reason = split_check_reason(skill_expr)
-    dictTValue['tRollReason'] = check_reason
+    set_check_reason(dictTValue, check_reason)
     flag_groupTemplate = OlivaDiceCore.userConfig.getUserConfigByKey(
         userId=tmp_hagID,
         userType='group',
@@ -3578,9 +3592,10 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
         result_lines.append(f'{i}. {result["result_str"]}')
     dictTValue['tTeamName'] = team_name
     dictTValue['tResult'] = '\n'.join(result_lines)
-    reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strTeamCheckResult'], dictTValue)
-    if check_reason:
-        reply_str += f'\n理由：{check_reason}'
+    reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
+        OlivaDiceCore.msgReplyModel.skill_check_custom(dictStrCustom, 'strTeamCheckResult', dictTValue),
+        dictTValue,
+    )
     OlivaDiceCore.msgReply.replyMsg(plugin_event, reply_str)
 
 
