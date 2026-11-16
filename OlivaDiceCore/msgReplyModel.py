@@ -91,7 +91,11 @@ def parse_forced_roll_prefix(text):
     rest = text[match.end():].lstrip()
     if rest.startswith(('+', '-', '*', '/', '^')):
         return None, text
-    return max(1, int(match.group(1))), rest
+    try:
+        value = int(match.group(1))
+    except ValueError:
+        return None, text
+    return max(1, value), rest
 
 
 def format_skill_update_roll(expression, rd_para):

@@ -7768,6 +7768,10 @@ def _sendForcedPrivateMarkdown(plugin_event, message, user_id):
     if plugin_event.indeAPI is None or not plugin_event.indeAPI.hasAPI('create_markdown_message'):
         return False
     extend_data = getattr(plugin_event.data, 'extend', {}) or {}
+    event_user = getattr(plugin_event.data, 'user_id', None)
+    # 频道私聊的 markdown 地址是发起人的 host_group_id，不能拿去给观察者。
+    if not extend_data.get('flag_from_qq', False) and user_id != event_user:
+        return False
     safe_message = OlivaDiceCore.censorAPI.doCensorReplaceOlivOSSafe(
         botHash=plugin_event.bot_info.hash, msg=str(message)
     )
@@ -7783,18 +7787,26 @@ def _sendForcedPrivateMarkdown(plugin_event, message, user_id):
         chat_id = extend_data.get('host_group_id', None)
         if not chat_id:
             return False
+    force_active = not extend_data.get('flag_from_direct', False)
     try:
         result = plugin_event.indeAPI.create_markdown_message(
             chat_type=chat_type,
             chat_id=chat_id,
             markdown={'content': safe_message},
-            msg_id=None,
+            msg_id=None if force_active else extend_data.get('reply_msg_id'),
             quote_msg_id=None,
-            force_active=not extend_data.get('flag_from_direct', False),
+            force_active=force_active,
         )
     except Exception:
-        return False
-    return isinstance(result, dict) and result.get('active', False)
+        # 请求发出后超时或异常，平台可能已经收下，不再补发纯文本。
+        return True
+    if isinstance(result, dict) and result.get('active', False):
+        return True
+    result_data = result.get('data') if isinstance(result, dict) else None
+    status = result_data.get('http_status') if isinstance(result_data, dict) else None
+    if not isinstance(status, int) or status >= 500:
+        return True
+    return False
 
 
 def replyMsgPrivateByEvent(plugin_event, message, markdown_code=None):
