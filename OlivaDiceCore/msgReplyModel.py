@@ -3289,7 +3289,9 @@ def team_st(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
     reply_msg = (
         OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strTeamSkillUpdate'], dictTValue) + special_notice
     )
-    OlivaDiceCore.msgReply.replyMsg(plugin_event, reply_msg)
+    OlivaDiceCore.msgReply.replyMsg(
+        plugin_event, reply_msg, markdown_code=dictTValue.get('tResults')
+    )
 
 
 def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, team_name):

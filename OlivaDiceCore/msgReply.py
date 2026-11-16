@@ -4769,7 +4769,11 @@ def unity_reply(plugin_event, Proc):
                                 dictStrCustom['strPcUpdateSkillValue'], dictTValue
                             )
                         trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
-                        replyMsg(plugin_event, tmp_reply_str + tmp_notice)
+                        replyMsg(
+                            plugin_event,
+                            tmp_reply_str + tmp_notice,
+                            markdown_code=dictTValue.get('tSkillUpdate'),
+                        )
                     return
                 tmp_skill_name = None
                 tmp_skill_value = None
