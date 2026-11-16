@@ -6165,7 +6165,7 @@ def unity_reply(plugin_event, Proc):
                             replyMsg(plugin_event, error_reply)
                         return
                 if forced_roll is not None:
-                    rd_para_str = '1D100'
+                    rd_para_str = '(%d)' % forced_roll
                 elif flag_bp_type == 1:
                     rd_para_str = 'B'
                 elif flag_bp_type == 2:

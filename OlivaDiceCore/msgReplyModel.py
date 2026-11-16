@@ -3458,7 +3458,7 @@ def team_ra(plugin_event, tmp_reast_str, tmp_hagID, dictTValue, dictStrCustom, t
             roll_value = rd_para.resInt
             roll_detail = check_roll_detail(rd_para)
         else:
-            rd_para_str = '1D100'
+            rd_para_str = '(%d)' % forced_roll
             roll_value = forced_roll
             roll_detail = ''
         skill_check_data = {'roll': roll_value, 'skill': current_skill_value}
