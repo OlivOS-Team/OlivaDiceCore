@@ -52,7 +52,7 @@ HIY_KEYS = ['普通成功', '困难成功', '极难成功', '大成功', '失败
 
 # 码表索引仅对内置模板启用(双端随核心版本内置, 一致性可控);
 # 自定义模板一律字面编码, 保证没装同款模板的骰也能解码
-BUILTIN_TEMPLATES = ['default', 'COC7', '纯净COC7', 'COC6', 'DND5E', 'DX3', 'FATE']
+BUILTIN_TEMPLATES = ['default', 'COC7', '纯净COC7', 'COC6', 'DND5E', 'DX3', 'FATE', 'COC7R']
 
 # 每卡 flags 位
 CF_TEMPLATE = 1
@@ -197,9 +197,23 @@ def getTemplateDict():
 
 
 def getTemplateByName(templateName):
+    '''按模板名取模板；先解析 tempMapping 别名（如 COC7 -> default），保证码表拿到真实模板。'''
     templates = getTemplateDict()
-    if templateName in templates:
-        return templates[templateName]
+    cur = templateName
+    seen = set()
+    while True:
+        tpl = templates.get(cur)
+        if not (isinstance(tpl, dict) and tpl.get('tempMapping')):
+            break
+        if cur in seen:
+            break
+        seen.add(cur)
+        nxt = tpl.get('tempMapping')
+        if not nxt or nxt not in templates:
+            break
+        cur = nxt
+    if cur in templates:
+        return templates[cur]
     return templates.get('default', {})
 
 

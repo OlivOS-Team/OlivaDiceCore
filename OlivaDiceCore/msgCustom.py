@@ -81,6 +81,8 @@ dictStrCustom = {
     'strHelpDocNotFound': '未找到匹配条目',
     'strDrawTi': '[{tName}]疯狂发作-临时症状:\n{tResult}',
     'strDrawLi': '[{tName}]疯狂发作-总结症状:\n{tResult}',
+    'strDrawSk': '[{tName}]震骇反应:\n{tResult}',
+    'strDrawPh': '[{tName}]异变-恐惧症状:\n{tResult}',
     'strDrawName': '[{tUserName}]的随机名称:\n{tResult}',
     'strDrawDeck': '[{tUserName}]抽到了:\n{tDrawDeckResult}',
     'strDrawDeckHideShow': '[{tUserName}]进行了暗抽牌',

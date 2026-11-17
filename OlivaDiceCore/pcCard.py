@@ -284,6 +284,19 @@ def dataPcCardTemplateInit():
     dictPcCardTemplateDefault['unity'] = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault.copy()
 
 
+def pcCardTemplateDisplayName(templateName):
+    '''按模板自带的 displayName 取显示名；无该键则原样返回模板名。'''
+    if not templateName:
+        return templateName
+    name = str(templateName)
+    template = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault.get(name)
+    if isinstance(template, dict):
+        shown = template.get('displayName')
+        if isinstance(shown, str) and shown.strip():
+            return shown.strip()
+    return name
+
+
 def pcCardRebase(pcHash, pcCardName, hagId=None):
     lockList_key = 'lockList'
     pcCardNameOld = None

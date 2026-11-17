@@ -2017,6 +2017,20 @@ def unity_reply(plugin_event, Proc):
             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawLi'], dictTValue)
             replyMsg(plugin_event, tmp_reply_str)
             return
+        elif isMatchWordStart(tmp_reast_str, 'sk', fullMatch=True, isCommand=True):
+            dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck(
+                '震骇', plugin_event.bot_info.hash, valDict=valDict
+            )
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawSk'], dictTValue)
+            replyMsg(plugin_event, tmp_reply_str)
+            return
+        elif isMatchWordStart(tmp_reast_str, 'ph', fullMatch=True, isCommand=True):
+            dictTValue['tResult'] = OlivaDiceCore.drawCard.getDrawDeck(
+                '异变', plugin_event.bot_info.hash, valDict=valDict
+            )
+            tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strDrawPh'], dictTValue)
+            replyMsg(plugin_event, tmp_reply_str)
+            return
         elif isMatchWordStart(tmp_reast_str, 'uinfo', isCommand=True):
             tmp_user_platform = plugin_event.platform['platform']
             flag_solo = False
@@ -3292,9 +3306,10 @@ def unity_reply(plugin_event, Proc):
                     # 获取当前人物卡的 template 和 rule
                     tmp_template_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateKey(tmp_pcHash, tmp_dict_pc_card_this)
                     tmp_rule_name = OlivaDiceCore.pcCard.pcCardDataGetTemplateRuleKey(tmp_pcHash, tmp_dict_pc_card_this)
-                    # 如果没有设置，显示 default
+                    # 如果没有设置，回落到 default，再统一走显示名
                     if tmp_template_name is None:
                         tmp_template_name = 'default'
+                    tmp_template_name = OlivaDiceCore.pcCard.pcCardTemplateDisplayName(tmp_template_name)
                     if tmp_rule_name is None:
                         tmp_rule_name = 'default'
                     # 格式化显示：序号. 人物卡名 [template/rule]
@@ -3519,7 +3534,7 @@ def unity_reply(plugin_event, Proc):
                                 )
                             )
                 dictTValue['tPcInitResult'] = '\n%s' % ' '.join(tmp_pcCard_list)
-                dictTValue['tPcTempName'] = tmp_template_name
+                dictTValue['tPcTempName'] = OlivaDiceCore.pcCard.pcCardTemplateDisplayName(tmp_template_name)
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInitSt'], dictTValue)
                 trigger_auto_sn_update(plugin_event, tmp_pc_id, tmp_pc_platform, tmp_hagID, dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
@@ -3913,7 +3928,8 @@ def unity_reply(plugin_event, Proc):
                                 actual_template_name = OlivaDiceCore.pcCard.pcCardDataResolveTemplateMapping(
                                     tmp_template_matched
                                 )
-                            dictTValue['tPcTempName'] = actual_template_name
+                            dictTValue['tPcTempName'] = (
+                                OlivaDiceCore.pcCard.pcCardTemplateDisplayName(actual_template_name))
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                                 dictStrCustom['strPcTemp'], dictTValue
                             )
@@ -3955,13 +3971,14 @@ def unity_reply(plugin_event, Proc):
                         )
                         dictTValue['tResult'] = ''
                         if tmp_groupTemplate is not None and tmp_groupTemplateRule is not None:
-                            dictTValue['tPcTempName'] = tmp_groupTemplate
+                            dictTValue['tPcTempName'] = (
+                                OlivaDiceCore.pcCard.pcCardTemplateDisplayName(tmp_groupTemplate))
                             dictTValue['tPcTempRuleName'] = tmp_groupTemplateRule
                             dictTValue['tResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(
                                 dictStrCustom['strPcGroupTempRuleShow'], dictTValue
                             )
                         dictTValue['tPcSelection'] = tmp_pc_name
-                        dictTValue['tPcTempName'] = tmp_template_name
+                        dictTValue['tPcTempName'] = OlivaDiceCore.pcCard.pcCardTemplateDisplayName(tmp_template_name)
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                             dictStrCustom['strPcTempShow'], dictTValue
                         )
@@ -3997,7 +4014,8 @@ def unity_reply(plugin_event, Proc):
                             tmp_template_rule_name,
                         ):
                             dictTValue['tPcSelection'] = tmp_pc_name
-                            dictTValue['tPcTempName'] = tmp_template_name
+                            dictTValue['tPcTempName'] = (
+                                OlivaDiceCore.pcCard.pcCardTemplateDisplayName(tmp_template_name))
                             dictTValue['tPcTempRuleName'] = tmp_template_rule_name
                             tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                                 dictStrCustom['strPcTempRule'], dictTValue
@@ -4046,13 +4064,14 @@ def unity_reply(plugin_event, Proc):
                         )
                         dictTValue['tResult'] = ''
                         if tmp_groupTemplate is not None and tmp_groupTemplateRule is not None:
-                            dictTValue['tPcTempName'] = tmp_groupTemplate
+                            dictTValue['tPcTempName'] = (
+                                OlivaDiceCore.pcCard.pcCardTemplateDisplayName(tmp_groupTemplate))
                             dictTValue['tPcTempRuleName'] = tmp_groupTemplateRule
                             dictTValue['tResult'] = OlivaDiceCore.msgCustomManager.formatReplySTR(
                                 dictStrCustom['strPcGroupTempRuleShow'], dictTValue
                             )
                         dictTValue['tPcSelection'] = tmp_pc_name
-                        dictTValue['tPcTempName'] = tmp_template_name
+                        dictTValue['tPcTempName'] = OlivaDiceCore.pcCard.pcCardTemplateDisplayName(tmp_template_name)
                         dictTValue['tPcTempRuleName'] = tmp_template_rule_name
                         tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                             dictStrCustom['strPcTempRuleShow'], dictTValue
@@ -5137,12 +5156,12 @@ def unity_reply(plugin_event, Proc):
                         tmp_total_count_2,
                         tmp_percent,
                     )
-                dictTValue['tPcTempName'] = 'COC7R'
+                dictTValue['tPcTempName'] = OlivaDiceCore.pcCard.pcCardTemplateDisplayName('COC7R')
                 dictTValue['tPcInitResult'] = tmp_reply_str_1
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInit'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
             else:
-                dictTValue['tPcTempName'] = 'COC7R'
+                dictTValue['tPcTempName'] = OlivaDiceCore.pcCard.pcCardTemplateDisplayName('COC7R')
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                     dictStrCustom['strPcInitErrorRange'], dictTValue
                 )
@@ -5186,7 +5205,7 @@ def unity_reply(plugin_event, Proc):
                             tmp_res_list_node[tmp_pcCardTemplate_skill_this] = tmp_skill_rd_this.resInt
                     tmp_res_list.append(tmp_res_list_node)
                 tmp_reply_str_1 = ''
-                dictTValue['tPcTempName'] = tmp_pcCardTemplateName
+                dictTValue['tPcTempName'] = OlivaDiceCore.pcCard.pcCardTemplateDisplayName(tmp_pcCardTemplateName)
                 time_count = 0
                 for tmp_res_list_this in tmp_res_list:
                     if time_count > 0:
@@ -5240,7 +5259,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInit'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
             else:
-                dictTValue['tPcTempName'] = tmp_pcCardTemplateName
+                dictTValue['tPcTempName'] = OlivaDiceCore.pcCard.pcCardTemplateDisplayName(tmp_pcCardTemplateName)
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                     dictStrCustom['strPcInitErrorRange'], dictTValue
                 )
@@ -5273,7 +5292,7 @@ def unity_reply(plugin_event, Proc):
                             tmp_res_list_this.append('%2d' % rd_this.resInt)
                             tmp_sum += rd_this.resInt
                     tmp_res_list.append([tmp_res_list_this, '%3d' % tmp_sum])
-                dictTValue['tPcTempName'] = tmp_pcCardTemplateName
+                dictTValue['tPcTempName'] = OlivaDiceCore.pcCard.pcCardTemplateDisplayName(tmp_pcCardTemplateName)
                 dictTValue['tPcInitResult'] = '\n' + '\n'.join([
                     '[%s] : %s' % (', '.join(tmp_res_list_this[0]), tmp_res_list_this[1])
                     for tmp_res_list_this in tmp_res_list
@@ -5281,7 +5300,7 @@ def unity_reply(plugin_event, Proc):
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(dictStrCustom['strPcInit'], dictTValue)
                 replyMsg(plugin_event, tmp_reply_str)
             else:
-                dictTValue['tPcTempName'] = tmp_pcCardTemplateName
+                dictTValue['tPcTempName'] = OlivaDiceCore.pcCard.pcCardTemplateDisplayName(tmp_pcCardTemplateName)
                 tmp_reply_str = OlivaDiceCore.msgCustomManager.formatReplySTR(
                     dictStrCustom['strPcInitErrorRange'], dictTValue
                 )
