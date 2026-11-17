@@ -143,6 +143,47 @@ def normalizeCensorWordList(word_list):
     return res
 
 
+def summarizeCensorAdds(existing, raw_lines):
+    # 按行判定要添加的敏感词。空行跳过，不计入总数。
+    # 返回可写入的词，以及失败行和原因，供界面逐条反馈。
+    if not isinstance(existing, (list, tuple)):
+        existing = []
+    if not isinstance(raw_lines, (list, tuple)):
+        raw_lines = []
+    seen = set(existing)
+    batch = set()
+    accepted = []
+    failures = []
+    total = 0
+    for index, raw in enumerate(raw_lines, 1):
+        if not isinstance(raw, str) or raw.strip() == '':
+            continue
+        total += 1
+        word = normalizeCensorWord(raw)
+        if word is None:
+            failures.append({
+                'line': index,
+                'text': raw.strip()[:32],
+                'reason': '无效或超过 64 字',
+            })
+            continue
+        if word in seen:
+            failures.append({'line': index, 'text': word, 'reason': '已存在'})
+            continue
+        if word in batch:
+            failures.append({'line': index, 'text': word, 'reason': '本次重复'})
+            continue
+        batch.add(word)
+        accepted.append(word)
+    return {
+        'total': total,
+        'success': len(accepted),
+        'failed': len(failures),
+        'failures': failures,
+        'accepted': accepted,
+    }
+
+
 def setConfigList(bot_hash, word_list):
     # 全量替换某个账号的自定义敏感词表,返回实际写入的列表。
     res = normalizeCensorWordList(word_list)
