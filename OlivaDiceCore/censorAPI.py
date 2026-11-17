@@ -204,11 +204,53 @@ def getCensorFileList(bot_hash):
     return res
 
 
+def censorFileDir(bot_hash):
+    return OlivaDiceCore.data.dataDirRoot + '/' + bot_hash + '/censor'
+
+
+def listCensorFiles(bot_hash):
+    # 只读列出文本库文件。目录没有就当空，不创建、不改写。
+    directory = censorFileDir(bot_hash)
+    if not os.path.isdir(directory):
+        return []
+    try:
+        names = sorted(os.listdir(directory))
+    except OSError as error:
+        raise ValueError('读取文本库失败: %s' % error)
+    files = []
+    for name in names:
+        path = directory + '/' + name
+        if not os.path.isfile(path):
+            continue
+        lines = readListFromFile(path)
+        files.append({
+            'name': name,
+            'lines': lines,
+            'count': len([line for line in lines if str(line).strip()]),
+        })
+    return files
+
+
+def reloadCensorFiles(bot_hash):
+    # 把当前范围的文本库重新读进内存。不写文件。读目录失败则保持原内存。
+    directory = censorFileDir(bot_hash)
+    if not os.path.isdir(directory):
+        gCensorList[bot_hash] = []
+        return []
+    files = listCensorFiles(bot_hash)
+    words = []
+    for item in files:
+        words.extend(item['lines'])
+    gCensorList[bot_hash] = words
+    return files
+
+
 def getCensorSnapshot(bot_hash):
-    # 敏感词管理页的数据快照:可编辑的自定义词 + 只读的来自文件的词。
+    # 敏感词管理页的数据快照:可编辑的自定义词 + 只读文本库文件。
     return {
         'config': list(getConfigList(bot_hash)),
         'fromFiles': getCensorFileList(bot_hash),
+        'files': listCensorFiles(bot_hash),
     }
 
 
