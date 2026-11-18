@@ -39,6 +39,7 @@ dictConsoleSwitchTemplate = {
         'largeRollLimit': 300,
         'multiRollDetail': 1,
         'checkTargetDetail': 1,
+        'forceMarkdownReply': 0,
         'randomMode': 0,
         'drawRecommendMode': 1,
         'drawListMode': 2,
@@ -97,17 +98,9 @@ def initConsoleSwitch(botHash, templateName='default'):
         if botHash not in dictConsoleSwitch:
             dictConsoleSwitch[botHash] = {}
         for template_key_this in dictConsoleSwitchTemplate[templateName]:
-            if (
-                type(dictConsoleSwitchTemplate[templateName][template_key_this]) in [list]
-                and template_key_this not in dictConsoleSwitch[botHash]
-            ):
-                dictConsoleSwitch[botHash][template_key_this] = dictConsoleSwitchTemplate[templateName][
-                    template_key_this
-                ].copy()
-            else:
-                dictConsoleSwitch[botHash][template_key_this] = dictConsoleSwitchTemplate[templateName][
-                    template_key_this
-                ]
+            if template_key_this not in dictConsoleSwitch[botHash]:
+                value = dictConsoleSwitchTemplate[templateName][template_key_this]
+                dictConsoleSwitch[botHash][template_key_this] = value.copy() if type(value) is list else value
 
 
 def initConsoleSwitchByBotDict(botDict):

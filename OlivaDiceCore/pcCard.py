@@ -284,6 +284,19 @@ def dataPcCardTemplateInit():
     dictPcCardTemplateDefault['unity'] = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault.copy()
 
 
+def pcCardTemplateDisplayName(templateName):
+    '''按模板自带的 displayName 取显示名；无该键则原样返回模板名。'''
+    if not templateName:
+        return templateName
+    name = str(templateName)
+    template = OlivaDiceCore.pcCardData.dictPcCardTemplateDefault.get(name)
+    if isinstance(template, dict):
+        shown = template.get('displayName')
+        if isinstance(shown, str) and shown.strip():
+            return shown.strip()
+    return name
+
+
 def pcCardRebase(pcHash, pcCardName, hagId=None):
     lockList_key = 'lockList'
     pcCardNameOld = None
@@ -302,7 +315,7 @@ def pcCardRebase(pcHash, pcCardName, hagId=None):
     # 更新lockList中所有匹配旧名字的条目
     if lockList_key in dictPcCardSelection['unity'][pcHash]:
         for hagId_this in dictPcCardSelection['unity'][pcHash][lockList_key]:
-            if pcCardNameOld is dictPcCardSelection['unity'][pcHash][lockList_key][hagId_this]:
+            if pcCardNameOld == dictPcCardSelection['unity'][pcHash][lockList_key][hagId_this]:
                 dictPcCardSelection['unity'][pcHash][lockList_key][hagId_this] = pcCardName
     if pcCardNameOld is not None:
         if pcHash in dictPcCardData['unity']:
@@ -388,13 +401,8 @@ def pcCardDataSetBySkillName(
     if tmp_hitList is None:
         tmp_hitList = []
     tmp_pc_card_name_key = pcCardName
-    # 先确保卡片数据存在
-    if pcHash in dictPcCardData['unity']:
-        pass
-    else:
-        dictPcCardData['unity'][pcHash] = {}
-    if tmp_pc_card_name_key not in dictPcCardData['unity'][pcHash]:
-        dictPcCardData['unity'][pcHash][tmp_pc_card_name_key] = {}
+    tmp_card_dict = dictPcCardData['unity'].setdefault(pcHash, {})
+    tmp_skill_dict = tmp_card_dict.setdefault(tmp_pc_card_name_key, {})
     # 然后再处理 selection 和 lock
     locked_pc = pcCardDataGetSelectionKeyLock(pcHash, hagId)
     if locked_pc is not None:
@@ -425,7 +433,7 @@ def pcCardDataSetBySkillName(
             tmp_pc_card_synonyms_hit = tmp_pc_card_synonyms[tmp_pc_card_synonyms_this]
     for tmp_pc_card_synonyms_hit_this in tmp_pc_card_synonyms_hit:
         if tmp_pc_card_synonyms_hit_this not in tmp_hitList:
-            dictPcCardData['unity'][pcHash][tmp_pc_card_name_key][tmp_pc_card_synonyms_hit_this] = skillValue
+            tmp_skill_dict[tmp_pc_card_synonyms_hit_this] = skillValue
             tmp_hitList.append(tmp_pc_card_synonyms_hit_this)
     for tmp_pc_card_mapping_hit_this in tmp_pc_card_mapping:
         if tmp_pc_card_mapping_hit_this not in tmp_hitList:
@@ -447,7 +455,7 @@ def pcCardDataSetBySkillName(
                     tmp_skill_rd = OlivaDiceCore.onedice.RD(
                         tmp_pc_card_mapping[tmp_pc_card_mapping_hit_this],
                         tmp_template_customDefault,
-                        valueTable=dictPcCardData['unity'][pcHash][tmp_pc_card_name_key],
+                        valueTable=tmp_skill_dict,
                     )
                     tmp_skill_rd.roll()
                     if tmp_skill_rd.resError is None:
@@ -592,7 +600,7 @@ def pcCardDataDelSelectionKey(pcHash, pcCardName, skipDel=False):
             return False
         if not skipDel:
             if selection_key in dictPcCardSelection['unity'][pcHash]:
-                if tmp_pc_card_name_key is dictPcCardSelection['unity'][pcHash][selection_key]:
+                if tmp_pc_card_name_key == dictPcCardSelection['unity'][pcHash][selection_key]:
                     dictPcCardSelection['unity'][pcHash].pop(selection_key)
                     if len(dictPcCardData['unity'][pcHash].keys()) > 0:
                         tmp_card_dict_keys = list(dictPcCardData['unity'][pcHash].keys())
@@ -603,7 +611,7 @@ def pcCardDataDelSelectionKey(pcHash, pcCardName, skipDel=False):
                 lockList_updates = {}
                 lockList_deletes = []
                 for hagId_this in dictPcCardSelection['unity'][pcHash][lockList_key]:
-                    if pcCardName is dictPcCardSelection['unity'][pcHash][lockList_key][hagId_this]:
+                    if pcCardName == dictPcCardSelection['unity'][pcHash][lockList_key][hagId_this]:
                         # 该群锁定的是被删除的卡,需要切换到其他卡
                         if len(dictPcCardData['unity'][pcHash].keys()) > 0:
                             # 还有其他人物卡,切换到第一个并保持锁定
@@ -1115,9 +1123,16 @@ def pcCardDataGetByPcName(pcHash, hagId=None):
         tmp_pc_card_name_key = tmp_pc_card_name_key_1
     else:
         return tmp_skill_list
-    if pcHash in dictPcCardData['unity']:
-        if tmp_pc_card_name_key in dictPcCardData['unity'][pcHash]:
-            tmp_skill_list = dictPcCardData['unity'][pcHash][tmp_pc_card_name_key]
+    tmp_card_dict = dictPcCardData['unity'].get(pcHash, {})
+    if tmp_pc_card_name_key in tmp_card_dict:
+        tmp_skill_list = tmp_card_dict[tmp_pc_card_name_key]
+    elif tmp_card_dict:
+        # 选中的卡已经不在了(删卡后残留),回落到现有第一张,并把选中项和锁定项改过来
+        tmp_pc_card_name_key = list(tmp_card_dict.keys())[0]
+        tmp_skill_list = tmp_card_dict[tmp_pc_card_name_key]
+        pcCardDataSetSelectionKey(pcHash, tmp_pc_card_name_key, forceSwitch=True)
+        if hagId is not None:
+            pcCardDataSetSelectionKeyLock(pcHash, tmp_pc_card_name_key, hagId)
     tmp_template_name = pcCardDataGetTemplateKey(pcHash, tmp_pc_card_name_key)
     tmp_template_defaultSkillValue = None
     if tmp_template_name is None:
